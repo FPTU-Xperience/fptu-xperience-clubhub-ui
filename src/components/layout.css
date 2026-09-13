@@ -1,0 +1,114 @@
+/* Vanguard-style Layout Custom CSS */
+
+.vanguard-sidebar {
+  background-color: #05070d;
+  box-shadow: 30px 0 80px rgba(0, 0, 0, 0.24);
+}
+
+.vanguard-header {
+  background-color: rgba(5, 7, 13, 0.85);
+}
+
+.vanguard-nav-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 43px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  overflow: hidden;
+  border-radius: 12px;
+  color: rgba(232, 237, 247, 0.56);
+  background: transparent;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+  border: 1px solid transparent;
+}
+
+.vanguard-nav-item::before {
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.vanguard-nav-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateX(2px);
+}
+
+.vanguard-nav-item.is-active {
+  color: #f8fbff;
+  background: linear-gradient(90deg, rgba(89, 224, 241, 0.12), rgba(116, 127, 255, 0.07)), rgba(255, 255, 255, 0.035);
+}
+
+.vanguard-nav-item.is-active::before {
+  border-color: rgba(109, 225, 246, 0.18);
+}
+
+.vanguard-active-dot {
+  width: 5px;
+  height: 5px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: #83effa;
+  box-shadow: 0 0 12px rgba(131, 239, 250, 0.8);
+}
+
+.vanguard-brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 13px;
+  color: #071015;
+  background: linear-gradient(145deg, #d9fbff, #68e8fa 48%, #8ea1ff);
+  box-shadow: 0 0 28px rgba(97, 226, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  font-family: "FSP DEMO - PODIUM Sharp 4.11", Impact, sans-serif;
+  font-size: 21px;
+}
+
+.vanguard-panel {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.027);
+  border-radius: 15px;
+}
+
+.vanguard-orb {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(80, 224, 199, 0.08);
+}
+
+.vanguard-orb span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #52e0bd;
+  box-shadow: 0 0 14px rgba(82, 224, 189, 0.85);
+}
+
+/* Base structural adjustments for layout transition */
+.vanguard-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45; /* Below sidebar's 50 */
+  background: rgba(1, 3, 8, 0.72);
+  backdrop-filter: blur(7px);
+  transition: opacity 240ms ease, visibility 240ms ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.vanguard-mobile-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
