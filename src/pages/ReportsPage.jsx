@@ -297,7 +297,7 @@ export default function ReportsPage() {
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
-                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${statusFilter === status ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${statusFilter === status ? 'bg-cyan-400 text-slate-50' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
                         >
                             {status === 'ALL' ? 'Tất cả trạng thái' : reportStatusLabel(status)}
                         </button>

@@ -11,6 +11,7 @@
   --theme-surface: #0a0f1a;
   --theme-surface-raised: #111927;
   --theme-surface-soft: rgba(255, 255, 255, 0.035);
+  --theme-toast-surface: #111927;
   --theme-input: rgba(255, 255, 255, 0.03);
   --theme-text: #f8faff;
   --theme-text-secondary: #c5cede;
@@ -25,6 +26,10 @@
   --theme-action-hover: #67e8f9;
   --theme-action-soft: rgba(131, 239, 250, 0.1);
   --theme-action-border: rgba(131, 239, 250, 0.3);
+  --theme-toast-success: #4ade80;
+  --theme-toast-info: #60a5fa;
+  --theme-toast-warning: #facc15;
+  --theme-toast-error: #f87171;
   --theme-nav-hover-bg: rgba(255, 255, 255, 0.045);
   --theme-nav-active-bg: linear-gradient(90deg, rgba(89, 224, 241, 0.12), rgba(116, 127, 255, 0.07)), rgba(255, 255, 255, 0.035);
   --theme-accent-strong: #52e0bd;
@@ -67,6 +72,7 @@
   --theme-surface: #ffffff;
   --theme-surface-raised: #f8fafc;
   --theme-surface-soft: #f1f5f9;
+  --theme-toast-surface: #ffffff;
   --theme-input: #f8fafc;
   --theme-text: #111827;
   --theme-text-secondary: #475569;
@@ -77,10 +83,14 @@
   --theme-accent: #f97316;
   --theme-accent-soft: rgba(249, 115, 22, 0.1);
   --theme-accent-border: rgba(249, 115, 22, 0.35);
-  --theme-action: #16a34a;
-  --theme-action-hover: #15803d;
-  --theme-action-soft: rgba(22, 163, 74, 0.1);
-  --theme-action-border: rgba(22, 163, 74, 0.35);
+  --theme-action: #1250dc;
+  --theme-action-hover: #0f43b9;
+  --theme-action-soft: rgba(18, 80, 220, 0.1);
+  --theme-action-border: rgba(18, 80, 220, 0.35);
+  --theme-toast-success: #22c55e;
+  --theme-toast-info: #2f80ed;
+  --theme-toast-warning: #f4b400;
+  --theme-toast-error: #ef4444;
   --theme-nav-hover-bg: #f8fafc;
   --theme-nav-active-bg: #fff7ed;
   --theme-accent-strong: #16a34a;
@@ -163,6 +173,134 @@ body {
   background-color: var(--theme-canvas);
   color: var(--theme-text);
   transition: background-color 200ms ease, color 200ms ease;
+}
+
+.toast-viewport {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 50;
+  display: flex;
+  width: min(380px, calc(100vw - 2rem));
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast-card {
+  --toast-accent: var(--theme-toast-info);
+  position: relative;
+  display: flex;
+  min-height: 72px;
+  align-items: flex-start;
+  gap: 0.75rem;
+  overflow: hidden;
+  padding: 1rem 0.875rem 1rem 0.75rem;
+  border: 1px solid var(--theme-border);
+  border-left: 8px solid var(--toast-accent);
+  border-radius: 0.5rem;
+  background: var(--theme-toast-surface);
+  color: var(--theme-text);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.toast-card:hover {
+  border-color: var(--toast-accent);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
+}
+
+.toast-card[data-toast-type='success'] {
+  --toast-accent: var(--theme-toast-success);
+}
+
+.toast-card[data-toast-type='info'] {
+  --toast-accent: var(--theme-toast-info);
+}
+
+.toast-card[data-toast-type='warning'] {
+  --toast-accent: var(--theme-toast-warning);
+}
+
+.toast-card[data-toast-type='error'] {
+  --toast-accent: var(--theme-toast-error);
+}
+
+.toast-icon {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  margin-top: 0.0625rem;
+  border-radius: 9999px;
+  background: var(--toast-accent);
+  color: #ffffff;
+}
+
+.toast-icon svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+.toast-content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.toast-title {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.toast-message {
+  margin: 0.25rem 0 0;
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.toast-close {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  margin: -0.125rem -0.125rem 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--theme-text-muted);
+  cursor: pointer;
+  transition: color 160ms ease, opacity 160ms ease;
+}
+
+.toast-close:hover {
+  color: var(--theme-text);
+}
+
+.toast-close:focus-visible {
+  outline: 2px solid var(--toast-accent);
+  outline-offset: 2px;
+}
+
+.toast-close svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+@media (max-width: 640px) {
+  .toast-viewport {
+    top: 0.75rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+  }
 }
 
 .theme-avatar {
@@ -253,7 +391,7 @@ body {
   background-color: rgba(249, 115, 22, 0.08) !important;
 }
 
-/* Cyan action buttons stay cyan in dark mode and become green in light mode. */
+/* Cyan action buttons stay cyan in dark mode and use the blue action color in light mode. */
 :root[data-theme='light'] button[class~='bg-cyan-400'],
 :root[data-theme='light'] a[class~='bg-cyan-400'],
 :root[data-theme='light'] button[class~='bg-cyan-500'],

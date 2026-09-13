@@ -246,7 +246,7 @@ export default function KpiPage() {
                         />
                         <button
                             type="submit"
-                            className="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+                            className="rounded-xl bg-blue-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
                         >
                             Áp dụng
                         </button>
