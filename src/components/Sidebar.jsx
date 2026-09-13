@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationContext'
 import { X } from 'lucide-react'
 import { formatRole, PERMISSIONS } from '../auth/permissions'
+import './Sidebar.scss'
 
 const navItems = [
   {

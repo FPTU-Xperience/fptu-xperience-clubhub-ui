@@ -227,7 +227,7 @@ src/
 
 ### Base URL
 ```javascript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 ```
 
 ### Authentication Endpoints

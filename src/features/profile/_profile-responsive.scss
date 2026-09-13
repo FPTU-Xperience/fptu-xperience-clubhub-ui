@@ -1,0 +1,169 @@
+@media (max-width: 1180px) {
+  .system-admin-profile .topbar {
+    grid-template-columns: auto 1fr auto;
+  }
+  .system-admin-profile .time-card {
+    display: none;
+  }
+  .system-admin-profile .profile-stage {
+    grid-template-columns: minmax(340px, 0.95fr) minmax(390px, 1.05fr);
+  }
+  .system-admin-profile .stage-copy {
+    padding: 30px;
+  }
+  .system-admin-profile .lower-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 920px) {
+  .system-admin-profile .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(310px, 86vw);
+    transform: translateX(-104%);
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .system-admin-profile .sidebar.is-open {
+    transform: translateX(0);
+  }
+  .system-admin-profile .sidebar-close,
+  .system-admin-profile .menu-button {
+    display: grid;
+  }
+  .system-admin-profile .topbar {
+    grid-template-columns: auto 1fr auto;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+  .system-admin-profile .search-box {
+    display: none;
+  }
+  .system-admin-profile .content {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+  .system-admin-profile .profile-stage {
+    grid-template-columns: 1fr;
+    transform: none !important;
+  }
+  .system-admin-profile .stage-copy {
+    min-height: 385px;
+  }
+  .system-admin-profile .stage-visual {
+    min-height: 390px;
+  }
+  .system-admin-profile .stage-visual::before {
+    background: linear-gradient(180deg, #0d111b 0%, transparent 22%);
+  }
+}
+@media (max-width: 640px) {
+  .system-admin-profile .topbar {
+    min-height: 66px;
+  }
+  .system-admin-profile .topbar-kicker {
+    display: none;
+  }
+  .system-admin-profile .topbar h1 {
+    font-size: 18px;
+  }
+  .system-admin-profile .notification-button {
+    display: none;
+  }
+  .system-admin-profile .content {
+    padding-top: 18px;
+    padding-bottom: 22px;
+  }
+  .system-admin-profile .content-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .system-admin-profile .content-head h2 {
+    font-size: 30px;
+  }
+  .system-admin-profile .edit-button {
+    width: 100%;
+  }
+  .system-admin-profile .profile-stage {
+    border-radius: 18px;
+  }
+  .system-admin-profile .stage-copy {
+    min-height: auto;
+    padding: 25px 20px 24px;
+  }
+  .system-admin-profile .profile-id {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .system-admin-profile .avatar-main {
+    width: 74px;
+    height: 74px;
+    border-radius: 20px;
+    font-size: 18px;
+  }
+  .system-admin-profile .profile-id h3 {
+    font-size: 37px;
+  }
+  .system-admin-profile .profile-bio {
+    margin-top: 18px;
+    font-size: 12px;
+  }
+  .system-admin-profile .profile-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .system-admin-profile .profile-stats {
+    gap: 10px;
+  }
+  .system-admin-profile .profile-stats strong {
+    font-size: 20px;
+  }
+  .system-admin-profile .stage-visual {
+    min-height: 340px;
+  }
+  .system-admin-profile .visual-topline {
+    right: 16px;
+    left: 16px;
+  }
+  .system-admin-profile .floating-card-main {
+    right: 16px;
+    bottom: 78px;
+    width: calc(100% - 32px);
+  }
+  .system-admin-profile .floating-card-mini {
+    top: 64px;
+    left: 16px;
+  }
+  .system-admin-profile .visual-caption {
+    right: 16px;
+    left: 16px;
+  }
+  .system-admin-profile .detail-panel,
+  .system-admin-profile .activity-panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .system-admin-profile .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .system-admin-profile .activity-row {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+  .system-admin-profile .activity-row time {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .system-admin-profile *,
+  .system-admin-profile *::before,
+  .system-admin-profile *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .system-admin-profile .profile-stage {
+    transform: none !important;
+  }
+}

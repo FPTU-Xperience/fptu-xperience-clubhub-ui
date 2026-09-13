@@ -1,0 +1,19 @@
+// Layout component styles
+$backdrop-bg: rgba(1, 3, 8, 0.72);
+
+/* Base structural adjustments for layout transition */
+.vanguard-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45; /* Below sidebar's 50 */
+  background: rgba(1, 3, 8, 0.72);
+  backdrop-filter: blur(7px);
+  transition: opacity 240ms ease, visibility 240ms ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.vanguard-mobile-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}

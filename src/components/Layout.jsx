@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import Sidebar from './Sidebar'
-import Header from './Header'
-import './layout.css'
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import { motion } from "framer-motion";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import "./Layout.scss";
 
 export default function Layout({ title, children }) {
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#05070d]">
       {/* Mobile Backdrop */}
-      <div 
-        className={`vanguard-mobile-backdrop ${isMobileOpen ? 'is-open' : ''}`}
+      <div
+        className={`vanguard-mobile-backdrop ${isMobileOpen ? "is-open" : ""}`}
         onClick={() => setIsMobileOpen(false)}
         aria-hidden={!isMobileOpen}
       />
@@ -23,10 +23,7 @@ export default function Layout({ title, children }) {
       {/* Main Content Area */}
       <div className="lg:ml-[250px] min-h-screen flex flex-col transition-all duration-300">
         {/* Header */}
-        <Header 
-          title={title} 
-          onMenuClick={() => setIsMobileOpen(true)} 
-        />
+        <Header title={title} onMenuClick={() => setIsMobileOpen(true)} />
 
         {/* Page Content */}
         <motion.main
@@ -35,11 +32,9 @@ export default function Layout({ title, children }) {
           transition={{ duration: 0.3 }}
           className="flex-1 p-4 sm:p-6 lg:p-8"
         >
-          <div className="max-w-[1400px] mx-auto">
-            {children || <Outlet />}
-          </div>
+          <div className="max-w-[1400px] mx-auto">{children || <Outlet />}</div>
         </motion.main>
       </div>
     </div>
-  )
+  );
 }

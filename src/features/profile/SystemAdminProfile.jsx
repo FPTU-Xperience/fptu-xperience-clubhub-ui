@@ -7,7 +7,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
-import "./system-admin-profile.css";
+import "./SystemAdminProfile.scss";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { formatRole } from "../../auth/permissions";
@@ -96,14 +96,34 @@ export default function SystemAdminProfile({ user }) {
   const profileStats = [
     { value: user?.username || "-", label: "Tên đăng nhập" },
     { value: "Quản trị kỹ thuật", label: "Vai trò" },
-    { value: user?.isActive && !user?.isLocked ? "Đang hoạt động" : "Bị hạn chế", label: "Trạng thái" },
+    {
+      value:
+        user?.isActive && !user?.isLocked ? "Đang hoạt động" : "Bị hạn chế",
+      label: "Trạng thái",
+    },
   ];
 
   const details = [
     { label: "Thư điện tử", value: formData.email, field: "email", icon: Mail },
-    { label: "Tên đăng nhập", value: user?.username || "-", icon: UserRound, readonly: true },
-    { label: "Vai trò", value: user?.roles?.map(formatRole).join(", ") || "Quản trị hệ thống", icon: ShieldCheck, readonly: true },
-    { label: "Trạng thái", value: user?.isActive && !user?.isLocked ? "Đang hoạt động" : "Bị hạn chế", icon: Check, readonly: true },
+    {
+      label: "Tên đăng nhập",
+      value: user?.username || "-",
+      icon: UserRound,
+      readonly: true,
+    },
+    {
+      label: "Vai trò",
+      value: user?.roles?.map(formatRole).join(", ") || "Quản trị hệ thống",
+      icon: ShieldCheck,
+      readonly: true,
+    },
+    {
+      label: "Trạng thái",
+      value:
+        user?.isActive && !user?.isLocked ? "Đang hoạt động" : "Bị hạn chế",
+      icon: Check,
+      readonly: true,
+    },
   ];
 
   return (
@@ -125,7 +145,11 @@ export default function SystemAdminProfile({ user }) {
             disabled={saving}
           >
             {editing ? <Check size={16} /> : <Pencil size={16} />}
-            {saving ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Chỉnh sửa hồ sơ"}
+            {saving
+              ? "Đang lưu..."
+              : editing
+                ? "Lưu thay đổi"
+                : "Chỉnh sửa hồ sơ"}
           </button>
         </div>
 
@@ -145,24 +169,45 @@ export default function SystemAdminProfile({ user }) {
               </div>
 
               <div>
-                <span className="profile-handle">@{user?.username || "admin"}</span>
+                <span className="profile-handle">
+                  @{user?.username || "admin"}
+                </span>
                 {editing ? (
-                  <input 
+                  <input
                     value={formData.name}
                     onChange={(e) => handleChange("name", e.target.value)}
                     disabled={saving}
                     aria-label="Họ và tên"
-                    style={{ background: 'transparent', color: 'white', fontSize: '31px', fontWeight: 'bold', border: 'none', borderBottom: '1px solid #8cecf5', outline: 'none', width: '100%', marginBottom: '5px' }}
+                    style={{
+                      background: "transparent",
+                      color: "white",
+                      fontSize: "31px",
+                      fontWeight: "bold",
+                      border: "none",
+                      borderBottom: "1px solid #8cecf5",
+                      outline: "none",
+                      width: "100%",
+                      marginBottom: "5px",
+                    }}
                   />
                 ) : (
-                  <h3 className="font-podium" style={{ textTransform: 'uppercase' }}>{formData.name}</h3>
+                  <h3
+                    className="font-podium"
+                    style={{ textTransform: "uppercase" }}
+                  >
+                    {formData.name}
+                  </h3>
                 )}
-                <p>{user?.roles?.map(formatRole).join(", ") || "Quản trị hệ thống"}</p>
+                <p>
+                  {user?.roles?.map(formatRole).join(", ") ||
+                    "Quản trị hệ thống"}
+                </p>
               </div>
             </div>
 
             <p className="profile-bio">
-              Quản trị kỹ thuật phụ trách quyền truy cập, tài khoản, tính ổn định và bảo mật của hệ thống.
+              Quản trị kỹ thuật phụ trách quyền truy cập, tài khoản, tính ổn
+              định và bảo mật của hệ thống.
             </p>
 
             <div className="profile-stats">
@@ -206,20 +251,29 @@ export default function SystemAdminProfile({ user }) {
             <div className="floating-card floating-card-mini">
               <ShieldCheck size={18} />
               <div>
-                <strong>{user?.isActive && !user?.isLocked ? "Đang hoạt động" : "Bị hạn chế"}</strong>
+                <strong>
+                  {user?.isActive && !user?.isLocked
+                    ? "Đang hoạt động"
+                    : "Bị hạn chế"}
+                </strong>
                 <span>Trạng thái tài khoản</span>
               </div>
             </div>
 
             <div className="visual-caption">
               <span>Hệ thống quản lý câu lạc bộ</span>
-              <strong className="font-podium">AN TOÀN. ỔN ĐỊNH. SẴN SÀNG.</strong>
+              <strong className="font-podium">
+                AN TOÀN. ỔN ĐỊNH. SẴN SÀNG.
+              </strong>
             </div>
           </div>
         </section>
 
         <div className="lower-grid">
-          <section className="detail-panel animate-fade-up-delay-2" style={{ gridColumn: "1 / -1" }}>
+          <section
+            className="detail-panel animate-fade-up-delay-2"
+            style={{ gridColumn: "1 / -1" }}
+          >
             <div className="panel-heading">
               <div>
                 <span className="panel-kicker">Thông tin định danh</span>
@@ -241,7 +295,9 @@ export default function SystemAdminProfile({ user }) {
                       {editing && !item.readonly ? (
                         <input
                           value={item.value}
-                          onChange={(e) => handleChange(item.field, e.target.value)}
+                          onChange={(e) =>
+                            handleChange(item.field, e.target.value)
+                          }
                           aria-label={item.label}
                           disabled={saving}
                         />
@@ -254,7 +310,6 @@ export default function SystemAdminProfile({ user }) {
               })}
             </div>
           </section>
-
         </div>
       </div>
     </div>

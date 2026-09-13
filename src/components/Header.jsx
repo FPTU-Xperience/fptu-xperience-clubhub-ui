@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationContext'
 import { Menu } from 'lucide-react'
 import { formatRole, PERMISSIONS } from '../auth/permissions'
+import './Header.scss'
 
 const SEARCH_DESTINATIONS = [
   { label: 'Tổng quan', path: '/dashboard', permission: PERMISSIONS.VIEW_DASHBOARD, keywords: 'dashboard tổng quan trang chủ' },
