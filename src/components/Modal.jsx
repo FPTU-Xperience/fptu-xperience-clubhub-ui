@@ -93,7 +93,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
             >
               {/* Header */}
               <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-6 py-4">
-                <h3 id={titleId} className="font-orbitron text-lg font-semibold text-neutral-900">
+                <h3 id={titleId} className="font-sans text-lg font-semibold text-neutral-900">
                   {title}
                 </h3>
                 <button

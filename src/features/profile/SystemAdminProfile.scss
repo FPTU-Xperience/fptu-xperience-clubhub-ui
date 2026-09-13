@@ -4,3 +4,170 @@
 @use './profile-stage';
 @use './profile-details';
 @use './profile-responsive';
+
+/* The profile page has its own layered visual system; map its dark surfaces
+   to the global light tokens when the light theme is selected. */
+:root[data-theme='light'] .system-admin-profile {
+  color: var(--theme-text);
+  background: var(--theme-canvas);
+}
+
+:root[data-theme='light'] .system-admin-profile .profile-app {
+  color: var(--theme-text);
+  background: var(--theme-canvas);
+}
+
+:root[data-theme='light'] .system-admin-profile .page-grid {
+  opacity: 0.45;
+  background-image: linear-gradient(rgba(249, 115, 22, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(249, 115, 22, 0.08) 1px, transparent 1px);
+}
+
+:root[data-theme='light'] .system-admin-profile .sidebar {
+  border-right-color: var(--theme-border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--theme-sidebar-shadow);
+}
+
+:root[data-theme='light'] .system-admin-profile .brand-mark,
+:root[data-theme='light'] .system-admin-profile .mini-avatar,
+:root[data-theme='light'] .system-admin-profile .top-avatar,
+:root[data-theme='light'] .system-admin-profile .avatar-main {
+  color: var(--theme-avatar-ink);
+  background: linear-gradient(145deg, var(--theme-avatar-start), var(--theme-avatar-mid) 48%, var(--theme-avatar-end));
+}
+
+:root[data-theme='light'] .system-admin-profile .brand-mark {
+  border-color: var(--theme-border);
+  box-shadow: var(--theme-brand-shadow);
+}
+
+:root[data-theme='light'] .system-admin-profile .brand small,
+:root[data-theme='light'] .system-admin-profile .sidebar-label,
+:root[data-theme='light'] .system-admin-profile .topbar-kicker,
+:root[data-theme='light'] .system-admin-profile .content-head p,
+:root[data-theme='light'] .system-admin-profile .profile-id p,
+:root[data-theme='light'] .system-admin-profile .profile-bio,
+:root[data-theme='light'] .system-admin-profile .profile-stats span,
+:root[data-theme='light'] .system-admin-profile .activity-row p,
+:root[data-theme='light'] .system-admin-profile .activity-row time,
+:root[data-theme='light'] .system-admin-profile .visual-caption span {
+  color: var(--theme-text-muted);
+}
+
+:root[data-theme='light'] .system-admin-profile .nav-item {
+  color: var(--theme-text-secondary);
+}
+
+:root[data-theme='light'] .system-admin-profile .nav-item:hover,
+:root[data-theme='light'] .system-admin-profile .nav-item.is-active {
+  color: var(--theme-text);
+  background: #fff7ed;
+}
+
+:root[data-theme='light'] .system-admin-profile .nav-item.is-active::before {
+  border-color: var(--theme-accent-border);
+}
+
+:root[data-theme='light'] .system-admin-profile .availability-card,
+:root[data-theme='light'] .system-admin-profile .sidebar-profile,
+:root[data-theme='light'] .system-admin-profile .detail-panel,
+:root[data-theme='light'] .system-admin-profile .activity-panel,
+:root[data-theme='light'] .system-admin-profile .floating-card {
+  border-color: var(--theme-border);
+  background: var(--theme-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme='light'] .system-admin-profile .availability-card strong,
+:root[data-theme='light'] .system-admin-profile .sidebar-profile strong,
+:root[data-theme='light'] .system-admin-profile .panel-heading h3,
+:root[data-theme='light'] .system-admin-profile .detail-item strong,
+:root[data-theme='light'] .system-admin-profile .activity-row strong,
+:root[data-theme='light'] .system-admin-profile .profile-stats strong,
+:root[data-theme='light'] .system-admin-profile .floating-card-main strong,
+:root[data-theme='light'] .system-admin-profile .floating-card-mini strong,
+:root[data-theme='light'] .system-admin-profile .visual-caption strong,
+:root[data-theme='light'] .system-admin-profile .topbar h1 {
+  color: var(--theme-text);
+}
+
+:root[data-theme='light'] .system-admin-profile .topbar {
+  border-bottom-color: var(--theme-border);
+  background: var(--theme-header);
+}
+
+:root[data-theme='light'] .system-admin-profile .search-box,
+:root[data-theme='light'] .system-admin-profile .live-pill,
+:root[data-theme='light'] .system-admin-profile .secondary-action {
+  border-color: var(--theme-border);
+  color: var(--theme-text-secondary);
+  background: var(--theme-surface-raised);
+}
+
+:root[data-theme='light'] .system-admin-profile .search-box input {
+  color: var(--theme-text);
+}
+
+:root[data-theme='light'] .system-admin-profile .search-box input::placeholder,
+:root[data-theme='light'] .system-admin-profile .search-box kbd,
+:root[data-theme='light'] .system-admin-profile .text-button {
+  color: var(--theme-text-muted);
+}
+
+:root[data-theme='light'] .system-admin-profile .profile-stage {
+  border-color: var(--theme-border);
+  background: linear-gradient(135deg, #ffffff, #fff7ed);
+  box-shadow: var(--shadow-lg);
+}
+
+:root[data-theme='light'] .system-admin-profile .stage-visual::before {
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.72) 10%, transparent 35%);
+}
+
+:root[data-theme='light'] .system-admin-profile .visual-shade {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(249, 115, 22, 0.12)), radial-gradient(circle at 70% 35%, transparent, rgba(255, 255, 255, 0.12) 72%);
+}
+
+:root[data-theme='light'] .system-admin-profile .detail-item {
+  border-color: var(--theme-border-subtle);
+  background: var(--theme-surface-raised);
+}
+
+:root[data-theme='light'] .system-admin-profile .detail-item:hover {
+  border-color: var(--theme-accent-border);
+  background: #fff7ed;
+}
+
+:root[data-theme='light'] .system-admin-profile .detail-icon,
+:root[data-theme='light'] .system-admin-profile .activity-index {
+  color: var(--theme-accent);
+  background: var(--theme-accent-soft);
+}
+
+:root[data-theme='light'] .system-admin-profile .detail-item input {
+  color: var(--theme-text);
+  border-bottom-color: var(--theme-accent-border);
+}
+
+:root[data-theme='light'] .system-admin-profile .primary-action {
+  color: #ffffff;
+  background: var(--theme-accent);
+}
+
+:root[data-theme='light'] .system-admin-profile .edit-button {
+  border-color: var(--theme-accent-border);
+  color: var(--theme-accent);
+  background: var(--theme-accent-soft);
+}
+
+:root[data-theme='light'] .system-admin-profile .edit-button.is-editing {
+  color: #ffffff;
+  border-color: var(--theme-accent);
+  background: var(--theme-accent);
+}
+
+:root[data-theme='light'] .system-admin-profile .online-mark,
+:root[data-theme='light'] .system-admin-profile .top-avatar span {
+  border-color: var(--theme-surface);
+  background: var(--theme-online);
+}

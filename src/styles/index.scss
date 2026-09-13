@@ -1,8 +1,9 @@
 // Application style entry point
 @use './enterprise';
 @use './tokens';
+@use './theme';
 @use './base';
-@use './legacy-components';
+// @use './legacy-components';
 @use './utilities';
 
 @tailwind base;

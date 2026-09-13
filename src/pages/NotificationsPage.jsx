@@ -160,7 +160,7 @@ export default function NotificationsPage() {
                     <time className="shrink-0 text-xs text-gray-500">{formatDate(notification.createdAtUtc)}</time>
                   </div>
                   <p className="mt-2 text-sm leading-6 text-gray-400">{notification.message}</p>
-                  <span className="mt-3 inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                  <span className="mt-3 inline-flex rounded-full bg-surface-raised px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
                     {formatEventType(notification.eventType)}
                   </span>
                 </div>

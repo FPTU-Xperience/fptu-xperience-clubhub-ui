@@ -140,15 +140,15 @@ export default function LoginPage() {
                   className="w-full text-white placeholder-gray-500 outline-none transition-all"
                   style={{
                     padding: '14px 18px 14px 3rem',
-                    fontFamily: "'Rajdhani', sans-serif",
+                    fontFamily: 'Inter, sans-serif',
                     fontSize: '16px',
-                    background: 'rgba(10, 10, 15, 0.8)',
+                    background: 'var(--theme-input)',
                     border: '2px solid var(--border-color)',
                     borderRadius: '8px'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--neon-cyan)'
-                    e.target.style.boxShadow = '0 0 15px rgba(0, 245, 255, 0.3)'
+                    e.target.style.borderColor = 'var(--theme-accent)'
+                    e.target.style.boxShadow = 'var(--theme-focus-shadow)'
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = 'var(--border-color)'
@@ -157,7 +157,7 @@ export default function LoginPage() {
                 />
               </div>
               {errors.email && (
-                <p className="mt-2 text-xs" style={{ color: '#ff4444' }}>{errors.email}</p>
+                <p className="mt-2 text-xs" style={{ color: 'var(--theme-error)' }}>{errors.email}</p>
               )}
             </motion.div>
 
@@ -187,15 +187,15 @@ export default function LoginPage() {
                   className="w-full text-white placeholder-gray-500 outline-none transition-all"
                   style={{
                     padding: '14px 18px 14px 3rem',
-                    fontFamily: "'Rajdhani', sans-serif",
+                    fontFamily: 'Inter, sans-serif',
                     fontSize: '16px',
-                    background: 'rgba(10, 10, 15, 0.8)',
+                    background: 'var(--theme-input)',
                     border: '2px solid var(--border-color)',
                     borderRadius: '8px'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--neon-cyan)'
-                    e.target.style.boxShadow = '0 0 15px rgba(0, 245, 255, 0.3)'
+                    e.target.style.borderColor = 'var(--theme-accent)'
+                    e.target.style.boxShadow = 'var(--theme-focus-shadow)'
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = 'var(--border-color)'
@@ -204,7 +204,7 @@ export default function LoginPage() {
                 />
               </div>
               {errors.password && (
-                <p className="mt-2 text-xs" style={{ color: '#ff4444' }}>{errors.password}</p>
+                <p className="mt-2 text-xs" style={{ color: 'var(--theme-error)' }}>{errors.password}</p>
               )}
             </motion.div>
 
@@ -241,7 +241,7 @@ export default function LoginPage() {
           >
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Chưa có tài khoản?{' '}
-              <Link to="/register" className="font-medium" style={{ color: 'var(--neon-cyan)' }}>
+              <Link to="/register" className="font-medium" style={{ color: 'var(--theme-accent)' }}>
                 Tạo tài khoản
               </Link>
             </p>

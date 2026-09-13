@@ -141,11 +141,11 @@ export default function RegisterPage() {
                   <motion.div
                     initial={false}
                     animate={{
-                      backgroundColor: s <= step ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.1)',
-                      borderColor: s <= step ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.2)'
+                      backgroundColor: s <= step ? 'var(--theme-accent)' : 'var(--theme-step-muted)',
+                      borderColor: s <= step ? 'var(--theme-accent)' : 'var(--theme-step-border)'
                     }}
                     className="w-8 h-8 rounded-lg border-2 flex items-center justify-center text-xs font-bold transition-all"
-                    style={{ color: s <= step ? '#000' : 'var(--text-secondary)' }}
+                    style={{ color: s <= step ? 'var(--theme-avatar-ink)' : 'var(--theme-text-secondary)' }}
                   >
                     {s < step ? (
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,7 +156,7 @@ export default function RegisterPage() {
                   {s < 2 && (
                     <div
                       className="w-12 h-0.5 mx-1"
-                      style={{ background: s < step ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.1)' }}
+                      style={{ background: s < step ? 'var(--theme-accent)' : 'var(--theme-step-muted)' }}
                     />
                   )}
                 </div>
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                     placeholder="Nguyễn Văn An"
                     className="cyber-input"
                   />
-                  {errors.name && <p className="mt-2 text-xs" style={{ color: '#ff4444' }}>{errors.name}</p>}
+                  {errors.name && <p className="mt-2 text-xs" style={{ color: 'var(--theme-error)' }}>{errors.name}</p>}
                 </div>
 
                 <div>
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                     placeholder="sinhvien@truong.edu.vn"
                     className="cyber-input"
                   />
-                  {errors.email && <p className="mt-2 text-xs" style={{ color: '#ff4444' }}>{errors.email}</p>}
+                  {errors.email && <p className="mt-2 text-xs" style={{ color: 'var(--theme-error)' }}>{errors.email}</p>}
                 </div>
 
                 <button
@@ -232,7 +232,7 @@ export default function RegisterPage() {
                     placeholder="Tối thiểu 8 ký tự"
                     className="cyber-input"
                   />
-                  {errors.password && <p className="mt-2 text-xs" style={{ color: '#ff4444' }}>{errors.password}</p>}
+                  {errors.password && <p className="mt-2 text-xs" style={{ color: 'var(--theme-error)' }}>{errors.password}</p>}
                 </div>
 
                 <div>
@@ -247,7 +247,7 @@ export default function RegisterPage() {
                     placeholder="Nhập lại mật khẩu"
                     className="cyber-input"
                   />
-                  {errors.confirmPassword && <p className="mt-2 text-xs" style={{ color: '#ff4444' }}>{errors.confirmPassword}</p>}
+                  {errors.confirmPassword && <p className="mt-2 text-xs" style={{ color: 'var(--theme-error)' }}>{errors.confirmPassword}</p>}
                 </div>
 
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -289,7 +289,7 @@ export default function RegisterPage() {
           >
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Đã có tài khoản?{' '}
-              <Link to="/login" className="font-medium" style={{ color: 'var(--neon-cyan)' }}>
+              <Link to="/login" className="font-medium" style={{ color: 'var(--theme-accent)' }}>
                 Đăng nhập
               </Link>
             </p>

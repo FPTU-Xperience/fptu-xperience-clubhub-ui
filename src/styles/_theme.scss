@@ -1,0 +1,388 @@
+/*
+ * Theme tokens
+ *
+ * Light is the default. Dark remains available through the `dark` class.
+ * Tailwind's `dark:` variant is controlled by the `dark` class on <html>.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --theme-canvas: #05070d;
+  --theme-surface: #0a0f1a;
+  --theme-surface-raised: #111927;
+  --theme-surface-soft: rgba(255, 255, 255, 0.035);
+  --theme-input: rgba(255, 255, 255, 0.03);
+  --theme-text: #f8faff;
+  --theme-text-secondary: #c5cede;
+  --theme-text-muted: #8c97ab;
+  --theme-text-subtle: rgba(221, 229, 245, 0.42);
+  --theme-border: rgba(255, 255, 255, 0.1);
+  --theme-border-subtle: rgba(255, 255, 255, 0.05);
+  --theme-accent: #83effa;
+  --theme-accent-soft: rgba(131, 239, 250, 0.1);
+  --theme-accent-border: rgba(131, 239, 250, 0.3);
+  --theme-action: #83effa;
+  --theme-action-hover: #67e8f9;
+  --theme-action-soft: rgba(131, 239, 250, 0.1);
+  --theme-action-border: rgba(131, 239, 250, 0.3);
+  --theme-nav-hover-bg: rgba(255, 255, 255, 0.045);
+  --theme-nav-active-bg: linear-gradient(90deg, rgba(89, 224, 241, 0.12), rgba(116, 127, 255, 0.07)), rgba(255, 255, 255, 0.035);
+  --theme-accent-strong: #52e0bd;
+  --theme-avatar-ink: #071015;
+  --theme-avatar-start: #bff8ff;
+  --theme-avatar-mid: #75e6f3;
+  --theme-avatar-end: #95a7ff;
+  --theme-brand-bg: linear-gradient(145deg, #d9fbff, #68e8fa 48%, var(--theme-accent-strong));
+  --theme-brand-shadow: 0 0 28px rgba(97, 226, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --theme-online: #52e0bd;
+  --theme-online-shadow: 0 0 14px rgba(82, 224, 189, 0.85);
+  --theme-kbd: rgba(0, 0, 0, 0.2);
+  --theme-overlay: rgba(1, 3, 8, 0.72);
+  --theme-grid-line: rgba(0, 245, 255, 0.03);
+  --theme-error: #ff4444;
+  --theme-focus-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+  --theme-step-muted: rgba(255, 255, 255, 0.1);
+  --theme-step-border: rgba(255, 255, 255, 0.2);
+  --theme-sidebar: #05070d;
+  --theme-header: rgba(5, 7, 13, 0.85);
+  --theme-sidebar-shadow: 30px 0 80px rgba(0, 0, 0, 0.24);
+
+  /* Legacy variables consumed by auth and cyber components. */
+  --bg-primary: var(--theme-canvas);
+  --bg-secondary: var(--theme-surface);
+  --bg-card: rgba(20, 20, 30, 0.8);
+  --bg-glass: rgba(20, 20, 30, 0.6);
+  --text-primary: var(--theme-text);
+  --text-secondary: var(--theme-text-secondary);
+  --text-muted: var(--theme-text-muted);
+  --border-color: var(--theme-border);
+}
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  /* FPT-inspired light theme: white surfaces, slate text, orange actions. */
+  --theme-canvas: #ffffff;
+  --theme-surface: #ffffff;
+  --theme-surface-raised: #f8fafc;
+  --theme-surface-soft: #f1f5f9;
+  --theme-input: #f8fafc;
+  --theme-text: #111827;
+  --theme-text-secondary: #475569;
+  --theme-text-muted: #64748b;
+  --theme-text-subtle: #64748b;
+  --theme-border: #e2e8f0;
+  --theme-border-subtle: #f1f5f9;
+  --theme-accent: #f97316;
+  --theme-accent-soft: rgba(249, 115, 22, 0.1);
+  --theme-accent-border: rgba(249, 115, 22, 0.35);
+  --theme-action: #16a34a;
+  --theme-action-hover: #15803d;
+  --theme-action-soft: rgba(22, 163, 74, 0.1);
+  --theme-action-border: rgba(22, 163, 74, 0.35);
+  --theme-nav-hover-bg: #f8fafc;
+  --theme-nav-active-bg: #fff7ed;
+  --theme-accent-strong: #16a34a;
+  --theme-avatar-ink: #0f172a;
+  --theme-avatar-start: #bbf7d0;
+  --theme-avatar-mid: #67e8f9;
+  --theme-avatar-end: #fdba74;
+  --theme-brand-bg: linear-gradient(145deg, #10b981, #06b6d4 52%, #f97316);
+  --theme-brand-shadow: 0 4px 16px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --theme-online: #16a34a;
+  --theme-online-shadow: 0 0 10px rgba(22, 163, 74, 0.45);
+  --theme-kbd: #f1f5f9;
+  --theme-overlay: rgba(15, 23, 42, 0.28);
+  --theme-grid-line: rgba(249, 115, 22, 0.08);
+  --theme-error: #dc2626;
+  --theme-focus-shadow: 0 0 0 3px rgba(249, 115, 22, 0.16);
+  --theme-step-muted: #e2e8f0;
+  --theme-step-border: #cbd5e1;
+  --theme-sidebar: #ffffff;
+  --theme-header: linear-gradient(90deg, #fff7ed 0%, #fed7aa 35%, #f97316 100%);
+  --theme-sidebar-shadow: 8px 0 24px rgba(15, 23, 42, 0.08);
+
+  --neon-cyan: #f97316;
+  --neon-purple: #fb923c;
+  --neon-pink: #ea580c;
+  --neon-green: #16a34a;
+  --neon-yellow: #f59e0b;
+  --neon-orange: #ea580c;
+
+  --color-primary-50: #fff7ed;
+  --color-primary-100: #ffedd5;
+  --color-primary-200: #fed7aa;
+  --color-primary-300: #fdba74;
+  --color-primary-400: #fb923c;
+  --color-primary-500: #f97316;
+  --color-primary-600: #ea580c;
+  --color-primary-700: #c2410c;
+  --color-primary-800: #9a3412;
+  --color-primary-900: #7c2d12;
+
+  --bg-primary: var(--theme-canvas);
+  --bg-secondary: var(--theme-surface);
+  --bg-card: var(--theme-surface);
+  --bg-glass: rgba(255, 255, 255, 0.82);
+  --text-primary: var(--theme-text);
+  --text-secondary: var(--theme-text-secondary);
+  --text-muted: var(--theme-text-muted);
+  --border-color: var(--theme-border);
+
+  /* Existing enterprise utilities also follow the selected theme. */
+  --color-background: var(--theme-canvas);
+  --color-surface: var(--theme-surface);
+  --color-surface-raised: var(--theme-surface-raised);
+  --color-border: var(--theme-border);
+  --color-border-subtle: var(--theme-border-subtle);
+  --color-text-primary: var(--theme-text);
+  --color-text-secondary: var(--theme-text-secondary);
+  --color-text-muted: var(--theme-text-muted);
+  --color-text-disabled: #cbd5e1;
+}
+
+:root[data-theme='dark'] {
+  --color-background: var(--theme-canvas);
+  --color-surface: var(--theme-surface);
+  --color-surface-raised: var(--theme-surface-raised);
+  --color-border: var(--theme-border);
+  --color-border-subtle: var(--theme-border-subtle);
+  --color-text-primary: var(--theme-text);
+  --color-text-secondary: var(--theme-text-secondary);
+  --color-text-muted: var(--theme-text-muted);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--theme-canvas);
+  color: var(--theme-text);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.theme-avatar {
+  color: var(--theme-avatar-ink);
+  background: linear-gradient(145deg, var(--theme-avatar-start), var(--theme-avatar-mid) 48%, var(--theme-avatar-end));
+}
+
+.theme-online-dot {
+  background-color: var(--theme-online);
+  border-color: var(--theme-canvas);
+  box-shadow: var(--theme-online-shadow);
+}
+
+/* The app predates semantic Tailwind classes in several pages. These small
+   selectors keep those pages readable when the light theme is selected. */
+:root[data-theme='light'] [class*='bg-slate-950'] {
+  background-color: var(--theme-canvas) !important;
+}
+
+:root[data-theme='light'] [class*='bg-slate-900'] {
+  background-color: var(--theme-surface) !important;
+}
+
+:root[data-theme='light'] [class*='bg-slate-800'],
+:root[data-theme='light'] [class*='bg-slate-700'] {
+  background-color: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme='light'] [class~='text-white'],
+:root[data-theme='light'] [class~='text-slate-100'],
+:root[data-theme='light'] [class~='text-slate-200'],
+:root[data-theme='light'] [class~='text-slate-300'] {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme='light'] [class~='text-white'][class*='bg-cyan-'],
+:root[data-theme='light'] [class~='text-white'][class*='bg-emerald-'],
+:root[data-theme='light'] [class~='text-white'][class*='bg-indigo-'],
+:root[data-theme='light'] [class~='text-white'][class*='bg-orange-'],
+:root[data-theme='light'] [class~='text-white'][class*='bg-rose-'],
+:root[data-theme='light'] [class~='text-white'][class*='bg-gradient'] {
+  color: #ffffff !important;
+}
+
+:root[data-theme='light'] [class~='text-slate-400'],
+:root[data-theme='light'] [class~='text-slate-500'],
+:root[data-theme='light'] [class~='text-slate-600'],
+:root[data-theme='light'] [class~='text-gray-300'],
+:root[data-theme='light'] [class~='text-gray-400'],
+:root[data-theme='light'] [class~='text-gray-500'],
+:root[data-theme='light'] [class~='text-gray-600'] {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme='light'] [class*='border-slate-900'],
+:root[data-theme='light'] [class*='border-slate-800'],
+:root[data-theme='light'] [class*='border-slate-700'],
+:root[data-theme='light'] [class~='border-white/5'],
+:root[data-theme='light'] [class~='border-white/10'] {
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme='light'] [class~='bg-white/[0.02]'],
+:root[data-theme='light'] [class~='bg-white/[0.03]'],
+:root[data-theme='light'] [class~='bg-white/[0.035]'],
+:root[data-theme='light'] [class~='bg-white/[0.05]'] {
+  background-color: var(--theme-input) !important;
+}
+
+:root[data-theme='light'] [class~='text-cyan-200'],
+:root[data-theme='light'] [class~='text-cyan-300'],
+:root[data-theme='light'] [class~='text-cyan-400'] {
+  color: #ea580c !important;
+}
+
+:root[data-theme='light'] [class~='border-cyan-400'],
+:root[data-theme='light'] [class~='border-cyan-500/20'],
+:root[data-theme='light'] [class~='border-cyan-500/30'],
+:root[data-theme='light'] [class~='border-cyan-500/40'] {
+  border-color: rgba(249, 115, 22, 0.35) !important;
+}
+
+:root[data-theme='light'] [class~='bg-cyan-400/5'],
+:root[data-theme='light'] [class~='bg-cyan-400/10'],
+:root[data-theme='light'] [class~='bg-cyan-500/5'],
+:root[data-theme='light'] [class~='bg-cyan-500/10'],
+:root[data-theme='light'] [class~='bg-cyan-500/15'] {
+  background-color: rgba(249, 115, 22, 0.08) !important;
+}
+
+/* Cyan action buttons stay cyan in dark mode and become green in light mode. */
+:root[data-theme='light'] button[class~='bg-cyan-400'],
+:root[data-theme='light'] a[class~='bg-cyan-400'],
+:root[data-theme='light'] button[class~='bg-cyan-500'],
+:root[data-theme='light'] a[class~='bg-cyan-500'],
+:root[data-theme='light'] button[class~='bg-cyan-600'],
+:root[data-theme='light'] a[class~='bg-cyan-600'] {
+  background-color: var(--theme-action) !important;
+}
+
+:root[data-theme='light'] button[class~='bg-cyan-500/10'],
+:root[data-theme='light'] a[class~='bg-cyan-500/10'],
+:root[data-theme='light'] button[class~='bg-cyan-500/15'],
+:root[data-theme='light'] a[class~='bg-cyan-500/15'],
+:root[data-theme='light'] button[class~='bg-cyan-500/20'],
+:root[data-theme='light'] a[class~='bg-cyan-500/20'],
+:root[data-theme='light'] button[class~='bg-cyan-500/25'],
+:root[data-theme='light'] a[class~='bg-cyan-500/25'] {
+  background-color: var(--theme-action-soft) !important;
+  border-color: var(--theme-action-border) !important;
+  color: var(--theme-action) !important;
+}
+
+:root[data-theme='light'] button[class~='bg-cyan-400']:hover,
+:root[data-theme='light'] a[class~='bg-cyan-400']:hover,
+:root[data-theme='light'] button[class~='bg-cyan-500']:hover,
+:root[data-theme='light'] a[class~='bg-cyan-500']:hover,
+:root[data-theme='light'] button[class~='bg-cyan-600']:hover,
+:root[data-theme='light'] a[class~='bg-cyan-600']:hover,
+:root[data-theme='light'] button[class~='hover:bg-cyan-300']:hover,
+:root[data-theme='light'] a[class~='hover:bg-cyan-300']:hover {
+  background-color: var(--theme-action-hover) !important;
+}
+
+:root[data-theme='light'] button[class~='from-cyan-500'][class~='to-purple-500'],
+:root[data-theme='light'] a[class~='from-cyan-500'][class~='to-purple-500'] {
+  background-image: linear-gradient(to right, var(--theme-action), var(--theme-action-hover)) !important;
+}
+
+:root[data-theme='light'] [class~='divide-slate-800'] > :not([hidden]) ~ :not([hidden]),
+:root[data-theme='light'] [class~='divide-slate-800/80'] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme='light'] [class~='text-rose-300'],
+:root[data-theme='light'] [class~='text-rose-400'] {
+  color: #dc2626 !important;
+}
+
+:root[data-theme='light'] [class~='text-amber-200'],
+:root[data-theme='light'] [class~='text-amber-300'],
+:root[data-theme='light'] [class~='text-amber-400'] {
+  color: #c2410c !important;
+}
+
+:root[data-theme='light'] .vanguard-header {
+  background: var(--theme-header);
+  border-bottom-color: var(--theme-accent-border) !important;
+}
+
+:root[data-theme='light'] .vanguard-header h1 {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme='light'] .vanguard-sidebar {
+  color: var(--theme-text);
+}
+
+:root[data-theme='light'] .vanguard-sidebar-header {
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme='light'] .vanguard-sidebar [class~='text-white'] {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme='light'] .vanguard-sidebar [class~='text-subtle'] {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item {
+  color: var(--theme-text-secondary);
+}
+
+:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item:hover,
+:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item.is-active {
+  color: var(--theme-text);
+  background: var(--theme-nav-active-bg);
+}
+
+:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item.is-active::before {
+  border-color: var(--theme-accent-border);
+}
+
+:root[data-theme='light'] .vanguard-sidebar .vanguard-brand-mark {
+  color: var(--theme-avatar-ink);
+  background: var(--theme-brand-bg);
+  box-shadow: var(--theme-brand-shadow);
+}
+
+:root[data-theme='light'] .vanguard-panel {
+  border-color: var(--theme-border);
+  background: var(--theme-surface-raised);
+}
+
+:root[data-theme='light'] .vanguard-active-dot {
+  background: var(--theme-accent);
+  box-shadow: var(--theme-online-shadow);
+}
+
+:root[data-theme='light'] .vanguard-header [class~='bg-surface'] {
+  background-color: var(--theme-surface) !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+}
+
+:root[data-theme='light'] .cyber-card {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme='light'] .cyber-input {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+:root[data-theme='light'] .cyber-btn-primary {
+  background: var(--theme-accent);
+  border-color: var(--theme-accent);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(249, 115, 22, 0.22);
+}

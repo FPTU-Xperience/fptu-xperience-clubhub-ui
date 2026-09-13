@@ -33,8 +33,8 @@
 /* Grid Background Pattern */
 .grid-pattern {
   background-image:
-    linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--theme-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--theme-grid-line) 1px, transparent 1px);
   background-size: 50px 50px;
 }
 
@@ -88,19 +88,19 @@
 
 /* Typography Hierarchy - Improved Readability */
 .text-label {
-  color: #d1d5db !important;
+  color: var(--theme-text-secondary) !important;
 }
 
 .text-secondary {
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
 
 .text-tertiary {
-  color: #6b7280;
+  color: var(--theme-text-muted);
 }
 
 .text-bright {
-  color: #f3f4f6;
+  color: var(--theme-text);
 }
 
 /* Card internal sections */
@@ -117,22 +117,22 @@
 
 /* Section divider */
 .section-divider {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--theme-border);
   margin: 1.5rem 0;
 }
 
 /* Item divider */
 .item-divider {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--theme-border);
 }
 
 /* Better label contrast for dark backgrounds */
 .label-bright {
-  color: #d1d5db;
+  color: var(--theme-text-secondary);
 }
 
 .label-muted {
-  color: #9ca3af;
+  color: var(--theme-text-muted);
 }
 
 /* Reports form: a compact, readable workflow layered over the legacy cyber theme. */
@@ -157,7 +157,7 @@
 .report-form h2 { letter-spacing: 0.035em; }
 
 .report-form input::placeholder,
-.report-form textarea::placeholder { color: #718096; opacity: 1; }
+.report-form textarea::placeholder { color: var(--theme-text-muted); opacity: 1; }
 
 /* Responsive */
 @media (max-width: 768px) {

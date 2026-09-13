@@ -43,9 +43,6 @@
     outline-offset: 3px;
   }
 @media all {
-  .system-admin-profile .font-podium {
-    font-family: "FSP DEMO - PODIUM Sharp 4.11", Impact, sans-serif;
-  }
   @keyframes fade-up {
     from {
       opacity: 0;
@@ -175,7 +172,7 @@
   color: #071015;
   background: linear-gradient(145deg, #d9fbff, #68e8fa 48%, #8ea1ff);
   box-shadow: 0 0 28px rgba(97, 226, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  font-family: "FSP DEMO - PODIUM Sharp 4.11", Impact, sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 21px;
 }
 .system-admin-profile .brand strong {

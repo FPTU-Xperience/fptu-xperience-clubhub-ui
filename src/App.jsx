@@ -26,10 +26,10 @@ function ProtectedRoute({ children, permission }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cyber-dark flex items-center justify-center">
+      <div className="min-h-screen bg-canvas text-ink flex items-center justify-center">
         <div className="text-center">
           <div className="cyber-spinner mx-auto mb-4" />
-          <p className="font-orbitron text-cyan-400 animate-pulse">Đang tải...</p>
+          <p className="font-sans text-cyan-400 animate-pulse">Đang tải...</p>
         </div>
       </div>
     )
@@ -63,7 +63,7 @@ function AuthRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cyber-dark flex items-center justify-center">
+      <div className="min-h-screen bg-canvas text-ink flex items-center justify-center">
         <div className="cyber-spinner mx-auto" />
       </div>
     )

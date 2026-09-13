@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,6 +8,24 @@ export default {
   theme: {
     extend: {
       colors: {
+        canvas: 'var(--theme-canvas)',
+        surface: 'var(--theme-surface)',
+        'surface-raised': 'var(--theme-surface-raised)',
+        'surface-soft': 'var(--theme-surface-soft)',
+        input: 'var(--theme-input)',
+        kbd: 'var(--theme-kbd)',
+        ink: 'var(--theme-text)',
+        secondary: 'var(--theme-text-secondary)',
+        muted: 'var(--theme-text-muted)',
+        subtle: 'var(--theme-text-subtle)',
+        outline: 'var(--theme-border)',
+        'outline-subtle': 'var(--theme-border-subtle)',
+        accent: 'var(--theme-accent)',
+        'accent-soft': 'var(--theme-accent-soft)',
+        'accent-border': 'var(--theme-accent-border)',
+        'accent-strong': 'var(--theme-accent-strong)',
+        'avatar-ink': 'var(--theme-avatar-ink)',
+        online: 'var(--theme-online)',
         primary: {
           50:  'var(--color-primary-50)',
           100: 'var(--color-primary-100)',
@@ -50,8 +69,9 @@ export default {
       },
 
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
+        mono: ['Inter', 'sans-serif'],
       },
 
       fontSize: {

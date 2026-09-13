@@ -121,9 +121,9 @@ export default function MinimalUploadedReportPreview({
     };
 
     return (
-        <section className="flex flex-col w-full h-[calc(100vh-64px)] min-h-0 overflow-hidden bg-[#070a10] text-slate-200">
+        <section className="flex flex-col w-full h-[calc(100vh-64px)] min-h-0 overflow-hidden bg-canvas text-secondary">
             {/* MINIMAL HEADER BAR */}
-            <header className="flex-none h-12 flex items-center justify-between gap-3 px-4 border-b border-slate-800/80 bg-[#0b101a] z-20">
+            <header className="flex-none h-12 flex items-center justify-between gap-3 px-4 border-b border-outline bg-surface z-20">
                 <button
                     type="button"
                     onClick={onBack}
@@ -133,7 +133,7 @@ export default function MinimalUploadedReportPreview({
                 </button>
 
                 {originalFileName && (
-                    <span className="hidden sm:inline-block text-xs text-slate-400 font-mono truncate max-w-xs">
+                    <span className="hidden sm:inline-block text-xs text-slate-400 font-sans truncate max-w-xs">
                         {originalFileName}
                     </span>
                 )}

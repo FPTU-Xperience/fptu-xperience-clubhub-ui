@@ -810,7 +810,7 @@ export default function ClubsPage() {
                     <p className="mt-4 rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 text-sm text-rose-200">Lý do: {membership.reviewNote}</p>
                   )}
                 </div>
-                <div className="border-t border-slate-800 bg-black/20 p-4">
+                <div className="border-t border-outline bg-surface-soft p-4">
                   {canDeleteClubs || isManaged ? (
                     <div className="grid gap-2">
                       <Link
@@ -896,7 +896,7 @@ export default function ClubsPage() {
               <Field label="Lời nhắn bổ sung"><TextArea value={joinForm.message} onChange={value => updateJoinField('message', value)} /></Field>
             </div>
           </section>
-          <div className="sticky -bottom-6 z-10 -mx-6 flex gap-3 border-t border-neutral-200 bg-white px-6 py-4 shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
+          <div className="sticky -bottom-6 z-10 -mx-6 flex gap-3 border-t border-outline bg-surface px-6 py-4 shadow-lg">
             <button type="button" onClick={closeJoinForm} disabled={isSubmitting} className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold text-neutral-700">Hủy</button>
             <button type="submit" disabled={isSubmitting} className="flex-1 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-500 px-4 py-3 font-semibold text-white disabled:opacity-50">{isSubmitting ? 'Đang gửi...' : 'Gửi đơn'}</button>
           </div>
@@ -1015,7 +1015,7 @@ export default function ClubsPage() {
             <Checkbox checked={clubForm.committedToResponsibility} onChange={value => updateClubForm('committedToResponsibility', value)} required>Chịu trách nhiệm trước ban quản trị</Checkbox>
             <Checkbox checked={clubForm.committedToReporting} onChange={value => updateClubForm('committedToReporting', value)} required>Nộp báo cáo hoạt động định kỳ</Checkbox>
           </section>
-          <div className="sticky -bottom-6 z-10 -mx-6 flex gap-3 border-t border-neutral-200 bg-white px-6 py-4 shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
+          <div className="sticky -bottom-6 z-10 -mx-6 flex gap-3 border-t border-outline bg-surface px-6 py-4 shadow-lg">
             <button type="button" onClick={() => setCreationModalOpen(false)} disabled={isSubmitting} className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold text-neutral-700">Hủy</button>
             <button type="submit" disabled={isSubmitting} className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 px-4 py-3 font-semibold text-white disabled:opacity-50">{isSubmitting ? 'Đang gửi...' : editingApplication ? 'Gửi lại đơn' : 'Gửi đơn thành lập'}</button>
           </div>

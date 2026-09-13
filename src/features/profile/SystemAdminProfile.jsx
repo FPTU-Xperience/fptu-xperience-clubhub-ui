@@ -135,7 +135,7 @@ export default function SystemAdminProfile({ user }) {
               <Sparkles size={14} />
               Không gian cá nhân
             </span>
-            <h2 className="font-podium">HỒ SƠ QUẢN TRỊ</h2>
+            <h2 className="font-sans">HỒ SƠ QUẢN TRỊ</h2>
           </div>
 
           <button
@@ -180,11 +180,11 @@ export default function SystemAdminProfile({ user }) {
                     aria-label="Họ và tên"
                     style={{
                       background: "transparent",
-                      color: "white",
+                      color: "var(--theme-text)",
                       fontSize: "31px",
                       fontWeight: "bold",
                       border: "none",
-                      borderBottom: "1px solid #8cecf5",
+                      borderBottom: "1px solid var(--theme-accent)",
                       outline: "none",
                       width: "100%",
                       marginBottom: "5px",
@@ -192,7 +192,7 @@ export default function SystemAdminProfile({ user }) {
                   />
                 ) : (
                   <h3
-                    className="font-podium"
+                    className="font-sans"
                     style={{ textTransform: "uppercase" }}
                   >
                     {formData.name}
@@ -262,7 +262,7 @@ export default function SystemAdminProfile({ user }) {
 
             <div className="visual-caption">
               <span>Hệ thống quản lý câu lạc bộ</span>
-              <strong className="font-podium">
+              <strong className="font-sans">
                 AN TOÀN. ỔN ĐỊNH. SẴN SÀNG.
               </strong>
             </div>

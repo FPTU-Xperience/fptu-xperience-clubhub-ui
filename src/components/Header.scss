@@ -1,6 +1,4 @@
 // Header component styles
-$header-bg: rgba(5, 7, 13, 0.85);
-
 .vanguard-header {
-  background-color: $header-bg;
+  background: var(--theme-header);
 }

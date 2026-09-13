@@ -9,7 +9,7 @@ export default function Layout({ title, children }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#05070d]">
+    <div className="min-h-screen bg-canvas">
       {/* Mobile Backdrop */}
       <div
         className={`vanguard-mobile-backdrop ${isMobileOpen ? "is-open" : ""}`}

@@ -341,7 +341,7 @@ export default function CreateReportPage() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-slate-800 pb-5 sm:flex-row sm:items-center">
         <div>
-          <h1 className="font-orbitron text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
+          <h1 className="font-sans text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
             {isEditMode ? 'Chỉnh sửa báo cáo' : 'Tạo báo cáo hoạt động'}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
@@ -511,7 +511,7 @@ export default function CreateReportPage() {
                     <div className="flex items-center gap-3 text-xs text-slate-400">
                       <span>{formatBytes(selectedFile.size)}</span>
                       <span>•</span>
-                      <span className="uppercase font-mono text-cyan-300">
+                      <span className="uppercase font-sans text-cyan-300">
                         {selectedFile.name.split('.').pop()}
                       </span>
                     </div>
@@ -905,7 +905,7 @@ export default function CreateReportPage() {
           {/* STEP 4 */}
           {step === 4 && (
             <div className="rounded-xl border border-cyan-500/30 bg-slate-900/80 p-6 space-y-6">
-              <h2 className="text-lg font-bold font-orbitron text-cyan-400">BƯỚC 4: XEM TRƯỚC VÀ NỘP BÁO CÁO</h2>
+              <h2 className="text-lg font-bold font-sans text-cyan-400">BƯỚC 4: XEM TRƯỚC VÀ NỘP BÁO CÁO</h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800">
                 <div>
@@ -918,7 +918,7 @@ export default function CreateReportPage() {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400">Hạn nộp</p>
-                  <p className="font-semibold text-amber-400 font-mono">{currentDueDate}</p>
+                  <p className="font-semibold text-amber-400 font-sans">{currentDueDate}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-400">Số hoạt động</p>
