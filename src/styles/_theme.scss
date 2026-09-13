@@ -475,9 +475,13 @@ body {
   color: var(--theme-text-secondary);
 }
 
-:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item:hover,
-:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item.is-active {
+:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item:hover {
   color: var(--theme-text);
+  background: var(--theme-nav-active-bg);
+}
+
+:root[data-theme='light'] .vanguard-sidebar .vanguard-nav-item.is-active {
+  color: var(--theme-accent);
   background: var(--theme-nav-active-bg);
 }
 
