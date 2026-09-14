@@ -88,13 +88,15 @@ class ApiService {
       headers,
     });
 
-    if (response.status === 401 || response.status === 403) {
-      if (endpoint === '/api/auth/login' || endpoint === '/api/auth/dev-login' || endpoint === '/api/auth/google' || endpoint === '/api/auth/register') {
+    if (endpoint === '/api/auth/login' || endpoint === '/api/auth/dev-login' || endpoint === '/api/auth/google' || endpoint === '/api/auth/register') {
+      if (!response.ok) {
         const authError = new Error(await this.getErrorMessage(response, { isAuthRequest: true }));
         authError.status = response.status;
         throw authError;
       }
+    }
 
+    if (response.status === 401) {
       // Try to refresh token
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
