@@ -63,9 +63,9 @@ export function AuthProvider({ children }) {
     initAuth();
   }, [loadClubAccess]);
 
-  const login = useCallback(async (username, password) => {
+  const login = useCallback(async (email) => {
     try {
-      const response = await api.login(username, password);
+      const response = await api.login(email);
 
       const userData = {
         id: response.user.id,
@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
         roles: response.user.roles,
         isActive: response.user.isActive,
         isLocked: response.user.isLocked,
-        avatar: response.user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+        avatar: response.user.fullName ? response.user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U',
       };
 
       localStorage.setItem('user', JSON.stringify(userData));
@@ -86,6 +86,33 @@ export function AuthProvider({ children }) {
       return userData;
     } catch (error) {
       console.error('Login failed:', error);
+      throw error;
+    }
+  }, [loadClubAccess]);
+
+  const loginWithGoogle = useCallback(async (credential) => {
+    try {
+      const response = await api.loginWithGoogle(credential);
+
+      const userData = {
+        id: response.user.id,
+        username: response.user.username,
+        name: response.user.fullName,
+        email: response.user.email,
+        roles: response.user.roles,
+        isActive: response.user.isActive,
+        isLocked: response.user.isLocked,
+        avatar: response.user.fullName ? response.user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U',
+      };
+
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      setIsAuthenticated(true);
+      await loadClubAccess(userData);
+
+      return userData;
+    } catch (error) {
+      console.error('Google login failed:', error);
       throw error;
     }
   }, [loadClubAccess]);
@@ -166,6 +193,7 @@ export function AuthProvider({ children }) {
       isAuthenticated,
       loading,
       login,
+      loginWithGoogle,
       register,
       logout,
       updateProfile,

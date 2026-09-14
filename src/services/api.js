@@ -88,8 +88,8 @@ class ApiService {
       headers,
     });
 
-    if (response.status === 401) {
-      if (endpoint === '/api/auth/login' || endpoint === '/api/auth/register') {
+    if (response.status === 401 || response.status === 403) {
+      if (endpoint === '/api/auth/login' || endpoint === '/api/auth/dev-login' || endpoint === '/api/auth/google' || endpoint === '/api/auth/register') {
         const authError = new Error(await this.getErrorMessage(response, { isAuthRequest: true }));
         authError.status = response.status;
         throw authError;
@@ -123,10 +123,10 @@ class ApiService {
   }
 
   // Auth endpoints
-  async login(username, password) {
-    const data = await this.request('/api/auth/login', {
+  async login(email) {
+    const data = await this.request('/api/auth/dev-login', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email: (email || '').trim() }),
     });
     this.setToken(data.accessToken);
     if (data.refreshToken) {
@@ -135,6 +135,17 @@ class ApiService {
     return data;
   }
 
+  async loginWithGoogle(credential) {
+    const data = await this.request('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    });
+    this.setToken(data.accessToken);
+    if (data.refreshToken) {
+      this.setRefreshToken(data.refreshToken);
+    }
+    return data;
+  }
   async register(username, fullName, email, password) {
     const data = await this.request('/api/auth/register', {
       method: 'POST',
