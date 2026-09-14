@@ -1,4 +1,4 @@
-# ClubReportHub - Tài liệu Tổng hợp Chức năng
+# FPTU-Xperience - Tài liệu Tổng hợp Chức năng
 
 ## Mục lục
 
@@ -12,7 +12,7 @@
 
 ## Tổng quan dự án
 
-**ClubReportHub** là hệ thống quản lý câu lạc bộ (Club Management System) dành cho trường học/đại học. Hệ thống cho phép:
+**FPTU-Xperience** là hệ thống quản lý câu lạc bộ (Club Management System) dành cho trường học/đại học. Hệ thống cho phép:
 
 - Quản lý câu lạc bộ (CLUB MANAGEMENT)
 - Quản lý báo cáo hoạt động (REPORT MANAGEMENT)

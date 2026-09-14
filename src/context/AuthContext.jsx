@@ -66,7 +66,6 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email) => {
     try {
       const response = await api.login(email);
-
       const userData = {
         id: response.user.id,
         username: response.user.username,
@@ -82,10 +81,9 @@ export function AuthProvider({ children }) {
       setUser(userData);
       setIsAuthenticated(true);
       await loadClubAccess(userData);
-
       return userData;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Email login failed:', error);
       throw error;
     }
   }, [loadClubAccess]);
@@ -113,33 +111,6 @@ export function AuthProvider({ children }) {
       return userData;
     } catch (error) {
       console.error('Google login failed:', error);
-      throw error;
-    }
-  }, [loadClubAccess]);
-
-  const register = useCallback(async (username, fullName, email, password) => {
-    try {
-      const response = await api.register(username, fullName, email, password);
-
-      const userData = {
-        id: response.user.id,
-        username: response.user.username,
-        name: response.user.fullName,
-        email: response.user.email,
-        roles: response.user.roles,
-        isActive: response.user.isActive,
-        isLocked: response.user.isLocked,
-        avatar: response.user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-      };
-
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      setIsAuthenticated(true);
-      await loadClubAccess(userData);
-
-      return userData;
-    } catch (error) {
-      console.error('Registration failed:', error);
       throw error;
     }
   }, [loadClubAccess]);
@@ -194,7 +165,6 @@ export function AuthProvider({ children }) {
       loading,
       login,
       loginWithGoogle,
-      register,
       logout,
       updateProfile,
       hasRole,

@@ -88,7 +88,7 @@ class ApiService {
       headers,
     });
 
-    if (endpoint === '/api/auth/login' || endpoint === '/api/auth/dev-login' || endpoint === '/api/auth/google' || endpoint === '/api/auth/register') {
+    if (endpoint === '/api/auth/google' || endpoint === '/api/auth/dev-login') {
       if (!response.ok) {
         const authError = new Error(await this.getErrorMessage(response, { isAuthRequest: true }));
         authError.status = response.status;
@@ -148,18 +148,6 @@ class ApiService {
     }
     return data;
   }
-  async register(username, fullName, email, password) {
-    const data = await this.request('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ username, fullName, email, password }),
-    });
-    this.setToken(data.accessToken);
-    if (data.refreshToken) {
-      this.setRefreshToken(data.refreshToken);
-    }
-    return data;
-  }
-
   async refresh(refreshToken) {
     try {
       const response = await fetch(this.buildUrl('/api/auth/refresh'), {

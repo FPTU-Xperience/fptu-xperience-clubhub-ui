@@ -146,7 +146,7 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-2xl bg-gradient-to-l from-orange-500 to-white/10 p-6 sm:p-8"
             >
-                <p className="text-sm font-semibold uppercase tracking-wider text-cyan-300">ClubReportHub</p>
+                <p className="text-sm font-semibold uppercase tracking-wider text-cyan-300">FPTU-Xperience</p>
                 <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
                     Xin chào, {user?.name || user?.username}
                 </h2>
