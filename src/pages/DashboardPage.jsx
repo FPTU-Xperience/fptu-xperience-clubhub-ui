@@ -119,14 +119,14 @@ export default function DashboardPage() {
         {
             label: 'Báo cáo có thể xem',
             value: data.reports.length,
-            color: 'text-purple-300',
+            color: 'text-violet-500',
             href: '/reports',
             show: hasPermission(PERMISSIONS.VIEW_REPORTS),
         },
         {
             label: 'Hoạt động',
             value: data.activities.length,
-            color: 'text-emerald-300',
+            color: 'text-green-500',
             href: '/activities',
             show: hasPermission(PERMISSIONS.VIEW_ACTIVITIES),
         },

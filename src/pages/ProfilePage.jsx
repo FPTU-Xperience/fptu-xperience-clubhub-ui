@@ -94,7 +94,7 @@ function ExistingProfile() {
                                 <p className="font-semibold text-white">{access.clubName}</p>
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                     {access.isManager && (
-                                        <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-purple-300">
+                                        <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-violet-500">
                                             Chủ nhiệm
                                         </span>
                                     )}
@@ -104,7 +104,7 @@ function ExistingProfile() {
                                         </span>
                                     )}
                                     {access.isApprovedMember && (
-                                        <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-emerald-300">
+                                        <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-green-500">
                                             Thành viên
                                         </span>
                                     )}

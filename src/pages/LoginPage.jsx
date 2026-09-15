@@ -131,25 +131,8 @@ export default function LoginPage() {
                             transition={{ delay: 0.2, type: 'spring' }}
                             className="relative inline-block mb-4"
                         >
-                            <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 p-1">
-                                <div
-                                    className="w-full h-full rounded-lg flex items-center justify-center"
-                                    style={{ background: 'var(--bg-primary)' }}
-                                >
-                                    <svg
-                                        className="w-8 h-8 text-cyan-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={1.5}
-                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                        />
-                                    </svg>
-                                </div>
+                            <div className="w-24 h-24 mx-auto rounded-xl">
+                                <img src={`${import.meta.env.BASE_URL}fptux.png`} />
                             </div>
                         </motion.div>
                         <h1 className="text-2xl font-bold gradient-text mb-2">FPTU-Xperience ClubHub</h1>
@@ -247,7 +230,7 @@ export default function LoginPage() {
                                         disabled={isLoading}
                                         whileHover={{ scale: 1.01 }}
                                         whileTap={{ scale: 0.99 }}
-                                        className="cyber-btn cyber-btn-primary w-full py-3"
+                                        className="cyber-btn cyber-btn-primary w-full py-3 rounded-md"
                                     >
                                         {isLoading ? 'Đang xác thực...' : 'Đăng nhập'}
                                     </motion.button>

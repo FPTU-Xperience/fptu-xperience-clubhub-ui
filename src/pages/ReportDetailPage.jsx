@@ -404,7 +404,7 @@ export default function ReportDetailPage() {
                                 type="button"
                                 disabled={isExporting}
                                 onClick={() => handleExport('XLSX')}
-                                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/20 disabled:opacity-50"
+                                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 text-xs font-semibold text-green-500 transition hover:bg-emerald-500/20 disabled:opacity-50"
                             >
                                 <Sheet size={14} /> Excel
                             </button>
@@ -451,7 +451,7 @@ export default function ReportDetailPage() {
 
                 <div className="flex items-center gap-2">
                     <ReportStatusBadge status={status} />
-                    <span className="rounded-md px-2.5 py-1 text-xs font-semibold border border-purple-500/20 bg-purple-500/10 text-purple-300">
+                    <span className="rounded-md px-2.5 py-1 text-xs font-semibold border border-purple-500/20 bg-purple-500/10 text-violet-500">
                         Khai báo trực tiếp
                     </span>
                 </div>
@@ -603,7 +603,7 @@ export default function ReportDetailPage() {
                                             </div>
                                             <div>
                                                 <span className="block text-slate-500">Tham gia thực tế</span>
-                                                <span className="font-medium text-emerald-300 font-semibold">
+                                                <span className="font-medium text-green-500 font-semibold">
                                                     {act.participantCount || 0} người
                                                 </span>
                                             </div>

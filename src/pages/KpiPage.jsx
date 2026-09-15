@@ -19,7 +19,7 @@ import { api } from '../services/api';
 const ADMIN_ROLES = new Set([ROLES.ADMIN, ROLES.STUDENT_AFFAIRS_ADMIN]);
 
 const RATING_STYLES = {
-    Excellent: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
+    Excellent: 'border-emerald-400/30 bg-emerald-400/10 text-green-500',
     Good: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
     Average: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
     'Needs Improvement': 'border-rose-400/30 bg-rose-400/10 text-rose-300',
@@ -67,8 +67,8 @@ function RatingBadge({ rating }) {
 function MetricCard({ icon: Icon, label, value, tone = 'cyan' }) {
     const tones = {
         cyan: 'border-cyan-400/20 bg-cyan-400/5 text-cyan-300',
-        emerald: 'border-emerald-400/20 bg-emerald-400/5 text-emerald-300',
-        purple: 'border-purple-400/20 bg-purple-400/5 text-purple-300',
+        emerald: 'border-emerald-400/20 bg-emerald-400/5 text-green-500',
+        purple: 'border-purple-400/20 bg-purple-400/5 text-violet-500',
         rose: 'border-rose-400/20 bg-rose-400/5 text-rose-300',
         amber: 'border-amber-400/20 bg-amber-400/5 text-amber-300',
     };
@@ -392,7 +392,7 @@ export default function KpiPage() {
                     {rules.map((rule) => (
                         <div key={rule.code} className="rounded-2xl border border-slate-800 bg-slate-950/45 p-4">
                             <p
-                                className={`text-2xl font-black ${Number(rule.points) >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}
+                                className={`text-2xl font-black ${Number(rule.points) >= 0 ? 'text-green-500' : 'text-rose-300'}`}
                             >
                                 {Number(rule.points) > 0 ? '+' : ''}
                                 {formatPoints(rule.points)}

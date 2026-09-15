@@ -155,27 +155,15 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
             className={`fixed inset-y-0 left-0 z-50 w-[250px] transform transition-transform duration-300 vanguard-sidebar flex flex-col ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
         >
             {/* Logo Section */}
-            <div
-                className="vanguard-sidebar-header h-[72px] flex items-center justify-between px-5"
-
-            >
+            <div className="vanguard-sidebar-header h-[72px] flex items-center justify-between px-5">
                 <div className="flex items-center gap-3 w-full cursor-pointer">
-                    <div className="vanguard-brand-mark">
-                        <svg className="w-5 h-5 text-avatar-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                            />
-                        </svg>
-                    </div>
+                    <img className="vanguard-brand-mark" src={`${import.meta.env.BASE_URL}fptux.png`} />
                     <div>
                         <strong className="block text-[18px] tracking-[0.12em] font-sans text-ink leading-tight">
-                            CLUBHUB
+                            CLUB HUB
                         </strong>
                         <small className="block mt-[3px] text-[9px] tracking-[0.22em] text-subtle uppercase">
-                            HỆ THỐNG BÁO CÁO
+                            Platform câu lạc bộ
                         </small>
                     </div>
                 </div>
@@ -190,9 +178,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 </button>
             </div>
 
-            <p className="mx-6 mt-[15px] mb-[10px] text-[9px] font-semibold tracking-[0.28em] text-subtle uppercase">
-                KHU VỰC LÀM VIỆC
-            </p>
+            <hr class="mx-4 border-gray-250 my-3"></hr>
 
             {/* Navigation */}
             <nav className="flex-1 px-3.5 overflow-y-auto space-y-1 flex flex-col pb-4">
@@ -225,11 +211,11 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
 
                 {/* User Section */}
                 <div className="vanguard-panel mx-1 p-3 flex items-center gap-2.5 group relative">
-                    <div className="theme-avatar w-[34px] h-[34px] rounded-[11px] flex items-center justify-center font-bold text-[10px]">
+                    <div className="theme-avatar w-[40px] h-[40px] rounded-[50%] flex items-center justify-center font-bold text-[10px]">
                         {user?.avatar || 'AC'}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <strong className="block text-[11px] font-semibold text-ink truncate">
+                        <strong className="block text-[11px] mx-auto my-auto font-semibold text-ink truncate">
                             {user?.name || 'Khách'}
                         </strong>
                         <small className="block mt-1 text-[9px] text-subtle truncate">

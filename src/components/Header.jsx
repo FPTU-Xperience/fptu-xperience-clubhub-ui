@@ -244,10 +244,11 @@ export default function Header({ title, onMenuClick }) {
                         aria-label="Mở menu tài khoản"
                         aria-expanded={showProfileMenu}
                     >
-                        <div className="theme-avatar w-[34px] h-[34px] rounded-xl flex items-center justify-center font-bold text-[10px] shadow-lg shadow-cyan-500/20">
-                            {user?.avatar || 'AC'}
+                        <div className="theme-avatar-panel rounded-[50%]">
+                            <div className="theme-avatar w-[34px] h-[34px] rounded-xl flex items-center justify-center font-bold text-[10px] shadow-lg shadow-cyan-500/20">
+                                {user?.avatar || 'AC'}
+                            </div>
                         </div>
-                        <div className="theme-online-dot absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-[2px]" />
                     </button>
 
                     {/* Dropdown */}
