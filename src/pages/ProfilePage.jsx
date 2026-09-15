@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatRole } from '../auth/permissions';
 
 import SystemAdminProfile from '../features/profile/SystemAdminProfile';
+import HexagonExperienceChart from '../components/Hexagonexperiencechart';
 
 function ExistingProfile() {
     const { user, clubAccess } = useAuth();
@@ -36,26 +37,20 @@ function ExistingProfile() {
                             {user?.isLocked ? 'Đã khóa' : user?.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                         </span>
                     </div>
-                </motion.section>
 
-                <motion.section
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="rounded-2xl border border-slate-800 bg-slate-900/65 p-6 lg:col-span-2"
-                >
-                    <h3 className="text-lg font-bold text-white">Thông tin tài khoản</h3>
-                    <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+                    {/* Thông tin người dùng */}
+                    <div className="mt-5 space-y-3 text-left">
                         <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                            <dt className="text-xs uppercase tracking-wider text-gray-500">Họ và tên</dt>
-                            <dd className="mt-2 break-words font-semibold text-white">{user?.name || '-'}</dd>
+                            <span className="text-xs uppercase tracking-wider text-gray-500">Họ và tên</span>
+                            <p className="mt-1 break-words font-semibold text-white">{user?.name || '-'}</p>
                         </div>
                         <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                            <dt className="text-xs uppercase tracking-wider text-gray-500">Thư điện tử</dt>
-                            <dd className="mt-2 break-words font-semibold text-white">{user?.email || '-'}</dd>
+                            <span className="text-xs uppercase tracking-wider text-gray-500">Thư điện tử</span>
+                            <p className="mt-1 break-words font-semibold text-white">{user?.email || '-'}</p>
                         </div>
-                        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 sm:col-span-2">
-                            <dt className="text-xs uppercase tracking-wider text-gray-500">Vai trò hệ thống</dt>
-                            <dd className="mt-2 flex flex-wrap gap-2">
+                        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                            <span className="text-xs uppercase tracking-wider text-gray-500">Vai trò hệ thống</span>
+                            <div className="mt-2 flex flex-wrap gap-2">
                                 {(user?.roles || []).map((role) => (
                                     <span
                                         key={role}
@@ -64,10 +59,18 @@ function ExistingProfile() {
                                         {formatRole(role)}
                                     </span>
                                 ))}
-                            </dd>
+                            </div>
                         </div>
-                    </dl>
+                    </div>
                 </motion.section>
+
+                <motion.div
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="lg:col-span-2"
+                >
+                    <HexagonExperienceChart />
+                </motion.div>
             </div>
 
             <section className="rounded-2xl border border-slate-800 bg-slate-900/65 p-6">
@@ -76,7 +79,7 @@ function ExistingProfile() {
                         <h3 className="text-lg font-bold text-white">Câu lạc bộ đã duyệt</h3>
                     </div>
                     <Link
-                        to="/clubs"
+                        to="/clubs/all"
                         className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-center text-sm font-semibold text-cyan-300"
                     >
                         Xem câu lạc bộ
@@ -94,7 +97,7 @@ function ExistingProfile() {
                                 <p className="font-semibold text-white">{access.clubName}</p>
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                     {access.isManager && (
-                                        <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-violet-500">
+                                        <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-purple-300">
                                             Chủ nhiệm
                                         </span>
                                     )}
@@ -104,7 +107,7 @@ function ExistingProfile() {
                                         </span>
                                     )}
                                     {access.isApprovedMember && (
-                                        <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-green-500">
+                                        <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-emerald-300">
                                             Thành viên
                                         </span>
                                     )}

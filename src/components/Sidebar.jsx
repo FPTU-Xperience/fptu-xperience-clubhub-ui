@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { formatRole, PERMISSIONS } from '../auth/permissions';
 import './Sidebar.scss';
 
@@ -36,6 +37,10 @@ const navItems = [
                 />
             </svg>
         ),
+        children: [
+            { path: '/clubs/all', name: 'Tất cả câu lạc bộ' },
+            { path: '/clubs/suggestion', name: 'Câu lạc bộ đề xuất' },
+        ],
     },
     {
         path: '/reports',
@@ -150,6 +155,20 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
     const { unreadCount } = useNotifications();
     const visibleNavItems = navItems.filter((item) => hasPermission(item.permission));
 
+    // Các menu con (vd: Câu lạc bộ) đang được mở rộng
+    const [openMenus, setOpenMenus] = useState(() => (location.pathname.startsWith('/clubs') ? ['/clubs'] : []));
+
+    // Tự động mở rộng menu Câu lạc bộ khi đang ở bất kỳ trang /clubs/*
+    useEffect(() => {
+        if (location.pathname.startsWith('/clubs')) {
+            setOpenMenus((current) => (current.includes('/clubs') ? current : [...current, '/clubs']));
+        }
+    }, [location.pathname]);
+
+    const toggleMenu = (path) => {
+        setOpenMenus((current) => (current.includes(path) ? current.filter((p) => p !== path) : [...current, path]));
+    };
+
     return (
         <aside
             className={`fixed inset-y-0 left-0 z-50 w-[250px] transform transition-transform duration-300 vanguard-sidebar flex flex-col ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
@@ -184,6 +203,69 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
             <nav className="flex-1 px-3.5 overflow-y-auto space-y-1 flex flex-col pb-4">
                 {visibleNavItems.map((item) => {
                     const badge = item.path === '/notifications' ? unreadCount : 0;
+                    const hasSubmenu = Array.isArray(item.children) && item.children.length > 0;
+
+                    // Menu có submenu (phần tử cha): bấm để xổ ra/cụp vào
+                    if (hasSubmenu) {
+                        const isMenuOpen = openMenus.includes(item.path);
+                        const isItemActive =
+                            location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+                        return (
+                            <div key={item.path}>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleMenu(item.path)}
+                                    aria-expanded={isMenuOpen}
+                                    className={`vanguard-nav-item ${isItemActive ? 'is-active' : ''}`}
+                                >
+                                    <span className={isItemActive ? 'text-accent' : 'opacity-80'}>{item.icon}</span>
+                                    <span className="flex-1 text-left text-[13px] font-medium tracking-wide">
+                                        {item.name}
+                                    </span>
+                                    <ChevronDown
+                                        size={15}
+                                        className={`shrink-0 transition-transform duration-200 ${
+                                            isMenuOpen ? 'rotate-180' : ''
+                                        } ${isItemActive ? 'text-accent' : 'opacity-60'}`}
+                                    />
+                                </button>
+
+                                <AnimatePresence initial={false}>
+                                    {isMenuOpen && (
+                                        <motion.div
+                                            key={`${item.path}-submenu`}
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="ml-[22px] mt-1 space-y-1 border-l border-neutral-300/40 pb-1 pl-2">
+                                                {item.children.map((child) => (
+                                                    <NavLink
+                                                        key={child.path}
+                                                        to={child.path}
+                                                        onClick={() => setIsMobileOpen(false)}
+                                                        className={({ isActive }) =>
+                                                            `vanguard-nav-item vanguard-nav-subitem ${
+                                                                isActive ? 'is-active' : ''
+                                                            }`
+                                                        }
+                                                    >
+                                                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-40" />
+                                                        <span className="text-[12.5px] font-medium tracking-wide">
+                                                            {child.name}
+                                                        </span>
+                                                    </NavLink>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        );
+                    }
+
                     return (
                         <NavLink
                             key={item.path}

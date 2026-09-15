@@ -45,6 +45,21 @@
   border-color: var(--theme-accent-border);
 }
 
+.vanguard-nav-subitem {
+  min-height: 34px;
+  padding: 0 10px;
+  gap: 8px;
+  border-radius: 10px;
+}
+
+.vanguard-nav-subitem:hover {
+  transform: translateX(1px);
+}
+
+.vanguard-nav-subitem::before {
+  inset: 0;
+}
+
 .vanguard-active-dot {
   width: 5px;
   height: 5px;

@@ -7,6 +7,7 @@ import { PERMISSIONS } from './auth/permissions';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ClubsPage from './pages/ClubsPage';
+import ClubsSuggestionPage from './pages/ClubsSuggestionPage';
 import ClubMembersPage from './pages/ClubMembersPage';
 import ActivityAttendancePage from './pages/ActivityAttendancePage';
 import ReportsPage from './pages/ReportsPage';
@@ -95,11 +96,20 @@ export default function App() {
                     </LayoutRoute>
                 }
             />
+            <Route path="/clubs" element={<Navigate to="/clubs/all" replace />} />
             <Route
-                path="/clubs"
+                path="/clubs/all"
                 element={
-                    <LayoutRoute title="Câu lạc bộ" permission={PERMISSIONS.VIEW_CLUBS}>
+                    <LayoutRoute title="Tất cả câu lạc bộ" permission={PERMISSIONS.VIEW_CLUBS}>
                         <ClubsPage />
+                    </LayoutRoute>
+                }
+            />
+            <Route
+                path="/clubs/suggestion"
+                element={
+                    <LayoutRoute title="Câu lạc bộ đề xuất" permission={PERMISSIONS.VIEW_CLUBS}>
+                        <ClubsSuggestionPage />
                     </LayoutRoute>
                 }
             />
