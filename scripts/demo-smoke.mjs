@@ -11,26 +11,26 @@ console.error = (...args) => {
     if (!String(args[0]).includes('useLayoutEffect does nothing on the server')) originalError(...args);
 };
 try {
-    const { default: DemoApp } = await vite.ssrLoadModule('/src/demo/DemoApp.jsx');
+    const { V2Routes } = await vite.ssrLoadModule('/src/pages/v2/DemoApp.jsx');
     const routes = [
-        ['/demo', 'Tìm cộng đồng.'],
-        ['/demo/events', 'Có gì đang diễn ra?'],
-        ['/demo/clubs/fcode', 'Câu lạc bộ Lập trình F-Code'],
-        ['/demo/my-clubs', 'Câu lạc bộ của tôi'],
-        ['/demo/profile', 'Nguyễn Khánh Linh'],
-        ['/demo/my-clubs/fcode', 'cùng dẫn dắt nhé.'],
-        ['/demo/my-clubs/fstyle', 'hôm nay có gì mới?'],
-        ['/demo/my-clubs/fcode/activities', 'Hoạt động trong CLB'],
-        ['/demo/my-clubs/fcode/attendance', 'Quản lý điểm danh'],
-        ['/demo/my-clubs/fcode/members', 'Thành viên CLB'],
-        ['/demo/my-clubs/fcode/quests', 'Nhiệm vụ &amp; đóng góp'],
-        ['/demo/my-clubs/fcode/points', 'Sổ ghi nhận đóng góp'],
-        ['/demo/my-clubs/fcode/gifts', 'Kho quà của CLB'],
-        ['/demo/my-clubs/fcode/reports', 'Báo cáo CLB'],
-        ['/demo/my-clubs/fcode/finance', 'Tổng quan tài chính'],
-        ['/demo/my-clubs/fcode/settings', 'Cài đặt CLB'],
-        ['/demo/my-clubs/fstyle/reports', 'Trang này không dành cho vai trò hiện tại'],
-        ['/demo/my-clubs/green', 'Không gian dành cho thành viên CLB'],
+        ['/v2', 'Tìm cộng đồng.'],
+        ['/v2/events', 'Có gì đang diễn ra?'],
+        ['/v2/clubs/fcode', 'Câu lạc bộ Lập trình F-Code'],
+        ['/v2/my-clubs', 'Câu lạc bộ của tôi'],
+        ['/v2/profile', 'Nguyễn Khánh Linh'],
+        ['/v2/my-clubs/fcode', 'cùng dẫn dắt nhé.'],
+        ['/v2/my-clubs/fstyle', 'hôm nay có gì mới?'],
+        ['/v2/my-clubs/fcode/activities', 'Hoạt động trong CLB'],
+        ['/v2/my-clubs/fcode/attendance', 'Quản lý điểm danh'],
+        ['/v2/my-clubs/fcode/members', 'Thành viên CLB'],
+        ['/v2/my-clubs/fcode/quests', 'Nhiệm vụ &amp; đóng góp'],
+        ['/v2/my-clubs/fcode/points', 'Sổ ghi nhận đóng góp'],
+        ['/v2/my-clubs/fcode/gifts', 'Kho quà của CLB'],
+        ['/v2/my-clubs/fcode/reports', 'Báo cáo CLB'],
+        ['/v2/my-clubs/fcode/finance', 'Tổng quan tài chính'],
+        ['/v2/my-clubs/fcode/settings', 'Cài đặt CLB'],
+        ['/v2/my-clubs/fstyle/reports', 'Trang này không dành cho vai trò hiện tại'],
+        ['/v2/my-clubs/green', 'Không gian dành cho thành viên CLB'],
     ];
     for (const [path, expected] of routes) {
         const html = renderToString(
@@ -40,7 +40,7 @@ try {
                 React.createElement(
                     Routes,
                     null,
-                    React.createElement(Route, { path: '/demo/*', element: React.createElement(DemoApp) }),
+                    React.createElement(Route, { path: '/v2/*', element: React.createElement(V2Routes) }),
                 ),
             ),
         );

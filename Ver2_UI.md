@@ -8,12 +8,12 @@ npm ci
 npm run dev -- --port 5174 --open false
 ```
 
-Mở **http://localhost:5174/demo**. Đường dẫn `/` và các trang cũ vẫn hoạt động như trước; `/demo` là khu xem thử độc lập.
+Mở **http://localhost:5174/v2**. Đường dẫn `/` và các trang cũ vẫn hoạt động như trước; `/v2` là khu xem thử độc lập.
 
 - Chỉ thiết kế desktop/laptop (từ khoảng 1060px). Không có phiên bản mobile trong phạm vi này.
-- Không cần đăng nhập Google để xem mock. Thanh **UI LAB** đổi nhân vật minh họa, không cấp quyền cho tài khoản thật.
-- Không mount AuthProvider/NotificationProvider thật trên route `/demo`; các thao tác demo không gọi API nghiệp vụ.
-- Tất cả dữ liệu trong bộ nhớ của phiên trang. **Reload hoặc Reset demo sẽ về dữ liệu ban đầu.** Không sửa DB, token hoặc localStorage hiện có.
+- `/v2` dùng `AuthProvider` và cơ chế đăng nhập email/Google hiện có. Đăng nhập thành công đi vào onboarding lần đầu hoặc trang Khám phá nếu đã hoàn tất.
+- Thanh **UI LAB** vẫn chỉ đổi nhân vật minh họa trong dữ liệu mock; nó không đổi tài khoản đã xác thực và không cấp quyền server.
+- Dữ liệu nghiệp vụ demo nằm trong bộ nhớ. **Reload hoặc Reset demo sẽ về dữ liệu ban đầu.** Riêng trạng thái hoàn tất onboarding được lưu theo user tại `localStorage`.
 - Theme của bản demo là sáng; không thay đổi theme/cài đặt của giao diện cũ.
 - Preview dùng ngày giả lập **16/09/2026, 10:00 giờ Việt Nam**. Mã check-in giả lập: **FPT26**. Không dùng camera, GPS hoặc QR bảo mật thật.
 
@@ -21,14 +21,22 @@ Mở **http://localhost:5174/demo**. Đường dẫn `/` và các trang cũ vẫ
 
 | Trang | Đường dẫn |
 | --- | --- |
-| Khám phá | `/demo` |
-| Hoạt động mở | `/demo/events` |
-| Giới thiệu F-Code | `/demo/clubs/fcode` |
-| CLB của tôi | `/demo/my-clubs` |
-| Không gian F-Code | `/demo/my-clubs/fcode` |
-| Hồ sơ portfolio | `/demo/profile` |
+| Khám phá | `/v2` |
+| Hoạt động mở | `/v2/events` |
+| Giới thiệu F-Code | `/v2/clubs/fcode` |
+| CLB của tôi | `/v2/my-clubs` |
+| Không gian F-Code | `/v2/my-clubs/fcode` |
+| Hồ sơ portfolio | `/v2/profile` |
 
 Trong CLB: `activities`, `attendance`, `quests`, `members`, `points`, `gifts`, `reports`, `finance`, `settings`. Menu và kiểm tra đường dẫn theo tư cách thành viên tại CLB, không theo vai trò ở CLB khác.
+
+## Đăng nhập và onboarding
+
+1. Mở `/v2` khi chưa có phiên: giao diện đăng nhập v2 xuất hiện.
+2. Email dùng endpoint dev-login hiện có; Google dùng Google Identity Services khi `VITE_GOOGLE_CLIENT_ID` được cấu hình.
+3. Tài khoản sinh viên chưa có preference phải chọn chuyên ngành, ít nhất 3 sở thích và tùy chọn đồng bộ thời khóa biểu.
+4. Hoàn tất sẽ lưu `clubhub:v2:onboarding:<user-id>` và mở trang Khám phá. Lần đăng nhập sau bỏ qua onboarding.
+5. Tài khoản Admin/CTSV/System Admin không bị ép qua onboarding sinh viên.
 
 ## Nhân vật để thử
 
@@ -41,7 +49,7 @@ Trong CLB: `activities`, `attendance`, `quests`, `members`, `points`, `gifts`, `
 ## Luồng thử đề xuất
 
 1. Linh → CLB của tôi → F-Code: xem dashboard, duyệt đơn, danh sách thành viên.
-2. Chuyển sang FStyle: menu Báo cáo/Tài chính/Cài đặt biến mất; thử mở URL `/demo/my-clubs/fstyle/reports` để thấy màn không có quyền.
+2. Chuyển sang FStyle: menu Báo cáo/Tài chính/Cài đặt biến mất; thử mở URL `/v2/my-clubs/fstyle/reports` để thấy màn không có quyền.
 3. FStyle → Điểm danh → nhập FPT26: lịch sử và điểm cập nhật; thao tác trùng bị ngăn.
 4. Đổi quà → túi tote: số dư và tồn kho thay đổi, điểm thành tích không bị trừ.
 5. An → Khám phá → F-Code → gửi đơn; Linh → Thành viên → duyệt; An → CLB của tôi có F-Code.
@@ -68,10 +76,10 @@ npm run test:demo:routes
 npm run build
 ```
 
-- `test:demo`: 10 ca kiểm tra trạng thái, cách ly CLB, đăng ký/check-in, đơn tham gia, điểm/quà, báo cáo, học kỳ lưu trữ.
+- `test:demo`: 13 ca kiểm tra trạng thái, cách ly CLB, đăng ký/check-in, đơn tham gia, điểm/quà, báo cáo, học kỳ lưu trữ và preference onboarding theo user.
 - `test:demo:routes`: render 18 route, gồm route bị chặn khi sai CLB/vai trò.
 - Kiểm thử trình duyệt bổ sung: chuyển vai trò/CLB, gửi và duyệt đơn, check-in, đổi quà, sửa hồ sơ và bản chia sẻ.
 
 ## Tổ chức code
 
-`src/demo/model.js`: fixture và các chuyển trạng thái có kiểm tra quyền. `DemoContext.jsx`: trạng thái trong bộ nhớ. `DemoApp.jsx`: route và khung UI. Các trang tách thành Discover, Workspace, Activities, Community, Profile; `ui.jsx` và `demo.scss` chứa thành phần/thiết kế dùng chung. `src/main.jsx` chỉ thêm nhánh lazy `/demo/*`, giữ nguyên provider của hệ thống hiện hữu ở các route còn lại.
+`src/pages/v2/model.js`: fixture và các chuyển trạng thái có kiểm tra quyền. `DemoContext.jsx`: trạng thái trong bộ nhớ. `DemoApp.jsx`: auth gate, route và khung UI. `V2Access.jsx` điều phối login/access; `src/components/v2/StudentOnboarding.jsx` là component onboarding; `onboarding.js` quản lý preference theo user. Các trang tách thành Discovery, Workspace, Activities, Community, Profile; `ui.jsx` và `demo.scss` chứa thành phần/thiết kế dùng chung. `src/main.jsx` thêm nhánh lazy `/v2/*`, giữ nguyên provider của hệ thống hiện hữu ở các route còn lại.

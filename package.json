@@ -7,7 +7,7 @@
         "dev": "vite --mode development",
         "build": "vite build",
         "preview": "vite preview",
-        "test:demo": "node --test src/demo/model.test.js",
+        "test:demo": "node --test src/pages/v2/*.test.js",
         "test:demo:routes": "node scripts/demo-smoke.mjs"
     },
     "dependencies": {

@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Bell, ChevronDown, RotateCcw, X, FlaskConical, Check, ArrowRight } from 'lucide-react';
+import { ArrowUpRight, Bell, ChevronDown, RotateCcw, FlaskConical } from 'lucide-react';
+import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { DemoProvider, useDemo } from './DemoContext';
+import V2Access from './V2Access';
 import { PEOPLE, clubById, displayPerson, membership } from './model';
 import { Avatar, Empty, Modal, Toast } from './ui';
-import { Discover, ClubDetail, MyClubs, PublicEvents } from './Discover';
+import { Discover, ClubDetail, MyClubs, PublicEvents } from './Discovery';
 import { Workspace, ClubHome } from './Workspace';
 import { Activities, Attendance } from './Activities';
 import { Members, Quests, Points, Gifts, Reports, Finance, ClubSettings } from './Community';
 import Profile from './Profile';
 import './demo.scss';
 
-function Shell() {
+function Shell({ sessionUser, onLogout = () => {} }) {
     const { state, actorId, setActorId, reset, scenario, setScenario } = useDemo();
     const actor = displayPerson(state, actorId);
+    const signedInPerson = { name: sessionUser?.name || actor.name, initials: sessionUser?.avatar || actor.initials };
     const location = useLocation();
     const navigate = useNavigate();
     const [resetOpen, setResetOpen] = useState(false),
         [notifications, setNotifications] = useState(false);
-    const workspace = location.pathname.startsWith('/demo/my-clubs/');
+    const workspace = location.pathname.startsWith('/v2/my-clubs/');
     useEffect(() => {
         window.scrollTo(0, 0);
         setNotifications(false);
@@ -46,7 +49,7 @@ function Shell() {
                             onChange={(e) => {
                                 setActorId(e.target.value);
                                 setScenario('normal');
-                                navigate('/demo/my-clubs');
+                                navigate('/v2/my-clubs');
                             }}
                         >
                             {PEOPLE.map((p) => (
@@ -72,13 +75,14 @@ function Shell() {
                         <RotateCcw size={13} />
                         Reset demo
                     </button>
+                    {sessionUser && <button onClick={onLogout}>Đăng xuất</button>}
                     <a href="/dashboard">
                         Hệ thống hiện tại <ArrowUpRight size={13} />
                     </a>
                 </div>
             </div>
             <header className="dx-header">
-                <Link className="dx-brand" to="/demo">
+                <Link className="dx-brand" to="/v2">
                     <img src="/fptux.png" alt="FPTU Xperience" />
                     <span>
                         clubhub<span className="dx-brand-dot">.</span>
@@ -86,11 +90,11 @@ function Shell() {
                     </span>
                 </Link>
                 <nav aria-label="Điều hướng chính">
-                    <NavLink to="/demo" end>
+                    <NavLink to="/v2" end>
                         Khám phá
                     </NavLink>
-                    <NavLink to="/demo/events">Hoạt động mở</NavLink>
-                    <NavLink to="/demo/my-clubs">CLB của tôi</NavLink>
+                    <NavLink to="/v2/events">Hoạt động mở</NavLink>
+                    <NavLink to="/v2/my-clubs">CLB của tôi</NavLink>
                 </nav>
                 <div className="dx-header-right">
                     <span className="dx-campus">FPTU Hồ Chí Minh</span>
@@ -103,11 +107,13 @@ function Shell() {
                         <Bell size={19} />
                         {notices.length > 0 && <i />}
                     </button>
-                    <Link className="dx-account" to="/demo/profile">
-                        <Avatar person={actor} />
+                    <Link className="dx-account" to="/v2/profile">
+                        <Avatar person={signedInPerson} />
                         <span>
-                            <strong>{actor.name.split(' ').slice(-2).join(' ')}</strong>
-                            <small>{actor.role === 'ADMIN' ? 'Role khác · Demo' : 'Sinh viên FPTU'}</small>
+                            <strong>{signedInPerson.name.split(' ').slice(-2).join(' ')}</strong>
+                            <small>
+                                {sessionUser?.email || (actor.role === 'ADMIN' ? 'Role khác · Demo' : 'Sinh viên FPTU')}
+                            </small>
                         </span>
                         <ChevronDown size={15} />
                     </Link>
@@ -140,7 +146,7 @@ function Shell() {
             )}
             {!workspace && (
                 <footer className="dx-footer">
-                    <Link className="dx-brand" to="/demo">
+                    <Link className="dx-brand" to="/v2">
                         clubhub.
                     </Link>
                     <p>Một phần của hành trình FPTU Xperience.</p>
@@ -163,7 +169,7 @@ function Shell() {
                             onClick={() => {
                                 reset();
                                 setResetOpen(false);
-                                navigate('/demo');
+                                navigate('/v2');
                             }}
                         >
                             Reset demo
@@ -174,11 +180,11 @@ function Shell() {
         </div>
     );
 }
-export default function DemoApp() {
+export function V2Routes({ sessionUser, onLogout }) {
     return (
         <DemoProvider>
             <Routes>
-                <Route element={<Shell />}>
+                <Route element={<Shell sessionUser={sessionUser} onLogout={onLogout} />}>
                     <Route index element={<Discover />} />
                     <Route path="events" element={<PublicEvents />} />
                     <Route path="clubs/:clubId" element={<ClubDetail />} />
@@ -201,7 +207,7 @@ export default function DemoApp() {
                         path="*"
                         element={
                             <Empty title="Không tìm thấy trang">
-                                <Link className="dx-button" to="/demo">
+                                <Link className="dx-button" to="/v2">
                                     Về khám phá
                                 </Link>
                             </Empty>
@@ -210,5 +216,20 @@ export default function DemoApp() {
                 </Route>
             </Routes>
         </DemoProvider>
+    );
+}
+
+function AuthenticatedV2Routes() {
+    const { user, logout } = useAuth();
+    return <V2Routes sessionUser={user} onLogout={logout} />;
+}
+
+export default function DemoApp() {
+    return (
+        <AuthProvider>
+            <V2Access>
+                <AuthenticatedV2Routes />
+            </V2Access>
+        </AuthProvider>
     );
 }

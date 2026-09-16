@@ -8,9 +8,9 @@ import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import './styles/index.scss';
 
-const DemoApp = lazy(() => import('./demo/DemoApp'));
+const DemoApp = lazy(() => import('./pages/v2/DemoApp'));
 
-// Keep server-connected providers out of the mock route, including auth and polling.
+// The v2 branch owns its auth boundary; keep notification polling and other legacy providers out of it.
 function ExistingApplication() {
     return (
         <AuthProvider>
@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 }
             >
                 <Routes>
-                    <Route path="/demo/*" element={<DemoApp />} />
+                    <Route path="/v2/*" element={<DemoApp />} />
                     <Route path="/*" element={<ExistingApplication />} />
                 </Routes>
             </Suspense>

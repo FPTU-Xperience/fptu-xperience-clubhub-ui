@@ -205,7 +205,7 @@ export default function Profile() {
                                 <div className="dx-person" key={m.clubId}>
                                     <ClubMark club={clubById(m.clubId)} />
                                     <div>
-                                        <Link className="dx-text-link" to={`/demo/clubs/${m.clubId}`}>
+                                        <Link className="dx-text-link" to={`/v2/clubs/${m.clubId}`}>
                                             {clubById(m.clubId).name}
                                         </Link>
                                         <small>{m.role === 'manager' ? 'Chủ nhiệm' : 'Thành viên'}</small>
@@ -319,7 +319,7 @@ export default function Profile() {
                                         title="Thêm một cộng đồng vào hành trình"
                                         text="Tìm một CLB để bắt đầu câu chuyện của bạn."
                                     >
-                                        <Link className="dx-button" to="/demo">
+                                        <Link className="dx-button" to="/v2">
                                             Khám phá CLB <ArrowRight size={16} />
                                         </Link>
                                     </Empty>
