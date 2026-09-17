@@ -24,8 +24,8 @@
 3. Select cards from Discover and Clubs: verify both navigate to the independent club-detail route.
 4. Select a card: verify navigation reaches `/v2/clubs/:clubId`, shows only permitted public
    detail, and retains the session.
-5. At 1060px and a wider desktop viewport, verify rail, controls, cards, focus order, and primary
-   actions remain visible without horizontal scrolling.
+5. At 1060px and a wider desktop viewport, verify the header, controls, cards, pagination, focus
+   order, and primary actions remain visible without horizontal scrolling.
 
 ## Validate availability and isolation
 

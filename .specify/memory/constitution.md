@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.0 → 1.1.1
-- Modified principles: I. V2-First Production Context (route-boundary clarification).
+- Version change: 1.1.1 → 1.1.2
+- Modified principles: Development Workflow (multi-issue migration traceability).
 - Added sections: none.
 - Removed sections: none.
 - Follow-up TODOs: none.
@@ -73,6 +73,14 @@ authentication changes, and data-schema changes without explicit acceptance crit
 Document assumptions and unresolved upstream dependencies rather than encoding them as product
 facts.
 
+When one migration implements, changes, or unblocks work represented by more than one linked
+issue, the implementation MUST record the relationship before handoff. It MUST identify the
+affected issues, preserve declared dependency boundaries, and add the UI-required API fields and
+public-data limits as comments on the corresponding implementation and adapter issues. The
+supporting documentation MUST include or update a navigable dependency graph when it does not
+already make those relationships clear. This traceability is required for every linked issue to
+avoid treating a UI migration as an implicit backend-contract or authorization change.
+
 Reviews MUST verify compliance with these principles, applicable feature acceptance criteria,
 access isolation, and relevant build or focused tests. Amendments require a documented rationale,
 semantic version update, and review of impacted specifications and plans.
@@ -90,4 +98,4 @@ deviations require explicit justification in the relevant feature artifact. The 
 and project documentation remain supporting references; they do not override these governance
 rules.
 
-**Version**: 1.1.1 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.1.2 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17

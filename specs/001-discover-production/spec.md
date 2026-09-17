@@ -2,7 +2,7 @@
 
 **Feature Branch**: `004-discover-production`  
 **Created**: 2026-09-17  
-**Status**: Draft  
+**Status**: Implemented — manual acceptance pending
 **Input**: User description: "Follow GitHub issue #4, using the current codebase and FPTU Xperience documentation."
 
 ## Clarifications
@@ -18,11 +18,33 @@
 - Q: Does "migration" permit a redesigned production Discover page? → A: No. Preserve the demo Discover page's complete layout and visual structure exactly, then split that implementation into maintainable V2 page/component modules and replace fixture behavior with production data.
 - Q: What is the final Discover/directory structure? → A: Remove the left rail. Discover shows at most 24 suggested clubs over at most four six-card pages with category filtering and no recruiting filter. Clubs shows every club, twelve per page, with all filters. Club details remain independent routes opened from cards.
 
+## Implementation Addendum — 2026-09-17
+
+### Delivered actions
+
+| Action                            | Delivered behavior                                                                                                                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Establish V2 production boundary  | `/v2` mounts the production V2 application; retained demo routes and demo state are isolated at `/v2/demo/*`.                                                                                                                |
+| Preserve the demo visual language | Production uses the migrated demo hero, discovery strip, directory cards, filters, and callout without UI LAB controls, fixture actors, or demo mutations.                                                                   |
+| Build the Discover landing        | `/v2` shows a deterministic suggested subset of at most 24 permitted clubs, six cards per page, with a maximum of four pages, search/category filtering, and no recruiting-only control. Its count reads “CLB dành cho bạn.” |
+| Build the full Clubs directory    | `/v2/clubs` is an independent directory page with all permitted clubs, search, category, recruiting-only filtering when status is available, and twelve cards per page.                                                      |
+| Add independent club details      | Every card opens `/v2/clubs/:clubId`, a read-only production detail page that renders only display-safe club data.                                                                                                           |
+| Make card media resilient         | A valid `logoUrl` fills the card media region with `object-fit: cover`; a missing or failed image falls back to generated ClubArt. Card footers remain aligned at the bottom.                                                |
+| Protect data/state correctness    | V2 adapters strip roster data, normalize optional fields, expose loading/empty/forbidden/error states, and reject stale responses after session, route, or request changes.                                                  |
+| Preserve deployment compatibility | Nginx SPA fallback supports direct V2 and demo deep links.                                                                                                                                                                   |
+
+### Verification record
+
+- `npm run test:demo`: 24/24 tests passed.
+- `npm run test:demo:routes`: 18/18 retained demo route renders passed.
+- `npm run build`: passed; Vite reports only its existing large-chunk advisory.
+- The only outstanding checklist item is a live manual walkthrough using an authenticated test account and production-compatible club data.
+
 ## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Discover clubs (Priority: P1)
 
-An authenticated user enters the ClubHub Discover landing page and finds communities through the complete migrated demo layout; the same page contains the searchable club directory.
+An authenticated user enters the ClubHub Discover landing page and finds a bounded suggested collection through the complete migrated demo layout; they can continue to the independent Clubs directory for the complete catalogue.
 
 **Why this priority**: Discover is the entry point for students to find a community and is the core outcome of issue #4.
 
@@ -84,7 +106,7 @@ An authenticated user sees a bounded suggested-club collection on Discover whose
 
 **Acceptance Scenarios**:
 
-1. **Given** personalized recommendations are not yet available, **When** a user opens Recommended Clubs, **Then** they see a clearly labeled, non-personalized curated set of clubs rather than simulated personalized recommendations.
+1. **Given** personalized recommendations are not yet available, **When** a user opens Discover, **Then** they see a bounded, non-personalized curated set of clubs rather than simulated personalized recommendations.
 2. **Given** personalized recommendation cards become available, **When** they are shown, **Then** they use the established recommendation-card region without changing the page’s navigation or primary layout.
 
 ### Edge Cases
@@ -121,7 +143,7 @@ An authenticated user sees a bounded suggested-club collection on Discover whose
 ### Key Entities _(include if feature involves data)_
 
 - **Club directory entry**: Publicly displayable club information: stable identifier, name, visual identity, description, category, schedule, recruitment status, and available destination.
-- **Directory criteria**: A user-selected directory mode, search term, category, recruitment-only preference, and page that define the current result set.
+- **Directory criteria**: A user-selected search term, category, recruitment-only preference where available, and page that define the current result set.
 - **Discover access context**: The current signed-in user’s session and permitted club-related context, used to retain authenticated navigation and determine what can be shown.
 - **Recommendation entry**: A club proposed to the current user, with enough public club information to render a card and an optional explanation when supplied by the recommendation capability.
 - **Page availability state**: The current loading, populated, empty, forbidden, or error condition for a Discover-area page.
@@ -131,7 +153,7 @@ An authenticated user sees a bounded suggested-club collection on Discover whose
 ### Measurable Outcomes
 
 - **SC-001**: In usability validation, at least 90% of authenticated participants can find and open a club matching a stated interest using All Clubs within 60 seconds.
-- **SC-002**: In supported desktop viewports from 1060 pixels wide upward, 100% of primary Discover, All Clubs, and Recommended Clubs navigation items, filters, and primary card actions are visible and operable without horizontal scrolling.
+- **SC-002**: In supported desktop viewports from 1060 pixels wide upward, 100% of Discover, Clubs, filters, pagination, and primary card actions are visible and operable without horizontal scrolling.
 - **SC-003**: In acceptance testing, 100% of loading, empty, forbidden, and error scenarios show a distinct, understandable page state with no demo club or demo-user content.
 - **SC-004**: In route acceptance testing, navigation among Discover, Clubs, and club detail retains the authenticated session.
 - **SC-005**: Once recommendation data is supplied, a recommendation card can be displayed on Discover without changes to the Clubs page structure.
@@ -142,7 +164,7 @@ An authenticated user sees a bounded suggested-club collection on Discover whose
 - Existing authentication and authorization remain authoritative; unauthenticated and expired-session handling follows the current application convention.
 - The current club service or a backend contract agreed during planning will provide the public directory information required by the cards. The exact service contract is outside this feature specification.
 - The recruiting-only filter becomes operable only when the directory contract supplies trustworthy recruitment status; otherwise it is visibly unavailable.
-- Recommended Clubs initially shows a clearly labeled, non-personalized curated set because RE-39 is a dependency; the page retains a stable card region for personalized recommendations.
+- Discover initially shows a bounded, non-personalized curated set because RE-39 is a dependency; its card region remains replaceable by personalized recommendations.
 - Joining, My Clubs, events, and internal club workspace behavior are outside this issue. The production club-detail page is limited to public club information and does not include demo mutations.
 - Production work for this feature is located under `src/pages/v2` and `src/components/v2`; legacy pages are not changed unless explicitly authorized.
 - The `/v2` route prefix is reserved for incoming production migrations, and the retained UI reference demo is isolated under `/v2/demo`.
