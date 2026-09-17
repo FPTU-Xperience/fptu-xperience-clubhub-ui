@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Bell, ChevronDown, RotateCcw, FlaskConical } from 'lucide-react';
-import { AuthProvider, useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { DemoProvider, useDemo } from './DemoContext';
-import V2Access from './V2Access';
 import { PEOPLE, clubById, displayPerson, membership } from './model';
 import { Avatar, Empty, Modal, Toast } from './ui';
 import { Discover, ClubDetail, MyClubs, PublicEvents } from './Discovery';
@@ -21,7 +20,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
     const navigate = useNavigate();
     const [resetOpen, setResetOpen] = useState(false),
         [notifications, setNotifications] = useState(false);
-    const workspace = location.pathname.startsWith('/v2/my-clubs/');
+    const workspace = location.pathname.startsWith('/v2/demo/my-clubs/');
     useEffect(() => {
         window.scrollTo(0, 0);
         setNotifications(false);
@@ -49,7 +48,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
                             onChange={(e) => {
                                 setActorId(e.target.value);
                                 setScenario('normal');
-                                navigate('/v2/my-clubs');
+                                navigate('/v2/demo/my-clubs');
                             }}
                         >
                             {PEOPLE.map((p) => (
@@ -82,7 +81,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
                 </div>
             </div>
             <header className="dx-header">
-                <Link className="dx-brand" to="/v2">
+                <Link className="dx-brand" to="/v2/demo">
                     <img src="/fptux.png" alt="FPTU Xperience" />
                     <span>
                         clubhub<span className="dx-brand-dot">.</span>
@@ -90,11 +89,11 @@ function Shell({ sessionUser, onLogout = () => {} }) {
                     </span>
                 </Link>
                 <nav aria-label="Điều hướng chính">
-                    <NavLink to="/v2" end>
+                    <NavLink to="/v2/demo" end>
                         Khám phá
                     </NavLink>
-                    <NavLink to="/v2/events">Hoạt động mở</NavLink>
-                    <NavLink to="/v2/my-clubs">CLB của tôi</NavLink>
+                    <NavLink to="/v2/demo/events">Hoạt động mở</NavLink>
+                    <NavLink to="/v2/demo/my-clubs">CLB của tôi</NavLink>
                 </nav>
                 <div className="dx-header-right">
                     <span className="dx-campus">FPTU Hồ Chí Minh</span>
@@ -107,7 +106,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
                         <Bell size={19} />
                         {notices.length > 0 && <i />}
                     </button>
-                    <Link className="dx-account" to="/v2/profile">
+                    <Link className="dx-account" to="/v2/demo/profile">
                         <Avatar person={signedInPerson} />
                         <span>
                             <strong>{signedInPerson.name.split(' ').slice(-2).join(' ')}</strong>
@@ -146,7 +145,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
             )}
             {!workspace && (
                 <footer className="dx-footer">
-                    <Link className="dx-brand" to="/v2">
+                    <Link className="dx-brand" to="/v2/demo">
                         clubhub.
                     </Link>
                     <p>Một phần của hành trình FPTU Xperience.</p>
@@ -169,7 +168,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
                             onClick={() => {
                                 reset();
                                 setResetOpen(false);
-                                navigate('/v2');
+                                navigate('/v2/demo');
                             }}
                         >
                             Reset demo
@@ -180,7 +179,7 @@ function Shell({ sessionUser, onLogout = () => {} }) {
         </div>
     );
 }
-export function V2Routes({ sessionUser, onLogout }) {
+export function DemoRoutes({ sessionUser, onLogout }) {
     return (
         <DemoProvider>
             <Routes>
@@ -207,7 +206,7 @@ export function V2Routes({ sessionUser, onLogout }) {
                         path="*"
                         element={
                             <Empty title="Không tìm thấy trang">
-                                <Link className="dx-button" to="/v2">
+                                <Link className="dx-button" to="/v2/demo">
                                     Về khám phá
                                 </Link>
                             </Empty>
@@ -219,17 +218,9 @@ export function V2Routes({ sessionUser, onLogout }) {
     );
 }
 
-function AuthenticatedV2Routes() {
-    const { user, logout } = useAuth();
-    return <V2Routes sessionUser={user} onLogout={logout} />;
-}
+export const V2Routes = DemoRoutes;
 
-export default function DemoApp() {
-    return (
-        <AuthProvider>
-            <V2Access>
-                <AuthenticatedV2Routes />
-            </V2Access>
-        </AuthProvider>
-    );
+export default function DemoApp({ sessionUser, onLogout }) {
+    const auth = useAuth();
+    return <DemoRoutes sessionUser={sessionUser || auth.user} onLogout={onLogout || auth.logout} />;
 }

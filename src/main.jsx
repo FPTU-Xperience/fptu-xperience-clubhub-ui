@@ -8,7 +8,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import './styles/index.scss';
 
-const DemoApp = lazy(() => import('./pages/v2/DemoApp'));
+const V2App = lazy(() => import('./pages/v2/V2App'));
 
 // The v2 branch owns its auth boundary; keep notification polling and other legacy providers out of it.
 function ExistingApplication() {
@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 }
             >
                 <Routes>
-                    <Route path="/v2/*" element={<DemoApp />} />
+                    <Route path="/v2/*" element={<V2App />} />
                     <Route path="/*" element={<ExistingApplication />} />
                 </Routes>
             </Suspense>
