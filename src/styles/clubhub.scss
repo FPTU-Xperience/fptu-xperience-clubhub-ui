@@ -1,0 +1,25 @@
+// FPTU ClubHub Design System - Modular SCSS Architecture
+// Layer 1: Core Base & Shared UI Primitives
+@use './base-app';
+@use './ui-primitives';
+
+// Layer 2: Layout Components
+@use '../components/layout/AppHeader';
+@use '../components/layout/AppFooter';
+@use '../components/layout/AppShell';
+
+// Layer 3: Shared Club Components
+@use '../components/club/ClubMark';
+@use '../components/club/ClubCard';
+@use '../components/club/EventCard';
+
+// Layer 4: Feature-Scoped Styles
+@use '../features/auth/styles/auth';
+@use '../features/discovery/styles/discovery';
+@use '../features/workspace/styles/workspace';
+@use '../features/activities/styles/activities';
+@use '../features/community/styles/community';
+@use '../features/profile/styles/profile';
+
+// Layer 5: Global Responsive Breakpoints & Brand Overrides
+@use './responsive-brand';

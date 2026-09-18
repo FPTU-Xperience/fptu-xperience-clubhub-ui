@@ -1,0 +1,38 @@
+// Footer and bottom callout banner
+
+.dx-bottom-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 38px;
+    background: #fff7ed;
+    padding: 32px;
+    border-radius: 12px;
+    h2 {
+        margin: 10px 0 8px;
+        font-size: 26px;
+    }
+    p {
+        font-size: 11px;
+    }
+}
+.dx-footer {
+    border-top: 1px solid var(--dx-line);
+    margin: 0 60px;
+    padding: 28px 0;
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    .dx-brand {
+        font-size: 22px;
+    }
+    p {
+        font-size: 10px;
+    }
+    > span {
+        margin-left: auto;
+        font-size: 8px;
+        color: #94a3b8;
+        letter-spacing: 1px;
+    }
+}

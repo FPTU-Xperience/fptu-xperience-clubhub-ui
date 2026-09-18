@@ -1,0 +1,214 @@
+// Club card presentation and generative arts
+
+.dx-club-card {
+    background: white;
+    border: 1px solid var(--dx-line);
+    border-radius: 12px;
+    overflow: hidden;
+    transition:
+        box-shadow 0.2s,
+        transform 0.2s;
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px #0f172a0a;
+    }
+}
+.dx-art-link {
+    display: block;
+}
+.dx-art {
+    height: 174px;
+    position: relative;
+    overflow: hidden;
+    background: #cfddc3;
+    color: #3e5b3c;
+    isolation: isolate;
+    &.code {
+        background: #e2decf;
+        color: #455640;
+    }
+    &.dance {
+        background: #e0dced;
+        color: #75638f;
+    }
+    &.green {
+        background: #cfdfcc;
+        color: #42644d;
+    }
+    &.photo {
+        background: #e4d7c7;
+        color: #7e6c51;
+    }
+    &.sport {
+        background: #d89a71;
+        color: #7f4a2d;
+    }
+    &.business {
+        background: #d2dfe5;
+        color: #4c7284;
+    }
+    &.hero {
+        height: 240px;
+        .dx-art-word {
+            font-size: 170px;
+            left: 42%;
+            bottom: 6px;
+        }
+        .dx-art-caption {
+            font-size: 19px;
+            left: 40px;
+            bottom: 25px;
+        }
+        .dx-art-stamp {
+            left: 40px;
+            top: 26px;
+        }
+    }
+}
+.dx-art-word {
+    position: absolute;
+    bottom: 6px;
+    left: 20px;
+    font-size: 119px;
+    font-weight: 800;
+    letter-spacing: -10px;
+    line-height: 1.08;
+    opacity: 0.8;
+    transform: rotate(-9deg);
+}
+.dx-art-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px);
+    background-size: 38px 38px;
+    opacity: 0.05;
+}
+.dx-art-orbit {
+    border: 1px solid currentColor;
+    opacity: 0.2;
+    width: 185px;
+    height: 185px;
+    border-radius: 50%;
+    position: absolute;
+    right: 15px;
+    top: 20px;
+    &.second {
+        right: -25px;
+        top: -24px;
+    }
+}
+.dance .dx-art-orbit {
+    border-width: 25px;
+    width: 260px;
+    height: 260px;
+    right: -80px;
+    top: -10px;
+    opacity: 0.12;
+}
+.green .dx-art-orbit {
+    border-radius: 0 90px 0 90px;
+    transform: rotate(-35deg);
+    background: currentColor;
+    width: 90px;
+    height: 145px;
+    right: 10px;
+    top: 16px;
+    opacity: 0.13;
+    &.second {
+        right: 90px;
+        top: -20px;
+        transform: rotate(45deg);
+    }
+}
+.photo .dx-art-orbit {
+    border-width: 20px;
+}
+.sport .dx-art-grid {
+    opacity: 0.12;
+    background-size: 80px 80px;
+    transform: rotate(-20deg);
+}
+.dx-art-stamp {
+    position: absolute;
+    top: 17px;
+    left: 19px;
+    font-size: 6px;
+    line-height: 1.5;
+    letter-spacing: 1.2px;
+}
+.dx-art-caption {
+    position: absolute;
+    bottom: 16px;
+    right: 18px;
+    font-size: 9px;
+    max-width: 110px;
+    line-height: 1.35;
+    text-align: right;
+    font-style: italic;
+}
+.dx-art-arrow {
+    position: absolute;
+    right: 16px;
+    top: 15px;
+    opacity: 0.5;
+}
+.dx-club-card-body {
+    padding: 20px 21px 0;
+    h3 {
+        font-size: 21px;
+        margin: 12px 0 8px;
+        letter-spacing: -0.6px;
+    }
+    > p {
+        font-size: 11px;
+        min-height: 54px;
+        line-height: 1.8;
+    }
+    > .dx-meta {
+        margin: 14px 0 16px;
+        font-size: 10px;
+    }
+}
+.dx-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+.dx-overline {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.7px;
+    color: #64748b;
+}
+
+.dx-meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+.dx-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-top: 1px solid #f1f5f9;
+    padding: 14px 0;
+    margin-top: 13px;
+    font-size: 9px;
+    color: #64748b;
+}
+.dx-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--dx-orange) !important;
+    font-size: 11px;
+    font-weight: 550;
+    &:hover {
+        text-decoration: underline;
+    }
+}

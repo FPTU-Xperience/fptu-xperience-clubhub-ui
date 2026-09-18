@@ -1,0 +1,74 @@
+// Activities events list, attendance management, check-in code
+
+.dx-event-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 25px 0;
+    span {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+}
+.dx-attendee-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 10px;
+}
+.dx-attendance-columns {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(300px, 1.2fr);
+    gap: 24px;
+}
+.dx-checkin-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    border: 1px dashed #e2e8f0;
+    border-radius: 12px;
+    background: #fff7ed;
+    margin: 25px 0;
+    color: #f97316;
+    small {
+        font-size: 8px;
+        letter-spacing: 1.5px;
+        margin-top: 17px;
+    }
+    strong {
+        font-size: 42px;
+        letter-spacing: 7px;
+        color: #475569;
+        line-height: 1.5;
+    }
+    > span {
+        font-size: 9px;
+    }
+}
+.dx-success {
+    background: #f0fdf4;
+    padding: 17px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #15803d;
+    border-radius: 7px;
+}
+.dx-attendance-summary {
+    margin: 24px 0;
+    strong {
+        font-size: 38px;
+        color: #16a34a;
+        span {
+            font-size: 22px;
+            color: #94a3b8;
+        }
+    }
+    p {
+        font-size: 11px;
+    }
+}

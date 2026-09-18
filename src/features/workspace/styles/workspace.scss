@@ -1,0 +1,418 @@
+// My Clubs student portal, workspace sidebar, dashboard columns, and activity feed
+
+.dx-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 4px 0 29px;
+    h1 {
+        margin: 10px 0 8px;
+    }
+    p {
+        font-size: 12px;
+    }
+}
+.dx-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.dx-my-clubs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+.dx-my-club {
+    border: 1px solid var(--dx-line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    .dx-art {
+        height: 100%;
+        min-height: 320px;
+    }
+    .dx-art-word {
+        font-size: 100px;
+        transform: rotate(-90deg);
+        left: -30px;
+        top: 130px;
+        bottom: auto;
+    }
+    .dx-art-caption {
+        bottom: 30px;
+        right: 20px;
+    }
+}
+.dx-my-club-body {
+    padding: 25px;
+    h2 {
+        margin: 17px 0 8px;
+    }
+    > p {
+        font-size: 11px;
+    }
+}
+.dx-up-next {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 15px 0;
+    margin: 15px 0;
+    border-top: 1px solid var(--dx-line);
+    border-bottom: 1px solid var(--dx-line);
+    svg {
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+    small {
+        font-size: 8px;
+        letter-spacing: 0.7px;
+    }
+    strong {
+        font-size: 11px;
+        display: block;
+        margin: 4px 0;
+    }
+    span {
+        font-size: 9px;
+        color: #64748b;
+    }
+}
+.dx-list-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #f1f5f9;
+    &:last-child {
+        border-bottom: 0;
+    }
+    p {
+        font-size: 11px;
+        margin-top: 5px;
+    }
+    > svg {
+        color: #f97316;
+    }
+}
+.dx-grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.dx-event-directory {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 25px;
+    .dx-art {
+        border-radius: 8px;
+    }
+}
+
+.dx-workspace {
+    display: grid;
+    grid-template-columns: 235px minmax(0, 1fr);
+    min-height: calc(100vh - 123px);
+}
+.dx-sidebar {
+    background: #fff;
+    padding: 24px 20px;
+    border-right: 1px solid var(--dx-line);
+    display: flex;
+    flex-direction: column;
+    .dx-back {
+        margin-bottom: 22px;
+        font-size: 10px;
+    }
+    nav {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        > a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            color: #64748b;
+            font-size: 11px;
+            padding: 10px 11px;
+            border-radius: 6px;
+            &.active {
+                background: #fff7ed;
+                color: #f97316;
+                font-weight: 600;
+            }
+            &:hover {
+                background: #f8fafc;
+            }
+            small {
+                margin-left: auto;
+                padding: 0 5px;
+                border-radius: 4px;
+                color: #c2410c;
+                background: #ffedd5;
+            }
+        }
+    }
+}
+.dx-sidebar-club {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 21px;
+    strong {
+        font-size: 15px;
+        display: block;
+    }
+    span:not(.dx-mark) {
+        font-size: 9px;
+        color: #64748b;
+    }
+}
+.dx-club-switch {
+    > span {
+        font-size: 7px;
+        color: #64748b;
+        letter-spacing: 1.1px;
+    }
+    select {
+        margin-top: 5px;
+        width: 100%;
+        min-height: 34px;
+        font-size: 9px;
+        padding: 7px;
+        background: #f8fafc;
+    }
+}
+.dx-sidebar-label {
+    font-size: 7px;
+    color: #94a3b8;
+    letter-spacing: 1.2px;
+    margin: 28px 10px 10px;
+}
+.dx-sidebar-bottom {
+    margin-top: auto;
+    padding-top: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 9px;
+    color: #64748b;
+    span,
+    a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    button {
+        text-align: left;
+        font-size: 9px;
+        color: #64748b;
+    }
+}
+.dx-workspace-bar {
+    min-height: 62px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 32px;
+    background: #fff;
+    border-bottom: 1px solid var(--dx-line);
+    gap: 15px;
+}
+.dx-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #64748b;
+    font-size: 10px;
+    strong {
+        color: #475569;
+        font-weight: 500;
+    }
+}
+.dx-term {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    color: #94a3b8;
+    select {
+        min-height: 32px;
+        padding: 5px 8px;
+        border: 0;
+        background: none;
+        font-size: 10px;
+    }
+}
+.dx-workspace-content {
+    padding: 27px 32px 45px;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+.dx-workspace.compact .dx-workspace-content {
+    padding: 20px 24px;
+    .dx-panel {
+        padding: 18px;
+    }
+}
+.dx-workspace .dx-page-heading h1 {
+    font-size: 26px;
+}
+.dx-workspace .dx-page-heading .dx-eyebrow {
+    font-size: 8px;
+}
+.dx-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin: 23px 0;
+    &.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+.dx-stat {
+    background: #fff;
+    border: 1px solid var(--dx-line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    .dx-between {
+        font-size: 10px;
+        color: #64748b;
+        svg {
+            color: #94a3b8;
+        }
+    }
+    > strong {
+        display: block;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.3;
+        margin: 14px 0 8px;
+        letter-spacing: -1px;
+    }
+    small {
+        font-size: 9px;
+    }
+}
+.dx-home-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(255px, 1fr);
+    gap: 23px;
+}
+.dx-home-feature {
+    background: linear-gradient(110deg, #fff7ed, #ffedd5 55%, #fed7aa);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 27px;
+    h2 {
+        white-space: pre-line;
+        font-size: 24px;
+        margin: 16px 0 12px;
+        line-height: 1.4;
+    }
+    p {
+        font-size: 11px;
+        max-width: 370px;
+        margin-bottom: 19px;
+    }
+}
+.dx-feature-symbol {
+    font-size: 86px;
+    color: #f97316;
+    line-height: 1.2;
+    letter-spacing: -7px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transform: rotate(-8deg);
+    opacity: 0.5;
+    padding: 0 5px;
+    span {
+        font-size: 14px;
+        letter-spacing: 1px;
+    }
+}
+.dx-task-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 15px 0;
+    > div {
+        flex: 1;
+    }
+    strong {
+        display: block;
+        font-size: 11px;
+    }
+    small {
+        font-size: 9px;
+        margin-top: 3px;
+    }
+    > svg {
+        color: #94a3b8;
+    }
+    &:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+}
+.dx-task-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
+    background: #fff7ed;
+    color: #f97316;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.dx-feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 13px 0;
+    border-bottom: 1px solid #f1f5f9;
+    strong {
+        font-size: 10px;
+        display: block;
+    }
+    p {
+        font-size: 9px;
+        margin: 3px 0;
+    }
+    small {
+        font-size: 8px;
+    }
+}
+.dx-feed-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f97316;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+.dx-banner {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 16px;
+    margin: 14px 0;
+    border: 1px solid #fed7aa;
+    border-radius: 7px;
+    color: #c2410c;
+    background: #fff7ed;
+    font-size: 11px;
+}
+.dx-workspace-main > .dx-banner {
+    margin: 15px 32px 0;
+}

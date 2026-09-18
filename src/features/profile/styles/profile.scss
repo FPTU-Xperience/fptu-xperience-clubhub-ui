@@ -1,0 +1,286 @@
+// Student profile cover, competency radar chart, timeline portfolio
+
+.dx-profile-cover {
+    border-radius: 14px;
+    background: var(--dx-header-gradient);
+    height: 210px;
+    padding: 27px 35px;
+    overflow: hidden;
+    position: relative;
+    > div:first-child {
+        position: relative;
+        z-index: 1;
+        > span {
+            display: block;
+            font-size: 8px;
+            letter-spacing: 2px;
+            color: #64748b;
+        }
+        > strong {
+            display: block;
+            font-size: 32px;
+            letter-spacing: -1px;
+            line-height: 1.12;
+            color: #9a3412;
+            margin-top: 20px;
+            em {
+                font-family: Georgia, serif;
+                font-weight: 400;
+            }
+        }
+    }
+}
+.dx-profile-cover-art {
+    position: absolute;
+    width: 510px;
+    right: 20px;
+    top: 0;
+    height: 240px;
+    span {
+        position: absolute;
+        width: 170px;
+        height: 260px;
+        background: #fed7aa;
+        border-radius: 100px 100px 0 0;
+        top: 50px;
+        left: 0;
+        transform: rotate(-30deg);
+        &:nth-child(2) {
+            background: #fed7aa;
+            left: 140px;
+            top: 10px;
+            transform: rotate(10deg);
+        }
+        &:nth-child(3) {
+            background: #fb923c;
+            left: 280px;
+            top: 80px;
+            transform: rotate(45deg);
+        }
+    }
+    b {
+        position: absolute;
+        right: 0;
+        top: 25px;
+        border: 1px solid #fb923c;
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        display: grid;
+        place-content: center;
+        text-align: center;
+        font-size: 8px;
+        letter-spacing: 1px;
+        color: #9a3412;
+        transform: rotate(15deg);
+    }
+}
+.dx-profile-identity {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    position: relative;
+    padding: 0 17px 29px;
+    margin-top: -19px;
+    .dx-avatar.large {
+        width: 108px;
+        height: 108px;
+        background: #ffedd5;
+        color: #9a3412;
+        font-size: 31px;
+    }
+    .dx-grow {
+        padding-top: 31px;
+        h1 {
+            font-size: 27px;
+        }
+        p {
+            margin: 4px 0 8px;
+            font-size: 11px;
+        }
+    }
+    .dx-actions {
+        padding-top: 25px;
+    }
+}
+.dx-profile-columns {
+    display: grid;
+    grid-template-columns: 288px minmax(0, 1fr);
+    gap: 27px;
+    .dx-panel > h3 {
+        margin-bottom: 14px;
+    }
+    aside .dx-panel {
+        padding: 24px;
+    }
+    aside p {
+        font-size: 11px;
+        line-height: 1.9;
+    }
+}
+.dx-profile-info {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    margin-top: 21px;
+    svg {
+        color: #64748b;
+        margin-top: 3px;
+    }
+    strong {
+        font-size: 10px;
+    }
+    small {
+        font-size: 9px;
+        margin-top: 3px;
+    }
+}
+.dx-tags {
+    gap: 7px;
+    padding: 4px 0;
+    .dx-pill {
+        padding: 6px 9px;
+    }
+}
+.dx-profile-tabs {
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid var(--dx-line);
+    margin-bottom: 21px;
+    button {
+        font-size: 11px;
+        color: #64748b;
+        padding: 14px 0;
+        border-bottom: 2px solid transparent;
+        &.active {
+            color: #f97316;
+            border-bottom-color: #f97316;
+        }
+    }
+}
+.dx-profile .dx-stats {
+    margin-top: 0;
+    .dx-stat {
+        padding: 18px;
+    }
+}
+.dx-radar-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 22px;
+    > div > h3 {
+        margin: 15px 0 10px;
+        font-size: 18px;
+    }
+    > div > p {
+        font-size: 10px;
+        line-height: 1.9;
+    }
+}
+.dx-radar {
+    svg {
+        width: 100%;
+        max-height: 255px;
+    }
+}
+.dx-radar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 8px;
+    color: #64748b;
+    span {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    i {
+        display: block;
+        width: 10px;
+        height: 2px;
+        background: #f97316;
+    }
+    span:last-child i {
+        background: #cbd5e1;
+    }
+}
+.dx-real-experience {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 7px;
+    margin-top: 18px;
+    color: #c2410c;
+    strong {
+        font-size: 10px;
+        color: #64748b;
+    }
+    small {
+        font-size: 8px;
+        margin-top: 3px;
+    }
+}
+.dx-timeline {
+    display: flex;
+    position: relative;
+    padding: 0 0 27px 24px;
+    border-left: 1px solid #e2e8f0;
+    margin-left: 5px;
+    margin-top: 20px;
+    .dx-timeline-dot {
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        border: 2px solid #fff;
+        background: #fb923c;
+        border-radius: 50%;
+        left: -5px;
+        top: 5px;
+    }
+    h3 {
+        font-size: 14px;
+        margin: 9px 0;
+    }
+    p {
+        font-size: 11px;
+        margin: 9px 0 13px;
+    }
+    small {
+        font-size: 8px;
+        letter-spacing: 0.4px;
+    }
+}
+.dx-portfolio-project {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 25px;
+    align-items: center;
+    h2 {
+        font-size: 21px;
+        margin: 14px 0;
+    }
+    p {
+        font-size: 11px;
+        margin-bottom: 18px;
+    }
+}
+.dx-project-art {
+    min-height: 210px;
+    background: #ffedd5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    border-radius: 8px;
+    color: #f97316;
+    > span {
+        font-size: 18px;
+        line-height: 1.1;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+}

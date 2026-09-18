@@ -1,11 +1,11 @@
 # Kế hoạch UI ClubHub — Chủ CLB & Sinh viên
 
-Ngày: 16/09/2026. Cập nhật tích hợp: 17/09/2026. Trạng thái: đã triển khai bản preview frontend tại `/v2`, có login và onboarding preference theo CLBHB-UI-03. Chỉ thiết kế web desktop/laptop theo cập nhật của người dùng; không triển khai hay kiểm thử mobile.
+Ngày: 16/09/2026. Cập nhật tích hợp: 18/09/2026. Trạng thái: đã hoàn thành chuẩn hóa kiến trúc doanh nghiệp và triển khai trực tiếp tại đường dẫn gốc `/`, có login và onboarding preference. Chỉ thiết kế web desktop/laptop theo cập nhật của người dùng; không triển khai hay kiểm thử mobile.
 
 ## 1. Phạm vi đã chốt
 
 - Thiết kế hai trải nghiệm: Chủ CLB và Sinh viên/thành viên.
-- Dữ liệu nghiệp vụ v2 vẫn là dữ liệu giả có liên kết và thao tác được. Route v2 tái sử dụng cơ chế đăng nhập thật hiện có; không sửa BE, DB online hoặc chính sách xác thực.
+- Toàn bộ ứng dụng chạy trực tiếp tại đường dẫn gốc `/`, hỗ trợ đồng bộ dữ liệu BE API và fallback mock an toàn. Cơ chế đăng nhập thật hiện có; không sửa BE, DB online hoặc chính sách xác thực.
 - Giữ nguyên trang riêng, route và quyền hiện hữu của các role khác; không thiết kế lại Admin/CTSV/Thủ quỹ.
 - Các role khác vẫn được vào khu khám phá và hồ sơ CLB công khai. Không chặn toàn khu mới bằng điều kiện chỉ có hai role.
 - Vào nội bộ một CLB theo quyền tại chính CLB đó. Có role khác không đồng nghĩa bị cấm, cũng không tự động được quyền chủ nhiệm. Giữ lối về trang riêng hiện có.
