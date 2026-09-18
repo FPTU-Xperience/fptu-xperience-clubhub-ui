@@ -7,8 +7,12 @@
         "dev": "vite --mode development",
         "build": "vite build",
         "preview": "vite preview",
-        "test:demo": "node --test src/pages/v2/*.test.js",
-        "test:demo:routes": "node scripts/demo-smoke.mjs"
+        "test": "node scripts/demo-smoke.mjs && node scripts/interaction-tests.mjs && node scripts/onboarding-tests.mjs",
+        "test:smoke": "node scripts/demo-smoke.mjs",
+        "test:interaction": "node scripts/interaction-tests.mjs",
+        "test:onboarding": "node scripts/onboarding-tests.mjs",
+        "format": "prettier --write \"src/**/*.{js,jsx,scss}\"",
+        "format:check": "prettier --check \"src/**/*.{js,jsx,scss}\""
     },
     "dependencies": {
         "framer-motion": "^10.16.0",

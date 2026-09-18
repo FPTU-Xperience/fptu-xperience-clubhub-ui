@@ -11,6 +11,6 @@ export default defineConfig({
     },
   },
   server: {
-    open: '/v2'
+    open: true
   }
 })
