@@ -6,11 +6,10 @@ import { DemoProvider, useDemo } from './DemoContext';
 import { PEOPLE, clubById, displayPerson, membership } from './model';
 import { Avatar, Empty, Modal, Toast } from './ui';
 import { Discover, ClubDetail, MyClubs, PublicEvents } from './Discovery';
-import { Workspace, ClubHome } from './Workspace';
-import { Activities, Attendance } from './Activities';
-import { Members, Quests, Points, Gifts, Reports, Finance, ClubSettings } from './Community';
-import Profile from './Profile';
-import './demo.scss';
+import { Workspace, ClubHome } from './club-workspace/Workspace';
+import { Activities, Attendance } from './activities/Activities';
+import { Members, Quests, Points, Gifts, Reports, Finance, ClubSettings } from './community/Community';
+import Profile from './profile-page/Profile';
 
 function Shell({ sessionUser, onLogout = () => {} }) {
     const { state, actorId, setActorId, reset, scenario, setScenario } = useDemo();

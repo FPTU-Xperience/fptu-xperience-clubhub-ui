@@ -1,30 +1,49 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../../context/AuthContext';
-import DiscoverShell from '../../components/v2/DiscoverShell';
-import AllClubsPage from './AllClubsPage';
-import ClubDetailPage from './ClubDetailPage';
+import Footer from '../../components/v2/common/footer/Footer';
+import Header from '../../components/v2/common/header/Header';
+import AllClubsPage from './all-clubs-page/AllClubsPage';
+import ClubDetailPage from './club-detail-page/ClubDetailPage';
 import DemoApp from './DemoApp';
-import DiscoverPage from './DiscoverPage';
+import DiscoverPage from './discovery-page/DiscoveryPage';
 import V2Access from './V2Access';
+import './V2App.scss';
+// The legacy demo and access styles remain available while their rules are
+// progressively moved beside the components that own them.
 import './demo.scss';
-import './discover.scss';
 
 function AuthenticatedV2App() {
     const { user, logout, clubAccess, api } = useAuth();
+    const location = useLocation();
     const sessionKey = user?.id || user?.email || 'anonymous';
+
+    if (location.pathname.startsWith('/v2/demo')) {
+        return (
+            <Routes>
+                <Route path="demo/*" element={<DemoApp sessionUser={user} onLogout={logout} />} />
+            </Routes>
+        );
+    }
+
     return (
-        <Routes>
-            <Route path="demo/*" element={<DemoApp sessionUser={user} onLogout={logout} />} />
-            <Route element={<DiscoverShell user={user} onLogout={logout} />}>
-                <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
-                <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
-                <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
-                <Route
-                    path="clubs/:clubId"
-                    element={<ClubDetailPage api={api} viewerAccess={clubAccess} sessionKey={sessionKey} />}
-                />
-            </Route>
-        </Routes>
+        <div className="v2-app">
+            <a className="v2-skip-link" href="#v2-main">
+                Đến nội dung chính
+            </a>
+            <Header user={user} onLogout={logout} api={api} />
+            <main id="v2-main" className="v2-main">
+                <Routes>
+                    <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
+                    <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
+                    <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
+                    <Route
+                        path="clubs/:clubId"
+                        element={<ClubDetailPage api={api} viewerAccess={clubAccess} sessionKey={sessionKey} />}
+                    />
+                </Routes>
+            </main>
+            <Footer />
+        </div>
     );
 }
 

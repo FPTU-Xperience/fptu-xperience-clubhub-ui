@@ -1,4 +1,5 @@
 import { AlertTriangle, LoaderCircle, LockKeyhole, SearchX } from 'lucide-react';
+import './PageState.scss';
 
 export default function PageState({ status, title, description, onRetry, children }) {
     if (status === 'populated') return children;
@@ -41,7 +42,7 @@ export default function PageState({ status, title, description, onRetry, childre
             <h2>{heading}</h2>
             <p>{copy}</p>
             {onRetry && status === 'error' && (
-                <button className="dx-button" type="button" onClick={onRetry}>
+                <button className="v2-button" type="button" onClick={onRetry}>
                     Thử lại
                 </button>
             )}

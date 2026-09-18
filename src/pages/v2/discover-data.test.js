@@ -117,8 +117,32 @@ test('production routing isolates demo, all-clubs, and club-detail pages', () =>
     assert.match(routes, /AllClubsPage/);
     assert.doesNotMatch(routes, /RecommendedClubsPage/);
 
-    const shell = readFileSync(new URL('../../components/v2/DiscoverShell.jsx', import.meta.url), 'utf8');
-    assert.doesNotMatch(shell, /DiscoverRail/);
+    assert.match(routes, /<Header user={user}/);
+    assert.match(routes, /<main id="v2-main"/);
+    assert.match(routes, /<Footer \/>/);
+    assert.doesNotMatch(routes, /DiscoverShell|DiscoverRail/);
+});
+
+test('production header is V2-local, production-routed, and accessible', () => {
+    const app = readFileSync(new URL('V2App.jsx', import.meta.url), 'utf8');
+    const header = readFileSync(new URL('../../components/v2/Header.jsx', import.meta.url), 'utf8');
+    const headerStyles = readFileSync(new URL('../../components/v2/Header.scss', import.meta.url), 'utf8');
+
+    assert.match(app, /import Header from '..\/..\/components\/v2\/Header'/);
+    assert.match(header, /to="\/v2"/);
+    assert.match(header, /to="\/v2\/clubs"/);
+    assert.match(header, /useHeaderNotifications/);
+    assert.match(header, /aria-expanded/);
+    assert.match(header, /aria-controls="v2-notification-popover"/);
+    assert.match(header, /event\.key === 'Escape'/);
+    assert.match(header, /aria-label="Đóng thông báo"/);
+    assert.match(header, /onLogout/);
+    assert.doesNotMatch(header, /DemoContext|NotificationContext|fixture|\/v2\/demo/);
+    assert.doesNotMatch(header, /className="[^"]*dx-/);
+    assert.match(header, /className="v2-header"/);
+    assert.match(headerStyles, /\.v2-notification-popover/);
+    assert.match(headerStyles, /top: calc\(100% - 12px\)/);
+    assert.doesNotMatch(headerStyles, /\.dx-/);
 });
 
 test('production Discover composes the complete demo layout instead of a redesigned page', () => {

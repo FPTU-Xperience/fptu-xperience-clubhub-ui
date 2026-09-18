@@ -1,32 +1,33 @@
 import { ArrowLeft, CalendarDays, Mail, MapPin, Phone, Users } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import { ClubLogo, ClubMark, Pill } from '../../components/v2/DiscoveryLayout';
-import PageState from '../../components/v2/PageState';
-import { useClubDetail } from './discover-data';
+import { ClubLogo, ClubMark, Pill } from '../../../components/v2/DiscoveryLayout';
+import PageState from '../../../components/v2/PageState';
+import { useClubDetail } from '../discover-data';
+import './ClubDetailPage.scss';
 
 export default function ClubDetailPage({ api, viewerAccess, sessionKey }) {
     const { clubId } = useParams();
     const result = useClubDetail(api, clubId, viewerAccess, sessionKey);
     const club = result.data;
     return (
-        <div className="dx-public-content">
-            <Link to="/v2/clubs" className="dx-back">
+        <div className="v2-public-content">
+            <Link to="/v2/clubs" className="v2-back">
                 <ArrowLeft size={16} /> Tất cả câu lạc bộ
             </Link>
             <PageState status={result.status} onRetry={result.retry}>
                 {club && (
                     <>
-                        <div className="dx-detail-cover">
+                        <div className="v2-detail-cover">
                             {club.coverImageUrl ? (
                                 <img src={club.coverImageUrl} alt="" />
                             ) : (
                                 <ClubLogo club={club} hero />
                             )}
                         </div>
-                        <div className="dx-club-identity">
+                        <div className="v2-club-identity">
                             <ClubMark club={club} large />
                             <div>
-                                <div className="dx-inline">
+                                <div className="v2-inline">
                                     <Pill>{club.category || 'Chưa phân loại'}</Pill>
                                     <Pill tone={club.isRecruiting ? 'orange' : ''}>
                                         {club.hasRecruitmentStatus
@@ -40,27 +41,27 @@ export default function ClubDetailPage({ api, viewerAccess, sessionKey }) {
                                 <p>{club.tagline}</p>
                             </div>
                         </div>
-                        <div className="dx-detail-columns">
+                        <div className="v2-detail-columns">
                             <div>
-                                <section className="dx-panel">
-                                    <span className="dx-eyebrow">CHÚNG MÌNH LÀ AI?</span>
+                                <section className="v2-panel">
+                                    <span className="v2-eyebrow">CHÚNG MÌNH LÀ AI?</span>
                                     <h2>Một nơi để cùng nhau phát triển.</h2>
-                                    <p className="dx-body-large">
+                                    <p className="v2-body-large">
                                         {club.description || 'Thông tin giới thiệu đang được cập nhật.'}
                                     </p>
                                     <p>
                                         Thông tin trên trang này đến từ nguồn dữ liệu ClubHub được phép hiển thị cho tài
                                         khoản của bạn.
                                     </p>
-                                    <div className="dx-inline">
+                                    <div className="v2-inline">
                                         {club.tags.map((tag) => (
                                             <Pill key={tag}>{tag}</Pill>
                                         ))}
                                     </div>
                                 </section>
-                                <section className="dx-panel">
+                                <section className="v2-panel">
                                     <h2>Bạn sẽ tìm thấy gì ở đây?</h2>
-                                    <div className="dx-benefits">
+                                    <div className="v2-benefits">
                                         {[
                                             [
                                                 '01',
@@ -84,7 +85,7 @@ export default function ClubDetailPage({ api, viewerAccess, sessionKey }) {
                                 </section>
                             </div>
                             <aside>
-                                <section className="dx-panel">
+                                <section className="v2-panel">
                                     <h3>Hẹn gặp bạn tại CLB</h3>
                                     <Info
                                         icon={CalendarDays}
@@ -112,7 +113,7 @@ export default function ClubDetailPage({ api, viewerAccess, sessionKey }) {
                                         <Info icon={Phone} label="Điện thoại" value={club.contact.phone} />
                                     )}
                                 </section>
-                                <div className="dx-small-note">
+                                <div className="v2-small-note">
                                     Chỉ thông tin công khai được phép mới hiển thị trên trang này.
                                 </div>
                             </aside>
@@ -126,7 +127,7 @@ export default function ClubDetailPage({ api, viewerAccess, sessionKey }) {
 
 function Info({ icon: Icon, label, value }) {
     return (
-        <div className="dx-info-row">
+        <div className="v2-info-row">
             <Icon />
             <div>
                 <small>{label}</small>

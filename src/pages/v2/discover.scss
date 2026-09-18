@@ -1,8 +1,10 @@
-.v2-discover-app {
+.v2-app {
     --v2-orange: #f97316;
     --v2-ink: #111827;
     --v2-muted: #64748b;
     --v2-line: #e2e8f0;
+    display: flex;
+    flex-direction: column;
     min-width: 1060px;
     min-height: 100vh;
 }
@@ -23,8 +25,8 @@
 }
 
 .v2-main {
+    flex: 1;
     min-width: 0;
-    min-height: calc(100vh - 68px);
 }
 
 .dx-checkbox.is-disabled {

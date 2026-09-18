@@ -15,9 +15,9 @@ import {
     LockKeyhole,
     ArrowRight,
 } from 'lucide-react';
-import { useDemo } from './DemoContext';
-import { CLUBS, CURRENT_TERM, clubById, displayPerson, ownPoints } from './model';
-import { Avatar, ClubMark, Empty, FormField, Modal, Pill, SectionHeading, Stat } from './ui';
+import { useDemo } from '../DemoContext';
+import { CLUBS, CURRENT_TERM, clubById, displayPerson, ownPoints } from '../model';
+import { Avatar, ClubMark, Empty, FormField, Modal, Pill, SectionHeading, Stat } from '../ui';
 
 function Radar({ hasData }) {
     const labels = ['Học tập', 'Nghiên cứu', 'Quốc tế', 'Thể thao & văn hóa', 'Cộng đồng', 'Khởi nghiệp'];

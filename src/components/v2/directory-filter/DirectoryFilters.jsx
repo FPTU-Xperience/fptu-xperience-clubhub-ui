@@ -1,5 +1,6 @@
 import { SlidersHorizontal } from 'lucide-react';
-import { SearchField } from './DiscoveryLayout';
+import { SearchField } from '../DiscoveryLayout';
+import './DirectoryFilters.scss';
 
 export default function DirectoryFilters({
     query,
@@ -16,8 +17,8 @@ export default function DirectoryFilters({
 }) {
     return (
         <>
-            <div className="dx-filter-bar">
-                <div className="dx-tabs" role="group" aria-label="Lĩnh vực CLB">
+            <div className="v2-filter-bar">
+                <div className="v2-tabs" role="group" aria-label="Lĩnh vực CLB">
                     <button
                         type="button"
                         className={category === 'ALL' ? 'active' : ''}
@@ -40,13 +41,13 @@ export default function DirectoryFilters({
                 </div>
                 <SearchField value={query} onChange={onQueryChange} placeholder="Tìm câu lạc bộ..." />
             </div>
-            <div className="dx-directory-label">
+            <div className="v2-directory-label">
                 <span>
                     {resultCount} {resultLabel}
                 </span>
                 {showRecruiting && (
                     <label
-                        className={`dx-checkbox ${!recruitmentAvailable ? 'is-disabled' : ''}`}
+                        className={`v2-checkbox ${!recruitmentAvailable ? 'is-disabled' : ''}`}
                         title={!recruitmentAvailable ? 'Dữ liệu tuyển thành viên đang được cập nhật' : ''}
                     >
                         <input

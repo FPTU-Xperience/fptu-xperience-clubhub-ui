@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, CalendarCheck, Check, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import {
-    INTERESTS,
-    MAJORS,
-    MIN_INTERESTS,
-    saveOnboarding,
-} from '../../pages/v2/onboarding';
+import { INTERESTS, MAJORS, MIN_INTERESTS, saveOnboarding } from '../../../pages/v2/onboarding';
 
 export default function StudentOnboarding({ user, onComplete }) {
     const navigate = useNavigate();

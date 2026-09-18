@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, LogIn, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import StudentOnboarding from '../../components/v2/StudentOnboarding';
+import StudentOnboarding from '../../components/v2/student-onboarding/StudentOnboarding';
 import { useAuth } from '../../context/AuthContext';
 import { readOnboarding } from './onboarding';
 
@@ -28,18 +28,21 @@ function V2Login() {
     const [googleReady, setGoogleReady] = useState(false);
     const googleButtonRef = useRef(null);
 
-    const finishLogin = useCallback(async (action) => {
-        setError('');
-        setBusy(true);
-        try {
-            await action();
-            navigate('/v2', { replace: true });
-        } catch (loginError) {
-            setError(loginError.message || 'Không thể đăng nhập. Vui lòng thử lại.');
-        } finally {
-            setBusy(false);
-        }
-    }, [navigate]);
+    const finishLogin = useCallback(
+        async (action) => {
+            setError('');
+            setBusy(true);
+            try {
+                await action();
+                navigate('/v2', { replace: true });
+            } catch (loginError) {
+                setError(loginError.message || 'Không thể đăng nhập. Vui lòng thử lại.');
+            } finally {
+                setBusy(false);
+            }
+        },
+        [navigate],
+    );
 
     const handleGoogleCredential = useCallback(
         (response) => {
@@ -72,7 +75,10 @@ function V2Login() {
             setGoogleReady(true);
         };
         if (window.google?.accounts?.id) initialise();
-        else document.querySelector('script[src="https://accounts.google.com/gsi/client"]')?.addEventListener('load', initialise);
+        else
+            document
+                .querySelector('script[src="https://accounts.google.com/gsi/client"]')
+                ?.addEventListener('load', initialise);
         return () => {
             disposed = true;
             document
@@ -105,7 +111,8 @@ function V2Login() {
                     <div>
                         <span className="dx-eyebrow">FPTU XPERIENCE · STUDENT COMMUNITY</span>
                         <h1>
-                            Tìm nơi bạn thuộc về.<br />
+                            Tìm nơi bạn thuộc về.
+                            <br />
                             <em>Bắt đầu từ đây.</em>
                         </h1>
                         <p>Khám phá câu lạc bộ, hoạt động và những người bạn cùng sở thích trong campus.</p>
@@ -133,10 +140,14 @@ function V2Login() {
                                     aria-label="Đăng nhập bằng Google"
                                 />
                                 {!googleReady && <small>Đang tải đăng nhập Google...</small>}
-                                <div className="dx-login-divider"><span>hoặc dùng email</span></div>
+                                <div className="dx-login-divider">
+                                    <span>hoặc dùng email</span>
+                                </div>
                             </>
                         ) : (
-                            <div className="dx-login-divider"><span>Đăng nhập bằng email</span></div>
+                            <div className="dx-login-divider">
+                                <span>Đăng nhập bằng email</span>
+                            </div>
                         )}
                         <form onSubmit={submitEmail} noValidate>
                             <label className="dx-field">
@@ -154,7 +165,11 @@ function V2Login() {
                                     aria-describedby={error ? 'v2-login-error' : undefined}
                                 />
                             </label>
-                            {error && <p className="dx-form-error" id="v2-login-error" role="alert">{error}</p>}
+                            {error && (
+                                <p className="dx-form-error" id="v2-login-error" role="alert">
+                                    {error}
+                                </p>
+                            )}
                             <button className="dx-button primary full" type="submit" disabled={busy}>
                                 {busy ? 'Đang xác thực...' : 'Tiếp tục'} <ArrowRight size={17} />
                             </button>

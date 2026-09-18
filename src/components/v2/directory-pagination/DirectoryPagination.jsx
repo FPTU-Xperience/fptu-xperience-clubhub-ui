@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import './DirectoryPagination.scss';
 
 export default function DirectoryPagination({ currentPage, totalPages, onPageChange }) {
     if (totalPages <= 1) return null;

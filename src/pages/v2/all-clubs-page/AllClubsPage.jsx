@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import ClubCard from '../../components/v2/ClubCard';
-import DirectoryFilters from '../../components/v2/DirectoryFilters';
-import DirectoryPagination from '../../components/v2/DirectoryPagination';
-import { EmptyState, SectionHeading } from '../../components/v2/DiscoveryLayout';
-import PageState from '../../components/v2/PageState';
-import { filterClubDirectory, paginateClubDirectory, useClubDirectory } from './discover-data';
+import ClubCard from '../../../components/v2/club-card/ClubCard';
+import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryFilters';
+import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
+import { EmptyState, SectionHeading } from '../../../components/v2/DiscoveryLayout';
+import PageState from '../../../components/v2/PageState';
+import { filterClubDirectory, paginateClubDirectory, useClubDirectory } from '../discover-data';
+import './AllClubsPage.scss';
 
 const PAGE_SIZE = 12;
 
@@ -44,11 +45,11 @@ export default function AllClubsPage({ api, sessionKey }) {
     };
 
     return (
-        <div className="dx-public-content">
+        <div className="v2-public-content">
             <section id="all-clubs-directory">
-                <div className="dx-page-heading">
+                <div className="v2-page-heading">
                     <div>
-                        <div className="dx-eyebrow">DANH MỤC CỘNG ĐỒNG</div>
+                        <div className="v2-eyebrow">DANH MỤC CỘNG ĐỒNG</div>
                         <h1>Tất cả câu lạc bộ</h1>
                         <p>Tìm một cộng đồng phù hợp với sở thích và nhịp sống của bạn.</p>
                     </div>
@@ -57,7 +58,7 @@ export default function AllClubsPage({ api, sessionKey }) {
                     title="Bạn muốn thử điều gì?"
                     description="Tìm theo lĩnh vực, tên câu lạc bộ hoặc trạng thái tuyển thành viên."
                 >
-                    <span className="dx-muted">{entries.length} CLB trong ClubHub</span>
+                    <span className="v2-muted">{entries.length} CLB trong ClubHub</span>
                 </SectionHeading>
                 <PageState status={result.status} onRetry={result.retry}>
                     <DirectoryFilters
@@ -74,7 +75,7 @@ export default function AllClubsPage({ api, sessionKey }) {
                     />
                     {clubs.length ? (
                         <>
-                            <div className="dx-club-grid" data-directory-mode="all">
+                            <div className="v2-club-grid" data-directory-mode="all">
                                 {pagination.items.map((club) => (
                                     <ClubCard key={club.id} club={club} />
                                 ))}

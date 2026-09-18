@@ -21,9 +21,9 @@ import {
     Sparkles,
     LockKeyhole,
 } from 'lucide-react';
-import { useDemo } from './DemoContext';
-import { CLUBS, CURRENT_TERM, clubById, displayPerson, membership, ownPoints } from './model';
-import { Avatar, ClubMark, Empty, EventCard, PageHeading, Pill, SectionHeading, Stat } from './ui';
+import { useDemo } from '../DemoContext';
+import { CURRENT_TERM, clubById, displayPerson, membership, ownPoints } from '../model';
+import { ClubMark, Empty, EventCard, PageHeading, Pill, SectionHeading, Stat } from '../ui';
 
 const WorkspaceContext = createContext(null);
 export const useWorkspace = () => useContext(WorkspaceContext);

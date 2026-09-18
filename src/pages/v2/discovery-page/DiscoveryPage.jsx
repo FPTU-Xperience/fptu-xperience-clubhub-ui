@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import ClubCard from '../../components/v2/ClubCard';
-import DirectoryFilters from '../../components/v2/DirectoryFilters';
-import DirectoryPagination from '../../components/v2/DirectoryPagination';
-import { BottomCallout, DiscoverHero, EmptyState, SectionHeading } from '../../components/v2/DiscoveryLayout';
-import PageState from '../../components/v2/PageState';
-import { createCuratedClubSet, filterClubDirectory, paginateClubDirectory, useClubDirectory } from './discover-data';
+import ClubCard from '../../../components/v2/club-card/ClubCard';
+import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryFilters';
+import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
+import { BottomCallout, DiscoverHero, EmptyState, SectionHeading } from '../../../components/v2/DiscoveryLayout';
+import PageState from '../../../components/v2/PageState';
+import { createCuratedClubSet, filterClubDirectory, paginateClubDirectory, useClubDirectory } from '../discover-data';
+import './DiscoveryPage.scss';
 
 const PAGE_SIZE = 6;
 const MAX_PAGES = 4;
@@ -43,14 +44,14 @@ export default function DiscoverPage({ api, sessionKey }) {
     };
 
     return (
-        <div className="dx-public-content">
+        <div className="v2-public-content">
             <DiscoverHero />
             <section id="club-directory">
                 <SectionHeading
                     title="Câu lạc bộ dành cho bạn"
                     description="Khám phá những cộng đồng được tuyển chọn phù hợp để bắt đầu hành trình."
                 >
-                    <span className="dx-muted">{suggestedEntries.length} CLB dành cho bạn</span>
+                    <span className="v2-muted">{suggestedEntries.length} CLB dành cho bạn</span>
                 </SectionHeading>
                 <PageState status={result.status} onRetry={result.retry}>
                     <DirectoryFilters
@@ -65,7 +66,7 @@ export default function DiscoverPage({ api, sessionKey }) {
                     />
                     {clubs.length ? (
                         <>
-                            <div className="dx-club-grid" data-directory-mode="suggested">
+                            <div className="v2-club-grid" data-directory-mode="suggested">
                                 {pagination.items.map((club) => (
                                     <ClubCard key={club.id} club={club} />
                                 ))}
