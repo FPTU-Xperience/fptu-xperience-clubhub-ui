@@ -232,6 +232,18 @@ class ApiService {
         return this.request('/api/clubs/me/memberships');
     }
 
+    async getMyClubSelection() {
+        return this.request('/api/clubs/me/selection');
+    }
+
+    async getMyMembershipApplications() {
+        return this.request('/api/clubs/me/membership-applications');
+    }
+
+    async withdrawMyMembershipApplication(applicationId) {
+        return this.request(`/api/clubs/me/membership-applications/${applicationId}/withdraw`, { method: 'POST' });
+    }
+
     async getMyClubAccess() {
         return this.request('/api/clubs/me/access');
     }
