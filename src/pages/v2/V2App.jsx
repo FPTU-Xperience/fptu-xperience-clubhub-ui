@@ -7,6 +7,8 @@ import AllClubsPage from './all-clubs-page/AllClubsPage';
 import ClubDetailPage from './club-detail-page/ClubDetailPage';
 import DemoApp from './DemoApp';
 import DiscoverPage from './discovery-page/DiscoveryPage';
+import ActivitiesPage from './activities-page/ActivitiesPage';
+import ActivityDetailPage from './activities-page/ActivityDetailPage';
 import V2Access from './V2Access';
 import './V2App.scss';
 // The legacy demo and access styles remain available while their rules are
@@ -36,6 +38,8 @@ function AuthenticatedV2App() {
                 <Routes>
                     <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
                     <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
+                    <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
+                    <Route path="activities/:activityId" element={<ActivityDetailPage api={api} sessionKey={sessionKey} />} />
                     <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
                     <Route
                         path="clubs/:clubId"

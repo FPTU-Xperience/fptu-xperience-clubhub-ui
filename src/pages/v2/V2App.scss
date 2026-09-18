@@ -28,3 +28,44 @@
     flex: 1;
     min-width: 0;
 }
+
+.v2-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 10px 17px;
+    border: 1px solid var(--v2-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--v2-ink);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 550;
+    line-height: 1.6;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+
+    &:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+
+    &:focus-visible {
+        outline: 3px solid #fed7aa;
+        outline-offset: 2px;
+    }
+
+    &.primary,
+    &.v2-button--primary {
+        border-color: var(--v2-orange);
+        background: var(--v2-orange);
+        color: #fff;
+
+        &:hover {
+            border-color: #ea580c;
+            background: #ea580c;
+        }
+    }
+}

@@ -1,0 +1,37 @@
+.v2-activities-page h1 {
+  margin: 4px 0
+}
+
+.v2-activity-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 18px
+}
+
+.v2-activity-filters button {
+  padding: 8px 11px;
+  border: 1px solid var(--v2-line);
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer
+}
+
+.v2-activity-filters button.active {
+  border-color: var(--v2-orange);
+  background: #fff7ed;
+  color: var(--v2-orange)
+}
+
+.v2-activity-filters input {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px;
+  border: 1px solid var(--v2-line);
+  border-radius: 8px
+}
+
+.v2-activity-list {
+  display: grid;
+  gap: 10px
+}
