@@ -120,7 +120,7 @@ export default function ProductionHeader({ user, onLogout, api }) {
                     Câu lạc bộ
                 </NavLink>
                 <NavLink to="/v2/activities" ref={(link) => (primaryNavLinkRefs.current[2] = link)}>
-                    Hoạt động mở
+                    Hoạt động
                 </NavLink>
                 <NavLink to="/v2/my-clubs" ref={(link) => (primaryNavLinkRefs.current[3] = link)}>
                     CLB của tôi

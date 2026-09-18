@@ -168,9 +168,9 @@ export function BottomCallout() {
     return (
         <section className="dx-bottom-callout">
             <div>
-                <span className="dx-eyebrow">KHÔNG CẦN GIỎI SẴN. CHỈ CẦN SẴN SÀNG.</span>
-                <h2>Bắt đầu từ một lời chào.</h2>
-                <p>Một sở thích nhỏ hôm nay có thể trở thành câu chuyện lớn ngày mai.</p>
+                <span className="dx-eyebrow">KHÁM PHÁ THÊM CỘNG ĐỒNG</span>
+                <h2>Nếu vẫn chưa thấy CLB phù hợp, xem nhiều hơn tại đây.</h2>
+                <p>Khám phá toàn bộ câu lạc bộ để tìm cộng đồng phù hợp với sở thích của bạn.</p>
             </div>
             <Link className="dx-button" to="/v2/clubs">
                 Xem tất cả câu lạc bộ <ArrowUpRight size={18} />
