@@ -1,0 +1,116 @@
+.v2-app {
+    --v2-orange: #f97316;
+    --v2-ink: #111827;
+    --v2-muted: #64748b;
+    --v2-line: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    min-width: 1060px;
+    min-height: 100vh;
+}
+
+.v2-skip-link {
+    position: fixed;
+    top: -80px;
+    left: 20px;
+    z-index: 100;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #111827;
+    color: #fff;
+
+    &:focus {
+        top: 12px;
+    }
+}
+
+.v2-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.dx-checkbox.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.v2-directory-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 28px;
+
+    button {
+        display: inline-flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--v2-line);
+        border-radius: 7px;
+        background: #fff;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 650;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            border-color: #fdba74;
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        &.active {
+            border-color: var(--v2-orange);
+            background: var(--v2-orange);
+            color: #fff;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+    }
+}
+
+.v2-page-state {
+    display: grid;
+    min-height: 260px;
+    place-items: center;
+    align-content: center;
+    padding: 38px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 18px;
+    background: #f8fafc;
+    text-align: center;
+
+    > svg {
+        width: 34px;
+        height: 34px;
+        color: var(--v2-orange);
+    }
+
+    h2 {
+        margin: 14px 0 5px;
+    }
+
+    p {
+        margin: 0 0 16px;
+        color: var(--v2-muted);
+    }
+
+    .dx-button {
+        margin-top: 2px;
+    }
+}
+
+.is-spinning {
+    animation: v2-spin 1s linear infinite;
+}
+
+@keyframes v2-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

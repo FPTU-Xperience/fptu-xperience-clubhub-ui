@@ -15,9 +15,9 @@ import {
     LockKeyhole,
     ArrowRight,
 } from 'lucide-react';
-import { useDemo } from './DemoContext';
-import { CLUBS, CURRENT_TERM, clubById, displayPerson, ownPoints } from './model';
-import { Avatar, ClubMark, Empty, FormField, Modal, Pill, SectionHeading, Stat } from './ui';
+import { useDemo } from '../DemoContext';
+import { CLUBS, CURRENT_TERM, clubById, displayPerson, ownPoints } from '../model';
+import { Avatar, ClubMark, Empty, FormField, Modal, Pill, SectionHeading, Stat } from '../ui';
 
 function Radar({ hasData }) {
     const labels = ['Học tập', 'Nghiên cứu', 'Quốc tế', 'Thể thao & văn hóa', 'Cộng đồng', 'Khởi nghiệp'];
@@ -205,7 +205,7 @@ export default function Profile() {
                                 <div className="dx-person" key={m.clubId}>
                                     <ClubMark club={clubById(m.clubId)} />
                                     <div>
-                                        <Link className="dx-text-link" to={`/v2/clubs/${m.clubId}`}>
+                                        <Link className="dx-text-link" to={`/v2/demo/clubs/${m.clubId}`}>
                                             {clubById(m.clubId).name}
                                         </Link>
                                         <small>{m.role === 'manager' ? 'Chủ nhiệm' : 'Thành viên'}</small>
@@ -319,7 +319,7 @@ export default function Profile() {
                                         title="Thêm một cộng đồng vào hành trình"
                                         text="Tìm một CLB để bắt đầu câu chuyện của bạn."
                                     >
-                                        <Link className="dx-button" to="/v2">
+                                        <Link className="dx-button" to="/v2/demo">
                                             Khám phá CLB <ArrowRight size={16} />
                                         </Link>
                                     </Empty>

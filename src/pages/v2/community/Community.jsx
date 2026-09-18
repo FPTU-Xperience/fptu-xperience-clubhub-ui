@@ -1,20 +1,9 @@
 import { useState } from 'react';
-import {
-    Plus,
-    ArrowRight,
-    Check,
-    Award,
-    Gift,
-    FileText,
-    ShieldCheck,
-    Sparkles,
-    Users,
-    ExternalLink,
-} from 'lucide-react';
-import { useDemo } from './DemoContext';
-import { useWorkspace } from './Workspace';
-import { displayPerson, ownPoints, wallet } from './model';
-import { Avatar, Empty, FormField, Modal, PageHeading, Pill, SearchField, SectionHeading, Stat, fmt } from './ui';
+import { Plus, ArrowRight, Check, Award, Gift, FileText, ShieldCheck, Sparkles } from 'lucide-react';
+import { useDemo } from '../DemoContext';
+import { useWorkspace } from '../club-workspace/Workspace';
+import { displayPerson, ownPoints, wallet } from '../model';
+import { Avatar, Empty, FormField, Modal, PageHeading, Pill, SearchField, SectionHeading, Stat, fmt } from '../ui';
 
 export function Members() {
     const { state, actorId, act } = useDemo();

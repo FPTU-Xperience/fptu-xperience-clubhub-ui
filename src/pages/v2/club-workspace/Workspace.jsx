@@ -21,9 +21,9 @@ import {
     Sparkles,
     LockKeyhole,
 } from 'lucide-react';
-import { useDemo } from './DemoContext';
-import { CLUBS, CURRENT_TERM, clubById, displayPerson, membership, ownPoints } from './model';
-import { Avatar, ClubMark, Empty, EventCard, PageHeading, Pill, SectionHeading, Stat } from './ui';
+import { useDemo } from '../DemoContext';
+import { CURRENT_TERM, clubById, displayPerson, membership, ownPoints } from '../model';
+import { ClubMark, Empty, EventCard, PageHeading, Pill, SectionHeading, Stat } from '../ui';
 
 const WorkspaceContext = createContext(null);
 export const useWorkspace = () => useContext(WorkspaceContext);
@@ -60,17 +60,17 @@ export function Workspace() {
                     title={club ? 'Không gian dành cho thành viên CLB' : 'Không tìm thấy CLB'}
                     text="Bạn cần được duyệt tham gia hoặc có phân công quản lý tại CLB này."
                 >
-                    <Link className="dx-button primary" to={club ? `/v2/clubs/${clubId}` : '/v2'}>
+                    <Link className="dx-button primary" to={club ? `/v2/demo/clubs/${clubId}` : '/v2/demo'}>
                         Tìm hiểu CLB <ArrowRight size={16} />
                     </Link>
-                    <Link className="dx-text-link" to="/v2/my-clubs">
+                    <Link className="dx-text-link" to="/v2/demo/my-clubs">
                         Về CLB của tôi
                     </Link>
                 </Empty>
             </div>
         );
     const manager = access.role === 'manager';
-    const base = `/v2/my-clubs/${clubId}`;
+    const base = `/v2/demo/my-clubs/${clubId}`;
     const page = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
     const nav = items.filter((i) => i[3] === 'both' || (manager && (i[3] !== 'finance' || club.finance)));
     const allowed = nav.some((i) => i[0] === page);
@@ -79,7 +79,7 @@ export function Workspace() {
         <WorkspaceContext.Provider value={context}>
             <div className={`dx-workspace ${compact ? 'compact' : ''}`}>
                 <aside className="dx-sidebar">
-                    <Link className="dx-back" to="/v2/my-clubs">
+                    <Link className="dx-back" to="/v2/demo/my-clubs">
                         <ArrowLeft size={15} />
                         CLB của tôi
                     </Link>
@@ -95,7 +95,7 @@ export function Workspace() {
                         <select
                             aria-label="Chuyển câu lạc bộ"
                             value={clubId}
-                            onChange={(e) => navigate(`/v2/my-clubs/${e.target.value}`)}
+                            onChange={(e) => navigate(`/v2/demo/my-clubs/${e.target.value}`)}
                         >
                             {state.memberships
                                 .filter((m) => m.userId === actorId && m.status === 'approved')
@@ -140,7 +140,7 @@ export function Workspace() {
                             <LockKeyhole size={15} />
                             Chỉ dữ liệu của {club.name}
                         </span>
-                        <Link to={`/v2/clubs/${clubId}`}>
+                        <Link to={`/v2/demo/clubs/${clubId}`}>
                             Xem trang giới thiệu <ArrowUpRight size={15} />
                         </Link>
                         <button onClick={() => setCompact(!compact)}>

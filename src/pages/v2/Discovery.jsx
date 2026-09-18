@@ -171,7 +171,7 @@ export function Discover() {
                     <h2>Bắt đầu từ một lời chào.</h2>
                     <p>Một sở thích nhỏ hôm nay có thể trở thành câu chuyện lớn ngày mai.</p>
                 </div>
-                <Link className="dx-button" to="/v2/my-clubs">
+                <Link className="dx-button" to="/v2/demo/my-clubs">
                     Đến CLB của tôi <ArrowUpRight size={18} />
                 </Link>
             </section>
@@ -188,7 +188,7 @@ export function ClubDetail() {
     if (!club)
         return (
             <Empty title="Không tìm thấy CLB" text="CLB này không có trong bản mock.">
-                <Link to="/v2" className="dx-button">
+                <Link to="/v2/demo" className="dx-button">
                     Về khám phá
                 </Link>
             </Empty>
@@ -202,7 +202,7 @@ export function ClubDetail() {
     const events = state.activities.filter((a) => a.clubId === clubId && a.public && a.term === CURRENT_TERM);
     return (
         <div className="dx-public-content">
-            <BackLink to="/v2">Tất cả câu lạc bộ</BackLink>
+            <BackLink to="/v2/demo">Tất cả câu lạc bộ</BackLink>
             <div className="dx-detail-cover">
                 <ClubArt club={club} hero />
             </div>
@@ -218,7 +218,7 @@ export function ClubDetail() {
                 </div>
                 <div className="dx-identity-action">
                     {access ? (
-                        <Link to={`/v2/my-clubs/${clubId}`} className="dx-button primary">
+                        <Link to={`/v2/demo/my-clubs/${clubId}`} className="dx-button primary">
                             Vào CLB của tôi <ArrowRight size={17} />
                         </Link>
                     ) : pending ? (
@@ -257,7 +257,7 @@ export function ClubDetail() {
                                 key={e.id}
                                 event={e}
                                 club={club}
-                                base={access ? `/v2/my-clubs/${clubId}/activities` : '/v2/events'}
+                                base={access ? `/v2/demo/my-clubs/${clubId}/activities` : '/v2/demo/events'}
                             />
                         ))
                     ) : (
@@ -393,7 +393,7 @@ export function MyClubs() {
                 title="Câu lạc bộ của tôi"
                 description="Mỗi cộng đồng, một phần trong hành trình của bạn."
                 actions={
-                    <Link className="dx-button" to="/v2">
+                    <Link className="dx-button" to="/v2/demo">
                         Khám phá thêm <ArrowUpRight size={16} />
                     </Link>
                 }
@@ -436,7 +436,7 @@ export function MyClubs() {
                                             )}
                                         </div>
                                     </div>
-                                    <Link to={`/v2/my-clubs/${c.id}`} className="dx-button primary">
+                                    <Link to={`/v2/demo/my-clubs/${c.id}`} className="dx-button primary">
                                         Vào không gian CLB <ArrowRight size={17} />
                                     </Link>
                                 </div>
@@ -449,7 +449,7 @@ export function MyClubs() {
                     title="Cộng đồng đầu tiên đang chờ bạn"
                     text="Khám phá một CLB phù hợp, gửi lời giới thiệu và bắt đầu hành trình mới."
                 >
-                    <Link className="dx-button primary" to="/v2">
+                    <Link className="dx-button primary" to="/v2/demo">
                         Tìm CLB của bạn <ArrowRight size={17} />
                     </Link>
                 </Empty>
@@ -518,8 +518,8 @@ export function PublicEvents() {
                             club={clubById(e.clubId)}
                             base={
                                 membership(state, actorId, e.clubId)
-                                    ? `/v2/my-clubs/${e.clubId}/activities`
-                                    : `/v2/clubs/${e.clubId}`
+                                    ? `/v2/demo/my-clubs/${e.clubId}/activities`
+                                    : `/v2/demo/clubs/${e.clubId}`
                             }
                         />
                         <p>{e.description}</p>
@@ -527,8 +527,8 @@ export function PublicEvents() {
                             className="dx-text-link"
                             to={
                                 membership(state, actorId, e.clubId)
-                                    ? `/v2/my-clubs/${e.clubId}/activities`
-                                    : `/v2/clubs/${e.clubId}`
+                                    ? `/v2/demo/my-clubs/${e.clubId}/activities`
+                                    : `/v2/demo/clubs/${e.clubId}`
                             }
                         >
                             {membership(state, actorId, e.clubId)

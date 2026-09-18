@@ -157,7 +157,11 @@
     border-radius: 50%;
     animation: dx-spin 0.8s linear infinite;
 }
-@keyframes dx-spin { to { transform: rotate(360deg); } }
+@keyframes dx-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 .dx-login-layout {
     min-height: 100vh;
     display: grid;
@@ -185,23 +189,39 @@
         font-weight: 700;
         transform: rotate(-10deg);
     }
-    > div, > a { position: relative; z-index: 1; }
+    > div,
+    > a {
+        position: relative;
+        z-index: 1;
+    }
     h1 {
         margin: 22px 0;
         font-size: clamp(46px, 5vw, 72px);
         line-height: 1.08;
         letter-spacing: -0.055em;
-        em { color: #ea580c; font-style: normal; }
+        em {
+            color: #ea580c;
+            font-style: normal;
+        }
     }
-    > div > p { max-width: 510px; font-size: 15px; line-height: 1.8; }
+    > div > p {
+        max-width: 510px;
+        font-size: 15px;
+        line-height: 1.8;
+    }
 }
-.dx-login-proof, .dx-onboarding-benefit {
+.dx-login-proof,
+.dx-onboarding-benefit {
     display: flex;
     align-items: center;
     gap: 13px;
     color: #c2410c;
-    span { display: block; }
-    small { margin-top: 2px; }
+    span {
+        display: block;
+    }
+    small {
+        margin-top: 2px;
+    }
 }
 .dx-login-panel {
     display: grid;
@@ -211,9 +231,16 @@
 }
 .dx-login-card {
     width: min(100%, 410px);
-    h2 { font-size: 30px; margin: 18px 0 8px; }
-    > p { margin-bottom: 28px; }
-    .dx-field { margin: 0 0 13px; }
+    h2 {
+        font-size: 30px;
+        margin: 18px 0 8px;
+    }
+    > p {
+        margin-bottom: 28px;
+    }
+    .dx-field {
+        margin: 0 0 13px;
+    }
 }
 .dx-login-icon {
     width: 48px;
@@ -229,7 +256,10 @@
     min-height: 42px;
     display: flex;
     justify-content: center;
-    &.disabled { pointer-events: none; opacity: 0.55; }
+    &.disabled {
+        pointer-events: none;
+        opacity: 0.55;
+    }
 }
 .dx-login-divider {
     display: flex;
@@ -240,9 +270,19 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    &::before, &::after { content: ''; height: 1px; background: #e2e8f0; flex: 1; }
+    &::before,
+    &::after {
+        content: '';
+        height: 1px;
+        background: #e2e8f0;
+        flex: 1;
+    }
 }
-.dx-login-note { margin-top: 22px; line-height: 1.7; text-align: center; }
+.dx-login-note {
+    margin-top: 22px;
+    line-height: 1.7;
+    text-align: center;
+}
 .dx-onboarding-header {
     height: 82px;
     padding: 0 54px;
@@ -251,7 +291,12 @@
     align-items: center;
     background: white;
     border-bottom: 1px solid #fed7aa;
-    > span { color: #9a3412; font-size: 10px; font-weight: 650; letter-spacing: 0.13em; }
+    > span {
+        color: #9a3412;
+        font-size: 10px;
+        font-weight: 650;
+        letter-spacing: 0.13em;
+    }
 }
 .dx-onboarding-shell {
     min-height: calc(100vh - 82px);
@@ -264,10 +309,25 @@
     padding: 82px 5vw 60px;
     background: linear-gradient(145deg, #fff7ed, #ffedd5);
     border-right: 1px solid #fed7aa;
-    h1 { font-size: 45px; line-height: 1.13; margin: 20px 0; }
-    h1 em { color: #ea580c; font-style: normal; }
-    > p { max-width: 420px; font-size: 14px; line-height: 1.8; }
-    .dx-onboarding-benefit { position: absolute; left: 5vw; bottom: 58px; }
+    h1 {
+        font-size: 45px;
+        line-height: 1.13;
+        margin: 20px 0;
+    }
+    h1 em {
+        color: #ea580c;
+        font-style: normal;
+    }
+    > p {
+        max-width: 420px;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+    .dx-onboarding-benefit {
+        position: absolute;
+        left: 5vw;
+        bottom: 58px;
+    }
 }
 .dx-onboarding-number {
     position: absolute;
@@ -281,11 +341,27 @@
 .dx-onboarding-form {
     padding: 55px 6vw 44px;
     background: white;
-    fieldset { border: 0; padding: 0; margin: 30px 0 25px; }
-    legend, > .dx-field > span { color: #111827; font-size: 14px; font-weight: 650; }
-    fieldset > p { font-size: 11px; margin: 4px 0 15px; }
-    > .dx-field { margin-top: 0; }
-    select { margin-top: 5px; }
+    fieldset {
+        border: 0;
+        padding: 0;
+        margin: 30px 0 25px;
+    }
+    legend,
+    > .dx-field > span {
+        color: #111827;
+        font-size: 14px;
+        font-weight: 650;
+    }
+    fieldset > p {
+        font-size: 11px;
+        margin: 4px 0 15px;
+    }
+    > .dx-field {
+        margin-top: 0;
+    }
+    select {
+        margin-top: 5px;
+    }
 }
 .dx-interest-grid {
     display: grid;
@@ -299,10 +375,25 @@
         border-radius: 9px;
         background: white;
         transition: 0.15s ease;
-        > span { display: flex; align-items: center; gap: 7px; font-weight: 600; }
-        small { margin-top: 4px; }
-        &:hover { border-color: #fdba74; background: #fffaf5; }
-        &.selected { border-color: #f97316; background: #fff7ed; color: #c2410c; box-shadow: 0 0 0 1px #f97316; }
+        > span {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+        }
+        small {
+            margin-top: 4px;
+        }
+        &:hover {
+            border-color: #fdba74;
+            background: #fffaf5;
+        }
+        &.selected {
+            border-color: #f97316;
+            background: #fff7ed;
+            color: #c2410c;
+            box-shadow: 0 0 0 1px #f97316;
+        }
     }
 }
 .dx-sync-option {
@@ -313,10 +404,22 @@
     border: 1px solid #e2e8f0;
     border-radius: 9px;
     cursor: pointer;
-    input { min-height: auto; width: 16px; height: 16px; accent-color: #f97316; padding: 0; }
-    svg { color: #ea580c; }
-    span { flex: 1; }
-    small { margin-top: 2px; }
+    input {
+        min-height: auto;
+        width: 16px;
+        height: 16px;
+        accent-color: #f97316;
+        padding: 0;
+    }
+    svg {
+        color: #ea580c;
+    }
+    span {
+        flex: 1;
+    }
+    small {
+        margin-top: 2px;
+    }
 }
 .dx-onboarding-actions {
     display: flex;
@@ -326,7 +429,10 @@
     padding-top: 24px;
     margin-top: 25px;
     border-top: 1px solid #e2e8f0;
-    > span { color: #64748b; font-size: 11px; }
+    > span {
+        color: #64748b;
+        font-size: 11px;
+    }
 }
 .dx-skip {
     position: absolute;
@@ -848,6 +954,9 @@
     gap: 23px;
 }
 .dx-club-card {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
     background: white;
     border: 1px solid var(--dx-line);
     border-radius: 12px;
@@ -862,6 +971,23 @@
 }
 .dx-art-link {
     display: block;
+    flex: 0 0 auto;
+}
+.dx-club-logo {
+    display: grid;
+    place-items: center;
+    background: #f8fafc;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &.hero img {
+        width: 100%;
+        max-width: none;
+    }
 }
 .dx-art {
     height: 174px;
@@ -1001,6 +1127,9 @@
     opacity: 0.5;
 }
 .dx-club-card-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
     padding: 20px 21px 0;
     h3 {
         font-size: 21px;
@@ -1062,7 +1191,7 @@
     gap: 10px;
     border-top: 1px solid #f1f5f9;
     padding: 14px 0;
-    margin-top: 13px;
+    margin-top: auto;
     font-size: 9px;
     color: #64748b;
 }
@@ -2165,7 +2294,6 @@
     position: absolute;
     z-index: 50;
     right: 45px;
-    top: 117px;
     width: 350px;
     padding: 23px;
     background: #fff;
@@ -2648,43 +2776,130 @@
 .dx-app {
     .dx-demo-bar {
         border-bottom: 1px solid #fed7aa;
-        strong, button, a { color: #9a3412; }
-        select { background: #fff; color: #475569; border-color: #fed7aa; }
+        strong,
+        button,
+        a {
+            color: #9a3412;
+        }
+        select {
+            background: #fff;
+            color: #475569;
+            border-color: #fed7aa;
+        }
     }
     .dx-header {
         border-bottom-color: #fed7aa;
-        > nav a { color: #475569; }
-        > nav a.active { color: #9a3412; }
-        > nav a.active::after { background: #ea580c; }
-        .dx-campus, .dx-account small, .dx-brand small { color: #475569; }
-        .dx-campus { border-right-color: #ffffff80; }
-        .dx-icon-button:hover { background: #ffffff50; color: #111827; }
+        > nav a {
+            color: #475569;
+        }
+        > nav a.active {
+            color: #9a3412;
+        }
+        > nav a.active::after {
+            background: #ea580c;
+        }
+        .dx-campus,
+        .dx-account small,
+        .dx-brand small {
+            color: #475569;
+        }
+        .dx-campus {
+            border-right-color: #ffffff80;
+        }
+        .dx-icon-button:hover {
+            background: #ffffff50;
+            color: #111827;
+        }
     }
-    .dx-avatar, .dx-profile-identity .dx-avatar.large {
+    .dx-avatar,
+    .dx-profile-identity .dx-avatar.large {
         background: linear-gradient(145deg, #fe8c03, #ffc94c 48%, #f97316);
         color: #0f172a;
     }
-    .dx-avatar-stack span { background: #ffedd5; color: #9a3412; border-color: #fff7ed; }
-    .dx-avatar-stack span:nth-child(2) { background: #fed7aa; color: #9a3412; }
-    .dx-avatar-stack span:nth-child(3) { background: #f1f5f9; color: #475569; }
-    .dx-collage-note { background: #ffedd5; color: #9a3412; }
-    .dx-circle-label { border-color: #ffffffaa; background: #fff7ed; color: #9a3412; }
-    .dx-collage-ticket { color: #111827; }
-    .dx-tabs button.active { color: #c2410c; background: #fff7ed; }
-    .dx-sidebar nav > a.active { background: #fff7ed; color: #ea580c; box-shadow: inset 0 0 0 1px #fed7aa; }
-    .dx-sidebar-club .dx-mark, .dx-club-identity .dx-mark { background: #fff7ed; }
-    .dx-stat > strong { color: #f97316; }
-    .dx-workspace .dx-stats > :nth-child(2) > strong { color: #8b5cf6; }
-    .dx-workspace .dx-stats > :nth-child(3) > strong { color: #16a34a; }
-    .dx-workspace .dx-stats > :nth-child(4) > strong { color: #ea580c; }
-    .dx-home-feature .dx-feature-symbol { color: #f97316; }
-    .dx-profile-cover > div:first-child > span, .dx-profile-cover > div:first-child > strong { color: #111827; }
-    .dx-profile-cover-art b { color: #9a3412; border-color: #fff7ed; background: #ffedd5; }
-    .dx-profile-tabs button.active { color: #ea580c; border-bottom-color: #f97316; }
-    .dx-radar svg { color: #64748b; }
-    .dx-real-experience strong, .dx-wallet strong { color: #c2410c; }
-    .dx-points-note, .dx-task-icon { color: #f97316; }
-    .dx-timeline-dot { background: #f97316; }
-    .dx-discover-hero .dx-eyebrow { color: #9a3412; }
-    .dx-discover-hero .dx-live-dot { background: #f97316; }
+    .dx-avatar-stack span {
+        background: #ffedd5;
+        color: #9a3412;
+        border-color: #fff7ed;
+    }
+    .dx-avatar-stack span:nth-child(2) {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+    .dx-avatar-stack span:nth-child(3) {
+        background: #f1f5f9;
+        color: #475569;
+    }
+    .dx-collage-note {
+        background: #ffedd5;
+        color: #9a3412;
+    }
+    .dx-circle-label {
+        border-color: #ffffffaa;
+        background: #fff7ed;
+        color: #9a3412;
+    }
+    .dx-collage-ticket {
+        color: #111827;
+    }
+    .dx-tabs button.active {
+        color: #c2410c;
+        background: #fff7ed;
+    }
+    .dx-sidebar nav > a.active {
+        background: #fff7ed;
+        color: #ea580c;
+        box-shadow: inset 0 0 0 1px #fed7aa;
+    }
+    .dx-sidebar-club .dx-mark,
+    .dx-club-identity .dx-mark {
+        background: #fff7ed;
+    }
+    .dx-stat > strong {
+        color: #f97316;
+    }
+    .dx-workspace .dx-stats > :nth-child(2) > strong {
+        color: #8b5cf6;
+    }
+    .dx-workspace .dx-stats > :nth-child(3) > strong {
+        color: #16a34a;
+    }
+    .dx-workspace .dx-stats > :nth-child(4) > strong {
+        color: #ea580c;
+    }
+    .dx-home-feature .dx-feature-symbol {
+        color: #f97316;
+    }
+    .dx-profile-cover > div:first-child > span,
+    .dx-profile-cover > div:first-child > strong {
+        color: #111827;
+    }
+    .dx-profile-cover-art b {
+        color: #9a3412;
+        border-color: #fff7ed;
+        background: #ffedd5;
+    }
+    .dx-profile-tabs button.active {
+        color: #ea580c;
+        border-bottom-color: #f97316;
+    }
+    .dx-radar svg {
+        color: #64748b;
+    }
+    .dx-real-experience strong,
+    .dx-wallet strong {
+        color: #c2410c;
+    }
+    .dx-points-note,
+    .dx-task-icon {
+        color: #f97316;
+    }
+    .dx-timeline-dot {
+        background: #f97316;
+    }
+    .dx-discover-hero .dx-eyebrow {
+        color: #9a3412;
+    }
+    .dx-discover-hero .dx-live-dot {
+        background: #f97316;
+    }
 }

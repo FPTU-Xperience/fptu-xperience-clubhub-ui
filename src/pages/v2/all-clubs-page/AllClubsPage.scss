@@ -1,0 +1,23 @@
+.v2-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 4px 0 29px;
+
+    .v2-page-heading-title {
+        margin: 10px 0 8px;
+        color: var(--v2-ink);
+        font-size: 30px;
+        font-weight: 650;
+        line-height: 1.35;
+        letter-spacing: -.035em;
+        text-transform: none;
+    }
+
+    p {
+        margin: 0;
+        color: var(--v2-muted);
+        font-size: 12px;
+    }
+}

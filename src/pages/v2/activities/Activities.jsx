@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { CalendarDays, Plus, Check, MapPin, Users, Clock, ArrowRight, ScanLine } from 'lucide-react';
-import { useDemo } from './DemoContext';
-import { useWorkspace } from './Workspace';
-import { displayPerson } from './model';
-import { Avatar, Empty, EventCard, FormField, Modal, PageHeading, Pill, SearchField, dateLabel } from './ui';
+import { CalendarDays, Plus, Check, MapPin, Users, ArrowRight, ScanLine } from 'lucide-react';
+import { useDemo } from '../DemoContext';
+import { useWorkspace } from '../club-workspace/Workspace';
+import { displayPerson } from '../model';
+import { Avatar, Empty, EventCard, FormField, Modal, PageHeading, Pill, SearchField, dateLabel } from '../ui';
 
 export function Activities() {
     const { state, actorId, act } = useDemo();

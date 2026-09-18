@@ -101,7 +101,7 @@ export function ClubCard({ club }) {
     const recruiting = state.settings[club.id]?.recruiting ?? club.recruiting;
     return (
         <article className="dx-club-card">
-            <Link to={`/v2/clubs/${club.id}`} className="dx-art-link" aria-label={`Khám phá ${club.name}`}>
+            <Link to={`/v2/demo/clubs/${club.id}`} className="dx-art-link" aria-label={`Khám phá ${club.name}`}>
                 <ClubArt club={club} />
             </Link>
             <div className="dx-club-card-body">
@@ -112,7 +112,7 @@ export function ClubCard({ club }) {
                     </Pill>
                 </div>
                 <h3>
-                    <Link to={`/v2/clubs/${club.id}`}>{club.name}</Link>
+                    <Link to={`/v2/demo/clubs/${club.id}`}>{club.name}</Link>
                 </h3>
                 <p>{state.settings[club.id]?.description || club.description}</p>
                 <div className="dx-meta">
@@ -121,7 +121,7 @@ export function ClubCard({ club }) {
                 </div>
                 <div className="dx-card-footer">
                     <span>{club.tags.slice(0, 2).join(' · ')}</span>
-                    <Link to={`/v2/clubs/${club.id}`} className="dx-text-link">
+                    <Link to={`/v2/demo/clubs/${club.id}`} className="dx-text-link">
                         Khám phá <ArrowUpRight size={16} />
                     </Link>
                 </div>
