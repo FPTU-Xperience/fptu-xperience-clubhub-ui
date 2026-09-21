@@ -3,6 +3,19 @@ import { api } from '../services/api';
 import { hasPermission as userHasPermission, ROLES } from '../auth/permissions';
 
 const AuthContext = createContext(null);
+// Local-only escape hatch while backend authentication is unavailable during UI work.
+// `import.meta.env.DEV` keeps this impossible to enable in a production build.
+const AUTH_BYPASS_ENABLED = import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH === 'true';
+const BYPASS_USER = Object.freeze({
+  id: 'local-dev-admin',
+  username: 'local-dev-admin',
+  name: 'Local development admin',
+  email: 'local-dev-admin@fpt.edu.vn',
+  roles: [ROLES.ADMIN],
+  isActive: true,
+  isLocked: false,
+  avatar: 'LD',
+});
 const CLUB_ACCESS_ROLES = new Set([
   ROLES.ADMIN,
   ROLES.STUDENT_AFFAIRS_ADMIN,
@@ -16,10 +29,10 @@ function canLoadClubAccess(actor) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(AUTH_BYPASS_ENABLED ? BYPASS_USER : null);
   const [clubAccess, setClubAccess] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(AUTH_BYPASS_ENABLED);
+  const [loading, setLoading] = useState(!AUTH_BYPASS_ENABLED);
 
   const loadClubAccess = useCallback(async (actor) => {
     if (!canLoadClubAccess(actor)) {
@@ -41,6 +54,10 @@ export function AuthProvider({ children }) {
   // Initialize from stored tokens on mount
   useEffect(() => {
     const initAuth = async () => {
+      if (AUTH_BYPASS_ENABLED) {
+        return;
+      }
+
       const token = localStorage.getItem('accessToken');
       const storedUser = localStorage.getItem('user');
 
@@ -64,6 +81,8 @@ export function AuthProvider({ children }) {
   }, [loadClubAccess]);
 
   const login = useCallback(async (email) => {
+    if (AUTH_BYPASS_ENABLED) return BYPASS_USER;
+
     try {
       const response = await api.login(email);
       const userData = {
@@ -89,6 +108,8 @@ export function AuthProvider({ children }) {
   }, [loadClubAccess]);
 
   const loginWithGoogle = useCallback(async (credential) => {
+    if (AUTH_BYPASS_ENABLED) return BYPASS_USER;
+
     try {
       const response = await api.loginWithGoogle(credential);
 
@@ -116,6 +137,8 @@ export function AuthProvider({ children }) {
   }, [loadClubAccess]);
 
   const logout = useCallback(async () => {
+    if (AUTH_BYPASS_ENABLED) return;
+
     try {
       await api.logout();
     } catch (e) {
