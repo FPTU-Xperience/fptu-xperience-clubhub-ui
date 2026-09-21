@@ -121,37 +121,44 @@ test('production routing isolates demo, all-clubs, and club-detail pages', () =>
     assert.match(routes, /path="demo\/\*"/);
     assert.match(routes, /<Route index element={<DiscoverPage/);
     assert.match(routes, /path="clubs"/);
+    assert.match(routes, /path="my-clubs"/);
+    assert.match(routes, /path="my-schedule"/);
     assert.match(routes, /path="recommended"/);
     assert.match(routes, /path="clubs\/:clubId"/);
     assert.match(routes, /AllClubsPage/);
     assert.doesNotMatch(routes, /RecommendedClubsPage/);
 
-    assert.match(routes, /<Header user={user}/);
+    assert.match(routes, /<LeftRail user={user}/);
     assert.match(routes, /<main id="v2-main"/);
     assert.match(routes, /<Footer \/>/);
     assert.doesNotMatch(routes, /DiscoverShell|DiscoverRail/);
 });
 
-test('production header is V2-local, production-routed, and accessible', () => {
+test('production left rail is V2-local, production-routed, and accessible', () => {
     const app = readFileSync(new URL('V2App.jsx', import.meta.url), 'utf8');
-    const header = readFileSync(new URL('../../components/v2/common/header/Header.jsx', import.meta.url), 'utf8');
-    const headerStyles = readFileSync(new URL('../../components/v2/common/header/Header.scss', import.meta.url), 'utf8');
+    const rail = readFileSync(new URL('../../components/v2/common/leftrail/LeftRail.jsx', import.meta.url), 'utf8');
+    const railStyles = readFileSync(new URL('../../components/v2/common/leftrail/LeftRail.scss', import.meta.url), 'utf8');
 
-    assert.match(app, /import Header from '..\/..\/components\/v2\/common\/header\/Header'/);
-    assert.match(header, /to="\/v2"/);
-    assert.match(header, /to="\/v2\/clubs"/);
-    assert.match(header, /useHeaderNotifications/);
-    assert.match(header, /aria-expanded/);
-    assert.match(header, /aria-controls="v2-notification-popover"/);
-    assert.match(header, /event\.key === 'Escape'/);
-    assert.match(header, /aria-label="Đóng thông báo"/);
-    assert.match(header, /onLogout/);
-    assert.doesNotMatch(header, /DemoContext|NotificationContext|fixture|\/v2\/demo/);
-    assert.doesNotMatch(header, /className="[^"]*dx-/);
-    assert.match(header, /className="v2-header"/);
-    assert.match(headerStyles, /\.v2-notification-popover/);
-    assert.match(headerStyles, /top: calc\(100% - 12px\)/);
-    assert.doesNotMatch(headerStyles, /\.dx-/);
+    assert.match(app, /import LeftRail from '..\/..\/components\/v2\/common\/leftrail\/LeftRail'/);
+    assert.match(rail, /to="\/v2"/);
+    assert.match(rail, /'\/v2\/clubs'/);
+    assert.match(rail, /useHeaderNotifications/);
+    assert.match(rail, /aria-expanded/);
+    assert.match(rail, /aria-controls="v2-rail-notification-popover"/);
+    assert.match(rail, /Của tôi/);
+    assert.match(rail, /Lịch trình/);
+    assert.match(rail, /'\/v2\/my-clubs'/);
+    assert.match(rail, /'\/v2\/my-schedule'/);
+    assert.match(rail, /aria-controls="v2-left-rail-personal-nav"/);
+    assert.match(rail, /event\.key === 'Escape'/);
+    assert.match(rail, /aria-label="Đóng thông báo"/);
+    assert.match(rail, /onLogout/);
+    assert.doesNotMatch(rail, /DemoContext|NotificationContext|fixture|\/v2\/demo/);
+    assert.doesNotMatch(rail, /className="[^"]*dx-/);
+    assert.match(rail, /className="v2-left-rail"/);
+    assert.match(railStyles, /\.v2-rail-notification-popover/);
+    assert.match(railStyles, /bottom: 18px/);
+    assert.doesNotMatch(railStyles, /\.dx-/);
 });
 
 test('production Discover composes the complete demo layout instead of a redesigned page', () => {

@@ -1,6 +1,8 @@
 import { formatErrorMessage, vi } from '../locales/vi';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000').replace(/\/+$/, '');
+// Keep API failures in-page during local UI work. Production always preserves the login redirect.
+const AUTH_BYPASS_ENABLED = import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH === 'true';
 
 class ApiService {
     constructor() {
@@ -108,10 +110,12 @@ class ApiService {
                     }
                 }
             }
-            // Clear tokens and redirect to login
+            // Clear tokens and redirect to login, unless the local UI bypass owns the session.
             this.clearTokens();
-            window.location.href = '/login';
-            throw new Error(vi.errors.unauthorized);
+            if (!AUTH_BYPASS_ENABLED) window.location.href = '/login';
+            const authError = new Error(vi.errors.unauthorized);
+            authError.status = 401;
+            throw authError;
         }
 
         if (!response.ok) {
@@ -230,6 +234,18 @@ class ApiService {
 
     async getMyMemberships() {
         return this.request('/api/clubs/me/memberships');
+    }
+
+    async getMyClubSelection() {
+        return this.request('/api/clubs/me/selection');
+    }
+
+    async getMyMembershipApplications() {
+        return this.request('/api/clubs/me/membership-applications');
+    }
+
+    async withdrawMyMembershipApplication(applicationId) {
+        return this.request(`/api/clubs/me/membership-applications/${applicationId}/withdraw`, { method: 'POST' });
     }
 
     async getMyClubAccess() {
