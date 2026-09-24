@@ -1,2 +1,41 @@
-import { CalendarDays, MapPin, X } from 'lucide-react'; import { Link } from 'react-router-dom'; import './ActivityDetail.scss';
-export default function ActivityDetail({ activity, onClose }) { if (!activity) return null; return <div className="v2-activity-dialog" role="dialog" aria-modal="true" aria-label={activity.title}><section><header><h2>{activity.title}</h2><button className="v2-activity-close" onClick={onClose} aria-label="Đóng chi tiết"><X size={22}/></button></header><div className="v2-activity-dialog-content"><span className="v2-activity-pill">{activity.status === 'LIVE' ? 'Đang diễn ra' : 'Sắp diễn ra'}</span><p className="v2-activity-description">{activity.description || 'Một buổi gặp gỡ để học điều mới, chia sẻ trải nghiệm và cùng tạo ra những kết nối ý nghĩa.'}</p><div className="v2-activity-facts"><span><CalendarDays size={20}/>{activity.startTime ? new Date(activity.startTime).toLocaleString('vi-VN') : 'Đang cập nhật thời gian'}</span><span><MapPin size={20}/>{activity.location || 'Đang cập nhật địa điểm'}</span></div><aside className="v2-activity-prepare"><h3>Bạn cần chuẩn bị gì?</h3><p>Đến trước 10 phút, mang thẻ sinh viên và tinh thần sẵn sàng trải nghiệm.</p></aside><div className="v2-activity-actions"><Link className="v2-button" to={`/v2/clubs/${activity.clubId}`}>Xem CLB</Link><Link className="v2-button primary" to={`/v2/activities/${activity.id}`} state={{ activity }}>Xem chi tiết</Link></div></div></section></div>; }
+import { CalendarDays, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import V2Modal from '../common/modal/V2Modal';
+import './ActivityDetail.scss';
+
+export default function ActivityDetail({ activity, onClose }) {
+    if (!activity) return null;
+    return (
+        <V2Modal title={activity.title} onClose={onClose}>
+            <span className="v2-activity-pill">{activity.status === 'LIVE' ? 'Đang diễn ra' : 'Sắp diễn ra'}</span>
+            <p className="v2-activity-description">
+                {activity.description ||
+                    'Một buổi gặp gỡ để học điều mới, chia sẻ trải nghiệm và cùng tạo ra những kết nối ý nghĩa.'}
+            </p>
+            <div className="v2-activity-facts">
+                <span>
+                    <CalendarDays size={20} />
+                    {activity.startTime
+                        ? new Date(activity.startTime).toLocaleString('vi-VN')
+                        : 'Đang cập nhật thời gian'}
+                </span>
+                <span>
+                    <MapPin size={20} />
+                    {activity.location || 'Đang cập nhật địa điểm'}
+                </span>
+            </div>
+            <aside className="v2-activity-prepare">
+                <h3>Bạn cần chuẩn bị gì?</h3>
+                <p>Đến trước 10 phút, mang thẻ sinh viên và tinh thần sẵn sàng trải nghiệm.</p>
+            </aside>
+            <div className="v2-activity-actions">
+                <Link className="v2-button" to={`/v2/clubs/${activity.clubId}`}>
+                    Xem CLB
+                </Link>
+                <Link className="v2-button primary" to={`/v2/activities/${activity.id}`} state={{ activity }}>
+                    Xem chi tiết
+                </Link>
+            </div>
+        </V2Modal>
+    );
+}

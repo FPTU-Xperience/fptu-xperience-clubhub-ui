@@ -1,5 +1,40 @@
-.v2-personal-page-heading { margin-bottom: 28px; }
-.v2-personal-page-heading > span { color: #c2410c; font-size: 9px; font-weight: 750; letter-spacing: .14em; }
-.v2-personal-page-heading h1 { margin: 7px 0; color: var(--v2-ink); font-size: 30px; letter-spacing: -.04em; }
-.v2-personal-page-heading p { margin: 0; color: var(--v2-muted); font-size: 13px; }
-.v2-personal-page .v2-empty-state { margin-top: 18px; }
+.v2-personal-page {
+    padding: 42px max(40px, calc((100% - 1060px) / 2));
+}
+.v2-personal-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 4px 0 29px;
+}
+.v2-personal-page-eyebrow {
+    color: var(--v2-orange);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+}
+.v2-personal-page-heading h1 {
+    margin: 10px 0 8px;
+    color: var(--v2-ink);
+    font-size: 30px;
+    letter-spacing: -0.04em;
+}
+.v2-personal-page-heading p {
+    margin: 0;
+    color: var(--v2-muted);
+    font-size: 13px;
+}
+.v2-personal-page .v2-empty-state {
+    margin-top: 18px;
+}
+
+@media (max-width: 720px) {
+    .v2-personal-page {
+        padding: 30px 24px;
+    }
+    .v2-personal-page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

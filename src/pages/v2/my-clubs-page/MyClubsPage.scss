@@ -1,14 +1,220 @@
-.v2-my-clubs-page { padding: 42px max(40px, calc((100% - 1060px) / 2)); }
-.v2-eyebrow { color: var(--v2-orange); font-size: 10px; font-weight: 700; letter-spacing: .14em; }
-.v2-my-clubs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px; margin-bottom: 30px; }
-.v2-my-club-card, .v2-my-applications { overflow: hidden; border: 1px solid var(--v2-line); border-radius: 12px; background: #fff; box-shadow: 0 8px 28px rgba(15, 23, 42, .05); }
-.v2-my-club-card { display: grid; grid-template-columns: 140px minmax(0, 1fr); min-height: 320px; }
-.v2-my-club-art { position: relative; display: grid; min-height: 320px; place-items: center; overflow: hidden; background: linear-gradient(150deg, #e7e4d4, #dcd9c5); color: #66715d; }
-.v2-my-club-art::before, .v2-my-club-art::after { position: absolute; border: 1px solid rgb(102 113 93 / 22%); border-radius: 50%; content: ''; }
-.v2-my-club-art::before { width: 220px; height: 220px; top: -43px; left: -70px; }.v2-my-club-art::after { width: 280px; height: 280px; right: -180px; bottom: -135px; }
-.v2-my-club-art-meta { position: absolute; top: 20px; left: 21px; color: #586450; font-size: 7px; letter-spacing: .17em; line-height: 1.5; }.v2-my-club-art-arrow { position: absolute; top: 17px; right: 21px; font-size: 28px; font-weight: 300; }
-.v2-my-club-art strong { position: relative; z-index: 1; max-width: 1.1em; overflow-wrap: anywhere; color: #65705d; font-size: 66px; font-weight: 700; letter-spacing: -.12em; line-height: .83; text-align: center; transform: rotate(-90deg); }
-.v2-my-club-art img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }.v2-my-club-art em { position: absolute; right: 18px; bottom: 31px; left: 18px; z-index: 1; color: #4f5a49; font-size: 10px; font-style: italic; line-height: 1.35; text-align: center; }
-.v2-my-club-body { min-width: 0; padding: 25px 31px 30px; }.v2-my-club-top { display: flex; align-items: flex-start; justify-content: space-between; }.v2-my-club-mark { display: inline-grid; width: 50px; height: 50px; place-items: center; border-radius: 12px; background: #fff0e8; color: #d8571a; font-size: 13px; font-weight: 800; }.v2-my-club-role, .v2-my-application-status { border-radius: 7px; background: #dcfce7; color: #166534; padding: 6px 10px; font-size: 10px; font-weight: 700; }.v2-my-club-role.is-manager { background: #fff4e8; color: #ea580c; }.v2-my-club-body h2 { margin: 23px 0 10px; color: #111827; font-size: 25px; letter-spacing: -.04em; }.v2-my-club-body > p, .v2-my-applications p { color: var(--v2-muted); font-size: 12px; }.v2-my-club-activity { display: flex; gap: 11px; margin: 22px 0 19px; padding: 21px 0; border-top: 1px solid var(--v2-line); border-bottom: 1px solid var(--v2-line); color: #94a3b8; }.v2-my-club-activity div { color: var(--v2-ink); }.v2-my-club-activity small, .v2-my-club-activity strong, .v2-my-club-activity span { display: block; }.v2-my-club-activity small { color: #64748b; font-size: 8px; letter-spacing: .1em; }.v2-my-club-activity strong { margin: 4px 0; font-size: 12px; }.v2-my-club-activity span { color: #64748b; font-size: 10px; }.v2-my-club-body .v2-button { min-height: 51px; padding-inline: 20px; font-size: 13px; }
-.v2-my-applications { margin-top: 28px; padding: 24px; }.v2-my-applications h2 { margin: 6px 0; font-size: 21px; }.v2-my-application { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--v2-line); }.v2-my-application > div:nth-child(2) { flex: 1; }.v2-my-application p { margin: 3px 0 0; }.v2-my-clubs-error { color: #b91c1c; }.v2-workspace-placeholder { max-width: 680px; margin: 76px auto; padding: 42px; border: 1px solid var(--v2-line); border-radius: 12px; text-align: center; }.v2-workspace-placeholder h1 { font-size: 28px; }
-@media (max-width: 1180px) { .v2-my-club-card { grid-template-columns: 120px minmax(0, 1fr); }.v2-my-club-art { min-height: 300px; }.v2-my-club-body { padding: 22px; } }
+.v2-my-clubs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+.v2-my-club-card,
+.v2-my-applications {
+    overflow: hidden;
+    border: 1px solid var(--v2-line);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+}
+.v2-my-club-card {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    min-height: 320px;
+}
+.v2-my-club-art {
+    position: relative;
+    display: grid;
+    min-height: 320px;
+    place-items: center;
+    overflow: hidden;
+    background: linear-gradient(150deg, #e7e4d4, #dcd9c5);
+    color: #66715d;
+}
+.v2-my-club-art::before,
+.v2-my-club-art::after {
+    position: absolute;
+    border: 1px solid rgb(102 113 93 / 22%);
+    border-radius: 50%;
+    content: '';
+}
+.v2-my-club-art::before {
+    width: 220px;
+    height: 220px;
+    top: -43px;
+    left: -70px;
+}
+.v2-my-club-art::after {
+    width: 280px;
+    height: 280px;
+    right: -180px;
+    bottom: -135px;
+}
+.v2-my-club-art-meta {
+    position: absolute;
+    top: 20px;
+    left: 21px;
+    color: #586450;
+    font-size: 7px;
+    letter-spacing: 0.17em;
+    line-height: 1.5;
+}
+.v2-my-club-art-arrow {
+    position: absolute;
+    top: 17px;
+    right: 21px;
+    font-size: 28px;
+    font-weight: 300;
+}
+.v2-my-club-art strong {
+    position: relative;
+    z-index: 1;
+    max-width: 1.1em;
+    overflow-wrap: anywhere;
+    color: #65705d;
+    font-size: 66px;
+    font-weight: 700;
+    letter-spacing: -0.12em;
+    line-height: 0.83;
+    text-align: center;
+    transform: rotate(-90deg);
+}
+.v2-my-club-art img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.v2-my-club-art em {
+    position: absolute;
+    right: 18px;
+    bottom: 31px;
+    left: 18px;
+    z-index: 1;
+    color: #4f5a49;
+    font-size: 10px;
+    font-style: italic;
+    line-height: 1.35;
+    text-align: center;
+}
+.v2-my-club-body {
+    min-width: 0;
+    padding: 25px 31px 30px;
+}
+.v2-my-club-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.v2-my-club-mark {
+    display: inline-grid;
+    width: 50px;
+    height: 50px;
+    place-items: center;
+    border-radius: 12px;
+    background: #fff0e8;
+    color: #d8571a;
+    font-size: 13px;
+    font-weight: 800;
+}
+.v2-my-club-role,
+.v2-my-application-status {
+    border-radius: 7px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 700;
+}
+.v2-my-club-role.is-manager {
+    background: #fff4e8;
+    color: #ea580c;
+}
+.v2-my-club-body h2 {
+    margin: 23px 0 10px;
+    color: #111827;
+    font-size: 25px;
+    letter-spacing: -0.04em;
+}
+.v2-my-club-body > p,
+.v2-my-applications p {
+    color: var(--v2-muted);
+    font-size: 12px;
+}
+.v2-my-club-activity {
+    display: flex;
+    gap: 11px;
+    margin: 22px 0 19px;
+    padding: 21px 0;
+    border-top: 1px solid var(--v2-line);
+    border-bottom: 1px solid var(--v2-line);
+    color: #94a3b8;
+}
+.v2-my-club-activity div {
+    color: var(--v2-ink);
+}
+.v2-my-club-activity small,
+.v2-my-club-activity strong,
+.v2-my-club-activity span {
+    display: block;
+}
+.v2-my-club-activity small {
+    color: #64748b;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+}
+.v2-my-club-activity strong {
+    margin: 4px 0;
+    font-size: 12px;
+}
+.v2-my-club-activity span {
+    color: #64748b;
+    font-size: 10px;
+}
+.v2-my-club-body .v2-button {
+    min-height: 51px;
+    padding-inline: 20px;
+    font-size: 13px;
+}
+.v2-my-applications {
+    margin-top: 28px;
+    padding: 24px;
+}
+.v2-my-applications h2 {
+    margin: 6px 0;
+    font-size: 21px;
+}
+.v2-my-application {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-top: 1px solid var(--v2-line);
+}
+.v2-my-application > div:nth-child(2) {
+    flex: 1;
+}
+.v2-my-application p {
+    margin: 3px 0 0;
+}
+.v2-my-clubs-error {
+    color: #b91c1c;
+}
+.v2-workspace-placeholder {
+    max-width: 680px;
+    margin: 76px auto;
+    padding: 42px;
+    border: 1px solid var(--v2-line);
+    border-radius: 12px;
+    text-align: center;
+}
+.v2-workspace-placeholder h1 {
+    font-size: 28px;
+}
+@media (max-width: 1180px) {
+    .v2-my-club-card {
+        grid-template-columns: 120px minmax(0, 1fr);
+    }
+    .v2-my-club-art {
+        min-height: 300px;
+    }
+    .v2-my-club-body {
+        padding: 22px;
+    }
+}

@@ -87,7 +87,7 @@ export function Workspace() {
                         <ClubMark club={club} />
                         <div>
                             <strong>{club.name}</strong>
-                            <span>{manager ? 'Không gian quản lý' : 'Không gian thành viên'}</span>
+                            <span>Không gian câu lạc bộ</span>
                         </div>
                     </div>
                     <label className="dx-club-switch">
@@ -135,18 +135,7 @@ export function Workspace() {
                             </NavLink>
                         ))}
                     </nav>
-                    <div className="dx-sidebar-bottom">
-                        <span>
-                            <LockKeyhole size={15} />
-                            Chỉ dữ liệu của {club.name}
-                        </span>
-                        <Link to={`/v2/demo/clubs/${clubId}`}>
-                            Xem trang giới thiệu <ArrowUpRight size={15} />
-                        </Link>
-                        <button onClick={() => setCompact(!compact)}>
-                            {compact ? 'Khoảng cách rộng' : 'Khoảng cách gọn'}
-                        </button>
-                    </div>
+                    <div className="dx-sidebar-bottom"></div>
                 </aside>
                 <main className="dx-workspace-main" id="demo-main">
                     <div className="dx-workspace-bar">
