@@ -45,6 +45,8 @@
 
 - [X] T011 Validate focused adapter tests and a production build using specs/004-club-workspace/quickstart.md
 - [X] T012 Check whitespace and review the workspace diff with git diff --check
+- [X] T013 Replace the shared workspace preview grid with tab-specific mock layouts in src/pages/v2/club-workspace-page/ClubWorkspacePage.jsx and src/pages/v2/club-workspace-page/ClubWorkspacePage.scss
+- [X] T014 Split the tab-specific workspace views into src/pages/v2/club-workspace-page/tabs/ components
 
 ## Dependencies & Execution Order
 
