@@ -12,6 +12,7 @@ import ActivityDetailPage from './activities-page/ActivityDetailPage';
 import MyClubsPage from './my-clubs-page/MyClubsPage';
 import ClubWorkspacePage from './club-workspace-page/ClubWorkspacePage';
 import { MySchedulePage } from './personal-pages/PersonalPages';
+import ProfilePage from './profile-page/ProfilePage';
 import V2Access from './V2Access';
 import './V2App.scss';
 // The legacy demo and access styles remain available while their rules are
@@ -48,6 +49,7 @@ function AuthenticatedV2App() {
                     <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
                     <Route path="my-clubs/:clubId/*" element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />} />
                     <Route path="my-schedule" element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />} />
+                    <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} />} />
                     <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
                     <Route
                         path="clubs/:clubId"
