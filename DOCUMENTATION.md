@@ -1,5 +1,7 @@
 # FPTU-Xperience - Tài liệu Tổng hợp Chức năng
 
+> Tài liệu này mô tả một giao diện/kiến trúc frontend cũ, bao gồm login email/password và module tài chính. Nó không phải SOW sản phẩm cuối. Dùng [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) cho phạm vi ClubHub đã chốt; các luồng hiện trạng chỉ là chứng cứ về code tại thời điểm viết.
+
 ## Mục lục
 
 1. [Tổng quan dự án](#tổng-quan-dự-án)
