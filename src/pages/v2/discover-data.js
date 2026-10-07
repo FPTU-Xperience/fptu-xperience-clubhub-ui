@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null);
+const rows = (value) => (Array.isArray(value) ? value : value?.items || value?.content || []);
+const normalizedClubCode = (value) => String(value || '').trim().toUpperCase();
+
+function notFoundClubCodeError() {
+    const error = new Error('Không tìm thấy câu lạc bộ.');
+    error.status = 404;
+    return error;
+}
 
 export function mapClubDirectoryEntry(raw = {}) {
     const recruitmentValue = firstDefined(raw.isRecruiting, raw.recruiting, raw.openForRecruitment);
@@ -26,7 +34,7 @@ export function mapClubDirectoryEntry(raw = {}) {
         scheduleLabel: firstDefined(raw.scheduleLabel, raw.schedule, raw.expectedSchedule, ''),
         hasRecruitmentStatus: recruitmentValue !== undefined,
         isRecruiting: recruitmentValue === undefined ? null : Boolean(recruitmentValue),
-        destination: id ? `/v2/clubs/${encodeURIComponent(id)}` : '/v2/clubs',
+        destination: raw.code ? `/v2/clubs/${encodeURIComponent(String(raw.code))}` : '/v2/clubs',
         fullName: String(firstDefined(raw.fullName, raw.name, raw.code, 'Câu lạc bộ')),
         tagline: String(firstDefined(raw.tagline, raw.purpose, 'Cùng học hỏi, kết nối và trưởng thành.')),
         tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [category, raw.code].filter(Boolean),
@@ -168,17 +176,34 @@ export function useClubDirectory(api, sessionKey) {
     return useRequest(
         () => api.getClubs(),
         (value) =>
-            (Array.isArray(value) ? value : value?.items || value?.content || [])
+            rows(value)
                 .map(mapClubDirectoryEntry)
                 .filter((club) => club.id),
         [api, sessionKey],
     );
 }
 
-export function useClubDetail(api, clubId, viewerAccess, sessionKey) {
+export function findClubIdByCode(value, clubCode) {
+    const requestedCode = normalizedClubCode(clubCode);
+    if (!requestedCode) return null;
+    const club = rows(value).find((item) => normalizedClubCode(item?.code) === requestedCode);
+    const clubId = Number(firstDefined(club?.id, club?.clubId));
+    return Number.isSafeInteger(clubId) && clubId > 0 ? clubId : null;
+}
+
+export function canJoinClub(club) {
+    return club?.isRecruiting === true && !['MEMBER', 'MANAGER'].includes(club.viewerRelationship);
+}
+
+export function useClubDetail(api, clubCode, viewerAccess, sessionKey) {
     return useRequest(
-        () => api.getClub(clubId),
+        async () => {
+            const directory = await api.getClubs();
+            const clubId = findClubIdByCode(directory, clubCode);
+            if (clubId === null) throw notFoundClubCodeError();
+            return api.getClub(clubId);
+        },
         (value) => mapClubPublicDetail(value, viewerAccess),
-        [api, clubId, sessionKey],
+        [api, clubCode, sessionKey],
     );
 }

@@ -142,14 +142,17 @@ export default function SystemAdminProfile({ user }) {
             type="button"
             className={`edit-button ${editing ? "is-editing" : ""}`}
             onClick={toggleEdit}
-            disabled={saving}
+            disabled={saving || user?.roles?.includes("SYSTEM_ADMIN")}
+            title={user?.roles?.includes("SYSTEM_ADMIN") ? "API hiện chưa hỗ trợ tự chỉnh sửa hồ sơ quản trị hệ thống." : undefined}
           >
             {editing ? <Check size={16} /> : <Pencil size={16} />}
             {saving
               ? "Đang lưu..."
               : editing
                 ? "Lưu thay đổi"
-                : "Chỉnh sửa hồ sơ"}
+                : user?.roles?.includes("SYSTEM_ADMIN")
+                  ? "Chưa hỗ trợ chỉnh sửa"
+                  : "Chỉnh sửa hồ sơ"}
           </button>
         </div>
 

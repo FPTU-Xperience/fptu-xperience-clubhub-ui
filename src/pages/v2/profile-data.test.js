@@ -45,12 +45,18 @@ test('mock profile seeds representative data without mutating authenticated iden
 
 test('profile records round-trip per account and returned snapshots are cloned', () => {
     const storage = memoryStorage();
-    const saved = saveProfile(studentA, { displayName: 'Anh M.', headline: 'Build with purpose', skills: ['React', 'React', 'Design'] }, storage);
+    const saved = saveProfile(studentA, {
+        displayName: 'Anh M.',
+        headline: 'Build with purpose',
+        skills: ['React', 'React', 'Design'],
+        personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567', address: 'TP. Hồ Chí Minh' },
+    }, storage);
     const reloaded = readProfile(studentA, storage);
     const other = readProfile(studentB, storage);
 
     assert.equal(saved.profile.displayName, 'Anh M.');
     assert.deepEqual(reloaded.profile.skills, ['React', 'Design']);
+    assert.equal(reloaded.personal.phoneNumber, '0901234567');
     assert.equal(other.profile.displayName, studentB.name);
     reloaded.profile.skills.push('Mutated by caller');
     assert.equal(readProfile(studentA, storage).profile.skills.includes('Mutated by caller'), false);
@@ -66,12 +72,14 @@ test('corrupt or old-version persisted values recover to an account seed', () =>
     assert.equal(readProfile(studentA, storage).profile.displayName, studentA.name);
 });
 
-test('save accepts only presentation fields and retains the prior record on validation failure', () => {
+test('save validates editable profile and private application fields', () => {
     const storage = memoryStorage();
     const prior = saveProfile(studentA, { displayName: 'Anh profile', about: 'A short introduction.' }, storage);
 
     assert.throws(() => saveProfile(studentA, { displayName: '   ' }, storage), /tên hiển thị/i);
     assert.throws(() => saveProfile(studentA, { headline: 'x'.repeat(161) }, storage), /160/);
+    assert.throws(() => saveProfile(studentA, { avatarUrl: 'javascript:alert(1)' }, storage), /ảnh đại diện/i);
+    assert.throws(() => saveProfile(studentA, { personal: { phoneNumber: '123' } }, storage), /số điện thoại/i);
     assert.throws(
         () => saveProfile(studentA, { skills: Array.from({ length: 13 }, (_, index) => `Skill ${index}`) }, storage),
         /12/,
@@ -82,6 +90,12 @@ test('save accepts only presentation fields and retains the prior record on vali
     const ignored = saveProfile(studentA, { studentCode: 'SE00000', academic: { major: 'Changed' } }, storage);
     assert.notEqual(ignored.academic.studentCode, 'SE00000');
     assert.notEqual(ignored.academic.major, 'Changed');
+    const withAvatar = saveProfile(studentA, { avatarUrl: 'https://cdn.example.edu/student/a.webp' }, storage);
+    assert.equal(withAvatar.profile.avatarUrl, 'https://cdn.example.edu/student/a.webp');
+    assert.equal(readProfile(studentB, storage).profile.avatarUrl, '');
+    const withPersonalData = saveProfile(studentA, { personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567' } }, storage);
+    assert.equal(withPersonalData.personal.dateOfBirth, '2004-05-17');
+    assert.equal(withPersonalData.personal.phoneNumber, '0901234567');
 });
 
 test('shared preview removes private fields without mutating or persisting the profile', () => {
@@ -92,6 +106,7 @@ test('shared preview removes private fields without mutating or persisting the p
     assert.equal(shared.academic.studentCode, '');
     assert.equal(shared.summary.recognizedContributionTotal, null);
     assert.deepEqual(shared.evidence, []);
+    assert.equal('personal' in shared, false);
     assert.equal(privateProfile.evidence.length > 0, true);
     assert.equal(readProfile(studentA, storage).profile.displayName, 'Anh profile');
 });
@@ -112,5 +127,5 @@ test('production profile sources stay isolated from demo dependencies', () => {
 
 test('authenticated V2 router owns the production profile route', () => {
     const source = readFileSync(new URL('./V2App.jsx', import.meta.url), 'utf8');
-    assert.match(source, /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} \/>\}/);
+    assert.match(source, /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} api=\{api\} \/>\}/);
 });

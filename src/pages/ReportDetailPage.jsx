@@ -138,6 +138,10 @@ export default function ReportDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [downloadingAttachmentId, setDownloadingAttachmentId] = useState(null);
+    const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
+    const [attachmentToDelete, setAttachmentToDelete] = useState(null);
+    const [isDeletingAttachment, setIsDeletingAttachment] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     // Modals
@@ -189,6 +193,49 @@ export default function ReportDetailPage() {
             success('Đang tải tệp báo cáo xuống...');
         } catch (err) {
             error(err.message || 'Không thể tải tệp báo cáo.');
+        }
+    };
+
+    const handleDownloadAttachment = async (attachment) => {
+        if (!report?.id || downloadingAttachmentId) return;
+        setDownloadingAttachmentId(attachment.id);
+        try {
+            await api.downloadReportAttachment(report.id, attachment.id, attachment.fileName);
+        } catch (err) {
+            error(err.message || 'Không thể tải tệp đính kèm.');
+        } finally {
+            setDownloadingAttachmentId(null);
+        }
+    };
+
+    const handleUploadAttachment = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file || !report?.id || isUploadingAttachment) return;
+        setIsUploadingAttachment(true);
+        try {
+            const updated = await api.uploadReportAttachment(report.id, file);
+            setReport(updated);
+            success('Đã thêm tệp minh chứng.');
+        } catch (err) {
+            error(err.message || 'Không thể thêm tệp minh chứng.');
+        } finally {
+            setIsUploadingAttachment(false);
+        }
+    };
+
+    const handleDeleteAttachment = async () => {
+        if (!report?.id || !attachmentToDelete || isDeletingAttachment) return;
+        setIsDeletingAttachment(true);
+        try {
+            await api.deleteReportAttachment(report.id, attachmentToDelete.id);
+            setAttachmentToDelete(null);
+            success('Đã gỡ tệp minh chứng khỏi báo cáo.');
+            await loadReportDetail();
+        } catch (err) {
+            error(err.message || 'Không thể gỡ tệp minh chứng.');
+        } finally {
+            setIsDeletingAttachment(false);
         }
     };
 
@@ -685,6 +732,13 @@ export default function ReportDetailPage() {
                         <h2 className="text-sm font-bold uppercase tracking-wider text-cyan-400 border-b border-slate-800 pb-2">
                             VII. Minh chứng đính kèm
                         </h2>
+                        {canEdit && isReportAuthor && (
+                            <label className="inline-flex cursor-pointer items-center rounded-lg border border-cyan-500/40 px-3 py-2 text-xs font-semibold text-cyan-300">
+                                {isUploadingAttachment ? 'Đang tải lên...' : 'Thêm tệp minh chứng'}
+                                <input type="file" className="sr-only" onChange={handleUploadAttachment}
+                                    disabled={isUploadingAttachment} />
+                            </label>
+                        )}
                         {(!report.attachments || report.attachments.length === 0) &&
                         !report.details?.some((d) => d.evidenceUrl) ? (
                             <p className="text-sm text-slate-500 py-2">Báo cáo chưa có minh chứng đính kèm.</p>
@@ -719,14 +773,17 @@ export default function ReportDetailPage() {
                                         <span className="truncate text-slate-300">
                                             {att.fileName} ({formatBytes(att.sizeBytes)})
                                         </span>
-                                        <a
-                                            href={att.storagePath}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 font-semibold text-cyan-300 hover:underline"
-                                        >
-                                            Tải tệp <Download size={12} />
-                                        </a>
+                                        <div className="flex items-center gap-3">
+                                            <button type="button" onClick={() => handleDownloadAttachment(att)}
+                                                disabled={downloadingAttachmentId === att.id}
+                                                className="inline-flex items-center gap-1 font-semibold text-cyan-300 hover:underline disabled:opacity-50">
+                                                {downloadingAttachmentId === att.id ? 'Đang tải...' : 'Tải tệp'} <Download size={12} />
+                                            </button>
+                                            {canEdit && isReportAuthor && (
+                                                <button type="button" onClick={() => setAttachmentToDelete(att)}
+                                                    className="font-semibold text-rose-300 hover:underline">Gỡ tệp</button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -788,6 +845,20 @@ export default function ReportDetailPage() {
                 onClose={() => setExportHistoryOpen(false)}
                 reportId={report.id}
             />
+            <Modal isOpen={Boolean(attachmentToDelete)} onClose={() => !isDeletingAttachment && setAttachmentToDelete(null)}
+                title="Gỡ tệp minh chứng" size="sm">
+                <div className="space-y-5 text-neutral-700">
+                    <p>Gỡ <strong>{attachmentToDelete?.fileName}</strong> khỏi báo cáo?</p>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={() => setAttachmentToDelete(null)} disabled={isDeletingAttachment}
+                            className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold">Hủy</button>
+                        <button type="button" onClick={handleDeleteAttachment} disabled={isDeletingAttachment}
+                            className="flex-1 rounded-lg bg-rose-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+                            {isDeletingAttachment ? 'Đang gỡ...' : 'Gỡ tệp'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

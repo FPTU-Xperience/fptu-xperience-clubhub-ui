@@ -1,91 +1,62 @@
-import { useState } from 'react';
-import { workspacePreviewRecords } from '../../workspace-preview-data';
+import { Link } from 'react-router-dom';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 
-const roleOptions = [
-    'Chủ nhiệm',
-    'Phó chủ nhiệm',
-    'Trưởng ban kỹ thuật',
-    'Trưởng ban nội dung',
-    'Thủ quỹ',
-    'Thành viên',
-];
+const initials = (name = '') => name.trim().split(/\s+/).slice(-2).map((part) => part[0]).join('').toUpperCase();
+const roleLabel = (role = '') => String(role).toUpperCase().includes('TREASURER') ? 'Thủ quỹ' : 'Thành viên';
 
-export default function MembersTab({ manager = false }) {
-    const [roles, setRoles] = useState(() =>
-        Object.fromEntries(workspacePreviewRecords['Thành viên'].map((member) => [member.title, member.status])),
-    );
-
+export default function MembersTab({ manager = false, dashboard, workspace }) {
+    const clubId = workspace?.clubId;
+    const summary = dashboard.data;
+    const count = summary?.memberCount;
+    const members = manager ? summary?.approvedMembers : summary?.publicLeaders;
+    const visibleMemberCount = members?.length ?? 0;
     return (
         <WorkspaceTabLayout
             title="Thành viên CLB"
-            description="Kết nối với những người đang cùng xây dựng cộng đồng."
-            action="Xem đơn tham gia"
-            records={workspacePreviewRecords['Thành viên']}
+            description={count == null
+                ? 'Danh sách thành viên của CLB.'
+                : manager
+                    ? `${count} thành viên đã được duyệt trong CLB.`
+                    : `CLB hiện có ${count} thành viên đã được duyệt. Danh sách thành viên không công khai.`}
+            action={manager ? <Link className="v2-button v2-button--primary" to={`/clubs/${encodeURIComponent(clubId)}/members`}>Quản lý thành viên</Link> : null}
+            records={members || []}
         >
             {(records) => (
                 <>
-                    <section className="v2-preview-members">
-                        <header>
-                            <span>THÀNH VIÊN</span>
-                            <span>VAI TRÒ</span>
-                            <span>TRẠNG THÁI</span>
-                        </header>
-                        {records.map((record) => (
-                            <article key={record.title}>
-                                <i>{record.tag}</i>
-                                <div>
-                                    <strong>{record.title}</strong>
-                                    <small>{record.meta}</small>
-                                </div>
-                                {manager ? (
-                                    <label className="v2-member-role-select">
-                                        <span className="sr-only">Vai trò của {record.title}</span>
-                                        <select
-                                            value={roles[record.title] || 'Thành viên'}
-                                            onChange={(event) =>
-                                                setRoles((current) => ({
-                                                    ...current,
-                                                    [record.title]: event.target.value,
-                                                }))
-                                            }
-                                        >
-                                            {roleOptions.map((role) => (
-                                                <option key={role} value={role}>
-                                                    {role}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                ) : (
-                                    <span>{roles[record.title] || record.status}</span>
-                                )}
-                                <em>Đang hoạt động</em>
-                            </article>
-                        ))}
-                    </section>
-                    {manager && (
-                        <section className="v2-preview-member-settings" aria-labelledby="member-settings-title">
-                            <h2 id="member-settings-title">Tuyển thành viên</h2>
-                            <div className="v2-preview-settings">
-                                {workspacePreviewRecords['Cài đặt thành viên'].map((record) => (
-                                    <article key={record.title}>
-                                        <div>
-                                            <h3>{record.title}</h3>
-                                            <p>{record.meta}</p>
-                                        </div>
-                                        <label className="v2-preview-toggle">
-                                            <input type="checkbox" defaultChecked aria-label="Đang tuyển thành viên" />{' '}
-                                            <span />
-                                        </label>
-                                    </article>
-                                ))}
-                            </div>
-                            <p className="v2-preview-role-note">
-                                Vai trò được đổi trực tiếp tại từng thành viên. Dữ liệu minh họa chỉ áp dụng trong phiên
-                                xem trước.
-                            </p>
+                    {dashboard.status === 'loading' && <p className="v2-workspace-data-note" role="status">Đang tải thành viên…</p>}
+                    {dashboard.status !== 'loading' && count == null && <p className="v2-workspace-data-note" role="alert">Không tải được số thành viên. <button type="button" onClick={dashboard.retry}>Thử lại</button></p>}
+                    {dashboard.status !== 'loading' && count != null && (
+                        <section className="v2-preview-members">
+                            <header>
+                                <span>{manager ? `THÀNH VIÊN ĐÃ DUYỆT (${count})` : `BAN ĐIỀU HÀNH CÔNG KHAI (${visibleMemberCount})`}</span>
+                                <span>VAI TRÒ</span>
+                                <span>TRẠNG THÁI</span>
+                            </header>
+                            {records.map((record) => (
+                                <article key={manager ? record.id : `${record.name}-${record.role}`}>
+                                    <i>{initials(record.name)}</i>
+                                    <div>
+                                        <strong>{record.name}</strong>
+                                        <small>{manager && record.joinedAt
+                                            ? `Đã duyệt ${new Date(record.joinedAt).toLocaleDateString('vi-VN')}`
+                                            : 'Được CLB công bố'}</small>
+                                    </div>
+                                    <span>{manager ? roleLabel(record.role) : record.role}</span>
+                                    <em>{manager ? 'Đã duyệt' : 'Được công bố'}</em>
+                                </article>
+                            ))}
+                            {records.length === 0 && <p className="v2-workspace-data-note">{manager ? 'Chưa có thành viên được duyệt.' : 'CLB chưa công bố ban điều hành.'}</p>}
                         </section>
+                    )}
+                    {manager && summary?.pendingMemberships?.length > 0 && (
+                        <section className="v2-workspace-pending-members">
+                            <h2>Đơn tham gia chờ duyệt ({summary.pendingMemberships.length})</h2>
+                            <p>{summary.pendingMemberships.map((member) => member.name).join(', ')}</p>
+                            <Link to={`/clubs/${encodeURIComponent(clubId)}/members`}>Xem và xử lý đơn</Link>
+                        </section>
+                    )}
+                    {manager && summary?.isRecruiting != null && (
+                        <p className="v2-workspace-data-note">Trạng thái tuyển thành viên: {summary.isRecruiting ? 'Đang mở' : 'Đang đóng'}.</p>
                     )}
                 </>
             )}

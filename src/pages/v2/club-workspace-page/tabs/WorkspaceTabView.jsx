@@ -10,7 +10,7 @@ import ReportsTab from './ReportsTab';
 
 const views = { 'Hoạt động': ActivitiesTab, 'Điểm danh': AttendanceTab, 'Nhiệm vụ & đóng góp': QuestsTab, 'Thành viên': MembersTab, 'Điểm & thành tích': PointsTab, 'Kho quà': GiftsTab, 'Báo cáo': ReportsTab, 'Tài chính': FinanceTab, 'Trang CLB': ClubPageTab };
 
-export default function WorkspaceTabView({ label, manager }) {
+export default function WorkspaceTabView({ label, manager, dashboard, workspace }) {
     const View = views[label];
-    return View ? <View manager={manager} /> : null;
+    return View ? <View manager={manager} dashboard={dashboard} workspace={workspace} /> : null;
 }

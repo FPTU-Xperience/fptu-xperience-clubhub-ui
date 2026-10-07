@@ -83,6 +83,7 @@ export default function ActivitiesPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [formData, setFormData] = useState(emptyForm);
     const [editingSchedule, setEditingSchedule] = useState(null);
+    const [activityToCancel, setActivityToCancel] = useState(null);
     const [attendanceSummary, setAttendanceSummary] = useState(null);
     const [summaryLoading, setSummaryLoading] = useState(false);
 
@@ -131,7 +132,8 @@ export default function ActivitiesPage() {
         if (busyId) return;
         setBusyId(activity.id);
         try {
-            const updated = await api.registerParticipant(activity.id, null, user?.name);
+            await api.registerParticipant(activity.id);
+            const updated = await api.getActivity(activity.id);
             setActivities((current) => current.map((item) => (item.id === activity.id ? updated : item)));
             success('Đã đăng ký tham gia hoạt động.');
         } catch (err) {
@@ -145,7 +147,8 @@ export default function ActivitiesPage() {
         if (busyId) return;
         setBusyId(activity.id);
         try {
-            const updated = await api.completeActivity(activity.id);
+            await api.completeActivity(activity.id);
+            const updated = await api.getActivity(activity.id);
             setActivities((current) => current.map((item) => (item.id === activity.id ? updated : item)));
             setSelectedActivity(updated);
             success('Đã đánh dấu hoạt động hoàn thành.');
@@ -156,11 +159,28 @@ export default function ActivitiesPage() {
         }
     };
 
+    const cancelActivity = async () => {
+        if (!activityToCancel || busyId) return;
+        setBusyId(`cancel-${activityToCancel.id}`);
+        try {
+            await api.cancelActivity(activityToCancel.id);
+            setActivityToCancel(null);
+            setSelectedActivity(null);
+            await loadActivities();
+            success('Đã hủy hoạt động.');
+        } catch (err) {
+            error(err.message || 'Không thể hủy hoạt động này.');
+        } finally {
+            setBusyId(null);
+        }
+    };
+
     const checkIn = async (activity) => {
         if (busyId) return;
         setBusyId(`check-in-${activity.id}`);
         try {
-            const updated = await api.checkInActivity(activity.id);
+            await api.checkInActivity(activity.id);
+            const updated = await api.getActivity(activity.id);
             setActivities((current) => current.map((item) => (item.id === activity.id ? updated : item)));
             setSelectedActivity(updated);
             const summary = await api.getMyActivityAttendance(activity.id);
@@ -188,7 +208,6 @@ export default function ActivitiesPage() {
                 startTimeUtc: editingSchedule.startTimeUtc,
                 endTimeUtc: editingSchedule.endTimeUtc,
                 location: editingSchedule.location,
-                status: editingSchedule.status,
                 meetingDays: editingSchedule.meetingDays,
             });
             setActivities((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -270,7 +289,7 @@ export default function ActivitiesPage() {
                         'Sắp diễn ra',
                         activities.filter(
                             (item) =>
-                                normalizeStatus(item.status) !== 'COMPLETED' &&
+                                normalizeStatus(item.status) === 'SCHEDULED' &&
                                 new Date(item.startTimeUtc) > new Date(),
                         ).length,
                         'text-violet-500',
@@ -389,7 +408,7 @@ export default function ActivitiesPage() {
                                     >
                                         Chi tiết
                                     </button>
-                                    {isWeekly && status !== 'COMPLETED' && canParticipate ? (
+                                    {isWeekly && status === 'SCHEDULED' && canParticipate ? (
                                         <button
                                             type="button"
                                             onClick={() => checkIn(activity)}
@@ -401,7 +420,7 @@ export default function ActivitiesPage() {
                                                 : 'Điểm danh hôm nay'}
                                         </button>
                                     ) : (
-                                        status !== 'COMPLETED' &&
+                                        status === 'SCHEDULED' &&
                                         canParticipate && (
                                             <button
                                                 type="button"
@@ -597,38 +616,12 @@ export default function ActivitiesPage() {
                                 </div>
                                 {attendanceSummary && (
                                     <>
-                                        <div className="grid grid-cols-3 gap-2 text-center">
-                                            <div className="rounded-lg bg-cyan-50 p-3">
-                                                <p className="text-xl font-bold text-cyan-700">
-                                                    {attendanceSummary.scheduledDays}
-                                                </p>
-                                                <p className="text-xs text-neutral-500">Buổi đã lên lịch</p>
-                                            </div>
-                                            <div className="rounded-lg bg-emerald-50 p-3">
-                                                <p className="text-xl font-bold text-emerald-700">
-                                                    {attendanceSummary.attendedDays}
-                                                </p>
-                                                <p className="text-xs text-neutral-500">Buổi có mặt</p>
-                                            </div>
-                                            <div className="rounded-lg bg-purple-50 p-3">
-                                                <p className="text-xl font-bold text-purple-700">
-                                                    {Number(attendanceSummary.attendanceRate).toFixed(2)}%
-                                                </p>
-                                                <p className="text-xs text-neutral-500">Tỷ lệ</p>
-                                            </div>
-                                        </div>
-                                        <p
-                                            className={`rounded-lg p-3 text-sm font-semibold ${attendanceSummary.canCheckInToday ? 'bg-emerald-50 text-emerald-700' : 'bg-neutral-100 text-neutral-600'}`}
-                                        >
-                                            {attendanceSummary.alreadyCheckedInToday
-                                                ? 'Bạn đã điểm danh hôm nay.'
-                                                : attendanceSummary.isScheduledToday
-                                                  ? 'Điểm danh đang mở hôm nay.'
-                                                  : 'Hôm nay không phải ngày họp theo lịch.'}
+                                        <p className="rounded-lg bg-cyan-50 p-3 text-sm font-semibold text-cyan-700">
+                                            Đã ghi nhận {attendanceSummary.total || 0} lượt điểm danh. Hệ thống kiểm tra lịch và thời gian khi bạn điểm danh.
                                         </p>
                                         <div className="max-h-48 divide-y divide-neutral-200 overflow-y-auto rounded-lg border border-neutral-200">
-                                            {attendanceSummary.history.length ? (
-                                                attendanceSummary.history.map((item) => (
+                                            {attendanceSummary.items?.length ? (
+                                                attendanceSummary.items.map((item) => (
                                                     <div
                                                         key={item.id}
                                                         className="flex items-center justify-between p-3 text-sm"
@@ -653,22 +646,19 @@ export default function ActivitiesPage() {
                                             type="button"
                                             onClick={() => checkIn(selectedActivity)}
                                             disabled={
-                                                !attendanceSummary.canCheckInToday ||
+                                                normalizeStatus(selectedActivity.status) !== 'SCHEDULED' ||
                                                 busyId === `check-in-${selectedActivity.id}`
                                             }
                                             className="w-full rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white disabled:opacity-40"
                                         >
-                                            {busyId === `check-in-${selectedActivity.id}`
-                                                ? 'Đang điểm danh...'
-                                                : attendanceSummary.alreadyCheckedInToday
-                                                  ? 'Đã điểm danh'
-                                                  : 'Điểm danh hôm nay'}
+                                            {busyId === `check-in-${selectedActivity.id}` ? 'Đang điểm danh...' : 'Điểm danh hôm nay'}
                                         </button>
                                     </>
                                 )}
                             </section>
                         )}
                         {accessByClub.get(selectedActivity.clubId)?.isManager &&
+                            normalizeStatus(selectedActivity.status) === 'SCHEDULED' &&
                             selectedActivity.meetingDays?.length > 0 && (
                                 <button
                                     type="button"
@@ -685,7 +675,7 @@ export default function ActivitiesPage() {
                                 </button>
                             )}
                         {accessByClub.get(selectedActivity.clubId)?.isManager &&
-                            normalizeStatus(selectedActivity.status) !== 'COMPLETED' && (
+                            normalizeStatus(selectedActivity.status) === 'SCHEDULED' && (
                                 <button
                                     type="button"
                                     onClick={() => completeActivity(selectedActivity)}
@@ -695,8 +685,30 @@ export default function ActivitiesPage() {
                                     {busyId === selectedActivity.id ? 'Đang xử lý...' : 'Đánh dấu hoàn thành'}
                                 </button>
                             )}
+                        {accessByClub.get(selectedActivity.clubId)?.isManager &&
+                            normalizeStatus(selectedActivity.status) === 'SCHEDULED' && (
+                                <button type="button" onClick={() => setActivityToCancel(selectedActivity)}
+                                    className="w-full rounded-lg border border-rose-300 px-4 py-3 font-semibold text-rose-700">
+                                    Hủy hoạt động
+                                </button>
+                            )}
                     </div>
                 )}
+            </Modal>
+
+            <Modal isOpen={Boolean(activityToCancel)} onClose={() => !busyId && setActivityToCancel(null)}
+                title="Hủy hoạt động" size="sm">
+                <div className="space-y-5 text-neutral-700">
+                    <p>Hủy <strong>{activityToCancel?.title}</strong>? Hoạt động sẽ chuyển sang trạng thái đã hủy.</p>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={() => setActivityToCancel(null)} disabled={Boolean(busyId)}
+                            className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold">Giữ lại</button>
+                        <button type="button" onClick={cancelActivity} disabled={Boolean(busyId)}
+                            className="flex-1 rounded-lg bg-rose-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+                            {busyId ? 'Đang hủy...' : 'Xác nhận hủy'}
+                        </button>
+                    </div>
+                </div>
             </Modal>
 
             <Modal

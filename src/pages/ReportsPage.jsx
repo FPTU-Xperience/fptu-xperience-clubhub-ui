@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Modal from '../components/Modal';
 import {
     CalendarClock,
     CheckCircle2,
@@ -64,8 +65,8 @@ function deriveSummary(reports, remoteSummary) {
 
 export default function ReportsPage() {
     const navigate = useNavigate();
-    const { clubAccess, hasPermission } = useAuth();
-    const { error } = useToast();
+    const { user, clubAccess, hasPermission } = useAuth();
+    const { error, success } = useToast();
     const canCreateReport = hasPermission(PERMISSIONS.AUTHOR_REPORTS);
     const isManager = clubAccess.some((access) => access.isManager);
 
@@ -78,6 +79,23 @@ export default function ReportsPage() {
     const [periodFilter, setPeriodFilter] = useState('ALL');
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [sortBy, setSortBy] = useState('UPDATED');
+    const [archiveTarget, setArchiveTarget] = useState(null);
+    const [archiving, setArchiving] = useState(false);
+
+    const archiveReport = async () => {
+        if (!archiveTarget || archiving) return;
+        setArchiving(true);
+        try {
+            await api.archiveReport(archiveTarget.id);
+            setArchiveTarget(null);
+            success('Đã lưu trữ báo cáo.');
+            await loadReports();
+        } catch (err) {
+            error(err.message || 'Không thể lưu trữ báo cáo.');
+        } finally {
+            setArchiving(false);
+        }
+    };
 
     const loadReports = useCallback(async () => {
         setIsLoading(true);
@@ -368,6 +386,9 @@ export default function ReportsPage() {
                                         clubAccess.some(
                                             (access) => access.clubId === report.clubId && access.isManager,
                                         ) && ['DRAFT', 'REJECTED'].includes(status);
+                                    const canArchive = canEdit && report.createdByUserId === user?.id &&
+                                        !report.budgetProposalId && !report.publishedActivityId &&
+                                        !report.financeSubmittedAtUtc;
                                     const dueIn = daysUntil(report.dueDate);
                                     const needsAttention =
                                         ['DRAFT', 'REJECTED'].includes(status) ||
@@ -439,6 +460,12 @@ export default function ReportsPage() {
                                                             <Pencil size={14} /> Sửa
                                                         </button>
                                                     )}
+                                                    {canArchive && (
+                                                        <button type="button" onClick={() => setArchiveTarget(report)}
+                                                            className="inline-flex items-center rounded-md border border-rose-400/30 px-3 py-2 text-sm font-semibold text-rose-200">
+                                                            Lưu trữ
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -449,6 +476,20 @@ export default function ReportsPage() {
                     </div>
                 )}
             </section>
+            <Modal isOpen={Boolean(archiveTarget)} onClose={() => !archiving && setArchiveTarget(null)}
+                title="Lưu trữ báo cáo" size="sm">
+                <div className="space-y-5 text-neutral-700">
+                    <p>Lưu trữ báo cáo <strong>#{archiveTarget?.id}</strong>? Tệp và lịch sử xét duyệt vẫn được giữ.</p>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={() => setArchiveTarget(null)} disabled={archiving}
+                            className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold">Hủy</button>
+                        <button type="button" onClick={archiveReport} disabled={archiving}
+                            className="flex-1 rounded-lg bg-rose-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+                            {archiving ? 'Đang lưu trữ...' : 'Lưu trữ'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

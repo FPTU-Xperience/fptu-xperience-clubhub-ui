@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import PageState from '../../../components/v2/PageState';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
+import ImagePicker from '../../../components/media/ImagePicker';
 import { toSharedProfile, useProfile } from '../profile-data';
 import './ProfilePage.scss';
 
@@ -61,23 +62,40 @@ function ProfileAvatar({ profile, large = false }) {
     return profile.avatarUrl ? <img className={`v2-profile-avatar${large ? ' is-large' : ''}`} src={profile.avatarUrl} alt="" /> : <span className={`v2-profile-avatar${large ? ' is-large' : ''}`} aria-hidden="true">{profile.initials}</span>;
 }
 
-function EditProfileModal({ profile, onClose, onSave }) {
+function EditProfileModal({ profile, personal, onClose, onSave, api, user }) {
     const [draft, setDraft] = useState({
         displayName: profile.displayName,
         headline: profile.headline,
         about: profile.about,
         skills: profile.skills.join(', '),
         interests: profile.interests.join(', '),
+        dateOfBirth: personal.dateOfBirth,
+        phoneNumber: personal.phoneNumber,
+        address: personal.address,
     });
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
+    const [avatarFile, setAvatarFile] = useState(null);
     const update = (event) => setDraft((current) => ({ ...current, [event.target.name]: event.target.value }));
     const submit = async (event) => {
         event.preventDefault();
         setSaving(true);
         setError('');
         try {
-            await onSave({ ...draft, skills: draft.skills.split(','), interests: draft.interests.split(',') });
+            const avatarUrl = avatarFile
+                ? await api.uploadPublicImage(avatarFile, 'student-avatar', user?.id || user?.email)
+                : profile.avatarUrl;
+            await onSave({
+                ...draft,
+                avatarUrl,
+                skills: draft.skills.split(','),
+                interests: draft.interests.split(','),
+                personal: {
+                    dateOfBirth: draft.dateOfBirth,
+                    phoneNumber: draft.phoneNumber,
+                    address: draft.address,
+                },
+            });
             onClose();
         } catch (requestError) {
             setError(requestError?.message || 'Không thể lưu hồ sơ lúc này. Vui lòng thử lại.');
@@ -88,11 +106,19 @@ function EditProfileModal({ profile, onClose, onSave }) {
     return (
         <V2Modal title="Chỉnh sửa hồ sơ cá nhân" onClose={onClose} wide>
             <form className="v2-profile-form" onSubmit={submit}>
+                <ImagePicker label="Ảnh đại diện" value={profile.avatarUrl} file={avatarFile} onChange={setAvatarFile} disabled={saving} />
                 <label> Tên hiển thị <input name="displayName" value={draft.displayName} onChange={update} required maxLength="120" /> </label>
                 <label> Câu nói tâm đắc / tiêu đề <input name="headline" value={draft.headline} onChange={update} maxLength="160" /> </label>
                 <label> Giới thiệu bản thân <textarea name="about" value={draft.about} onChange={update} rows="4" maxLength="2000" /> </label>
                 <label> Kỹ năng (cách nhau bởi dấu phẩy) <input name="skills" value={draft.skills} onChange={update} /> </label>
                 <label> Sở thích (cách nhau bởi dấu phẩy) <input name="interests" value={draft.interests} onChange={update} /> </label>
+                <fieldset className="v2-profile-form-private">
+                    <legend>Thông tin dùng khi đăng ký CLB</legend>
+                    <p>Chỉ bạn nhìn thấy. Thông tin này sẽ tự điền vào hồ sơ gia nhập CLB.</p>
+                    <label>Ngày sinh <input name="dateOfBirth" value={draft.dateOfBirth} onChange={update} type="date" /></label>
+                    <label>Số điện thoại <input name="phoneNumber" value={draft.phoneNumber} onChange={update} inputMode="tel" placeholder="Ví dụ: 0901234567" maxLength="16" /></label>
+                    <label>Địa chỉ <input name="address" value={draft.address} onChange={update} maxLength="500" /></label>
+                </fieldset>
                 {error && <p className="v2-profile-form-error" role="alert">{error}</p>}
                 <footer><button className="v2-button" type="button" onClick={onClose} disabled={saving}>Hủy</button><button className="v2-button v2-button--primary" disabled={saving}>{saving ? 'Đang lưu...' : <><Check size={16} /> Lưu thay đổi</>}</button></footer>
             </form>
@@ -100,7 +126,7 @@ function EditProfileModal({ profile, onClose, onSave }) {
     );
 }
 
-export default function ProfilePage({ user, sessionKey }) {
+export default function ProfilePage({ user, sessionKey, api }) {
     const result = useProfile(user, sessionKey);
     const [shared, setShared] = useState(false);
     const [tab, setTab] = useState('overview');
@@ -139,7 +165,7 @@ export default function ProfilePage({ user, sessionKey }) {
                     {tab === 'overview' ? <><div className="v2-profile-stats"><Stat icon={Award} label="Điểm đóng góp ghi nhận" value={data.summary.recognizedContributionTotal} hidden={shared} note={shared ? 'Chỉ hiển thị trong hồ sơ cá nhân' : 'Tổng tích lũy qua các kỳ'} /><Stat icon={BookOpen} label="Hoạt động đã tham dự" value={data.summary.activityCount} note={term ? `Trong ${term}` : 'Tất cả học kỳ'} /><Stat icon={FolderOpen} label="Câu lạc bộ tham gia" value={data.summary.clubCount} note="Cộng đồng đã gắn bó" /></div><section className="v2-profile-panel v2-profile-experience"><div><span>SÁU TRỤ CỘT TRẢI NGHIỆM</span><h2>Hành trình của bạn không chỉ được đo bằng điểm số.</h2><p>Đây là hình minh họa cho những kỹ năng bạn đang nuôi dưỡng qua từng trải nghiệm.</p></div><Radar pillars={data.summary.experiencePillars} /></section></> : <section className="v2-profile-panel"><div className="v2-profile-section-heading"><div><span>MINH CHỨNG</span><h2>Lịch sử đóng góp & hoạt động</h2><p>Từng dấu ấn được ghi nhận bởi ban chủ nhiệm CLB.</p></div></div>{shared ? <p className="v2-profile-empty">Lịch sử riêng tư được ẩn trong bản chia sẻ.</p> : evidence.length ? <div className="v2-profile-evidence-list">{evidence.map((item) => <article key={item.id}><Award size={20} /><div><strong>{item.title}</strong><small>{item.clubName} · {item.date} · Người xác nhận: {item.verifier}</small></div><span>+{item.points} điểm</span></article>)}</div> : <p className="v2-profile-empty">Chưa có minh chứng trong học kỳ này.</p>}</section>}
                 </div>
             </div>
-            {editing && <EditProfileModal profile={result.data.profile} onClose={() => setEditing(false)} onSave={result.save} />}
+            {editing && <EditProfileModal profile={result.data.profile} personal={result.data.personal} onClose={() => setEditing(false)} onSave={result.save} api={api} user={user} />}
         </div>
     );
 }

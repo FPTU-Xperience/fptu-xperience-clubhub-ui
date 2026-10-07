@@ -3,9 +3,11 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import {
     classifyApiError,
+    canJoinClub,
     createCuratedClubSet,
     createRequestGate,
     filterClubDirectory,
+    findClubIdByCode,
     mapClubDirectoryEntry,
     mapClubPublicDetail,
     orderDirectoryCategories,
@@ -23,12 +25,24 @@ test('directory adapter exposes only the V2 card model and preserves unavailable
         members: [{ userId: 'private', fullName: 'Private Student' }],
     });
     assert.equal(mapped.id, '7');
-    assert.equal(mapped.destination, '/v2/clubs/7');
+    assert.equal(mapped.destination, '/v2/clubs/F-CODE');
     assert.equal(mapped.category, 'Công nghệ');
     assert.equal(mapped.logoUrl, 'https://cdn.example.edu/f-code.png');
     assert.equal(mapped.hasRecruitmentStatus, false);
     assert.equal(mapped.isRecruiting, null);
     assert.equal('members' in mapped, false);
+});
+
+test('club detail resolves a route code to the numeric API identifier', () => {
+    const directory = { items: [{ id: 7, code: 'F-CODE' }, { id: 9, code: 'F-STYLE' }] };
+    assert.equal(findClubIdByCode(directory, 'f-code'), 7);
+    assert.equal(findClubIdByCode(directory, 'missing'), null);
+});
+
+test('a recruitment CTA is available only to viewers without club access', () => {
+    assert.equal(canJoinClub({ isRecruiting: true, viewerRelationship: 'NONE' }), true);
+    assert.equal(canJoinClub({ isRecruiting: true, viewerRelationship: 'MEMBER' }), false);
+    assert.equal(canJoinClub({ isRecruiting: false, viewerRelationship: 'NONE' }), false);
 });
 
 test('directory criteria combine query, category, and recruitment with AND semantics', () => {
@@ -124,7 +138,7 @@ test('production routing isolates demo, all-clubs, and club-detail pages', () =>
     assert.match(routes, /path="my-clubs"/);
     assert.match(routes, /path="my-schedule"/);
     assert.match(routes, /path="recommended"/);
-    assert.match(routes, /path="clubs\/:clubId"/);
+    assert.match(routes, /path="clubs\/:clubCode"/);
     assert.match(routes, /AllClubsPage/);
     assert.doesNotMatch(routes, /RecommendedClubsPage/);
 

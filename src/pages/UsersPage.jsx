@@ -6,8 +6,8 @@ import { useToast } from '../context/ToastContext';
 import { ROLE_LABELS, ROLES } from '../auth/permissions';
 import { useDebounce } from '../hooks/useLocalStorage';
 
-const allRoles = Object.values(ROLES);
-const emptyCreate = { username: '', fullName: '', email: '', password: '', role: ROLES.CLUB_MEMBER };
+const accountRoles = [ROLES.ADMIN, ROLES.CLUB_MANAGER, ROLES.CLUB_MEMBER];
+const emptyCreate = { username: '', fullName: '', email: '', role: ROLES.CLUB_MEMBER };
 const PAGE_SIZE = 20;
 function FormField({ label, children }) {
     return (
@@ -34,7 +34,7 @@ export default function UsersPage() {
     const [editing, setEditing] = useState(null);
     const [editForm, setEditForm] = useState(null);
 
-    const availableRoles = isAdmin ? allRoles : allRoles.filter((role) => role !== ROLES.ADMIN);
+    const availableRoles = isAdmin ? accountRoles : accountRoles.filter((role) => role !== ROLES.ADMIN);
 
     const loadUsers = useCallback(async () => {
         setIsLoading(true);
@@ -70,7 +70,6 @@ export default function UsersPage() {
                 username: createForm.username.trim(),
                 fullName: createForm.fullName.trim(),
                 email: createForm.email.trim(),
-                password: createForm.password,
                 roles: [createForm.role],
             });
             setShowCreate(false);
@@ -175,6 +174,7 @@ export default function UsersPage() {
                             <tbody className="divide-y divide-slate-800">
                                 {users.map((target) => {
                                     const protectedAdmin = target.roles.includes(ROLES.ADMIN) && !isAdmin;
+                                    const unsupportedEditRole = !accountRoles.includes(target.roles[0]);
                                     return (
                                         <tr key={target.id} className="hover:bg-white/[0.02]">
                                             <td className="px-5 py-4">
@@ -205,7 +205,8 @@ export default function UsersPage() {
                                                         type="button"
                                                         aria-label={`Chỉnh sửa ${target.fullName}`}
                                                         onClick={() => openEdit(target)}
-                                                        disabled={protectedAdmin}
+                                                        disabled={protectedAdmin || unsupportedEditRole}
+                                                        title={unsupportedEditRole ? 'API hiện chưa hỗ trợ chỉnh sửa vai trò này.' : undefined}
                                                         className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-gray-300 disabled:opacity-35"
                                                     >
                                                         Sửa
@@ -296,19 +297,7 @@ export default function UsersPage() {
                             className="w-full rounded-lg border border-neutral-300 px-3 py-2.5 text-neutral-900"
                         />
                     </FormField>
-                    <FormField label="Mật khẩu ban đầu *">
-                        <input
-                            type="password"
-                            autoComplete="new-password"
-                            value={createForm.password}
-                            onChange={(event) =>
-                                setCreateForm((current) => ({ ...current, password: event.target.value }))
-                            }
-                            required
-                            minLength={8}
-                            className="w-full rounded-lg border border-neutral-300 px-3 py-2.5 text-neutral-900"
-                        />
-                    </FormField>
+                    <p className="text-sm text-neutral-600">Tài khoản đăng nhập bằng Google; không cần mật khẩu ban đầu.</p>
                     <FormField label="Vai trò *">
                         <select
                             value={createForm.role}

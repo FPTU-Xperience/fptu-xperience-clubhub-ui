@@ -58,8 +58,10 @@ export default function ClubMembersPage() {
     const [data, setData] = useState({ items: [], totalItems: 0, totalPages: 0 });
     const [loading, setLoading] = useState(true);
     const [selected, setSelected] = useState(null);
+    const [memberEdit, setMemberEdit] = useState(null);
     const [detailLoading, setDetailLoading] = useState(false);
     const [pendingTreasurer, setPendingTreasurer] = useState(null);
+    const [pendingTreasurerRemoval, setPendingTreasurerRemoval] = useState(null);
     const [pendingDelete, setPendingDelete] = useState(null);
     const [busy, setBusy] = useState(false);
 
@@ -130,6 +132,43 @@ export default function ClubMembersPage() {
             await load();
         } catch (err) {
             error(err.message || 'Không thể chỉ định thành viên này làm thủ quỹ.');
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const saveMemberProfile = async (event) => {
+        event.preventDefault();
+        if (!memberEdit || busy) return;
+        setBusy(true);
+        try {
+            await api.updateClubMemberProfile(clubId, memberEdit.id, {
+                fullName: memberEdit.fullName.trim(),
+                email: memberEdit.email.trim(),
+                phoneNumber: memberEdit.phoneNumber.trim() || undefined,
+                address: memberEdit.address.trim(),
+            });
+            setMemberEdit(null);
+            success('Đã cập nhật thông tin thành viên.');
+            await load();
+            setSelected(await api.getClubMember(clubId, memberEdit.id));
+        } catch (err) {
+            error(err.message || 'Không thể cập nhật thông tin thành viên.');
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const removeTreasurer = async () => {
+        if (!pendingTreasurerRemoval || busy) return;
+        setBusy(true);
+        try {
+            await api.removeClubTreasurer(pendingTreasurerRemoval.id);
+            success(`${pendingTreasurerRemoval.fullName} đã trở lại vai trò thành viên.`);
+            setPendingTreasurerRemoval(null);
+            await load();
+        } catch (err) {
+            error(err.message || 'Không thể gỡ vai trò thủ quỹ.');
         } finally {
             setBusy(false);
         }
@@ -288,6 +327,12 @@ export default function ClubMembersPage() {
                                                             Chỉ định thủ quỹ
                                                         </button>
                                                     )}
+                                                {member.status === 'Approved' && member.role === 'TREASURER' && (
+                                                    <button type="button" onClick={() => setPendingTreasurerRemoval(member)}
+                                                        className="rounded-lg bg-amber-500/10 px-3 py-2 font-semibold text-amber-300">
+                                                        Gỡ thủ quỹ
+                                                    </button>
+                                                )}
                                                 {member.role !== 'CLUB_OWNER' && (
                                                     <button
                                                         type="button"
@@ -358,6 +403,18 @@ export default function ClubMembersPage() {
                                     <p className="font-semibold">{formatDate(selected.joinedAtUtc)}</p>
                                 </div>
                             </div>
+                            <button type="button" onClick={() => {
+                                setMemberEdit({
+                                    id: selected.member.id,
+                                    fullName: selected.member.fullName || '',
+                                    email: selected.member.email || '',
+                                    phoneNumber: selected.member.phoneNumber || '',
+                                    address: selected.member.address || '',
+                                });
+                                setSelected(null);
+                            }} className="rounded-lg border border-cyan-200 px-4 py-2 font-semibold text-cyan-700">
+                                Cập nhật thông tin
+                            </button>
                             <div className="rounded-xl bg-neutral-100 p-4">
                                 <p className="text-sm font-semibold">Tỷ lệ tham gia</p>
                                 <p className="mt-1 text-3xl font-bold text-cyan-700">
@@ -399,6 +456,36 @@ export default function ClubMembersPage() {
                 )}
             </Modal>
 
+            <Modal isOpen={Boolean(memberEdit)} onClose={() => !busy && setMemberEdit(null)}
+                title="Cập nhật thông tin thành viên" size="md">
+                {memberEdit && <form onSubmit={saveMemberProfile} className="space-y-4">
+                    <label className="block text-sm font-semibold text-neutral-700">Họ và tên
+                        <input value={memberEdit.fullName} onChange={(event) => setMemberEdit((value) => ({ ...value, fullName: event.target.value }))}
+                            required maxLength={200} className="mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2" />
+                    </label>
+                    <label className="block text-sm font-semibold text-neutral-700">Thư điện tử
+                        <input type="email" value={memberEdit.email} onChange={(event) => setMemberEdit((value) => ({ ...value, email: event.target.value }))}
+                            required maxLength={255} className="mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2" />
+                    </label>
+                    <label className="block text-sm font-semibold text-neutral-700">Điện thoại
+                        <input value={memberEdit.phoneNumber} onChange={(event) => setMemberEdit((value) => ({ ...value, phoneNumber: event.target.value }))}
+                            maxLength={40} className="mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2" />
+                    </label>
+                    <label className="block text-sm font-semibold text-neutral-700">Địa chỉ
+                        <input value={memberEdit.address} onChange={(event) => setMemberEdit((value) => ({ ...value, address: event.target.value }))}
+                            maxLength={500} className="mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2" />
+                    </label>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={() => setMemberEdit(null)} disabled={busy}
+                            className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold">Hủy</button>
+                        <button type="submit" disabled={busy}
+                            className="flex-1 rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+                            {busy ? 'Đang lưu...' : 'Lưu'}
+                        </button>
+                    </div>
+                </form>}
+            </Modal>
+
             <Modal
                 isOpen={Boolean(pendingTreasurer)}
                 onClose={() => !busy && setPendingTreasurer(null)}
@@ -429,6 +516,21 @@ export default function ClubMembersPage() {
                             className="flex-1 rounded-lg bg-purple-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
                         >
                             {busy ? 'Đang chỉ định...' : 'Chỉ định thủ quỹ'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal isOpen={Boolean(pendingTreasurerRemoval)} onClose={() => !busy && setPendingTreasurerRemoval(null)}
+                title="Gỡ vai trò thủ quỹ" size="sm">
+                <div className="space-y-5 text-neutral-800">
+                    <p>Chuyển <strong>{pendingTreasurerRemoval?.fullName}</strong> về vai trò thành viên?</p>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={() => setPendingTreasurerRemoval(null)} disabled={busy}
+                            className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold disabled:opacity-50">Hủy</button>
+                        <button type="button" onClick={removeTreasurer} disabled={busy}
+                            className="flex-1 rounded-lg bg-amber-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+                            {busy ? 'Đang cập nhật...' : 'Xác nhận'}
                         </button>
                     </div>
                 </div>

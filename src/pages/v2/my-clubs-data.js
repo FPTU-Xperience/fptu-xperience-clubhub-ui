@@ -7,11 +7,11 @@ export const isMyClubsMockEnabled = viteEnv.DEV && viteEnv.VITE_MOCK_MY_CLUBS ==
 
 const mockSelection = [
     {
-        clubId: 'fcode', name: 'F-Code', role: 'MANAGER', pendingApplications: 3,
+        clubId: 1, clubCode: 'fcode', name: 'F-Code', role: 'MANAGER', pendingApplications: 3,
         upcomingActivity: { title: 'Code Camp: Build for Campus', startTime: '2026-09-28T08:30:00+07:00', location: 'Innovation Lab' },
     },
     {
-        clubId: 'fstyle', name: 'F-Style', role: 'MEMBER',
+        clubId: 2, clubCode: 'fstyle', name: 'F-Style', role: 'MEMBER',
         upcomingActivity: { title: 'Creative Portfolio Workshop', startTime: '2026-10-02T18:00:00+07:00', location: 'Phòng Studio A' },
     },
 ];
@@ -36,16 +36,18 @@ export function mapMyClubSelection(value) {
     return rows(value)
         .map((raw) => {
             const clubId = text(raw.clubId || raw.id);
+            const clubCode = text(raw.clubCode || raw.code).trim();
             const role = text(raw.role).toUpperCase();
-            if (!clubId || !['MEMBER', 'MANAGER'].includes(role) || seen.has(clubId)) return null;
+            if (!clubId || !clubCode || !['MEMBER', 'MANAGER'].includes(role) || seen.has(clubId)) return null;
             seen.add(clubId);
             const activity = raw.upcomingActivity;
             return {
                 clubId,
+                clubCode,
                 name: text(raw.name, 'Câu lạc bộ'),
                 logoUrl: text(raw.logoUrl),
                 role,
-                workspacePath: `/v2/my-clubs/${encodeURIComponent(clubId)}`,
+                workspacePath: `/v2/my-clubs/${encodeURIComponent(clubCode)}`,
                 upcomingActivity: activity?.title && activity?.startTime
                     ? { title: text(activity.title), startTime: text(activity.startTime), location: text(activity.location) }
                     : null,

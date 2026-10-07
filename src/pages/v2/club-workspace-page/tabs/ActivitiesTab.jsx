@@ -1,21 +1,29 @@
 import { useState } from 'react';
 import { ArrowUpRight, Plus } from 'lucide-react';
-import { useParams } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import PageState from '../../../../components/v2/PageState';
 import ActivityDetail from '../../../../components/v2/activity-detail/ActivityDetail';
 import V2Modal from '../../../../components/v2/common/modal/V2Modal';
-import { useActivityFeed } from '../../activity-data';
+import ImagePicker from '../../../../components/media/ImagePicker';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 
-export default function ActivitiesTab({ manager = false }) {
-    const { clubId } = useParams();
-    const { api, user } = useAuth();
+export default function ActivitiesTab({ manager = false, dashboard, workspace }) {
+    const clubId = workspace?.clubId;
+    const { api } = useAuth();
     const [selected, setSelected] = useState(null);
     const [creating, setCreating] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const result = useActivityFeed(api, user?.id || user?.email || 'anonymous', clubId);
+    const [imageActivity, setImageActivity] = useState(null);
+    const [coverFile, setCoverFile] = useState(null);
+    const activities = dashboard.data?.activities || [];
+    const result = {
+        status: dashboard.status === 'ready'
+            ? dashboard.data?.activityAvailable ? (activities.length ? 'populated' : 'empty') : 'error'
+            : dashboard.status,
+        data: activities,
+        retry: dashboard.retry,
+    };
 
     const createActivity = async (event) => {
         event.preventDefault();
@@ -24,16 +32,38 @@ export default function ActivitiesTab({ manager = false }) {
         setSubmitError('');
         try {
             await api.createActivity({
-                clubId,
+                clubId: Number(clubId),
+                clubName: workspace.name,
                 title: values.title.trim(),
                 description: values.description.trim(),
                 startTimeUtc: new Date(values.startTime).toISOString(),
+                endTimeUtc: new Date(values.endTime).toISOString(),
                 location: values.location.trim(),
             });
             setCreating(false);
             result.retry();
         } catch (error) {
             setSubmitError(error?.message || 'Không thể tạo hoạt động. Vui lòng thử lại.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const saveCover = async (event) => {
+        event.preventDefault();
+        if (!manager || !imageActivity || !coverFile || submitting) return;
+        setSubmitting(true);
+        setSubmitError('');
+        try {
+            const url = await api.uploadPublicImage(coverFile, 'activity-cover', imageActivity.id);
+            await api.updateActivityCoverImage(imageActivity.id, url);
+            setImageActivity(null);
+            setCoverFile(null);
+            result.retry();
+        } catch (error) {
+            setSubmitError(error?.status === 404
+                ? 'Máy chủ chưa hỗ trợ lưu ảnh hoạt động.'
+                : error?.message || 'Không thể lưu ảnh hoạt động.');
         } finally {
             setSubmitting(false);
         }
@@ -77,12 +107,14 @@ export default function ActivitiesTab({ manager = false }) {
                                             </span>
                                         </time>
                                         <div>
+                                            {record.coverImageUrl && <img className="v2-workspace-event-cover" src={record.coverImageUrl} alt="" />}
                                             <span>
-                                                {record.status === 'LIVE' ? 'Đang diễn ra' : 'Sắp diễn ra'}
+                                                {record.status === 'COMPLETED' ? 'Đã hoàn thành' : record.status === 'LIVE' ? 'Đang diễn ra' : 'Đã lên lịch'}
                                                 {record.location ? ` · ${record.location}` : ''}
                                             </span>
                                             <h2>{record.title}</h2>
                                             <p>{record.description || 'Thông tin chi tiết đang được cập nhật.'}</p>
+                                            {manager && <button className="v2-workspace-image-action" type="button" onClick={() => { setImageActivity(record); setCoverFile(null); setSubmitError(''); }}>Ảnh hoạt động</button>}
                                         </div>
                                         <button
                                             type="button"
@@ -104,7 +136,14 @@ export default function ActivitiesTab({ manager = false }) {
                     )
                 }
             </WorkspaceTabLayout>
-            <ActivityDetail activity={selected} onClose={() => setSelected(null)} />
+            <ActivityDetail activity={selected ? { ...selected, clubCode: workspace?.clubCode } : null} onClose={() => setSelected(null)} />
+            {imageActivity && <V2Modal title={`Ảnh hoạt động: ${imageActivity.title}`} onClose={() => !submitting && setImageActivity(null)}>
+                <form className="v2-workspace-activity-form" onSubmit={saveCover}>
+                    <ImagePicker label="Ảnh bìa hoạt động" value={imageActivity.coverImageUrl} file={coverFile} onChange={setCoverFile} disabled={submitting} />
+                    {submitError && <p className="v2-workspace-form-error" role="alert">{submitError}</p>}
+                    <div><button className="v2-button" type="button" onClick={() => setImageActivity(null)} disabled={submitting}>Hủy</button><button className="v2-button v2-button--primary" disabled={submitting || !coverFile}>{submitting ? 'Đang lưu…' : 'Lưu ảnh'}</button></div>
+                </form>
+            </V2Modal>}
             {creating && (
                 <V2Modal title="Tạo hoạt động nội bộ" onClose={() => !submitting && setCreating(false)}>
                     <form className="v2-workspace-activity-form" onSubmit={createActivity}>
@@ -122,6 +161,10 @@ export default function ActivitiesTab({ manager = false }) {
                             <input name="startTime" type="datetime-local" required />
                         </label>
                         <label>
+                            Thời gian kết thúc
+                            <input name="endTime" type="datetime-local" required />
+                        </label>
+                        <label>
                             Địa điểm
                             <input name="location" required placeholder="Ví dụ: Innovation Hub" />
                         </label>
@@ -130,6 +173,7 @@ export default function ActivitiesTab({ manager = false }) {
                             <textarea
                                 name="description"
                                 rows="4"
+                                required
                                 maxLength="1000"
                                 placeholder="Mục tiêu, nội dung và lưu ý cho người tham gia"
                             />

@@ -11,6 +11,7 @@ import {
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import PageState from '../../../components/v2/PageState';
 import { useClubWorkspace } from '../workspace-data';
+import { useWorkspaceDashboard } from '../workspace-dashboard-data';
 import WorkspaceTabView from './tabs/WorkspaceTabView';
 import WorkspaceLeftRail, { getWorkspaceSections } from './WorkspaceLeftRail';
 import './ClubWorkspacePage.scss';
@@ -47,9 +48,13 @@ function Review({ icon: Icon, title, copy }) {
     );
 }
 
-function WorkspaceHome({ workspace, manager, base, viewer }) {
-    const pending =
-        workspace.pendingApplications === null ? 'Đang cập nhật' : (workspace.pendingApplications ?? 'Đang cập nhật');
+function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
+    const summary = dashboard.data;
+    const metric = (value) => value ?? (dashboard.status === 'loading' ? '…' : '—');
+    const loadingNote = 'Đang tải dữ liệu…';
+    const activityNote = dashboard.status === 'loading' ? loadingNote : summary?.activityAvailable
+        ? summary.upcomingActivity?.title || 'Chưa có hoạt động sắp tới'
+        : 'Không tải được lịch hoạt động';
     return (
         <>
             <section className="v2-workspace-intro">
@@ -70,26 +75,26 @@ function WorkspaceHome({ workspace, manager, base, viewer }) {
                 </Link>
             </section>
             <div className="v2-workspace-stats">
-                <Stat label="Thành viên CLB" value="Đang cập nhật" note="Danh sách thành viên hiện tại" Icon={Users} />
+                <Stat label="Thành viên CLB" value={metric(summary?.memberCount)} note="Thành viên đã được duyệt" Icon={Users} />
                 <Stat
-                    label="Hoạt động trong kỳ"
-                    value="Đang cập nhật"
-                    note="Lịch hoạt động của CLB"
+                    label="Hoạt động của CLB"
+                    value={metric(summary?.activityCount)}
+                    note="Không gồm hoạt động đã hủy"
                     Icon={CalendarDays}
                     tone="is-purple"
                 />
                 <Stat
-                    label="Đơn chờ duyệt"
-                    value={manager ? pending : '—'}
-                    note={manager ? 'Đơn hiện tại của CLB' : 'Chỉ dành cho chủ nhiệm'}
+                    label={manager ? 'Đơn chờ duyệt' : 'Hoạt động sắp tới'}
+                    value={metric(manager ? summary?.pendingApplications : summary?.upcomingCount)}
+                    note={manager ? 'Đơn tham gia đang chờ' : 'Lịch sắp diễn ra của CLB'}
                     Icon={Award}
                     tone="is-green"
                 />
                 <Stat
-                    label="Đóng góp cần xác nhận"
-                    value="Đang cập nhật"
-                    note="Mỗi đóng góp đều đáng ghi nhận"
-                    Icon={Award}
+                    label="Báo cáo đã duyệt"
+                    value={metric(summary?.approvedReportCount)}
+                    note="Báo cáo CLB bạn có thể xem"
+                    Icon={FileText}
                 />
             </div>
             <div className="v2-workspace-dashboard">
@@ -120,28 +125,33 @@ function WorkspaceHome({ workspace, manager, base, viewer }) {
                     </div>
                 </section>
                 <section className="v2-workspace-review">
-                    <h2>Cần bạn xem qua</h2>
+                    <h2>Điểm qua CLB</h2>
                     <Review
                         icon={Users}
                         title={manager ? 'Đơn tham gia mới' : 'Hoạt động của CLB'}
                         copy={
                             manager
-                                ? workspace.pendingApplications === null
-                                    ? 'Đơn tham gia đang cập nhật'
-                                    : `${workspace.pendingApplications} đơn đang chờ xem xét`
-                                : 'Thông tin mới sẽ xuất hiện tại đây'
+                                ? dashboard.status === 'loading' ? loadingNote : summary?.pendingApplications == null
+                                    ? 'Không tải được đơn tham gia'
+                                    : `${summary.pendingApplications} đơn đang chờ xem xét`
+                                : activityNote
                         }
                     />
-                    <Review icon={Award} title="Xác nhận đóng góp" copy="Đang cập nhật" />
-                    <Review icon={FileText} title="Báo cáo học kỳ" copy="Đang cập nhật" />
+                    <Review
+                        icon={FileText}
+                        title="Báo cáo đã duyệt"
+                        copy={dashboard.status === 'loading' ? loadingNote : summary?.approvedReportCount == null
+                            ? 'Không tải được báo cáo'
+                            : `${summary.approvedReportCount} báo cáo có thể xem`}
+                    />
                 </section>
                 <section className="v2-workspace-schedule">
                     <div>
                         <h2>Lịch hẹn của CLB</h2>
                         <p>
-                            {workspace.upcomingActivity
-                                ? `${dateLabel(workspace.upcomingActivity.startTime)}${workspace.upcomingActivity.location ? ` · ${workspace.upcomingActivity.location}` : ''}`
-                                : 'Dành thời gian cho những điều bạn quan tâm.'}
+                            {summary?.upcomingActivity
+                                ? `${dateLabel(summary.upcomingActivity.startTime)}${summary.upcomingActivity.location ? ` · ${summary.upcomingActivity.location}` : ''}`
+                                : 'Lịch hoạt động sắp tới của CLB'}
                         </p>
                     </div>
                     <Link to={`${base}/activities`}>
@@ -150,9 +160,10 @@ function WorkspaceHome({ workspace, manager, base, viewer }) {
                     <article>
                         <CalendarDays size={18} />
                         <div>
-                            <strong>{workspace.upcomingActivity?.title || 'Lịch hoạt động đang cập nhật'}</strong>
+                            <strong>{activityNote}</strong>
                             <span>
-                                {workspace.upcomingActivity?.location || 'Thông tin chi tiết sẽ xuất hiện tại đây.'}
+                                {summary?.upcomingActivity?.location ||
+                                    (summary?.activityAvailable ? 'Xem tất cả hoạt động của CLB.' : 'Vui lòng thử lại sau.')}
                             </span>
                         </div>
                     </article>
@@ -163,11 +174,13 @@ function WorkspaceHome({ workspace, manager, base, viewer }) {
 }
 
 export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
-    const { clubId: routeClubId } = useParams();
+    const { clubCode: routeClubCode } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const result = useClubWorkspace(api, sessionKey, routeClubId);
-    const base = `/v2/my-clubs/${encodeURIComponent(result.clubId || routeClubId || '')}`;
+    const result = useClubWorkspace(api, sessionKey, routeClubCode);
+    const manager = result.workspace?.role === 'MANAGER';
+    const dashboard = useWorkspaceDashboard(api, result.status === 'populated' ? result.clubId : null, manager, sessionKey);
+    const base = `/v2/my-clubs/${encodeURIComponent(result.workspace?.clubCode || routeClubCode || '')}`;
     if (result.status !== 'populated')
         return (
             <div className="v2-public-content v2-workspace-state">
@@ -190,7 +203,6 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
                 )}
             </div>
         );
-    const manager = result.workspace.role === 'MANAGER';
     const availableSections = getWorkspaceSections(manager);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
     const activeSection = availableSections.find(([path]) => path === relativePath);
@@ -198,11 +210,11 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     return (
         <div className="v2-production-workspace">
             <WorkspaceLeftRail
-                workspace={result.workspace}
+                workspace={{ ...result.workspace, pendingApplications: dashboard.data?.pendingApplications ?? null }}
                 selections={result.data}
                 base={base}
                 manager={manager}
-                onClubChange={(clubId) => navigate(`/v2/my-clubs/${encodeURIComponent(clubId)}`)}
+                onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
             />
             <main className="v2-workspace-main">
                 <header className="v2-workspace-bar">
@@ -221,9 +233,9 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
                 </header>
                 <div className="v2-workspace-content">
                     {activeSection && !relativePath ? (
-                        <WorkspaceHome workspace={result.workspace} manager={manager} base={base} viewer={viewer} />
+                        <WorkspaceHome workspace={result.workspace} manager={manager} base={base} viewer={viewer} dashboard={dashboard} />
                     ) : (
-                        <WorkspaceTabView label={sectionLabel} manager={manager} />
+                        <WorkspaceTabView label={sectionLabel} manager={manager} dashboard={dashboard} workspace={result.workspace} />
                     )}
                 </div>
             </main>

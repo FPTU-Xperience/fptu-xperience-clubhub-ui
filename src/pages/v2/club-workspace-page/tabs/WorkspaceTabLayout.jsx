@@ -1,9 +1,9 @@
-export default function WorkspaceTabLayout({ title, description, action, records, children }) {
+export default function WorkspaceTabLayout({ title, description, action, records = [], preview = false, children }) {
     return (
         <section className="v2-workspace-section">
             <header>
                 <div>
-                    <span className="v2-eyebrow">KHÔNG GIAN CLB · DỮ LIỆU MINH HỌA</span>
+                    <span className="v2-eyebrow">KHÔNG GIAN CLB{preview ? ' · DỮ LIỆU MINH HỌA' : ''}</span>
                     <h1>{title}</h1>
                     <p>{description}</p>
                 </div>

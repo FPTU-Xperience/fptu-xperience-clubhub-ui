@@ -1,6 +1,6 @@
 import { useMyClubSelection } from './my-clubs-data.js';
 
-export function decodeWorkspaceClubId(value) {
+export function decodeWorkspaceClubCode(value) {
     try {
         return decodeURIComponent(value || '');
     } catch {
@@ -8,15 +8,17 @@ export function decodeWorkspaceClubId(value) {
     }
 }
 
-export function resolveWorkspace(selection, routeClubId) {
-    const clubId = decodeWorkspaceClubId(routeClubId);
-    if (selection.status !== 'populated') return { ...selection, workspace: null, clubId };
-    const workspace = selection.data.find((club) => club.clubId === clubId) || null;
+const normalizedClubCode = (value) => String(value || '').trim().toUpperCase();
+
+export function resolveWorkspace(selection, routeClubCode) {
+    const clubCode = decodeWorkspaceClubCode(routeClubCode);
+    if (selection.status !== 'populated') return { ...selection, workspace: null, clubCode, clubId: null };
+    const workspace = selection.data.find((club) => normalizedClubCode(club.clubCode) === normalizedClubCode(clubCode)) || null;
     return workspace
-        ? { ...selection, workspace, clubId }
-        : { ...selection, status: 'not-found', workspace: null, clubId };
+        ? { ...selection, workspace, clubCode: workspace.clubCode, clubId: workspace.clubId }
+        : { ...selection, status: 'not-found', workspace: null, clubCode, clubId: null };
 }
 
-export function useClubWorkspace(api, sessionKey, routeClubId) {
-    return resolveWorkspace(useMyClubSelection(api, sessionKey), routeClubId);
+export function useClubWorkspace(api, sessionKey, routeClubCode) {
+    return resolveWorkspace(useMyClubSelection(api, sessionKey), routeClubCode);
 }

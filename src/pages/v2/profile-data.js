@@ -6,6 +6,7 @@ const MAX_HEADLINE = 160;
 const MAX_ABOUT = 2000;
 const MAX_LIST_ITEMS = 12;
 const MAX_LIST_ITEM_LENGTH = 80;
+const PHONE_NUMBER_PATTERN = /^\+?[0-9]{9,15}$/;
 
 const clone = (value) => structuredClone(value);
 const accountIdentity = (user) => {
@@ -45,13 +46,33 @@ function editableProfile(value, fallback) {
     const about = value.about === undefined ? fallback.about : text(value.about);
     const skills = value.skills === undefined ? fallback.skills : normalizeList(value.skills, 'Kỹ năng');
     const interests = value.interests === undefined ? fallback.interests : normalizeList(value.interests, 'Sở thích');
+    const avatarUrl = value.avatarUrl === undefined ? fallback.avatarUrl : text(value.avatarUrl);
 
     if (!displayName) throw new Error('Vui lòng nhập tên hiển thị.');
     if (displayName.length > MAX_DISPLAY_NAME) throw new Error(`Tên hiển thị tối đa ${MAX_DISPLAY_NAME} ký tự.`);
     if (headline.length > MAX_HEADLINE) throw new Error(`Tiêu đề tối đa ${MAX_HEADLINE} ký tự.`);
     if (about.length > MAX_ABOUT) throw new Error(`Giới thiệu tối đa ${MAX_ABOUT} ký tự.`);
+    if (avatarUrl && (avatarUrl.length > 1000 || !/^https:\/\//i.test(avatarUrl))) {
+        throw new Error('Đường dẫn ảnh đại diện không hợp lệ.');
+    }
 
-    return { displayName, headline, about, skills, interests };
+    return { displayName, headline, about, skills, interests, avatarUrl };
+}
+
+function editablePersonal(value, fallback) {
+    const dateOfBirth = value.dateOfBirth === undefined ? fallback.dateOfBirth : text(value.dateOfBirth);
+    const phoneNumber = value.phoneNumber === undefined ? fallback.phoneNumber : text(value.phoneNumber);
+    const address = value.address === undefined ? fallback.address : text(value.address);
+
+    if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
+        throw new Error('Ngày sinh không hợp lệ.');
+    }
+    if (phoneNumber && !PHONE_NUMBER_PATTERN.test(phoneNumber)) {
+        throw new Error('Số điện thoại phải có từ 9 đến 15 chữ số.');
+    }
+    if (address.length > 500) throw new Error('Địa chỉ tối đa 500 ký tự.');
+
+    return { dateOfBirth, phoneNumber, address };
 }
 
 export function profileStorageKey(user) {
@@ -96,6 +117,11 @@ export function createMockProfile(user) {
             skills: ['React', 'Thiết kế UI', 'Làm việc nhóm'],
             project: 'Một hành trình được xây từ những lần dám thử.',
         },
+        personal: {
+            dateOfBirth: '',
+            phoneNumber: '',
+            address: '',
+        },
         academic: {
             campus: 'FPTU Hồ Chí Minh',
             major: variation % 2 ? 'Kỹ thuật phần mềm' : 'Thiết kế mỹ thuật số',
@@ -130,13 +156,13 @@ function storageFor(storage) {
     return storage;
 }
 
-function savedEditableProfile(user, storage) {
+function savedProfileRecord(user, storage) {
     const key = profileStorageKey(user);
     if (!key) return null;
     try {
         const stored = storageFor(storage).getItem(key);
         const value = stored ? JSON.parse(stored) : null;
-        return isPersistedProfile(value) ? value.profile : null;
+        return isPersistedProfile(value) ? value : null;
     } catch {
         return null;
     }
@@ -144,15 +170,16 @@ function savedEditableProfile(user, storage) {
 
 export function readProfile(user, storage = globalThis.localStorage) {
     const seed = createMockProfile(user);
-    const saved = savedEditableProfile(user, storage);
+    const saved = savedProfileRecord(user, storage);
     if (!saved) return clone(seed);
     try {
         return {
             ...seed,
             profile: {
                 ...seed.profile,
-                ...editableProfile(saved, seed.profile),
+                ...editableProfile(saved.profile, seed.profile),
             },
+            personal: editablePersonal(saved.personal || {}, seed.personal),
         };
     } catch {
         return clone(seed);
@@ -164,13 +191,15 @@ export function saveProfile(user, patch, storage = globalThis.localStorage) {
     if (!key) throw new Error('Không thể lưu hồ sơ khi chưa có tài khoản.');
     const current = readProfile(user, storage);
     const profile = editableProfile(patch || {}, current.profile);
-    const record = { version: PROFILE_STORAGE_VERSION, profile, savedAt: new Date().toISOString() };
+    const personal = editablePersonal(patch?.personal || {}, current.personal);
+    const record = { version: PROFILE_STORAGE_VERSION, profile, personal, savedAt: new Date().toISOString() };
     storageFor(storage).setItem(key, JSON.stringify(record));
     return readProfile(user, storage);
 }
 
 export function toSharedProfile(snapshot) {
     const shared = clone(snapshot);
+    delete shared.personal;
     shared.academic.studentCode = '';
     shared.summary.recognizedContributionTotal = null;
     shared.summary.contributionRecordCount = null;

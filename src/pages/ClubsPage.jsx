@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { PERMISSIONS } from '../auth/permissions';
 import { api } from '../services/api';
+import ImagePicker from '../components/media/ImagePicker';
 
 const CATEGORY_LABELS = {
     SPORTS: 'Thể thao',
@@ -216,7 +217,7 @@ function Field({ label, required, children }) {
     );
 }
 
-function TextInput({ value, onChange, required, type = 'text', maxLength, placeholder, ariaLabel }) {
+function TextInput({ value, onChange, required, type = 'text', maxLength, placeholder, ariaLabel, disabled = false }) {
     return (
         <input
             type={type}
@@ -226,6 +227,7 @@ function TextInput({ value, onChange, required, type = 'text', maxLength, placeh
             maxLength={maxLength}
             placeholder={placeholder}
             aria-label={ariaLabel}
+            disabled={disabled}
             className={inputClass}
         />
     );
@@ -314,6 +316,9 @@ export default function ClubsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [clubToDelete, setClubToDelete] = useState(null);
+    const [clubLogoToEdit, setClubLogoToEdit] = useState(null);
+    const [clubLogoUrl, setClubLogoUrl] = useState('');
+    const [existingClubLogoFile, setExistingClubLogoFile] = useState(null);
 
     const [selectedClub, setSelectedClub] = useState(null);
     const [joinForm, setJoinForm] = useState(() => createJoinForm(user));
@@ -324,6 +329,7 @@ export default function ClubsPage() {
     const [creationModalOpen, setCreationModalOpen] = useState(false);
     const [editingApplication, setEditingApplication] = useState(null);
     const [clubForm, setClubForm] = useState(() => createClubForm(user));
+    const [clubLogoFile, setClubLogoFile] = useState(null);
     const [applicationReview, setApplicationReview] = useState(null);
     const [applicationReviewAction, setApplicationReviewAction] = useState('approve');
     const [applicationReviewForm, setApplicationReviewForm] = useState({
@@ -473,8 +479,36 @@ export default function ClubsPage() {
         }
     };
 
+    const saveClubLogo = async (event) => {
+        event.preventDefault();
+        if (!clubLogoToEdit || isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            const logoUrl = existingClubLogoFile
+                ? await api.uploadPublicImage(existingClubLogoFile, 'club-logo', clubLogoToEdit.id)
+                : clubLogoUrl.trim();
+            if (!logoUrl) throw new Error('Vui lòng chọn ảnh hoặc nhập URL logo.');
+            // UpdateClubRequest defaults IsActive to true, so always preserve the current value.
+            const updated = await api.updateClub(clubLogoToEdit.id, {
+                logoUrl,
+                isActive: clubLogoToEdit.isActive,
+            });
+            setClubs((current) => current.map((club) =>
+                club.id === clubLogoToEdit.id ? { ...club, ...updated, logoUrl } : club,
+            ));
+            setClubLogoToEdit(null);
+            setExistingClubLogoFile(null);
+            success('Đã cập nhật logo câu lạc bộ.');
+        } catch (err) {
+            error(err.message || 'Không thể cập nhật logo câu lạc bộ.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const openCreationForm = (application) => {
         setEditingApplication(application || null);
+        setClubLogoFile(null);
         setClubForm(application ? applicationToForm(application) : createClubForm(user));
         setCreationModalOpen(true);
     };
@@ -526,11 +560,14 @@ export default function ClubsPage() {
 
         setIsSubmitting(true);
         try {
+            const logoUrl = clubLogoFile
+                ? await api.uploadPublicImage(clubLogoFile, 'club-application-logo', editingApplication?.id)
+                : clubForm.logoUrl.trim() || null;
             const { activityFrequencyCount, activityFrequencyUnit, ...applicationFields } = clubForm;
             const payload = {
                 ...applicationFields,
                 code: clubForm.code.trim() || null,
-                logoUrl: clubForm.logoUrl.trim() || null,
+                logoUrl,
                 activityFrequency: formatActivityFrequency(activityFrequencyCount, activityFrequencyUnit),
                 expectedLocation: clubForm.expectedLocation.trim() || null,
                 expectedSchedule: clubForm.expectedSchedule.trim() || null,
@@ -549,7 +586,9 @@ export default function ClubsPage() {
             setEditingApplication(null);
             await loadData();
         } catch (err) {
-            error(err.message || 'Không thể gửi đơn thành lập câu lạc bộ.');
+            error(err?.status === 404 && clubLogoFile
+                ? 'Máy chủ chưa hỗ trợ tải ảnh. Bạn có thể dùng URL logo hiện có.'
+                : err.message || 'Không thể gửi đơn thành lập câu lạc bộ.');
         } finally {
             setIsSubmitting(false);
         }
@@ -901,13 +940,26 @@ export default function ClubsPage() {
                                                 Quản lý thành viên
                                             </Link>
                                             {canDeleteClubs && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setClubToDelete(club)}
-                                                    className="w-full rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 font-semibold text-rose-300 transition hover:bg-rose-500/20"
-                                                >
-                                                    Xóa câu lạc bộ
-                                                </button>
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setClubLogoToEdit(club);
+                                                            setClubLogoUrl(club.logoUrl || '');
+                                                            setExistingClubLogoFile(null);
+                                                        }}
+                                                        className="w-full rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
+                                                    >
+                                                        Cập nhật logo
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setClubToDelete(club)}
+                                                        className="w-full rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 font-semibold text-rose-300 transition hover:bg-rose-500/20"
+                                                    >
+                                                        Xóa câu lạc bộ
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                     ) : status === 'APPROVED' ? (
@@ -1153,12 +1205,20 @@ export default function ClubsPage() {
                                     placeholder="Để trống để hệ thống tự tạo"
                                 />
                             </Field>
-                            <Field label="Logo/biểu tượng (URL không bắt buộc)">
+                            <ImagePicker
+                                label="Logo/biểu tượng (không bắt buộc)"
+                                value={clubForm.logoUrl}
+                                file={clubLogoFile}
+                                onChange={setClubLogoFile}
+                                disabled={isSubmitting}
+                            />
+                            <Field label="Hoặc dùng URL logo hiện có">
                                 <TextInput
                                     type="url"
                                     value={clubForm.logoUrl}
                                     onChange={(value) => updateClubForm('logoUrl', value)}
                                     maxLength={1000}
+                                    disabled={isSubmitting}
                                 />
                             </Field>
                         </div>
@@ -1690,6 +1750,34 @@ export default function ClubsPage() {
                             className="flex-1 rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
                         >
                             {isSubmitting ? 'Đang xử lý...' : 'Xác nhận quyết định'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            <Modal
+                isOpen={Boolean(clubLogoToEdit)}
+                onClose={() => !isSubmitting && setClubLogoToEdit(null)}
+                title={`Cập nhật logo ${clubLogoToEdit?.name || ''}`}
+                size="md"
+            >
+                <form onSubmit={saveClubLogo} className="space-y-5">
+                    <ImagePicker
+                        label="Logo câu lạc bộ"
+                        value={clubLogoUrl}
+                        file={existingClubLogoFile}
+                        onChange={setExistingClubLogoFile}
+                        disabled={isSubmitting}
+                    />
+                    <Field label="Hoặc URL ảnh công khai">
+                        <TextInput value={clubLogoUrl} onChange={setClubLogoUrl} maxLength={1000} />
+                    </Field>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={() => setClubLogoToEdit(null)} disabled={isSubmitting}
+                            className="flex-1 rounded-lg bg-neutral-100 px-4 py-3 font-semibold text-neutral-700 disabled:opacity-50">Hủy</button>
+                        <button type="submit" disabled={isSubmitting || (!existingClubLogoFile && !clubLogoUrl.trim())}
+                            className="flex-1 rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
+                            {isSubmitting ? 'Đang lưu...' : 'Lưu logo'}
                         </button>
                     </div>
                 </form>

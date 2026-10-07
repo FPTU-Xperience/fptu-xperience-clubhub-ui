@@ -11,20 +11,21 @@ import {
 test('selection maps only display-safe eligible roles and deduplicates cards', () => {
     const items = mapMyClubSelection({
         items: [
-            { clubId: 1, name: 'F-Code', role: 'MEMBER', members: [{ email: 'private' }], pendingApplications: 2 },
-            { clubId: 1, name: 'Duplicate', role: 'MANAGER' },
+            { clubId: 1, clubCode: 'F-CODE', name: 'F-Code', role: 'MEMBER', members: [{ email: 'private' }], pendingApplications: 2 },
+            { clubId: 1, clubCode: 'DUPLICATE', name: 'Duplicate', role: 'MANAGER' },
             {
                 clubId: 2,
+                clubCode: 'F-STYLE',
                 name: 'F-Style',
                 role: 'MANAGER',
                 pendingApplications: null,
                 upcomingActivity: { title: 'Show', startTime: '2026-10-01T09:00:00Z' },
             },
-            { clubId: 3, name: 'No access', role: 'PENDING' },
+            { clubId: 3, clubCode: 'NO-ACCESS', name: 'No access', role: 'PENDING' },
         ],
     });
     assert.equal(items.length, 2);
-    assert.equal(items[0].workspacePath, '/v2/my-clubs/1');
+    assert.equal(items[0].workspacePath, '/v2/my-clubs/F-CODE');
     assert.equal(items[0].pendingApplications, undefined);
     assert.equal('members' in items[0], false);
     assert.equal(items[1].pendingApplications, null);
@@ -69,7 +70,7 @@ test('production My Clubs route and files stay V2-local and demo-free', () => {
     const personalHeading = readFileSync(new URL('./personal-pages/PersonalPageHeading.jsx', import.meta.url), 'utf8');
     const card = readFileSync(new URL('../../components/v2/my-clubs/MyClubCard.jsx', import.meta.url), 'utf8');
     assert.match(app, /path="my-clubs"/);
-    assert.match(app, /path="my-clubs\/:clubId\/\*"/);
+    assert.match(app, /path="my-clubs\/:clubCode\/\*"/);
     assert.match(page, /PageState/);
     assert.match(card, /workspacePath/);
     assert.match(page, /PersonalPageHeading/);

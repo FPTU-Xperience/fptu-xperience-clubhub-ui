@@ -5,14 +5,18 @@
     display: grid;
     place-items: center;
     padding: 24px;
+    overflow: auto;
+    overscroll-behavior: contain;
     background: rgb(15 23 42 / 50%);
     backdrop-filter: blur(2px);
 }
 
 .v2-modal {
     width: min(540px, 100%);
-    max-height: min(88vh, 760px);
-    overflow: auto;
+    max-height: min(calc(100dvh - 48px), 760px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     background: #fff;
@@ -56,5 +60,19 @@
     color: #0f172a;
 }
 .v2-modal-content {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
     padding: 24px;
+}
+
+@media (max-width: 560px) {
+    .v2-modal-backdrop {
+        padding: 12px;
+    }
+
+    .v2-modal {
+        max-height: calc(100dvh - 24px);
+    }
 }

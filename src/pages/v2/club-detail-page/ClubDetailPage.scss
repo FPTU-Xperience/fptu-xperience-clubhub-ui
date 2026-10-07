@@ -55,6 +55,184 @@
     font-size: 33px;
 }
 
+.v2-club-detail-actions {
+    margin-top: 16px;
+
+    p {
+        margin: 0;
+        color: #047857;
+        font-size: 12px;
+        font-weight: 650;
+    }
+}
+
+.v2-club-join-form {
+    display: grid;
+    gap: 15px;
+
+    > p {
+        margin: 0;
+        color: var(--v2-muted);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    > label,
+    .v2-club-join-form-grid > label {
+        display: grid;
+        gap: 6px;
+        color: var(--v2-ink);
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    small {
+        color: var(--v2-muted);
+        font-weight: 400;
+    }
+
+    input:not([type='checkbox']),
+    select,
+    textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid var(--v2-line);
+        border-radius: 7px;
+        padding: 10px 11px;
+        color: var(--v2-ink);
+        font: inherit;
+        font-size: 13px;
+        resize: vertical;
+    }
+
+    input:not([type='checkbox']),
+    select {
+        height: 54px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: 3px solid #fed7aa;
+        border-color: var(--v2-orange);
+    }
+
+    footer {
+        display: flex;
+        justify-content: end;
+        gap: 9px;
+        padding-top: 5px;
+    }
+}
+
+.v2-club-join-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.v2-club-join-form-grid > label {
+    align-content: start;
+}
+
+.v2-club-join-field-label {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    small {
+        white-space: nowrap;
+    }
+}
+
+.v2-club-join-profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -3px 0 0 !important;
+    color: var(--v2-muted) !important;
+    font-size: 11px !important;
+    line-height: 1.45;
+
+    a {
+        color: #c2410c;
+        font-weight: 700;
+        text-decoration: none;
+    }
+}
+
+.v2-club-join-form input[readonly],
+.v2-club-join-form textarea[readonly] {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.v2-club-join-form-grid > label > select {
+    min-height: 0;
+}
+
+.v2-club-join-legacy small {
+    line-height: 1.45;
+}
+
+.v2-club-join-check {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 9px;
+    font-weight: 500 !important;
+    line-height: 1.5;
+
+    input {
+        flex: 0 0 auto;
+        margin: 3px 0 0;
+    }
+
+    label {
+        display: block;
+    }
+}
+
+.v2-club-rules-link {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #c2410c;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.v2-club-rules {
+    color: var(--v2-ink);
+    font-size: 13px;
+    line-height: 1.7;
+
+    > p {
+        margin-top: 0;
+        color: var(--v2-muted);
+    }
+
+    ol {
+        display: grid;
+        gap: 10px;
+        margin: 18px 0;
+        padding-left: 22px;
+    }
+
+    footer {
+        display: flex;
+        justify-content: end;
+    }
+}
+
+.v2-club-join-error {
+    margin: 0;
+    color: #b91c1c !important;
+    font-size: 12px;
+}
+
 .v2-inline {
     display: flex;
     flex-wrap: wrap;
@@ -167,6 +345,10 @@
 
 @media (max-width: 860px) {
     .v2-detail-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .v2-club-join-form-grid {
         grid-template-columns: 1fr;
     }
 }

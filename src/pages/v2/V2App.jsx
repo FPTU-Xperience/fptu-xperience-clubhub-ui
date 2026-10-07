@@ -47,13 +47,13 @@ function AuthenticatedV2App() {
                     <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
                     <Route path="activities/:activityId" element={<ActivityDetailPage api={api} sessionKey={sessionKey} />} />
                     <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
-                    <Route path="my-clubs/:clubId/*" element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />} />
+                    <Route path="my-clubs/:clubCode/*" element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />} />
                     <Route path="my-schedule" element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />} />
-                    <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} />} />
+                    <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} />} />
                     <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
                     <Route
-                        path="clubs/:clubId"
-                        element={<ClubDetailPage api={api} viewerAccess={clubAccess} sessionKey={sessionKey} />}
+                        path="clubs/:clubCode"
+                        element={<ClubDetailPage api={api} viewer={user} viewerAccess={clubAccess} sessionKey={sessionKey} />}
                     />
                 </Routes>
             </main>

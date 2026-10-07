@@ -1,4 +1,6 @@
 import { formatErrorMessage, vi } from '../locales/vi';
+import { putImageWithIntent, validateImageUpload } from './media-upload';
+import { applicationsFromMemberships, selectionFromClubAccess } from './my-clubs-adapter';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000').replace(/\/+$/, '');
 // Keep API failures in-page during local UI work. Production always preserves the login redirect.
@@ -195,6 +197,10 @@ class ApiService {
         return this.request(`/api/users${query ? `?${query}` : ''}`);
     }
 
+    async getCurrentUser() {
+        return this.request('/api/users/me');
+    }
+
     async createUser(data) {
         return this.request('/api/users', {
             method: 'POST',
@@ -226,6 +232,44 @@ class ApiService {
         return this.request(`/api/clubs/${id}`);
     }
 
+    async updateClub(id, data) {
+        return this.request(`/api/clubs/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async uploadPublicImage(file, kind, ownerId = '') {
+        validateImageUpload(file);
+        const intent = await this.request('/api/media/upload-intents', {
+            method: 'POST',
+            body: JSON.stringify({
+                kind,
+                ...(ownerId ? { ownerId: String(ownerId) } : {}),
+                contentType: file.type,
+                sizeBytes: file.size,
+            }),
+        });
+        return putImageWithIntent(file, intent, {
+            bucketName: import.meta.env.VITE_R2_BUCKET_NAME,
+            s3Endpoint: import.meta.env.VITE_R2_S3_ENDPOINT,
+        });
+    }
+
+    async updateClubPublicImages(clubId, images) {
+        return this.request(`/api/clubs/${encodeURIComponent(clubId)}/public-images`, {
+            method: 'PUT',
+            body: JSON.stringify(images),
+        });
+    }
+
+    async updateActivityCoverImage(activityId, coverImageUrl) {
+        return this.request(`/api/activities/${encodeURIComponent(activityId)}/cover-image`, {
+            method: 'PUT',
+            body: JSON.stringify({ coverImageUrl }),
+        });
+    }
+
     async deleteClub(id) {
         return this.request(`/api/clubs/${id}`, {
             method: 'DELETE',
@@ -237,11 +281,12 @@ class ApiService {
     }
 
     async getMyClubSelection() {
-        return this.request('/api/clubs/me/selection');
+        const [access, clubs] = await Promise.all([this.getMyClubAccess(), this.getClubs()]);
+        return selectionFromClubAccess(access, clubs);
     }
 
     async getMyMembershipApplications() {
-        return this.request('/api/clubs/me/membership-applications');
+        return applicationsFromMemberships(await this.getMyMemberships());
     }
 
     async withdrawMyMembershipApplication(applicationId) {
@@ -336,10 +381,23 @@ class ApiService {
         return this.request(`/api/clubs/${clubId}/members/${memberId}?${query}`);
     }
 
+    async updateClubMemberProfile(clubId, memberId, data) {
+        return this.request(`/api/clubs/${encodeURIComponent(clubId)}/members/${encodeURIComponent(memberId)}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
     async assignClubTreasurer(clubId, memberUserId, memberName) {
         return this.request(`/api/clubs/${clubId}/treasurers`, {
             method: 'POST',
             body: JSON.stringify({ memberUserId, memberName }),
+        });
+    }
+
+    async removeClubTreasurer(membershipId) {
+        return this.request(`/api/clubs/memberships/${encodeURIComponent(membershipId)}/member`, {
+            method: 'POST',
         });
     }
 
@@ -373,6 +431,10 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify(data),
         });
+    }
+
+    async archiveReport(id) {
+        return this.request(`/api/reports/${encodeURIComponent(id)}`, { method: 'DELETE' });
     }
 
     async submitReport(id) {
@@ -511,9 +573,58 @@ class ApiService {
         document.body.removeChild(a);
     }
 
+    async downloadReportAttachment(reportId, attachmentId, fileName) {
+        const url = this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`);
+        const token = this.getToken();
+        const response = await fetch(url, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!response.ok) {
+            const downloadError = new Error(await this.getErrorMessage(response));
+            downloadError.status = response.status;
+            throw downloadError;
+        }
+        const objectUrl = window.URL.createObjectURL(await response.blob());
+        const anchor = document.createElement('a');
+        anchor.href = objectUrl;
+        anchor.download = fileName || `attachment-${attachmentId}`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.URL.revokeObjectURL(objectUrl);
+    }
+
+    async uploadReportAttachment(reportId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const token = this.getToken();
+        const response = await fetch(this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/upload`), {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
+        });
+        if (!response.ok) {
+            const uploadError = new Error(await this.getErrorMessage(response));
+            uploadError.status = response.status;
+            throw uploadError;
+        }
+        return this.parseResponse(response);
+    }
+
+    async deleteReportAttachment(reportId, attachmentId) {
+        return this.request(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`, {
+            method: 'DELETE',
+        });
+    }
+
     // Activity endpoints
     async getActivities(clubId) {
-        const query = clubId ? `?clubId=${clubId}` : '';
+        const hasClubId = clubId !== undefined && clubId !== null && clubId !== '';
+        const numericClubId = Number(clubId);
+        if (hasClubId && (!Number.isSafeInteger(numericClubId) || numericClubId <= 0)) {
+            throw new TypeError('Activity clubId must be a positive numeric club ID.');
+        }
+        const query = hasClubId ? `?clubId=${numericClubId}` : '';
         return this.request(`/api/activities${query}`);
     }
 
@@ -535,6 +646,10 @@ class ApiService {
         });
     }
 
+    async cancelActivity(activityId) {
+        return this.request(`/api/activities/${encodeURIComponent(activityId)}`, { method: 'DELETE' });
+    }
+
     async checkInActivity(activityId) {
         return this.request(`/api/activities/${activityId}/check-in`, { method: 'POST' });
     }
@@ -544,10 +659,10 @@ class ApiService {
         return this.request(`/api/activities/${activityId}/my-attendance?${query}`);
     }
 
-    async registerParticipant(activityId, userId, fullName) {
+    async registerParticipant(activityId, userId = null) {
         return this.request(`/api/activities/${activityId}/participants`, {
             method: 'POST',
-            body: JSON.stringify({ userId, fullName }),
+            body: JSON.stringify({ userId, fullName: null }),
         });
     }
 
@@ -626,6 +741,13 @@ class ApiService {
 
     async approveSettlement(settlementId, note = '') {
         return this.request(`/api/finance/settlements/${settlementId}/approve`, {
+            method: 'POST',
+            body: JSON.stringify({ note }),
+        });
+    }
+
+    async rejectSettlement(settlementId, note) {
+        return this.request(`/api/finance/settlements/${encodeURIComponent(settlementId)}/reject`, {
             method: 'POST',
             body: JSON.stringify({ note }),
         });

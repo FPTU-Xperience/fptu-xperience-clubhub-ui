@@ -13,9 +13,11 @@ export function mapActivityFeedItem(raw = {}) {
     return {
         id: String(raw.id),
         clubId: String(raw.clubId || ''),
+        clubCode: String(raw.clubCode || raw.code || ''),
         clubName: String(raw.clubName || 'CLB'),
         title: String(raw.title || 'Hoạt động'),
         description: String(raw.description || ''),
+        coverImageUrl: String(raw.coverImageUrl || ''),
         startTime: raw.startTime || raw.startTimeUtc || '',
         endTime: raw.endTime || raw.endTimeUtc || '',
         location: String(raw.location || ''),
@@ -26,14 +28,11 @@ export function mapActivityFeedItem(raw = {}) {
 
 export function mapActivityFeed(value) {
     const rows = Array.isArray(value) ? value : value?.items || [];
-    return [
-        ...new Map(
-            rows
-                .map(mapActivityFeedItem)
-                .filter(Boolean)
-                .map((item) => [item.id, item]),
-        ).values(),
-    ];
+    const unique = new Map();
+    rows.map(mapActivityFeedItem).filter(Boolean).forEach((item) => {
+        if (!unique.has(item.id)) unique.set(item.id, item);
+    });
+    return [...unique.values()];
 }
 
 export function mapRecommendations(value) {

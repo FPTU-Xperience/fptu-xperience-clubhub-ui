@@ -28,6 +28,19 @@ function canLoadClubAccess(actor) {
   return actor?.roles?.some(role => CLUB_ACCESS_ROLES.has(role)) || false;
 }
 
+function toAuthUser(summary) {
+  return {
+    id: summary.id,
+    username: summary.username,
+    name: summary.fullName,
+    email: summary.email,
+    roles: summary.roles,
+    isActive: summary.isActive,
+    isLocked: summary.isLocked,
+    avatar: summary.fullName ? summary.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U',
+  };
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(AUTH_BYPASS_ENABLED ? BYPASS_USER : null);
   const [clubAccess, setClubAccess] = useState([]);
@@ -59,20 +72,22 @@ export function AuthProvider({ children }) {
       }
 
       const token = localStorage.getItem('accessToken');
-      const storedUser = localStorage.getItem('user');
-
-      if (token && storedUser) {
+      if (token) {
         try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
+          const currentUser = toAuthUser(await api.getCurrentUser());
+          localStorage.setItem('user', JSON.stringify(currentUser));
+          setUser(currentUser);
           setIsAuthenticated(true);
-          await loadClubAccess(parsedUser);
+          await loadClubAccess(currentUser);
         } catch (e) {
-          // Invalid stored data, clear it
           api.clearTokens();
           localStorage.removeItem('user');
           setClubAccess([]);
+          setUser(null);
+          setIsAuthenticated(false);
         }
+      } else {
+        localStorage.removeItem('user');
       }
       setLoading(false);
     };
@@ -85,16 +100,7 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await api.login(email);
-      const userData = {
-        id: response.user.id,
-        username: response.user.username,
-        name: response.user.fullName,
-        email: response.user.email,
-        roles: response.user.roles,
-        isActive: response.user.isActive,
-        isLocked: response.user.isLocked,
-        avatar: response.user.fullName ? response.user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U',
-      };
+      const userData = toAuthUser(response.user);
 
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
@@ -113,16 +119,7 @@ export function AuthProvider({ children }) {
     try {
       const response = await api.loginWithGoogle(credential);
 
-      const userData = {
-        id: response.user.id,
-        username: response.user.username,
-        name: response.user.fullName,
-        email: response.user.email,
-        roles: response.user.roles,
-        isActive: response.user.isActive,
-        isLocked: response.user.isLocked,
-        avatar: response.user.fullName ? response.user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U',
-      };
+      const userData = toAuthUser(response.user);
 
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
