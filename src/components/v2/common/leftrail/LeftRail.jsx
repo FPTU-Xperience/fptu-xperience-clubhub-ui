@@ -41,13 +41,16 @@ const navigation = [
 const personalNavigation = [
     ['/v2/my-clubs', 'Câu lạc bộ'],
     ['/v2/my-schedule', 'Lịch trình'],
+    ['/v2/study-schedule', 'Lịch học'],
 ];
 
 export default function LeftRail({ user, onLogout, api }) {
     const location = useLocation();
     const accountMenuRef = useRef(null);
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-    const [isPersonalNavOpen, setIsPersonalNavOpen] = useState(false);
+    const [isPersonalNavOpen, setIsPersonalNavOpen] = useState(() =>
+        personalNavigation.some(([path]) => location.pathname === path),
+    );
     const { theme, toggleTheme } = useTheme();
     const sessionKey = user?.id || user?.email || null;
     const notifications = useHeaderNotifications(api, sessionKey);

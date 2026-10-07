@@ -142,6 +142,16 @@ const navItems = [
             </svg>
         ),
     },
+    {
+        path: '/academic-calendar',
+        name: 'Lịch học kỳ',
+        permission: PERMISSIONS.MANAGE_ACADEMIC_CALENDAR,
+        icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 3v3m8-3v3M4 10h16M5 6h14a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1zm3 8h3m-3 3h6" />
+            </svg>
+        ),
+    },
 ];
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {

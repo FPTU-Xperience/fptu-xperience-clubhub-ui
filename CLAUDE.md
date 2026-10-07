@@ -1,5 +1,9 @@
 # FPTU-Xperience Frontend
 
+## Context triển khai hiện tại
+
+- [Lịch học theo tuần và calendar do Admin cấu hình](docs/study-schedule-implementation-context.md): quyết định sản phẩm, trạng thái mock, contract BE và checklist tích hợp. Đọc cùng [API contract](docs/contracts/study-schedule-api.md) trước khi nối BE; không xem `localStorage` là nguồn dữ liệu production.
+
 ## Cấu trúc
 
 ```

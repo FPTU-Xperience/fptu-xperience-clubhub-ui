@@ -18,6 +18,7 @@ import FinancePage from './pages/FinancePage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
+import AcademicCalendarPage from './pages/AcademicCalendarPage';
 
 // Protected Route Component
 function ProtectedRoute({ children, permission }) {
@@ -196,6 +197,14 @@ export default function App() {
                 element={
                     <LayoutRoute title="Người dùng" permission={PERMISSIONS.MANAGE_USERS}>
                         <UsersPage />
+                    </LayoutRoute>
+                }
+            />
+            <Route
+                path="/academic-calendar"
+                element={
+                    <LayoutRoute title="Lịch học kỳ" permission={PERMISSIONS.MANAGE_ACADEMIC_CALENDAR}>
+                        <AcademicCalendarPage />
                     </LayoutRoute>
                 }
             />
