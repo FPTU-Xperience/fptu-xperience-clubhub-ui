@@ -47,6 +47,7 @@ function editableProfile(value, fallback) {
     const skills = value.skills === undefined ? fallback.skills : normalizeList(value.skills, 'Kỹ năng');
     const interests = value.interests === undefined ? fallback.interests : normalizeList(value.interests, 'Sở thích');
     const avatarUrl = value.avatarUrl === undefined ? fallback.avatarUrl : text(value.avatarUrl);
+    const coverPreset = value.coverPreset === undefined ? fallback.coverPreset : text(value.coverPreset);
 
     if (!displayName) throw new Error('Vui lòng nhập tên hiển thị.');
     if (displayName.length > MAX_DISPLAY_NAME) throw new Error(`Tên hiển thị tối đa ${MAX_DISPLAY_NAME} ký tự.`);
@@ -55,8 +56,11 @@ function editableProfile(value, fallback) {
     if (avatarUrl && (avatarUrl.length > 1000 || !/^https:\/\//i.test(avatarUrl))) {
         throw new Error('Đường dẫn ảnh đại diện không hợp lệ.');
     }
+    if (!['default', 'sunset', 'horizon', 'custom'].includes(coverPreset)) {
+        throw new Error('Mẫu ảnh bìa không hợp lệ.');
+    }
 
-    return { displayName, headline, about, skills, interests, avatarUrl };
+    return { displayName, headline, about, skills, interests, avatarUrl, coverPreset };
 }
 
 function editablePersonal(value, fallback) {
@@ -110,11 +114,12 @@ export function createMockProfile(user) {
         profile: {
             displayName,
             avatarUrl: '',
+            coverPreset: 'default',
             initials: text(user?.avatar, initials(displayName)),
             headline: 'Học hỏi, kết nối và tạo dấu ấn theo cách của mình.',
-            about: 'Mình muốn biến những trải nghiệm nhỏ ở FPTU thành hành trình có ý nghĩa.',
-            interests: ['Công nghệ', 'Thiết kế trải nghiệm', 'Cộng đồng'],
-            skills: ['React', 'Thiết kế UI', 'Làm việc nhóm'],
+            about: '',
+            interests: [],
+            skills: [],
             project: 'Một hành trình được xây từ những lần dám thử.',
         },
         personal: {
@@ -205,6 +210,30 @@ export function toSharedProfile(snapshot) {
     shared.summary.contributionRecordCount = null;
     shared.evidence = [];
     return shared;
+}
+
+export function mapProfileMemberships(rows) {
+    if (!Array.isArray(rows)) return [];
+    return rows.filter((item) =>
+        String(item.status).toUpperCase() === 'APPROVED' && item.clubId && item.clubName,
+    ).map((item) => ({
+        clubId: item.clubId,
+        clubName: item.clubName,
+        role: item.role || 'MEMBER',
+    }));
+}
+
+export function useProfileMemberships(api, sessionKey) {
+    const [result, setResult] = useState({ status: 'loading', data: [] });
+    useEffect(() => {
+        let active = true;
+        setResult({ status: 'loading', data: [] });
+        api.getMyMemberships().then((rows) => {
+            if (active) setResult({ status: 'ready', data: mapProfileMemberships(rows) });
+        }).catch(() => { if (active) setResult({ status: 'error', data: [] }); });
+        return () => { active = false; };
+    }, [api, sessionKey]);
+    return result;
 }
 
 export function classifyProfileError(error) {

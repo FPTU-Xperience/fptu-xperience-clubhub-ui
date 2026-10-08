@@ -12,12 +12,32 @@
     padding: 27px 35px;
     border-radius: 14px;
     background: linear-gradient(120deg, #fff7ed, #ffedd5 52%, #fff);
+    background-size: cover;
+    background-position: center;
 
     > div:first-child { position: relative; z-index: 1; }
     > div:first-child > span { display: block; color: var(--v2-muted); font-size: 9px; letter-spacing: 2px; }
     > div:first-child > strong { display: block; margin-top: 20px; color: #9a3412; font-size: 32px; line-height: 1.12; letter-spacing: -1px; }
     em { font-family: Georgia, serif; font-weight: 400; }
 }
+
+.v2-profile-cover.is-sunset { background: linear-gradient(120deg, #fff4d9, #ffc494 48%, #ee775f); }
+.v2-profile-cover.is-horizon { background: linear-gradient(120deg, #e8f6ff, #b7daf2 55%, #fcd9b0); }
+.v2-profile-cover-edit { position: absolute; z-index: 2; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 6px; padding: 8px 11px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; color: #111827; font: inherit; font-size: 12px; cursor: pointer; }
+.v2-profile-cover-edit:hover, .v2-profile-avatar-edit:hover { border-color: var(--v2-orange); color: var(--v2-orange); }
+.v2-profile-avatar-wrap { position: relative; flex: 0 0 auto; }
+.v2-profile-avatar-edit { position: absolute; right: 1px; bottom: 1px; display: grid; width: 30px; height: 30px; place-items: center; border: 2px solid white; border-radius: 50%; background: #fff; color: #111827; box-shadow: 0 1px 6px #0002; cursor: pointer; }
+.v2-profile-cover-choices { margin: 0; padding: 0; border: 0; }
+.v2-profile-cover-choices legend { margin-bottom: 10px; font-size: 12px; font-weight: 700; }
+.v2-profile-cover-choices > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.v2-profile-cover-choice { overflow: hidden; padding: 0; border: 2px solid #e2e8f0; border-radius: 9px; background: #fff; color: #111827; text-align: left; cursor: pointer; }
+.v2-profile-cover-choice.is-selected { border-color: var(--v2-orange); }
+.v2-profile-cover-edit:focus-visible, .v2-profile-avatar-edit:focus-visible, .v2-profile-cover-choice:focus-visible { outline: 3px solid #fed7aa; outline-offset: 2px; }
+.v2-profile-cover-choice-art { display: block; height: 66px; background: linear-gradient(120deg, #fff7ed, #ffedd5 52%, #fff); }
+.v2-profile-cover-choice.is-sunset .v2-profile-cover-choice-art { background: linear-gradient(120deg, #fff4d9, #ffc494 48%, #ee775f); }
+.v2-profile-cover-choice.is-horizon .v2-profile-cover-choice-art { background: linear-gradient(120deg, #e8f6ff, #b7daf2 55%, #fcd9b0); }
+.v2-profile-cover-choice strong { display: block; padding: 7px; font-size: 11px; }
+.v2-profile-image-note { margin: 0; color: var(--v2-muted); font-size: 11px; }
 
 .v2-profile-cover-art {
     position: absolute;
@@ -123,4 +143,5 @@
     .v2-profile-columns aside, .v2-profile-stats { grid-template-columns: 1fr; }
     .v2-profile-tabs-row { align-items: flex-start; flex-direction: column; }
     .v2-profile-term { padding-bottom: 10px; }
+    .v2-profile-cover-choices > div { grid-template-columns: 1fr; }
 }

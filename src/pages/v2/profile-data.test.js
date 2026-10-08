@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
     PROFILE_STORAGE_VERSION,
     createMockProfile,
+    mapProfileMemberships,
     profileStorageKey,
     readProfile,
     saveProfile,
@@ -93,6 +94,10 @@ test('save validates editable profile and private application fields', () => {
     const withAvatar = saveProfile(studentA, { avatarUrl: 'https://cdn.example.edu/student/a.webp' }, storage);
     assert.equal(withAvatar.profile.avatarUrl, 'https://cdn.example.edu/student/a.webp');
     assert.equal(readProfile(studentB, storage).profile.avatarUrl, '');
+    const withCover = saveProfile(studentA, { coverPreset: 'sunset' }, storage);
+    assert.equal(withCover.profile.coverPreset, 'sunset');
+    assert.equal(readProfile(studentB, storage).profile.coverPreset, 'default');
+    assert.throws(() => saveProfile(studentA, { coverPreset: 'unknown' }, storage), /ảnh bìa/i);
     const withPersonalData = saveProfile(studentA, { personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567' } }, storage);
     assert.equal(withPersonalData.personal.dateOfBirth, '2004-05-17');
     assert.equal(withPersonalData.personal.phoneNumber, '0901234567');
@@ -109,6 +114,15 @@ test('shared preview removes private fields without mutating or persisting the p
     assert.equal('personal' in shared, false);
     assert.equal(privateProfile.evidence.length > 0, true);
     assert.equal(readProfile(studentA, storage).profile.displayName, 'Anh profile');
+});
+
+test('profile clubs show only approved memberships from the API response', () => {
+    const rows = [
+        { clubId: 7, clubName: 'F-Code', role: 'MEMBER', status: 'APPROVED' },
+        { clubId: 8, clubName: 'F-Style', role: 'MEMBER', status: 'PENDING' },
+    ];
+    assert.deepEqual(mapProfileMemberships(rows), [{ clubId: 7, clubName: 'F-Code', role: 'MEMBER' }]);
+    assert.deepEqual(mapProfileMemberships(null), []);
 });
 
 test('production profile sources stay isolated from demo dependencies', () => {
