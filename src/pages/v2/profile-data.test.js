@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { formatBirthDate, parseBirthDate } from './profile-date.js';
 import {
     PROFILE_STORAGE_VERSION,
     createMockProfile,
@@ -90,7 +91,7 @@ test('save validates editable profile and private application fields', () => {
 
     const ignored = saveProfile(studentA, { studentCode: 'SE00000', academic: { major: 'Changed' } }, storage);
     assert.notEqual(ignored.academic.studentCode, 'SE00000');
-    assert.notEqual(ignored.academic.major, 'Changed');
+    assert.equal(ignored.academic.major, 'Changed');
     const withAvatar = saveProfile(studentA, { avatarUrl: 'https://cdn.example.edu/student/a.webp' }, storage);
     assert.equal(withAvatar.profile.avatarUrl, 'https://cdn.example.edu/student/a.webp');
     assert.equal(readProfile(studentB, storage).profile.avatarUrl, '');
@@ -101,6 +102,35 @@ test('save validates editable profile and private application fields', () => {
     const withPersonalData = saveProfile(studentA, { personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567' } }, storage);
     assert.equal(withPersonalData.personal.dateOfBirth, '2004-05-17');
     assert.equal(withPersonalData.personal.phoneNumber, '0901234567');
+});
+
+test('birth dates use DD/MM/YYYY in the editor and reject impossible calendar dates', () => {
+    assert.equal(formatBirthDate('2004-05-17'), '17/05/2004');
+    assert.equal(parseBirthDate('17/05/2004'), '2004-05-17');
+    assert.equal(parseBirthDate('29/02/2004'), '2004-02-29');
+    assert.equal(parseBirthDate('29/02/2000'), '2000-02-29');
+    assert.equal(parseBirthDate(''), '');
+    for (const invalid of ['29/02/2003', '29/02/1900', '31/04/2004', '00/05/2004', '17/13/2004', '17/05/0000', '2004-05-17']) {
+        assert.throws(() => parseBirthDate(invalid), /ngày sinh/i);
+    }
+    const storage = memoryStorage();
+    saveProfile(studentA, { personal: { dateOfBirth: '2004-05-17' } }, storage);
+    assert.throws(() => saveProfile(studentA, { personal: { dateOfBirth: '2003-02-29' } }, storage), /ngày sinh/i);
+    assert.equal(readProfile(studentA, storage).personal.dateOfBirth, '2004-05-17');
+});
+
+test('academic fields persist per account, support clearing and keep student code private', () => {
+    const storage = memoryStorage();
+    assert.equal(readProfile(studentA, storage).academic.campus, '');
+    const academic = { campus: 'FPTU Hồ Chí Minh', major: 'Kỹ thuật phần mềm', year: 'K20', studentCode: 'SE123456' };
+    saveProfile(studentA, { academic }, storage);
+    assert.deepEqual(readProfile(studentA, storage).academic, academic);
+    assert.equal(readProfile(studentB, storage).academic.campus, '');
+    assert.equal(toSharedProfile(readProfile(studentA, storage)).academic.studentCode, '');
+    assert.throws(() => saveProfile(studentA, { academic: { campus: 'x'.repeat(121) } }, storage), /campus/i);
+    assert.equal(readProfile(studentA, storage).academic.campus, academic.campus);
+    assert.equal(saveProfile(studentA, { academic: { major: '' } }, storage).academic.major, '');
+    assert.equal(readProfile(studentA, storage).academic.campus, academic.campus);
 });
 
 test('shared preview removes private fields without mutating or persisting the profile', () => {
@@ -141,5 +171,5 @@ test('production profile sources stay isolated from demo dependencies', () => {
 
 test('authenticated V2 router owns the production profile route', () => {
     const source = readFileSync(new URL('./V2App.jsx', import.meta.url), 'utf8');
-    assert.match(source, /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} api=\{api\} \/>\}/);
+    assert.match(source, /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} api=\{api\} profileImages=\{profileImages\} \/>\}/);
 });

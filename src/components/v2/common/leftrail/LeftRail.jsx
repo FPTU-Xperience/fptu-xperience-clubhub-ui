@@ -44,7 +44,7 @@ const personalNavigation = [
     ['/v2/study-schedule', 'Lịch học'],
 ];
 
-export default function LeftRail({ user, onLogout, api }) {
+export default function LeftRail({ user, avatarUrl, onLogout, api }) {
     const location = useLocation();
     const accountMenuRef = useRef(null);
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
@@ -135,7 +135,7 @@ export default function LeftRail({ user, onLogout, api }) {
                 </button>
                 <div className="v2-left-rail-account-menu" ref={accountMenuRef}>
                     <button className="v2-left-rail-account" type="button" aria-label="Mở menu tài khoản" aria-expanded={isAccountMenuOpen} aria-controls="v2-rail-account-menu" onClick={() => setIsAccountMenuOpen((open) => !open)}>
-                        <span className="v2-left-rail-avatar" aria-hidden="true">{avatar}</span>
+                        <span className="v2-left-rail-avatar" aria-hidden="true">{avatarUrl ? <img src={avatarUrl} alt="" /> : avatar}</span>
                         <span><strong>{displayName}</strong><small>{secondaryIdentifier}</small></span>
                         <ChevronDown size={15} aria-hidden="true" />
                     </button>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { formatBirthDate, parseBirthDate } from './profile-date.js';
 
 export const PROFILE_STORAGE_VERSION = 1;
 const MAX_DISPLAY_NAME = 120;
@@ -24,10 +25,6 @@ function initials(value) {
         .slice(0, 2)
         .toUpperCase();
     return result || 'SV';
-}
-
-function seededNumber(identity, offset) {
-    return [...identity].reduce((value, character) => (value * 31 + character.charCodeAt(0)) % 997, offset) % 31;
 }
 
 function normalizeList(value, field) {
@@ -71,12 +68,23 @@ function editablePersonal(value, fallback) {
     if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
         throw new Error('Ngày sinh không hợp lệ.');
     }
+    if (dateOfBirth) parseBirthDate(formatBirthDate(dateOfBirth));
     if (phoneNumber && !PHONE_NUMBER_PATTERN.test(phoneNumber)) {
         throw new Error('Số điện thoại phải có từ 9 đến 15 chữ số.');
     }
     if (address.length > 500) throw new Error('Địa chỉ tối đa 500 ký tự.');
 
     return { dateOfBirth, phoneNumber, address };
+}
+
+function editableAcademic(value, fallback) {
+    const fields = { campus: ['Campus', 120], major: ['Ngành học', 120], year: ['Khóa học', 30], studentCode: ['Mã sinh viên', 30] };
+    const academic = { ...fallback };
+    for (const [field, [label, limit]] of Object.entries(fields)) {
+        academic[field] = value[field] === undefined ? fallback[field] : text(value[field]);
+        if (academic[field].length > limit) throw new Error(`${label} tối đa ${limit} ký tự.`);
+    }
+    return academic;
 }
 
 export function profileStorageKey(user) {
@@ -88,7 +96,6 @@ export function createMockProfile(user) {
     const identity = accountIdentity(user);
     if (!identity) throw new Error('Không thể tải hồ sơ khi chưa có tài khoản.');
     const displayName = text(user?.name || user?.fullName, 'Sinh viên FPTU');
-    const variation = seededNumber(identity, 11);
     const primaryTerm = 'FA26';
     const secondaryTerm = 'SU26';
     const participations = [
@@ -128,10 +135,10 @@ export function createMockProfile(user) {
             address: '',
         },
         academic: {
-            campus: 'FPTU Hồ Chí Minh',
-            major: variation % 2 ? 'Kỹ thuật phần mềm' : 'Thiết kế mỹ thuật số',
-            year: `K${20 + (variation % 4)}`,
-            studentCode: `HE${String(170000 + variation).padStart(6, '0')}`,
+            campus: '',
+            major: '',
+            year: '',
+            studentCode: '',
         },
         participations,
         summary: {
@@ -185,6 +192,7 @@ export function readProfile(user, storage = globalThis.localStorage) {
                 ...editableProfile(saved.profile, seed.profile),
             },
             personal: editablePersonal(saved.personal || {}, seed.personal),
+            academic: editableAcademic(saved.academic || {}, seed.academic),
         };
     } catch {
         return clone(seed);
@@ -197,7 +205,8 @@ export function saveProfile(user, patch, storage = globalThis.localStorage) {
     const current = readProfile(user, storage);
     const profile = editableProfile(patch || {}, current.profile);
     const personal = editablePersonal(patch?.personal || {}, current.personal);
-    const record = { version: PROFILE_STORAGE_VERSION, profile, personal, savedAt: new Date().toISOString() };
+    const academic = editableAcademic(patch?.academic || {}, current.academic);
+    const record = { version: PROFILE_STORAGE_VERSION, profile, personal, academic, savedAt: new Date().toISOString() };
     storageFor(storage).setItem(key, JSON.stringify(record));
     return readProfile(user, storage);
 }

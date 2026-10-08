@@ -196,6 +196,6 @@ export default function V2Access({ children }) {
     if (loading) return <LoadingScreen />;
     if (!isAuthenticated) return <V2Login />;
     if (preferences === undefined) return <LoadingScreen />;
-    if (needsOnboarding && !preferences) return <StudentOnboarding user={user} onComplete={setPreferences} />;
+    if (needsOnboarding && !preferences) return <StudentOnboarding key={user?.id || user?.email} user={user} onComplete={setPreferences} />;
     return children;
 }

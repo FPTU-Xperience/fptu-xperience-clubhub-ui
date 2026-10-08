@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import './V2Modal.scss';
 
-export default function V2Modal({ title, children, onClose, wide = false }) {
+export default function V2Modal({ title, children, onClose, wide = false, className = '' }) {
     const dialogRef = useRef(null);
     const closeRef = useRef(onClose);
     closeRef.current = onClose;
@@ -48,7 +48,7 @@ export default function V2Modal({ title, children, onClose, wide = false }) {
         <div className="v2-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
             <section
                 ref={dialogRef}
-                className={`v2-modal${wide ? ' v2-modal--wide' : ''}`}
+                className={`v2-modal${wide ? ' v2-modal--wide' : ''}${className ? ` ${className}` : ''}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="v2-modal-title"

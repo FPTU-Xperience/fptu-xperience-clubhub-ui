@@ -14,6 +14,7 @@ import ClubWorkspacePage from './club-workspace-page/ClubWorkspacePage';
 import { MySchedulePage } from './personal-pages/PersonalPages';
 import StudySchedulePage from './personal-pages/StudySchedulePage';
 import ProfilePage from './profile-page/ProfilePage';
+import { useProfileImages } from './profile-page/profile-images';
 import V2Access from './V2Access';
 import './V2App.scss';
 // The legacy demo and access styles remain available while their rules are
@@ -24,6 +25,7 @@ function AuthenticatedV2App() {
     const { user, logout, clubAccess, api } = useAuth();
     const location = useLocation();
     const sessionKey = user?.id || user?.email || 'anonymous';
+    const profileImages = useProfileImages(user, sessionKey);
 
     if (location.pathname.startsWith('/v2/demo')) {
         return (
@@ -40,7 +42,7 @@ function AuthenticatedV2App() {
             <a className="v2-skip-link" href="#v2-main">
                 Đến nội dung chính
             </a>
-            {!workspace && <LeftRail user={user} onLogout={logout} api={api} />}
+            {!workspace && <LeftRail user={user} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />}
             <main id="v2-main" className="v2-main">
                 <Routes>
                     <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
@@ -51,7 +53,7 @@ function AuthenticatedV2App() {
                     <Route path="my-clubs/:clubCode/*" element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />} />
                     <Route path="my-schedule" element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />} />
                     <Route path="study-schedule" element={<StudySchedulePage key={sessionKey} user={user} />} />
-                    <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} />} />
+                    <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} profileImages={profileImages} />} />
                     <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
                     <Route
                         path="clubs/:clubCode"

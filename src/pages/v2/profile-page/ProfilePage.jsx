@@ -13,12 +13,14 @@ import {
     Pencil,
     ShieldCheck,
     Sparkles,
+    Info,
 } from 'lucide-react';
 import PageState from '../../../components/v2/PageState';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
-import ImagePicker from '../../../components/media/ImagePicker';
+import ProfileImagePicker from './ProfileImagePicker';
 import { toSharedProfile, useProfile, useProfileMemberships } from '../profile-data';
-import { useProfileImages } from './profile-images';
+import { formatBirthDate, formatBirthDateInput, parseBirthDate } from '../profile-date';
+import { CAMPUSES, campusLabel } from '../profile-options';
 import './ProfilePage.scss';
 
 const pillarLabels = ['Học tập', 'Nghiên cứu', 'Quốc tế', 'Thể thao & văn hóa', 'Cộng đồng', 'Khởi nghiệp'];
@@ -65,7 +67,7 @@ function ProfileAvatar({ profile, imageUrl, large = false }) {
     return imageUrl || profile.avatarUrl ? <img className={`v2-profile-avatar${large ? ' is-large' : ''}`} src={imageUrl || profile.avatarUrl} alt="" /> : <span className={`v2-profile-avatar${large ? ' is-large' : ''}`} aria-hidden="true">{profile.initials}</span>;
 }
 
-function ProfileImageModal({ kind, value, hasCustomCover, onClose, onSave }) {
+function ProfileImageModal({ kind, value, images, profile, onClose, onSave }) {
     const [file, setFile] = useState(null);
     const [preset, setPreset] = useState(value);
     const [saving, setSaving] = useState(false);
@@ -84,32 +86,37 @@ function ProfileImageModal({ kind, value, hasCustomCover, onClose, onSave }) {
             setSaving(false);
         }
     };
-    return <V2Modal title={cover ? 'Đổi ảnh bìa' : 'Đổi ảnh đại diện'} onClose={onClose} wide={cover}>
-        <form className="v2-profile-form" onSubmit={submit}>
+    return <V2Modal title={cover ? 'Đổi ảnh bìa' : 'Đổi ảnh đại diện'} onClose={onClose} wide={cover} className="v2-profile-image-modal">
+        <form className="v2-profile-form v2-profile-image-form" onSubmit={submit}>
+            <p className="v2-profile-image-intro">{cover ? 'Thêm một chút cá tính cho trang cá nhân của bạn.' : 'Chọn một bức ảnh để mọi người dễ nhận ra bạn.'}</p>
             {cover && <fieldset className="v2-profile-cover-choices"><legend>Chọn ảnh bìa có sẵn</legend><div>
                 {[
                     ['default', 'Cam trải nghiệm'],
                     ['sunset', 'Hoàng hôn'],
                     ['horizon', 'Bầu trời'],
-                ].map(([id, label]) => <button key={id} type="button" className={`v2-profile-cover-choice is-${id}${preset === id && !file ? ' is-selected' : ''}`} aria-pressed={preset === id && !file} onClick={() => { setFile(null); setPreset(id); }}><span className="v2-profile-cover-choice-art" /><strong>{label}</strong></button>)}
-                {hasCustomCover && <button type="button" className={`v2-profile-cover-choice is-custom${preset === 'custom' && !file ? ' is-selected' : ''}`} aria-pressed={preset === 'custom' && !file} onClick={() => { setFile(null); setPreset('custom'); }}><span className="v2-profile-cover-choice-art" /><strong>Ảnh đã tải</strong></button>}
+                ].map(([id, label]) => <button key={id} type="button" disabled={saving} className={`v2-profile-cover-choice is-${id}${preset === id && !file ? ' is-selected' : ''}`} aria-pressed={preset === id && !file} onClick={() => { setFile(null); setPreset(id); setError(''); }}><span className="v2-profile-cover-choice-art" /><strong>{label}{preset === id && !file && <Check size={15} aria-hidden="true" />}</strong></button>)}
+                {images.cover && <button type="button" disabled={saving} className={`v2-profile-cover-choice is-custom${preset === 'custom' && !file ? ' is-selected' : ''}`} aria-pressed={preset === 'custom' && !file} onClick={() => { setFile(null); setPreset('custom'); setError(''); }}><span className="v2-profile-cover-choice-art" style={{ backgroundImage: `url(${images.cover})` }} /><strong>Ảnh đã tải{preset === 'custom' && !file && <Check size={15} aria-hidden="true" />}</strong></button>}
             </div></fieldset>}
-            <ImagePicker label={cover ? 'Hoặc tải ảnh bìa' : 'Tải ảnh đại diện'} file={file} onChange={setFile} disabled={saving} hint="JPG, PNG hoặc WebP · tối đa 5 MB · chỉ lưu trên thiết bị này" />
-            <p className="v2-profile-image-note">Ảnh được lưu trên thiết bị này cho tài khoản của bạn. Backend hiện chưa có API lưu ảnh profile.</p>
+            <ProfileImagePicker cover={cover} file={file} value={cover ? (preset === 'custom' ? images.cover : '') : images.avatar || profile.avatarUrl} initials={profile.initials} preset={preset} onChange={(next) => { setFile(next); setError(''); }} disabled={saving} />
+            <p className="v2-profile-image-note"><Info size={16} aria-hidden="true" /><span>Ảnh chỉ được lưu cho tài khoản của bạn trên thiết bị này.</span></p>
             {error && <p className="v2-profile-form-error" role="alert">{error}</p>}
             <footer><button className="v2-button" type="button" onClick={onClose} disabled={saving}>Hủy</button><button className="v2-button v2-button--primary" disabled={saving || (!cover && !file) || (cover && !file && preset === value)}>{saving ? 'Đang lưu...' : 'Lưu ảnh'}</button></footer>
         </form>
     </V2Modal>;
 }
 
-function EditProfileModal({ profile, personal, onClose, onSave }) {
+function EditProfileModal({ profile, personal, academic, onClose, onSave }) {
     const [draft, setDraft] = useState({
         displayName: profile.displayName,
         headline: profile.headline,
         about: profile.about,
         skills: profile.skills.join(', '),
         interests: profile.interests.join(', '),
-        dateOfBirth: personal.dateOfBirth,
+        dateOfBirth: formatBirthDate(personal.dateOfBirth),
+        campus: CAMPUSES.includes(academic.campus) ? academic.campus : '',
+        major: academic.major,
+        year: academic.year,
+        studentCode: academic.studentCode,
         phoneNumber: personal.phoneNumber,
         address: personal.address,
     });
@@ -125,8 +132,9 @@ function EditProfileModal({ profile, personal, onClose, onSave }) {
                 ...draft,
                 skills: draft.skills.split(','),
                 interests: draft.interests.split(','),
+                academic: { campus: draft.campus, major: draft.major, year: draft.year, studentCode: draft.studentCode },
                 personal: {
-                    dateOfBirth: draft.dateOfBirth,
+                    dateOfBirth: parseBirthDate(draft.dateOfBirth),
                     phoneNumber: draft.phoneNumber,
                     address: draft.address,
                 },
@@ -146,10 +154,23 @@ function EditProfileModal({ profile, personal, onClose, onSave }) {
                 <label> Giới thiệu bản thân <textarea name="about" value={draft.about} onChange={update} rows="4" maxLength="2000" /> </label>
                 <label> Kỹ năng (cách nhau bởi dấu phẩy) <input name="skills" value={draft.skills} onChange={update} /> </label>
                 <label> Sở thích (cách nhau bởi dấu phẩy) <input name="interests" value={draft.interests} onChange={update} /> </label>
+                <fieldset className="v2-profile-form-private v2-profile-form-academic">
+                    <legend>Thông tin học vụ</legend>
+                    <p>Bổ sung thông tin học vụ của bạn. Mã sinh viên chỉ hiển thị trong hồ sơ cá nhân.</p>
+                    <label>Campus <select name="campus" value={draft.campus} onChange={update}><option value="">Chọn campus</option>{CAMPUSES.map((campus) => <option key={campus} value={campus}>{campusLabel(campus)}</option>)}</select></label>
+                    <div className="v2-profile-form-row">
+                        <label>Ngành học <input name="major" value={draft.major} onChange={update} placeholder="Ví dụ: Kỹ thuật phần mềm" maxLength="120" /></label>
+                        <label>Khóa học <input name="year" value={draft.year} onChange={update} placeholder="Ví dụ: K20" maxLength="30" /></label>
+                    </div>
+                    <label>Mã sinh viên <input name="studentCode" value={draft.studentCode} onChange={update} placeholder="Ví dụ: SE123456" maxLength="30" /></label>
+                </fieldset>
                 <fieldset className="v2-profile-form-private">
                     <legend>Thông tin dùng khi đăng ký CLB</legend>
                     <p>Chỉ bạn nhìn thấy. Dữ liệu tạm lưu trên thiết bị; hồ sơ gia nhập CLB hiện chưa tự lấy thông tin này.</p>
-                    <label>Ngày sinh <input name="dateOfBirth" value={draft.dateOfBirth} onChange={update} type="date" /></label>
+                    <label>Ngày sinh (DD/MM/YYYY) <input name="dateOfBirth" value={draft.dateOfBirth} onChange={(event) => {
+                        const dateOfBirth = formatBirthDateInput(event.target.value);
+                        setDraft((current) => ({ ...current, dateOfBirth }));
+                    }} inputMode="numeric" autoComplete="bday" placeholder="DD/MM/YYYY" maxLength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" /></label>
                     <label>Số điện thoại <input name="phoneNumber" value={draft.phoneNumber} onChange={update} inputMode="tel" placeholder="Ví dụ: 0901234567" maxLength="16" /></label>
                     <label>Địa chỉ <input name="address" value={draft.address} onChange={update} maxLength="500" /></label>
                 </fieldset>
@@ -160,9 +181,9 @@ function EditProfileModal({ profile, personal, onClose, onSave }) {
     );
 }
 
-export default function ProfilePage({ user, sessionKey, api }) {
+export default function ProfilePage({ user, sessionKey, api, profileImages }) {
     const result = useProfile(user, sessionKey);
-    const { images, error: imageError, saveImage } = useProfileImages(user, sessionKey);
+    const { images, error: imageError, saveImage } = profileImages;
     const [shared, setShared] = useState(false);
     const [tab, setTab] = useState('overview');
     const [editing, setEditing] = useState(false);
@@ -194,13 +215,19 @@ export default function ProfilePage({ user, sessionKey, api }) {
             </section>
             <section className="v2-profile-identity">
                 <div className="v2-profile-avatar-wrap"><ProfileAvatar profile={data.profile} imageUrl={images.avatar} large />{!shared && <button type="button" className="v2-profile-avatar-edit" aria-label="Đổi ảnh đại diện" onClick={() => setImageModal('avatar')}><Camera size={17} /></button>}</div>
-                <div className="v2-profile-grow"><div><h1>{data.profile.displayName}</h1><ShieldCheck size={21} aria-label="Hồ sơ trải nghiệm" /></div><p>{data.profile.headline}</p><small><MapPin size={15} /> Thông tin học vụ chưa được kết nối</small></div>
+                <div className="v2-profile-grow"><div><h1>{data.profile.displayName}</h1><ShieldCheck size={21} aria-label="Hồ sơ trải nghiệm" /></div><p>{data.profile.headline}</p><small><MapPin size={15} /><span>{[campusLabel(data.academic.campus), data.academic.major, data.academic.year].filter(Boolean).join(' · ') || 'Chưa cập nhật thông tin học vụ'}</span></small></div>
                 <div className="v2-profile-actions"><button className="v2-button" type="button" onClick={() => setShared((value) => !value)}>{shared ? <LockKeyhole size={16} /> : <Eye size={16} />}{shared ? 'Về hồ sơ cá nhân' : 'Xem bản chia sẻ'}</button>{!shared && <button className="v2-button v2-button--primary" type="button" onClick={() => setEditing(true)}><Pencil size={16} />Chỉnh sửa</button>}</div>
             </section>
             {imageError && <p className="v2-profile-form-error" role="alert">{imageError}</p>}
             {shared && <section className="v2-profile-privacy-banner" role="status"><Eye size={18} />Đang xem trước thông tin chia sẻ. Mã sinh viên, điểm chi tiết và lịch sử riêng tư được ẩn.</section>}
             <div className="v2-profile-columns">
                 <aside>
+                    {!shared && <section className="v2-profile-panel"><h2>Thông tin cá nhân</h2><dl className="v2-profile-personal-details">
+                        <div><dt>Mã sinh viên</dt><dd>{data.academic.studentCode || 'Chưa cập nhật'}</dd></div>
+                        <div><dt>Ngày sinh</dt><dd>{formatBirthDate(data.personal.dateOfBirth) || 'Chưa cập nhật'}</dd></div>
+                        <div><dt>Số điện thoại</dt><dd>{data.personal.phoneNumber || 'Chưa cập nhật'}</dd></div>
+                        <div><dt>Địa chỉ</dt><dd>{data.personal.address || 'Chưa cập nhật'}</dd></div>
+                    </dl><p className="v2-profile-note">Chỉ bạn nhìn thấy.</p></section>}
                     <section className="v2-profile-panel"><h2>Một chút về mình</h2><p>{data.profile.about || 'Chưa thêm giới thiệu.'}</p><div className="v2-profile-info"><GraduationCap size={18} /><div><strong>{user.name || user.fullName}</strong><small>Tên tài khoản từ hệ thống</small></div></div><div className="v2-profile-info"><Sparkles size={18} /><div><strong>Sở thích</strong><small>{data.profile.interests.join(' · ') || 'Chưa cập nhật'}</small></div></div></section>
                     <section className="v2-profile-panel"><h2>Kỹ năng & thế mạnh</h2><div className="v2-profile-tags">{data.profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div><p className="v2-profile-note">Thông tin do sinh viên tự cập nhật.</p></section>
                     <section className="v2-profile-panel"><h2>Câu lạc bộ đồng hành</h2>{memberships.status === 'loading' && <p>Đang tải câu lạc bộ…</p>}{memberships.status === 'error' && <p role="alert">Không thể tải câu lạc bộ lúc này.</p>}{memberships.status === 'ready' && !participations.length && <p>Chưa tham gia câu lạc bộ nào.</p>}{participations.map((club) => <div className="v2-profile-club" key={club.clubId}><span>{club.clubName.slice(0, 2).toUpperCase()}</span><div><strong>{club.clubName}</strong><small>{club.role}</small></div></div>)}</section>
@@ -210,8 +237,8 @@ export default function ProfilePage({ user, sessionKey, api }) {
                     {tab === 'overview' ? <><div className="v2-profile-stats"><Stat icon={Award} label="Điểm đóng góp ghi nhận" value="—" hidden={shared} note="Chưa có API tổng hợp cá nhân" /><Stat icon={BookOpen} label="Hoạt động đã tham dự" value="—" note="Chưa có API lịch sử cá nhân" /><Stat icon={FolderOpen} label="Câu lạc bộ tham gia" value={memberships.status === 'ready' ? participations.length : '—'} note="Danh sách đã duyệt từ hệ thống" /></div><section className="v2-profile-panel v2-profile-experience"><div><span>SÁU TRỤ CỘT TRẢI NGHIỆM · MINH HỌA</span><h2>Hành trình của bạn không chỉ được đo bằng điểm số.</h2><p>Biểu đồ mẫu; số liệu trải nghiệm cá nhân chưa được kết nối.</p></div><Radar pillars={data.summary.experiencePillars} /></section></> : <section className="v2-profile-panel"><div className="v2-profile-section-heading"><div><span>MINH CHỨNG</span><h2>Lịch sử đóng góp & hoạt động</h2></div></div><p className="v2-profile-empty">{shared ? 'Lịch sử riêng tư được ẩn trong bản chia sẻ.' : 'Lịch sử minh chứng cá nhân chưa có API để hiển thị.'}</p></section>}
                 </div>
             </div>
-            {editing && <EditProfileModal profile={result.data.profile} personal={result.data.personal} onClose={() => setEditing(false)} onSave={result.save} />}
-            {imageModal && <ProfileImageModal kind={imageModal} value={coverPreset} hasCustomCover={Boolean(images.cover)} onClose={() => setImageModal('')} onSave={saveSelectedImage} />}
+            {editing && <EditProfileModal profile={result.data.profile} personal={result.data.personal} academic={result.data.academic} onClose={() => setEditing(false)} onSave={result.save} />}
+            {imageModal && <ProfileImageModal kind={imageModal} value={coverPreset} images={images} profile={data.profile} onClose={() => setImageModal('')} onSave={saveSelectedImage} />}
         </div>
     );
 }

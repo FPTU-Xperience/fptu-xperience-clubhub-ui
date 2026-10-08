@@ -1,3 +1,5 @@
+import { readProfile, saveProfile } from './profile-data.js';
+
 export const ONBOARDING_VERSION = 1;
 export const MIN_INTERESTS = 3;
 
@@ -44,7 +46,27 @@ export function readOnboarding(user, storage = globalThis.localStorage) {
     if (!key || !storage) return null;
     try {
         const value = JSON.parse(storage.getItem(key));
-        return isValidOnboarding(value) ? value : null;
+        if (!isValidOnboarding(value)) return null;
+        const profile = readProfile(user, storage);
+        if (!value.profileSynced) {
+            try {
+                saveProfile(user, {
+                    academic: { major: profile.academic.major || value.major },
+                    interests: profile.profile.interests.length ? profile.profile.interests : value.interests.map((id) => INTERESTS.find((item) => item.id === id)?.label || id),
+                }, storage);
+                value.profileSynced = true;
+                storage.setItem(key, JSON.stringify(value));
+            } catch {
+                // A completed onboarding remains completed if local storage is unavailable.
+                return value;
+            }
+        }
+        const current = readProfile(user, storage);
+        return {
+            ...value,
+            major: current.academic.major,
+            interests: current.profile.interests.map((label) => INTERESTS.find((item) => item.label === label)?.id || label),
+        };
     } catch {
         return null;
     }
@@ -55,12 +77,19 @@ export function saveOnboarding(user, preferences, storage = globalThis.localStor
     if (!key || !storage) throw new Error('Không thể lưu sở thích khi chưa có tài khoản.');
     const value = {
         version: ONBOARDING_VERSION,
-        major: preferences.major.trim(),
+        major: String(preferences.major || '').trim(),
         interests: [...new Set(preferences.interests)],
         syncTimetable: Boolean(preferences.syncTimetable),
         completedAt: new Date().toISOString(),
+        profileSynced: true,
     };
     if (!isValidOnboarding(value)) throw new Error('Vui lòng chọn chuyên ngành và ít nhất 3 sở thích.');
+    saveProfile(user, {
+        ...(preferences.profile || {}),
+        academic: { ...(preferences.academic || {}), major: value.major },
+        ...(preferences.personal ? { personal: preferences.personal } : {}),
+        interests: value.interests.map((id) => INTERESTS.find((item) => item.id === id)?.label || id),
+    }, storage);
     storage.setItem(key, JSON.stringify(value));
     return value;
 }

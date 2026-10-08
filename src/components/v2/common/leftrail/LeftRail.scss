@@ -196,6 +196,14 @@
     color: #0f172a;
     font-size: 11px;
     font-weight: 700;
+    overflow: hidden;
+}
+
+.v2-left-rail-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .v2-left-rail-account>span:nth-child(2) {

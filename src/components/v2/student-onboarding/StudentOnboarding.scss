@@ -1,0 +1,58 @@
+.dx-app.dx-student-onboarding { min-width: 0; }
+.dx-student-onboarding {
+    .dx-onboarding-shell { grid-template-columns: minmax(300px, .7fr) minmax(0, 1.3fr); }
+    .dx-onboarding-intro { align-self: start; position: sticky; top: 0; min-height: calc(100dvh - 82px); box-sizing: border-box; }
+    .dx-onboarding-intro .dx-onboarding-benefit { position: static; margin-top: 60px; }
+    .dx-onboarding-form { min-width: 0; padding: 40px clamp(24px, 4vw, 64px); }
+    .dx-onboarding-form h2 { margin: 24px 0 8px; font-size: 25px; color: #111827; }
+    .dx-onboarding-form h2:focus { outline: none; }
+    .dx-onboarding-description { color: #64748b; font-size: 13px; line-height: 1.7; }
+    .dx-onboarding-section { padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+    .dx-onboarding-section legend { font-size: 14px; }
+    .dx-onboarding-section > p { color: #64748b; line-height: 1.6; }
+    .dx-onboarding-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .dx-field { display: grid; min-width: 0; gap: 7px; margin-top: 16px; }
+    .dx-onboarding-fields .dx-field { margin-top: 0; }
+    .dx-field input, .dx-field select, .dx-field textarea { width: 100%; box-sizing: border-box; margin-top: 0; }
+    .dx-field textarea { min-height: 96px; resize: vertical; }
+    .dx-onboarding-actions { position: sticky; bottom: 0; z-index: 1; margin-bottom: -40px; padding: 18px 0 24px; background: #fff; }
+    .dx-onboarding-sync-note { display: flex; align-items: flex-start; gap: 8px; padding: 12px; border-radius: 9px; background: #f8fafc; color: #64748b; font-size: 12px; line-height: 1.6; }
+    .dx-onboarding-sync-note svg { flex-shrink: 0; margin-top: 2px; }
+    .dx-onboarding-custom-interests { margin-top: 16px; font-size: 12px; }
+    .dx-onboarding-custom-interests button { margin: 4px 6px 0 0; padding: 6px 10px; border: 1px solid #fed7aa; border-radius: 20px; background: #fff7ed; color: #9a3412; cursor: pointer; }
+    .dx-onboarding-autofill { margin-top: 28px; }
+    .dx-onboarding-email { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+    .dx-onboarding-email > svg { flex-shrink: 0; color: #ea580c; }
+    .dx-onboarding-email > div { min-width: 0; }
+    .dx-onboarding-email small { display: block; color: #64748b; font-size: 11px; }
+    .dx-onboarding-email strong { display: block; overflow-wrap: anywhere; font-size: 13px; }
+    .dx-onboarding-autofill-message { display: flex; gap: 8px; margin: 18px 0 24px; color: #9a3412; font-size: 13px; line-height: 1.7; }
+    .dx-onboarding-autofill-message > svg { flex-shrink: 0; margin-top: 3px; }
+    .dx-onboarding-autofill > .dx-onboarding-description { margin-top: 18px; }
+}
+.dx-onboarding-steps {
+    display: flex; gap: 24px; color: #94a3b8; font-size: 12px;
+    span { display: flex; gap: 8px; align-items: center; }
+    b { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: #f1f5f9; }
+    [aria-current="step"] { color: #c2410c; font-weight: 650; }
+    [aria-current="step"] b { background: #fff7ed; box-shadow: inset 0 0 0 1px #fed7aa; }
+}
+@media (max-width: 900px) {
+    .dx-student-onboarding {
+        .dx-onboarding-shell { grid-template-columns: 1fr; }
+        .dx-onboarding-intro { position: relative; min-height: 0; padding: 32px 24px; border-right: 0; border-bottom: 1px solid #fed7aa; }
+        .dx-onboarding-intro h1 { font-size: 32px; }
+        .dx-onboarding-intro .dx-onboarding-benefit { margin-top: 24px; }
+        .dx-onboarding-header { height: 70px; padding: 0 24px; gap: 16px; }
+        .dx-onboarding-header > span { font-size: 9px; text-align: right; }
+        .dx-onboarding-form { padding: 28px 24px 40px; }
+    }
+}
+@media (max-width: 560px) {
+    .dx-student-onboarding {
+        .dx-onboarding-fields, .dx-interest-grid { grid-template-columns: 1fr; }
+        .dx-onboarding-actions { gap: 12px; flex-wrap: wrap; }
+        .dx-onboarding-actions > span { width: 100%; }
+        .dx-onboarding-actions > button { flex: 1; }
+    }
+}
