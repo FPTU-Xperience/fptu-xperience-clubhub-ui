@@ -42,3 +42,5 @@ cd frontend
 docker build -t clubreport-frontend .
 docker run -p 3000:80 clubreport-frontend
 ```
+
+The [backend API implementation handoff](docs/contracts/backend-api-implementation-handoff.md) is the entry point for pending frontend API work, with the [2026-10-09 debt register](docs/contracts/frontend-api-debt-register.md), source evidence and dependency-ordered contract tasks.

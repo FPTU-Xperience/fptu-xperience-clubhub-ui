@@ -1,0 +1,114 @@
+import assert from 'node:assert/strict';
+import React from 'react';
+import { StaticRouter } from 'react-router-dom/server.js';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { createServer } from 'vite';
+
+const vite = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
+const path = '/src/pages/v2/club-workspace-page/tabs/club-page/';
+try {
+    const { default: Preview } = await vite.ssrLoadModule(`${path}ClubPagePreview.jsx`);
+    const { default: Info } = await vite.ssrLoadModule(`${path}ClubPageInfoModal.jsx`);
+    const { default: Images } = await vite.ssrLoadModule(`${path}ClubPageImageModal.jsx`);
+    const { default: Schedule } = await vite.ssrLoadModule(`${path}ClubScheduleEditor.jsx`);
+    const { CLUB_PAGE_FIELDS, CLUB_PAGE_TABS } = await vite.ssrLoadModule(`${path}club-page-fields.js`);
+    const { default: Members } = await vite.ssrLoadModule('/src/pages/v2/club-workspace-page/tabs/MembersTab.jsx');
+    const { ClubRolesInfoModal } = await vite.ssrLoadModule('/src/pages/v2/club-workspace-page/tabs/members/ClubRolesInfo.jsx');
+    const { default: EditProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-page/EditProfileModal.jsx');
+    const { createMockProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-data.js');
+    const { default: CoverArt } = await vite.ssrLoadModule('/src/pages/v2/profile-page/ProfileCoverArt.jsx');
+    const { default: CoverModal } = await vite.ssrLoadModule('/src/pages/v2/profile-page/ProfileCoverModal.jsx');
+    const { AuthProvider } = await vite.ssrLoadModule('/src/context/AuthContext.jsx');
+    const { default: Invite } = await vite.ssrLoadModule('/src/pages/v2/club-workspace-page/tabs/members/InviteMemberModal.jsx');
+    const { default: MyApplications } = await vite.ssrLoadModule('/src/components/v2/my-clubs/MyMembershipApplications.jsx');
+    const club = { name: 'CLB kiểm thử', category: 'TECHNOLOGY', description: 'Nội dung đã lưu', contactEmail: 'club@example.edu', contactPhone: '0123456789', scheduleLabel: 'Thứ bảy' };
+    const noop = () => {};
+    const render = (Component, props) => renderToStaticMarkup(React.createElement(Component, props));
+    const profileEditor = render(EditProfile, { snapshot: createMockProfile({ id: 1, name: 'Student' }), onClose: noop, onPreview: noop });
+    assert.equal((profileEditor.match(/role="tab"/g) || []).length, 3);
+    assert.equal((profileEditor.match(/role="tabpanel"/g) || []).length, 3);
+    assert.ok(profileEditor.includes('Xem trước') && !profileEditor.includes('Lưu thay đổi'));
+    assert.ok(!profileEditor.includes('type="file"'));
+    const cover = render(CoverArt, { color: 'horizon', shape: 'ribbons' });
+    assert.ok(cover.includes('viewBox="0 0 1400 270"') && cover.includes('data-shape="ribbons"'));
+    const coverModal = renderToStaticMarkup(React.createElement(StaticRouter, { location: '/v2/profile' }, React.createElement(CoverModal, { user: { id: 1 }, profile: createMockProfile({ id: 1, name: 'Student' }).profile, savedImage: '', onClose: noop, onSave: noop })));
+    assert.ok(coverModal.includes('Màu nền') && coverModal.includes('Ảnh nền'));
+    assert.equal((coverModal.match(/role="tab"/g) || []).length, 3);
+    const layeredCover = render(CoverArt, { imageUrl: 'https://example.com/background.png', shape: 'ribbons', shapeTransform: { x: 10, y: 20, scale: 75 }, coverText: { title: '<My cover>', subtitle: 'Hello' } });
+    assert.ok(layeredCover.indexOf('background.png') < layeredCover.indexOf('data-layer="shape"'));
+    assert.ok(layeredCover.indexOf('data-layer="shape"') < layeredCover.indexOf('data-layer="text"'));
+    assert.ok(layeredCover.includes('scale(0.75)') && layeredCover.includes('&lt;My cover&gt;'));
+    const movedText = render(CoverArt, { coverText: { title: 'Large heading', size: 240, x: 10, y: 20 } });
+    assert.ok(movedText.includes('font-size="240"') && movedText.includes('translate(140 54)'));
+    const noText = render(CoverArt, { coverText: { visible: false } });
+    assert.ok(!noText.includes('data-layer="text"'));
+    assert.ok(coverModal.includes('Kho quà') && coverModal.includes('Lưu ảnh bìa'));
+    const dashboard = { status: 'ready', data: { memberCount: 1, publicLeaders: [{ name: 'Chủ nhiệm công khai', role: 'Chủ nhiệm' }] }, retry: noop };
+    const publicMembers = render(Members, { manager: false, dashboard, workspace: { clubId: 7 } });
+    assert.ok(publicMembers.includes('Chủ nhiệm công khai'));
+    assert.ok(!publicMembers.includes('Quản lý thành viên') && !publicMembers.includes('Quản lý đơn'));
+    const managedMembers = renderToStaticMarkup(React.createElement(AuthProvider, null, React.createElement(Members, { manager: true, dashboard, workspace: { clubId: 7 } })));
+    assert.ok(managedMembers.includes('Quản lý thành viên') && managedMembers.includes('Quản lý đơn'));
+    assert.ok(managedMembers.includes('Thêm thành viên'));
+    assert.ok(managedMembers.includes('Xem trách nhiệm và quyền hạn của các vai trò'));
+    assert.ok(publicMembers.includes('Xem trách nhiệm và quyền hạn của các vai trò'));
+    const roleInfo = render(ClubRolesInfoModal, { onClose: noop });
+    assert.equal((roleInfo.match(/scope="row"/g) || []).length, 8);
+    assert.ok(roleInfo.includes('Phó chủ nhiệm') && roleInfo.includes('Nội dung (Content)') && roleInfo.includes('Sự kiện (Event)'));
+    assert.ok(!roleInfo.includes('Đề xuất') && !roleInfo.includes('đề xuất'));
+    assert.ok(roleInfo.includes('v2-club-role-check'));
+    assert.ok(!managedMembers.includes('href='), 'member management stays inside the V2 tab');
+    const invitationForm = render(Invite, { api: {}, clubId: 7, onClose: noop, onInvited: noop });
+    assert.ok(invitationForm.includes('Học kỳ tra cứu') && invitationForm.includes('Tìm sinh viên để mời'));
+    assert.ok(invitationForm.match(/type="submit"[^>]*disabled=""/), 'cannot send before selecting an eligible student');
+    const inbox = render(MyApplications, { applications: [{ applicationId: 1, club: { name: 'Club', clubId: 7 }, status: 'PENDING', canAcceptInvitation: true }], onAcceptInvitation: noop });
+    assert.ok(inbox.includes('Xem lời mời') && inbox.includes('Lời mời tham gia'));
+    const readOnly = render(Preview, { club, manager: false, onEdit: noop });
+    assert.ok(readOnly.includes(club.name));
+    assert.ok(!readOnly.includes('<button'), 'read-only preview must not expose editing controls');
+    const manager = render(Preview, { club, manager: true, onEdit: noop });
+    assert.equal((manager.match(/<button/g) || []).length, 3, 'one information edit and two image edits');
+    assert.ok(!manager.includes('<input'), 'preview must not expose the full form');
+    assert.ok(manager.match(/class="club-page-name-row"[\s\S]*?<h2>[\s\S]*?club-page-edit-button/), 'edit button belongs beside the club name');
+    const previewHeading = manager.match(/class="club-page-preview-heading"[^>]*>(.*?)<\/div>/s)?.[1] || '';
+    assert.ok(!previewHeading.includes('<button'), 'preview heading must not contain the edit button');
+    {
+        const html = render(Info, { club, saving: false, error: 'Lỗi lưu mẫu', onClose: noop, onPreview: noop });
+        assert.ok(!html.includes('type="file"'), 'information dialog must not include image uploads');
+        for (const field of CLUB_PAGE_FIELDS) assert.ok(html.includes(`name="${field.name}"`));
+        assert.equal((html.match(/role="tab"/g) || []).length, 4);
+        assert.equal((html.match(/role="tabpanel"/g) || []).length, 4);
+        assert.equal((html.match(/aria-selected="true"/g) || []).length, 1);
+        for (const tab of CLUB_PAGE_TABS) {
+            assert.ok(html.includes(`aria-controls="club-page-panel-${tab.id}"`));
+            assert.ok(html.includes(`aria-labelledby="club-page-tab-${tab.id}"`));
+        }
+        assert.equal((html.match(/<form/g) || []).length, 1);
+        const footer = html.match(/<footer>(.*?)<\/footer>/s)?.[1] || '';
+        assert.equal((footer.match(/<button/g) || []).length, 2, 'one shared preview/cancel pair');
+        assert.ok(footer.includes('Xem trước'));
+        assert.ok(!footer.includes('Lưu thông tin'));
+        assert.ok(html.includes('role="alert"'));
+        assert.ok(html.includes('disabled=""'), 'unchanged draft cannot be saved');
+    }
+    for (const kind of ['logo', 'cover']) {
+        const html = render(Images, { kind, file: null, saving: false, error: '', onChange: noop, onClose: noop, onSave: noop });
+        assert.equal((html.match(/type="file"/g) || []).length, 1, 'one upload per image dialog');
+        assert.ok(!html.includes('name="description"'));
+        assert.ok(html.includes(kind === 'logo' ? 'Lưu logo' : 'Lưu ảnh bìa'));
+    }
+    const schedule = render(Schedule, { value: 'FA2026 · T2, T7 · 18:00–20:00 · Lặp lại hàng tuần', onChange: noop });
+    assert.equal((schedule.match(/type="range"/g) || []).length, 2);
+    assert.equal((schedule.match(/step="30"/g) || []).length, 2);
+    assert.equal((schedule.match(/aria-pressed="true"/g) || []).length, 2);
+    assert.ok(schedule.includes('type="checkbox"'));
+    assert.ok(!schedule.includes('<table'));
+    assert.ok(!schedule.includes('10W') && !schedule.includes('3W'));
+    assert.ok(schedule.includes('<p>FA2026 · T2, T7 · 18:00–20:00 · Hằng tuần</p>'));
+    const weeklyPreview = render(Preview, { club: { ...club, scheduleLabel: 'FA2026 · T2 · 18:00–20:00 · Lặp lại hàng tuần' }, manager: false });
+    assert.ok(weeklyPreview.includes('Hằng tuần'));
+    assert.ok(!weeklyPreview.includes('Lặp lại hàng tuần'));
+    console.log('PASS: V2-local member management, role-gated public leaders, preview/cancel dialog, weekly labels, and isolated image dialogs.');
+} finally {
+    await vite.close();
+}

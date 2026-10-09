@@ -8,7 +8,8 @@
         "build": "vite build",
         "preview": "vite preview",
         "test:demo": "node --test src/pages/v2/*.test.js",
-        "test:demo:routes": "node scripts/demo-smoke.mjs"
+        "test:demo:routes": "node scripts/demo-smoke.mjs",
+        "test:club-page": "node scripts/club-page-smoke.mjs"
     },
     "dependencies": {
         "framer-motion": "^10.16.0",

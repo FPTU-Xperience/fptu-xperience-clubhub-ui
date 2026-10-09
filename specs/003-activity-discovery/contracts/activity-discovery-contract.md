@@ -103,3 +103,7 @@ must not be used for client authorization.
 - The contract needs cross-repository ownership and a linked issue/comment before UI implementation
   begins. Existing relevant graph dependencies are UI-02 API adapters, UI-06 activity
   recommendations, RE-35, RE-40 and RE-43.
+
+## API implementation refinement — 2026-10-09
+
+[Discovery API](../../../docs/contracts/activity-discovery-api.md) retains these feed/recommendation route names and adds explicit pagination, numeric server IDs (client may stringify), cover URL, direct safe detail, server-clock LIVE state and private-by-default publication. The string IDs in the original examples above are illustrative, not a requirement to replace existing integer identities. Page size 50 satisfies the original validation case; add UI page handling for larger results. Main 80818266 still lacks this safe feed/ranking boundary. Source contracts/handoff are recorded; no external issue/comment was created by this audit. Ownership/deployment verification remains a future implementation task.

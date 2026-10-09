@@ -28,5 +28,15 @@ test('membership reads do not advertise unsupported self withdrawal', () => {
         reason: 'Interested',
         status: 'PENDING',
         canWithdraw: false,
+        canAcceptInvitation: false,
     }]);
+});
+
+test('unconsented pending memberships are shown as invitations', () => {
+    const invitations = applicationsFromMemberships([
+        { id: 1, clubId: 7, status: 'Pending', acceptedClubRules: false, committedToParticipate: false },
+        { id: 2, clubId: 7, status: 'Pending', acceptedClubRules: true, committedToParticipate: true },
+        { id: 3, clubId: 7, status: 'Approved', acceptedClubRules: false, committedToParticipate: false },
+    ]);
+    assert.deepEqual(invitations.map((record) => record.canAcceptInvitation), [true, false, false]);
 });

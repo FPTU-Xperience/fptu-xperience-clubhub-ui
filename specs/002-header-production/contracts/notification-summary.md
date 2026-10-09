@@ -44,3 +44,7 @@ The V2 adapter accepts equivalent existing timestamp field names but exposes onl
 - The response must not rely on client-side role checks for authorization.
 - The header must not use demo notices, fixture actors, cached entries from another session, or local mutation behavior as a fallback.
 - Marking notifications read and navigating to a notification-management page are outside this header migration; the popover is read-only.
+
+## API rescan — 2026-10-09
+
+Notification list and read mutations already exist on main 80818266; no replacement notification service is requested. New invitation, role, contribution and redemption notifications should use source outbox events and recipient deduplication under [shared conventions](../../../docs/contracts/api-contract-conventions.md). Preserve this header's bounded safe projection and session isolation; full inbox pagination is a separate existing-API integration task (D14). See [handoff](../../../docs/contracts/backend-api-implementation-handoff.md).

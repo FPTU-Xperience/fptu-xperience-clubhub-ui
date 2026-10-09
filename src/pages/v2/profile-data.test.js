@@ -6,10 +6,14 @@ import {
     PROFILE_STORAGE_VERSION,
     createMockProfile,
     mapProfileMemberships,
+    loadProfileMemberships,
     profileStorageKey,
     readProfile,
     saveProfile,
     toSharedProfile,
+    previewProfile,
+    readProfileFromMemberships,
+    projectOwnMemberProfile,
 } from './profile-data.js';
 
 function memoryStorage() {
@@ -23,6 +27,46 @@ function memoryStorage() {
 
 const studentA = { id: 'student-a', name: 'Nguyễn Minh Anh', email: 'anh@fpt.edu.vn', avatar: 'NA' };
 const studentB = { id: 'student-b', name: 'Trần Gia Hân', email: 'han@fpt.edu.vn', avatar: 'TH' };
+
+test('own membership seeds profile once and saved self edits override registration snapshots', () => {
+    const storage = memoryStorage();
+    const member = {
+        id: 7,
+        userId: studentA.id,
+        fullName: 'Anh từ đơn CLB',
+        phoneNumber: '0901234567',
+        hobbies: 'Cloud, Cầu lông',
+        skills: 'Linux',
+        address: 'Hà Nội',
+        expectations: 'Application only',
+    };
+    const imported = readProfileFromMemberships(
+        studentA,
+        [{ ...member, userId: studentB.id, fullName: 'Other' }, member],
+        storage,
+    );
+    assert.equal(imported.profile.displayName, member.fullName);
+    assert.deepEqual(imported.profile.interests, ['Cloud', 'Cầu lông']);
+    assert.equal(imported.personal.address, 'Hà Nội');
+    assert.ok(!('expectations' in imported.profile));
+    saveProfile(studentA, { ...imported.profile, personal: { ...imported.personal, address: 'Đà Nẵng' } }, storage);
+    const saved = readProfileFromMemberships(studentA, [member], storage);
+    assert.equal(saved.personal.address, 'Đà Nẵng');
+    const own = projectOwnMemberProfile(member, studentA, saved);
+    assert.equal(own.address, 'Đà Nẵng');
+    assert.equal(own.expectations, 'Application only');
+    assert.equal(projectOwnMemberProfile(member, studentB, saved), member);
+});
+
+test('preview validates a draft without persisting or modifying the source', () => {
+    const storage = memoryStorage();
+    const before = readProfile(studentA, storage);
+    const preview = previewProfile(before, { displayName: 'Draft', personal: { address: 'Preview address' } });
+    assert.equal(preview.profile.displayName, 'Draft');
+    assert.equal(before.profile.displayName, studentA.name);
+    assert.equal(readProfile(studentA, storage).personal.address, '');
+    assert.throws(() => previewProfile(before, { personal: { phoneNumber: 'invalid' } }), /điện thoại/);
+});
 
 test('profile storage requires an authenticated identity and isolates accounts', () => {
     assert.equal(profileStorageKey(null), null);
@@ -47,12 +91,16 @@ test('mock profile seeds representative data without mutating authenticated iden
 
 test('profile records round-trip per account and returned snapshots are cloned', () => {
     const storage = memoryStorage();
-    const saved = saveProfile(studentA, {
-        displayName: 'Anh M.',
-        headline: 'Build with purpose',
-        skills: ['React', 'React', 'Design'],
-        personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567', address: 'TP. Hồ Chí Minh' },
-    }, storage);
+    const saved = saveProfile(
+        studentA,
+        {
+            displayName: 'Anh M.',
+            headline: 'Build with purpose',
+            skills: ['React', 'React', 'Design'],
+            personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567', address: 'TP. Hồ Chí Minh' },
+        },
+        storage,
+    );
     const reloaded = readProfile(studentA, storage);
     const other = readProfile(studentB, storage);
 
@@ -99,7 +147,11 @@ test('save validates editable profile and private application fields', () => {
     assert.equal(withCover.profile.coverPreset, 'sunset');
     assert.equal(readProfile(studentB, storage).profile.coverPreset, 'default');
     assert.throws(() => saveProfile(studentA, { coverPreset: 'unknown' }, storage), /ảnh bìa/i);
-    const withPersonalData = saveProfile(studentA, { personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567' } }, storage);
+    const withPersonalData = saveProfile(
+        studentA,
+        { personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567' } },
+        storage,
+    );
     assert.equal(withPersonalData.personal.dateOfBirth, '2004-05-17');
     assert.equal(withPersonalData.personal.phoneNumber, '0901234567');
 });
@@ -110,7 +162,15 @@ test('birth dates use DD/MM/YYYY in the editor and reject impossible calendar da
     assert.equal(parseBirthDate('29/02/2004'), '2004-02-29');
     assert.equal(parseBirthDate('29/02/2000'), '2000-02-29');
     assert.equal(parseBirthDate(''), '');
-    for (const invalid of ['29/02/2003', '29/02/1900', '31/04/2004', '00/05/2004', '17/13/2004', '17/05/0000', '2004-05-17']) {
+    for (const invalid of [
+        '29/02/2003',
+        '29/02/1900',
+        '31/04/2004',
+        '00/05/2004',
+        '17/13/2004',
+        '17/05/0000',
+        '2004-05-17',
+    ]) {
         assert.throws(() => parseBirthDate(invalid), /ngày sinh/i);
     }
     const storage = memoryStorage();
@@ -151,8 +211,35 @@ test('profile clubs show only approved memberships from the API response', () =>
         { clubId: 7, clubName: 'F-Code', role: 'MEMBER', status: 'APPROVED' },
         { clubId: 8, clubName: 'F-Style', role: 'MEMBER', status: 'PENDING' },
     ];
-    assert.deepEqual(mapProfileMemberships(rows), [{ clubId: 7, clubName: 'F-Code', role: 'MEMBER' }]);
+    assert.deepEqual(mapProfileMemberships(rows), [{ clubId: 7, clubName: 'F-Code', clubCode: '', logoUrl: '', role: 'MEMBER' }]);
     assert.deepEqual(mapProfileMemberships(null), []);
+});
+
+test('profile memberships load club logos and preserve approved clubs when a logo lookup fails', async () => {
+    const requested = [];
+    const clubs = await loadProfileMemberships({
+        getMyMemberships: async () => [
+            { clubId: 7, clubName: 'F-Code', status: 'APPROVED' },
+            { clubId: 8, clubName: 'F-Style', status: 'PENDING' },
+            { clubId: 9, clubName: 'Club 9', status: 'APPROVED' },
+            { clubId: 10, clubName: 'Club 10', clubCode: 'C10', status: 'APPROVED', logoUrl: 'https://cdn.example.com/10.png' },
+        ],
+        getClub: async (id) => {
+            requested.push(id);
+            if (id === 9) throw new Error('Unavailable');
+            return { id, code: 'F-CODE', logoUrl: 'https://cdn.example.com/7.png' };
+        },
+    });
+    assert.deepEqual(requested, [7, 9]);
+    assert.deepEqual(clubs.map((club) => club.clubCode), ['F-CODE', '', 'C10']);
+    assert.deepEqual(
+        clubs.map((club) => [club.clubId, club.logoUrl]),
+        [
+            [7, 'https://cdn.example.com/7.png'],
+            [9, ''],
+            [10, 'https://cdn.example.com/10.png'],
+        ],
+    );
 });
 
 test('production profile sources stay isolated from demo dependencies', () => {
@@ -171,5 +258,8 @@ test('production profile sources stay isolated from demo dependencies', () => {
 
 test('authenticated V2 router owns the production profile route', () => {
     const source = readFileSync(new URL('./V2App.jsx', import.meta.url), 'utf8');
-    assert.match(source, /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} api=\{api\} profileImages=\{profileImages\} \/>\}/);
+    assert.match(
+        source,
+        /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} api=\{api\} profileImages=\{profileImages\} \/>\}/,
+    );
 });

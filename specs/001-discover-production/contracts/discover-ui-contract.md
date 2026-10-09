@@ -54,6 +54,10 @@ All Clubs directory to fail or be replaced by fixture data.
 
 ## Existing destination
 
-Each card targets `/v2/clubs/:clubId`. The V2 detail route is read-only in this feature; joining,
+Each card targets `/v2/clubs/:clubCode` using the server club code. The V2 detail route is read-only in this feature; joining,
 club workspace, and demo mutations remain outside scope. The source remains responsible for
 authorization checks.
+
+## Backend rescan — 2026-10-09
+
+Main 80818266 has active club directory/detail and a persisted dynamic category catalog. Preserve server category codes and fix static normalization in application flows instead of creating another category source. Joining is now handled by the production detail UI through existing routes, beyond this original read-only feature scope. Public-page writes/media remain D04/D01. Activity recommendations require the distinct [discovery API contract](../../../docs/contracts/activity-discovery-api.md); a curated club subset is not personalized ranking. See [handoff](../../../docs/contracts/backend-api-implementation-handoff.md).

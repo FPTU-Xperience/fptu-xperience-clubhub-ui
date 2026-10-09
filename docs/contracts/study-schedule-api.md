@@ -142,3 +142,14 @@ When BE is deployed, replace repository methods with calls through [the existing
 - [ ] Invalid week (`0`, `11` for 10W, `4` for 3W), 10W `slot-6`/`slot-7`, invalid period, and overlong fields return 400.
 - [ ] Unauthenticated calls return 401; one user cannot see or modify another user's entries.
 - [ ] Gateway GET/PUT/DELETE/POST and FE week switching, reload, account switching, preview, conflict handling, and error states work on authenticated sessions.
+
+
+## Latest-main reconciliation — 2026-10-09
+
+Main 80818266 now persists AdminService semesters (`GET/POST /api/v1/semesters`, GET active, PUT identifier; aliases `/api/semesters`). These routes require backoffice authorization; do not call them directly as a student or create a parallel semester catalog. They provide start/end and canonical GUID/code, not the term/10W/3W date configuration above or private timetable cells. The proposed calendar and timetable routes remain absent.
+
+Link calendar configuration to `Semester.Id`, campus scope and configured year/term alias. Retain FE year/term/block routes through an explicit alias resolver; unknown/ambiguous mapping is an error, not a date-based inference. Reuse existing semester start where policy maps it to termStartDate; store block dates separately under the linked record. Backoffice writes use existing campus/global policy. Student calendar projection is authenticated read-only; it does not broaden backoffice semester rights.
+
+Add opaque calendar/version and expectedVersion to writes, and per-cell/block version checks to prevent bulk import racing manual edits. Block template import validates all rows and commits atomically; stale configuration/period ->409. Empty calendar dates mean a known semester with missing block configuration, not a nonexistent semester. Semester deactivation prevents new writes without erasing prior personal schedules; authorized historic self reads remain available. The weekly CLB page schedule is presentation metadata and remains separate from the student's 10W/3W timetable.
+
+Acceptance adds authoritative semester alias and cross-campus administration tests, inactive semester, manual-vs-bulk conflict and preservation when calendar dates change. See [conventions](api-contract-conventions.md), D09 [handoff](backend-api-implementation-handoff.md).

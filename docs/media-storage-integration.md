@@ -1,5 +1,28 @@
 # Public image storage integration
 
+## Selected delivery domain (2026-10-09)
+
+Keep Cloudflare **R2** storage and presigned S3 PUT uploads. Hosted Images is not selected.
+The user-provided public read base URL is:
+
+```text
+https://pub-3092f35e8d664b8caf203e269232769a.r2.dev
+```
+
+`VITE_R2_PUBLIC_BASE_URL` is configured in `.env.example`, local `.env.development`, and the Pages workflow (repository variable override supported). The frontend validates that both the signed upload URL and returned `publicUrl` refer to the issued `key`, and that the public URL uses this exact origin. It returns that URL only after the R2 PUT succeeds, then the club editor calls `updateClubPublicImages`. Changing the public origin later requires updating frontend configuration and the backend's URL issuer together; existing stored URLs are not automatically rewritten.
+
+The backend implementation must configure the same read base URL in its server-side R2 options. It must issue `publicUrl` as `<base>/<key>`, never as the S3 endpoint and never from untrusted client input. The media/club image endpoints below remain required; configuring this frontend URL does not implement them or verify live upload/persistence.
+
+### Setup checklist for this bucket
+
+1. Keep **R2 → fptux-cloud-storage → Settings → Public Development URL** enabled; confirm the displayed URL matches the base above.
+2. Add the exact deployed UI origin and `http://localhost:5173` to the bucket CORS policy below. Upload uses the S3 endpoint, so CORS belongs on the bucket.
+3. Create an R2 API token with **Object Read & Write** scoped to this bucket. Configure Access Key ID and Secret Access Key only on the backend. The Pages deployment token is not an S3 upload credential.
+4. Implement and deploy the authenticated upload-intent and club public-image routes below, including the gateway route and cover-image database field.
+5. Verify a manager uploads an image, saves its URL, reloads the page, and can fetch the image publicly. Verify cross-club writes are denied.
+
+`r2.dev` is the selected development delivery endpoint and is rate-limited; use a custom domain for production delivery per [Cloudflare documentation](https://developers.cloudflare.com/r2/buckets/public-buckets/#public-development-url).
+
 The source-backed existing/missing API comparison and proposed backend request/response contract are in [contracts/public-image-api.md](contracts/public-image-api.md).
 The audit of every frontend API method is in [contracts/frontend-api-audit.md](contracts/frontend-api-audit.md).
 
@@ -45,7 +68,7 @@ The screenshot's S3 API URL appends `/fptux-cloud-storage` to the account endpoi
 
 For the UI build, `.env.development` provides `VITE_R2_BUCKET_NAME` and `VITE_R2_S3_ENDPOINT` locally. The Cloudflare Pages workflow injects those same public identifiers into `npm run build`, using repository variables when set and the supplied values as defaults. `.env.development` is gitignored. These build variables do not authenticate uploads or configure the backend API; the backend needs its own server-side R2 configuration.
 
-The shown `fptux-cloud-storage` bucket has public access disabled. For images used in `<img>` tags, configure a production custom domain for public reads or a controlled read proxy. The S3 endpoint used for signed PUTs is not the public image URL. If using the custom domain, make `publicUrl` point there. Configure cache headers for versioned object keys and keep old URLs valid or clean them up when references change.
+The earlier screenshot showed public access disabled. The user has since provided the `r2.dev` URL selected above; its live object reads still need verification. The S3 endpoint used for signed PUTs is not the public image URL. For production, configure a custom read domain or a controlled read proxy and update the issuer and frontend origin together. Configure cache headers for versioned object keys and keep old URLs valid or clean them up when references change.
 
 Configure R2 CORS for the UI's production origin and local development origin (`http://localhost:5173`): allow `PUT`, allow the `Content-Type` header, and optionally expose `ETag`. The browser sends the signed `Content-Type` and file body only. Presigned PUT URLs work on the R2 S3 endpoint, not a custom read domain. A minimal policy is:
 

@@ -67,7 +67,7 @@ export function mapMyMembershipApplications(value) {
             const clubId = text(raw.club?.clubId || raw.clubId);
             const status = text(raw.status).toUpperCase();
             if (!applicationId || !clubId || !statuses.has(status)) return null;
-            return { applicationId, club: { clubId, name: text(raw.club?.name || raw.clubName, 'Câu lạc bộ'), logoUrl: text(raw.club?.logoUrl) }, reason: text(raw.reason), status, canWithdraw: status === 'PENDING' && raw.canWithdraw === true };
+            return { applicationId, club: { clubId, name: text(raw.club?.name || raw.clubName, 'Câu lạc bộ'), logoUrl: text(raw.club?.logoUrl) }, reason: text(raw.reason), status, canWithdraw: status === 'PENDING' && raw.canWithdraw === true, canAcceptInvitation: status === 'PENDING' && raw.canAcceptInvitation === true };
         })
         .filter(Boolean);
 }

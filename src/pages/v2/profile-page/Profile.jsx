@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    ArrowUpRight,
-    Award,
-    BookOpen,
     Check,
     Eye,
     GraduationCap,
@@ -14,6 +11,7 @@ import {
     FolderOpen,
     LockKeyhole,
     ArrowRight,
+    Undo2,
 } from 'lucide-react';
 import { useDemo } from '../DemoContext';
 import { CLUBS, CURRENT_TERM, clubById, displayPerson, ownPoints } from '../model';
@@ -142,8 +140,8 @@ export default function Profile() {
                 </div>
                 <div className="dx-actions">
                     <button className="dx-button" onClick={() => setShared(!shared)}>
-                        {shared ? <LockKeyhole size={16} /> : <Eye size={16} />}{' '}
-                        {shared ? 'Về hồ sơ cá nhân' : 'Xem bản chia sẻ'}
+                        {shared ? <Undo2 size={16} /> : <Eye size={16} />}{' '}
+                        {shared ? 'Trở lại' : 'Xem dưới view công khai'}
                     </button>
                     {!shared && (
                         <button className="dx-button primary" onClick={() => setEditing(true)}>

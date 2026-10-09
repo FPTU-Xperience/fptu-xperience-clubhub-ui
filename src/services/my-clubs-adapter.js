@@ -1,3 +1,5 @@
+import { isPendingClubInvitation } from './club-invitations.js';
+
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 
 export function selectionFromClubAccess(accessResponse, clubsResponse) {
@@ -27,5 +29,6 @@ export function applicationsFromMemberships(membershipsResponse) {
             status: String(membership.status).toUpperCase(),
             // ClubService currently permits only managers/admins to delete memberships.
             canWithdraw: false,
+            canAcceptInvitation: isPendingClubInvitation(membership),
         }));
 }

@@ -253,6 +253,7 @@ class ApiService {
         return putImageWithIntent(file, intent, {
             bucketName: import.meta.env.VITE_R2_BUCKET_NAME,
             s3Endpoint: import.meta.env.VITE_R2_S3_ENDPOINT,
+            publicBaseUrl: import.meta.env.VITE_R2_PUBLIC_BASE_URL,
         });
     }
 
@@ -260,6 +261,14 @@ class ApiService {
         return this.request(`/api/clubs/${encodeURIComponent(clubId)}/public-images`, {
             method: 'PUT',
             body: JSON.stringify(images),
+        });
+    }
+
+    // Provisional manager-scoped contract; the current admin PUT /clubs/{id} cannot be used here.
+    async updateClubPublicProfile(clubId, fields) {
+        return this.request(`/api/clubs/${encodeURIComponent(clubId)}/public-profile`, {
+            method: 'PATCH',
+            body: JSON.stringify(fields),
         });
     }
 
@@ -374,6 +383,19 @@ class ApiService {
             Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ''),
         ).toString();
         return this.request(`/api/clubs/${clubId}/members${query ? `?${query}` : ''}`);
+    }
+
+    // Requires a manager-scoped semester roster endpoint; never use the admin user directory.
+    async searchEligibleClubMembers(clubId, params) {
+        const query = new URLSearchParams(params).toString();
+        return this.request(`/api/clubs/${encodeURIComponent(clubId)}/eligible-members?${query}`);
+    }
+
+    async inviteClubMember(clubId, student, semesterId) {
+        return this.request(`/api/clubs/${encodeURIComponent(clubId)}/members`, {
+            method: 'POST',
+            body: JSON.stringify({ userId: Number(student.userId), fullName: student.fullName, role: 'CLUB_MEMBER', semesterId }),
+        });
     }
 
     async getClubMember(clubId, memberId, params = { historyPage: 1, historyPageSize: 20 }) {

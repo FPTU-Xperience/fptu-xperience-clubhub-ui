@@ -1,0 +1,96 @@
+.v2-cover-gifts {
+    .v2-cover-gifts-balance {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        border: 1px solid #fed7aa;
+        background: #fff7ed;
+        border-radius: 12px;
+    }
+    .v2-cover-gifts-balance small {
+        font-size: 10px;
+        color: #9a3412;
+    }
+    .v2-cover-gifts-balance strong {
+        display: block;
+        font-size: 24px;
+        color: #193554;
+        white-space: nowrap;
+    }
+    .v2-cover-gifts-balance p {
+        color: #637895;
+        font-size: 12px;
+        max-width: 650px;
+    }
+    .v2-cover-gifts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+    article {
+        overflow: hidden;
+        border: 1px solid #dfe7f1;
+        border-radius: 12px;
+        background: #fff;
+    }
+    article > div {
+        padding: 18px;
+    }
+    article small {
+        color: #637895;
+        font-size: 10px;
+    }
+    article h2 {
+        font-size: 16px;
+        margin: 6px 0;
+    }
+    article p {
+        color: #c2410c;
+        font-size: 12px;
+    }
+    @media (max-width: 680px) {
+        .v2-cover-gifts-grid {
+            grid-template-columns: 1fr;
+        }
+        .v2-cover-gifts-balance {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 4px;
+        }
+    }
+}
+.v2-club-shape-form {
+    display: grid;
+    gap: 16px;
+    color: #193554;
+    font:
+        13px/1.65 'Inter',
+        sans-serif;
+    label {
+        display: grid;
+        gap: 8px;
+    }
+    input {
+        padding: 10px 12px;
+        border: 1px solid #dfe7f1;
+        border-radius: 8px;
+        color: #193554;
+        font: inherit;
+    }
+    small,
+    > p {
+        color: #637895;
+    }
+    footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .v2-club-shape-preview {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #dfe7f1;
+    }
+}

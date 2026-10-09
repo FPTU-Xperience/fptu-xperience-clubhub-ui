@@ -1,11 +1,12 @@
 import { ArrowLeft, CalendarDays, Mail, MapPin, Phone, Users } from 'lucide-react';
-import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ClubLogo, ClubMark, Pill } from '../../../components/v2/DiscoveryLayout';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import PageState from '../../../components/v2/PageState';
 import { canJoinClub, useClubDetail } from '../discover-data';
 import { useProfile } from '../profile-data';
+import { isPendingClubInvitation } from '../../../services/club-invitations';
 import './ClubDetailPage.scss';
 
 const joinProfile = (viewer, profileSnapshot) => ({
@@ -28,7 +29,7 @@ const joinProfile = (viewer, profileSnapshot) => ({
 export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }) {
     const { clubCode } = useParams();
     const result = useClubDetail(api, clubCode, viewerAccess, sessionKey);
-    const profileResult = useProfile(viewer, sessionKey);
+    const profileResult = useProfile(viewer, sessionKey, api);
     const club = result.data;
     const [joinOpen, setJoinOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
@@ -36,6 +37,22 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     const [submitting, setSubmitting] = useState(false);
     const [joinError, setJoinError] = useState('');
     const [joined, setJoined] = useState(false);
+    const [params] = useSearchParams();
+    const invitationId = params.get('invitation');
+    const [invitation, setInvitation] = useState(null);
+    useEffect(() => {
+        let active = true;
+        setInvitation(null);
+        if (!invitationId || !club?.id) return undefined;
+        api.getMyMemberships().then((memberships) => {
+            const match = (Array.isArray(memberships) ? memberships : memberships?.items || []).find((member) =>
+                String(member.id) === invitationId && String(member.clubId) === String(club.id)
+                && isPendingClubInvitation(member));
+            if (active && match) setInvitation({ id: match.id, clubId: String(club.id) });
+        }).catch((issue) => { if (active) setJoinError(issue?.message || 'Không thể tải lời mời.'); });
+        return () => { active = false; };
+    }, [api, club?.id, invitationId, sessionKey]);
+    const acceptingInvitation = invitation && String(invitation.id) === invitationId && invitation.clubId === String(club?.id);
     const updateForm = (event) => {
         const { name, type, checked, value } = event.target;
         setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
@@ -122,13 +139,13 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                 <div className="v2-club-detail-actions">
                                     {joined ? (
                                         <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>
-                                    ) : canJoinClub(club) ? (
+                                    ) : acceptingInvitation || canJoinClub(club) ? (
                                         <button
                                             className="v2-button v2-button--primary"
                                             type="button"
                                             onClick={openJoin}
                                         >
-                                            Nộp hồ sơ gia nhập
+                                            {acceptingInvitation ? 'Chấp nhận lời mời' : 'Nộp hồ sơ gia nhập'}
                                         </button>
                                     ) : null}
                                 </div>
@@ -215,7 +232,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                 )}
             </PageState>
             {joinOpen && (
-                <V2Modal title={`Gia nhập ${club.name}`} onClose={() => !submitting && setJoinOpen(false)} wide>
+                <V2Modal title={`${acceptingInvitation ? 'Chấp nhận lời mời từ' : 'Gia nhập'} ${club.name}`} onClose={() => !submitting && setJoinOpen(false)} wide>
                     <form className="v2-club-join-form" onSubmit={submitJoin}>
                         <p>Hồ sơ sẽ được gửi đến ban chủ nhiệm CLB để xem xét.</p>
                         <p className="v2-club-join-profile">
@@ -351,7 +368,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                 Hủy
                             </button>
                             <button className="v2-button v2-button--primary" disabled={submitting}>
-                                {submitting ? 'Đang gửi…' : 'Gửi hồ sơ'}
+                                {submitting ? 'Đang gửi…' : acceptingInvitation ? 'Chấp nhận lời mời' : 'Gửi hồ sơ'}
                             </button>
                         </footer>
                     </form>

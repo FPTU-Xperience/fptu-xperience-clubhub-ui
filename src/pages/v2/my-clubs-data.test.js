@@ -63,6 +63,15 @@ test('availability outcomes and request gate remain distinct', () => {
     assert.equal(gate.isCurrent(second), false);
 });
 
+test('invitation acceptance is retained only for pending current-user records', () => {
+    const records = mapMyMembershipApplications([
+        { id: 1, clubId: 3, status: 'Pending', canAcceptInvitation: true },
+        { id: 2, clubId: 3, status: 'Approved', canAcceptInvitation: true },
+        { id: 3, clubId: 3, status: 'Pending' },
+    ]);
+    assert.deepEqual(records.map((record) => record.canAcceptInvitation), [true, false, false]);
+});
+
 test('production My Clubs route and files stay V2-local and demo-free', () => {
     const app = readFileSync(new URL('./V2App.jsx', import.meta.url), 'utf8');
     const page = readFileSync(new URL('./my-clubs-page/MyClubsPage.jsx', import.meta.url), 'utf8');

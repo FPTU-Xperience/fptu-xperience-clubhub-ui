@@ -5,11 +5,12 @@ import { putImageWithIntent, validateImageUpload, validateUploadIntent } from '.
 const config = {
     bucketName: 'fptux-cloud-storage',
     s3Endpoint: 'https://c2e463013aa669515ae4e2c54843c4ae.r2.cloudflarestorage.com',
+    publicBaseUrl: 'https://pub-3092f35e8d664b8caf203e269232769a.r2.dev',
 };
 const file = { type: 'image/webp', size: 1024 };
 const intent = {
     uploadUrl: `${config.s3Endpoint}/fptux-cloud-storage/club/1/logo.webp?X-Amz-Signature=abc`,
-    publicUrl: 'https://images.example.edu/club/1/logo.webp',
+    publicUrl: `${config.publicBaseUrl}/club/1/logo.webp`,
     key: 'club/1/logo.webp',
 };
 
@@ -27,9 +28,25 @@ test('direct upload sends only the file and signed content type to R2', async ()
 });
 
 test('rejects untrusted upload hosts and S3 API URLs as public image URLs', () => {
-    assert.throws(() => validateUploadIntent({ ...intent, uploadUrl: 'https://attacker.example/upload?X-Amz-Signature=abc' }, config.s3Endpoint, config.bucketName));
-    assert.throws(() => validateUploadIntent({ ...intent, uploadUrl: `${config.s3Endpoint}/another-bucket/a.webp?X-Amz-Signature=abc` }, config.s3Endpoint, config.bucketName));
-    assert.throws(() => validateUploadIntent({ ...intent, publicUrl: `${config.s3Endpoint}/fptux-cloud-storage/club/1/logo.webp` }, config.s3Endpoint, config.bucketName));
+    const validate = (value) => validateUploadIntent(value, config.s3Endpoint, config.bucketName, config.publicBaseUrl);
+    assert.throws(() => validate({ ...intent, uploadUrl: 'https://attacker.example/upload?X-Amz-Signature=abc' }));
+    assert.throws(() => validate({ ...intent, uploadUrl: `${config.s3Endpoint}/another-bucket/a.webp?X-Amz-Signature=abc` }));
+    assert.throws(() => validate({ ...intent, publicUrl: `${config.s3Endpoint}/fptux-cloud-storage/club/1/logo.webp` }));
+});
+
+test('only accepts the configured public domain and matching object paths', () => {
+    const validate = (value) => validateUploadIntent(value, config.s3Endpoint, config.bucketName, config.publicBaseUrl);
+    assert.equal(validate(intent).publicUrl, intent.publicUrl);
+    assert.throws(() => validate({ ...intent, publicUrl: 'https://another-bucket.r2.dev/club/1/logo.webp' }));
+    assert.throws(() => validate({ ...intent, publicUrl: `${config.publicBaseUrl}/club/2/logo.webp` }));
+    assert.throws(() => validate({ ...intent, uploadUrl: `${config.s3Endpoint}/${config.bucketName}/club/2/logo.webp?X-Amz-Signature=abc` }));
+    assert.throws(() => validate({ ...intent, key: 'club/../logo.webp' }));
+    assert.throws(() => validateUploadIntent(intent, config.s3Endpoint, config.bucketName, ''));
+});
+
+test('accepts virtual-hosted R2 upload URLs and trailing slash on the public base URL', () => {
+    const uploadUrl = `https://${config.bucketName}.${new URL(config.s3Endpoint).host}/club/1/logo.webp?X-Amz-Signature=abc`;
+    assert.equal(validateUploadIntent({ ...intent, uploadUrl }, config.s3Endpoint, config.bucketName, `${config.publicBaseUrl}/`).uploadUrl, uploadUrl);
 });
 
 test('rejects unsupported files and failed R2 writes before returning a URL', async () => {

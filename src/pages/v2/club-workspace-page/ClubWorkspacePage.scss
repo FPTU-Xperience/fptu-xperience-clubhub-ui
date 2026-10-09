@@ -4,6 +4,24 @@
     min-height: 100vh;
     background: #fff;
     color: #10203a;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    letter-spacing: 0;
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    h1, h2, h3, h4 {
+        font-family: inherit;
+        text-transform: none;
+        letter-spacing: -0.035em;
+        line-height: 1.35;
+    }
+
+    h2 { font-size: 21px; font-weight: 650; }
+    h3 { font-size: 15px; font-weight: 650; }
+
+    button, input, select, textarea { font-family: inherit; letter-spacing: 0; }
 }
 
 .v2-workspace-main {

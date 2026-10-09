@@ -1,6 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import PageState from '../../../components/v2/PageState';
 import MyClubCard from '../../../components/v2/my-clubs/MyClubCard';
 import MyMembershipApplications from '../../../components/v2/my-clubs/MyMembershipApplications';
@@ -14,6 +14,35 @@ export default function MyClubsPage({ api, sessionKey }) {
     const [withdrawingId, setWithdrawingId] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
     const [mockWithdrawnIds, setMockWithdrawnIds] = useState([]);
+    const navigate = useNavigate();
+    const [acceptingId, setAcceptingId] = useState('');
+    const [invitationError, setInvitationError] = useState('');
+    const invitationRequest = useRef(0);
+    const invitationLock = useRef(false);
+    useEffect(() => {
+        invitationRequest.current++;
+        invitationLock.current = false;
+        setAcceptingId('');
+        setInvitationError('');
+        return () => { invitationRequest.current++; };
+    }, [sessionKey]);
+    const openInvitation = async (item) => {
+        if (invitationLock.current || !item.canAcceptInvitation) return;
+        invitationLock.current = true;
+        const request = ++invitationRequest.current;
+        setAcceptingId(item.applicationId);
+        setInvitationError('');
+        try {
+            const club = await api.getClub(item.club.clubId);
+            if (request !== invitationRequest.current) return;
+            if (!club.code) throw new Error('Không tìm thấy trang CLB để xác nhận lời mời.');
+            navigate(`/v2/clubs/${encodeURIComponent(club.code)}?invitation=${encodeURIComponent(item.applicationId)}`);
+        } catch (issue) {
+            if (request === invitationRequest.current) setInvitationError(issue?.message || 'Không thể mở lời mời.');
+        } finally {
+            if (request === invitationRequest.current) { invitationLock.current = false; setAcceptingId(''); }
+        }
+    };
     const withdraw = async (applicationId) => {
         setWithdrawingId(applicationId);
         setWithdrawError('');
@@ -71,7 +100,10 @@ export default function MyClubsPage({ api, sessionKey }) {
                     )}
                     withdrawingId={withdrawingId}
                     onWithdraw={withdraw}
+                    acceptingId={acceptingId}
+                    onAcceptInvitation={openInvitation}
                 />
+                {invitationError && <p className="v2-my-clubs-error" role="alert">{invitationError}</p>}
                 {withdrawError && (
                     <p className="v2-my-clubs-error" role="alert">
                         {withdrawError}
