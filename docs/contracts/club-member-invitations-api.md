@@ -4,7 +4,7 @@ Status (2026-10-09): **partially supported on latest API main**. Semester persis
 
 ## Latest-main audit
 
-Fetched `origin/main` on 2026-10-09 without checking out or changing API source. Audited commit **`80818266f617bd5144ab1b1a6cd0e74983983a4d`**, committed 2026-10-08 16:22:35 +07:00 (`feat(catalog): implement dynamic club categories and semester APIs with persistence`). It is 16 commits ahead of the local API checkout `109c901331d2f9605c79d9fa5d97d81ce10c3091`. Findings below come from the fetched tree, not the older checkout or deployment.
+Audited commit **`80818266f617bd5144ab1b1a6cd0e74983983a4d`**, committed 2026-10-08 16:22:35 +07:00 (`feat(catalog): implement dynamic club categories and semester APIs with persistence`). Rechecked 2026-10-12: remote main and local API HEAD match this commit. Findings remain source-based, not deployment proof. Recruitment access for HR/leadership must come from [effective governance capabilities](club-governance-groups-api.md), not group labels. Governance group pickers search approved club members; invitation eligibility searches the school semester roster and remains separately scoped.
 
 | Capability | Latest main | Evidence under API repository |
 | --- | --- | --- |

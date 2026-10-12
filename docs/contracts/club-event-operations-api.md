@@ -2,7 +2,11 @@
 
 D12; proposed gap behind the agreed role matrix. Existing ActivityService CRUD, participant registration, check-in and attendance remain available. There is no staff/form/submitted-answer approval contract in main 80818266. Do not replace attendance with application records. Shared [conventions](api-contract-conventions.md) apply.
 
+2026-10-12: role names below describe presets. Authorization resolves [effective governance group capabilities](club-governance-groups-api.md); membership in any BQL group is not blanket event authority. Report submission never grants these capabilities.
+
 ## Content
+
+The activity profile, separate viewer/workspace pages, media gallery, document uploads and embedded links are specified in [activity profile/resources](activity-profile-resources-api.md). That contract adds scoped asset capabilities; it does not make general membership or content edit permission equivalent to attendance/roster administration.
 
 PATCH `/api/activities/{activityId}/content`: CONTENT or leadership for owning club, `{title?,description?,expectedVersion}` plus separately authorized cover attachment under D01. Validate title/description with existing activity constraints. Content permission does not grant dates/location/cancellation/finance/attendance administration. Existing management PUT stays for leadership workflow; extend service authorization intentionally instead of granting global CLUB_MANAGER to content writers.
 

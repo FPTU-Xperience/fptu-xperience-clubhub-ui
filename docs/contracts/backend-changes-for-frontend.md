@@ -1,6 +1,6 @@
 # Backend changes needed after frontend integration
 
-Updated 2026-10-09 against freshly fetched API `origin/main` **80818266f617bd5144ab1b1a6cd0e74983983a4d** and the current frontend working tree. This index replaces the older 2026-10-05 gap list. Source existence and verified deployment are separate; no live gateway/database/R2 behavior was tested.
+Rechecked 2026-10-12: remote main and local API HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**. [Contract lifecycle audit](contract-lifecycle-audit.md) records retained/retired contracts and [declaration inventory](api-declaration-inventory.md) covers all current facade wrappers. Source existence and verified deployment are separate; no live gateway/database/R2 behavior was tested.
 
 Start the backend session with [implementation handoff](backend-api-implementation-handoff.md). It contains dependency waves, migration/integration tasks, acceptance checks and unresolved product choices. [Debt register](frontend-api-debt-register.md) owns classifications; [source inventory](api-debt-source-inventory.md) records frontend markers; [shared conventions](api-contract-conventions.md) owns transport, errors, pagination and idempotency.
 
@@ -13,7 +13,7 @@ Start the backend session with [implementation handoff](backend-api-implementati
 | D03 | Consolidated self experience/history; reuse existing Admin declarations/radar | [Personal experience](personal-experience-api.md) |
 | D04 | Club public-profile PATCH, preview/save, dynamic category and weekly 30-minute schedule | [Club profile](club-public-profile-api.md) |
 | D05 | CTSV semester roster/import, eligible-member search and upgraded existing invitation workflow | [Roster](semester-student-roster-api.md), [Invitations](club-member-invitations-api.md) |
-| D06 | Club-scoped roles and service capabilities; self-managed personal records | [Club roles](club-member-roles-api.md) |
+| D06 | Multi-group BQL by semester, immediate specialist grants, immutable intra-term personal history, independent report snapshots and CTSV leadership appointments | [Governance groups](club-governance-groups-api.md) |
 | D07 | Club tasks, evidence, review, credited wallet/ledger and achievements | [Contributions/points](club-contributions-points-api.md) |
 | D08 | Club reward catalog, color/PNG shape/bundle redemption and owned inventory | [Cover rewards](profile-cover-rewards-api.md) |
 | D09 | Existing semester-linked academic block dates and private student timetable | [Study schedule](study-schedule-api.md) |

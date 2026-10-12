@@ -1,6 +1,6 @@
 # Backend API implementation handoff
 
-Prepared 2026-10-09 for the next implementation session. Start with [debt register](frontend-api-debt-register.md), [source inventory](api-debt-source-inventory.md), and [shared conventions](api-contract-conventions.md). API baseline: freshly fetched `origin/main` **80818266f617bd5144ab1b1a6cd0e74983983a4d**. Frontend includes current uncommitted work; no backend source was changed during this audit. Fetch main again before implementation and reconcile any new routes, migrations and permissions.
+Updated 2026-10-12 for the next BE batch. Start with [contract lifecycle audit](contract-lifecycle-audit.md), [debt register](frontend-api-debt-register.md), [declaration inventory](api-declaration-inventory.md), and [shared conventions](api-contract-conventions.md). API baseline: remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-12. Frontend includes current uncommitted governance rehearsal; no backend source was changed. Recheck main before implementation and reconcile any new routes, migrations and permissions.
 
 ## Contract precedence and decisions
 
@@ -30,9 +30,15 @@ Every unchecked task requires code/migration/tests plus FE integration; checking
 
 ### Wave 2 — semester roster, invitations, roles and own applications (D05, D06, D09, D10)
 
+- [ ] Implement one scoped [workspace semester catalog/context](workspace-semester-context-api.md) from existing Admin semesters; provide explicit activity bounds, report Period and invitation aliases. Header is the only selector; reconcile governance/invitation catalogs rather than create competing authorities. Define finance attribution and term-indexed club schedules before claiming every tab is semester-filtered.
+
 - [ ] Add roster revision/import preview+commit/read and audited carry-forward linked to existing semester. [Roster](semester-student-roster-api.md), [invites](club-member-invitations-api.md).
 - [ ] Add protected internal eligibility reads and manager/HR semester options/eligible-member lookup. Upgrade existing invite/consent/approve with authoritative identity/source/revision; outbox recipient notifications.
-- [ ] Implement scoped member role catalog/assignment/version/audit and per-service capabilities; [roles](club-member-roles-api.md). Owner succession remains existing transfer workflow.
+- [ ] Implement [canonical governance groups contract](club-governance-groups-api.md): authoritative term + immutable structure revisions, capability/preset catalog, multi-group specialist assignments and atomic ADD/REMOVE/TRANSFER; preserve owner/two-treasurer rules across custom groups.
+- [ ] Persist each intra-term promote/transfer/demote/group-permission change with before/after personal events and assignment intervals in the same transaction; include system expiry/member-departure/revocation and history reads after demotion.
+- [ ] Implement independent term report submissions with exact-version snapshots and supplementary history; submission never grants/revokes rights and has no whole-BQL review gate.
+- [ ] Implement CTSV-approved vice appointments; reuse existing owner transfer workflow; protected leadership cannot be granted through custom groups. Synchronize shared access, Finance/Report/Activity action policies/recipients, cache invalidation and legacy role-writer cutover.
+- [ ] Replace DEV-only governance rehearsal with authoritative facade adapters/approved-member paging/capability gates after BE verification; do not migrate synthetic people, sample semesters or browser grants.
 - [ ] Implement self withdrawal/history and active-record uniqueness/reapply; optional richer My Clubs reads only if replacing composed adapters. [My Clubs](my-clubs-membership-api.md).
 - [ ] Extend semester with admin calendar block dates and safe student projection, implement private weekly timetable and transactional template import. [Study schedule](study-schedule-api.md). No second semester table.
 - [ ] Wire Admin roster/calendar and ClubHub invite/timetable UI; two-account consent must still await manager approval.
@@ -46,6 +52,8 @@ Every unchecked task requires code/migration/tests plus FE integration; checking
 - [ ] Replace unavailable Quests/Points tabs and local Gifts/Cover repositories with authoritative API reads/mutations; preserve empty/error states.
 
 ### Wave 4 — discovery and specialist event operations (D11, D12)
+
+- [ ] Implement profile-style activity detail media/document/embed projections and owned upload-intent/commit pipeline; enable `resourceCapabilities` only after deployed verification. Keep public viewer and workspace manager contracts separate. [Activity profile/resources](activity-profile-resources-api.md).
 
 - [ ] Add auditable publication/visibility with default CLUB_ONLY, privacy-safe paged feed/direct detail and server-clock UPCOMING/LIVE; [discovery](activity-discovery-api.md).
 - [ ] Route authenticated recommendations via Gateway, use private preference input internally, isolate engine outage and label curated fallback.

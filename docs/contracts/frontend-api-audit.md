@@ -1,6 +1,6 @@
 # Frontend API to backend audit
 
-Source snapshot: 2026-10-09. Compared all 95 public async methods in the current working tree of `src/services/api.js` (excluding its three request/response helpers) with a freshly fetched backend `origin/main` snapshot, **80818266f617bd5144ab1b1a6cd0e74983983a4d**, including endpoint declarations, handlers, DTOs and Gateway routing. The sibling checkout itself is older and was not changed. [Debt register](frontend-api-debt-register.md) covers repositories, uncalled proposed APIs and feature contracts beyond this facade. This is a source contract audit, not a live deployment probe. Route existence means the HTTP method and path are declared; authorization, request fields, response fields, and service health still matter.
+Source recheck: 2026-10-12. [Generated per-wrapper inventory](api-declaration-inventory.md) compares all 95 current public async facade methods against API local HEAD **80818266f617bd5144ab1b1a6cd0e74983983a4d**; remote main was independently checked and matched. No API checkout change. The detailed DTO/handler/Gateway findings below originate from the 2026-10-09 audit of the same commit. [Contract lifecycle audit](contract-lifecycle-audit.md) records this batch's replacements; [debt register](frontend-api-debt-register.md) covers repositories and uncalled proposed APIs. Route existence is not a deployed integration probe or proof of authorization/DTO compatibility.
 
 ## Every frontend method
 

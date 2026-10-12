@@ -1,6 +1,6 @@
 # Frontend API debt source inventory
 
-Generated on 2026-10-09 from the current uncommitted frontend tree. Literal-marker scan plus production import closure rooted at `src/main.jsx`, `src/App.jsx` and `src/pages/v2/V2App.jsx`; intentionally excludes traversal into `DemoApp.jsx`. Imports/styles, dynamic dispatch and product semantics still require manual review. This is evidence, not an automatic list of missing APIs. Auth/theme/cache local storage and network-unavailable states are not automatically API debt.
+Historical evidence generated on 2026-10-09 from that day's uncommitted frontend tree; line/file/import counts below are not current counts. The [2026-10-12 lifecycle audit](contract-lifecycle-audit.md) and [declaration inventory](api-declaration-inventory.md) own the latest recheck. Literal-marker scan plus production import closure rooted at `src/main.jsx`, `src/App.jsx` and `src/pages/v2/V2App.jsx`; intentionally excludes traversal into `DemoApp.jsx`. Imports/styles, dynamic dispatch and product semantics still require manual review. Auth/theme/cache local storage and network-unavailable states are not automatically API debt.
 
 Scanned JavaScript/JSX source files: **145**. Production-import closure: **113**. Matching production source lines: **88**. API facade has **95 async public wrappers** (98 including three internal transport/error helpers).
 
