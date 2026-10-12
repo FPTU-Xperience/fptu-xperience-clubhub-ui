@@ -1,8 +1,18 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyActivityError, filterActivityFeed, mapActivityFeed, mapRecommendations } from './activity-data.js';
+import { classifyActivityError, filterActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations } from './activity-data.js';
 
 const activity = { id: 'a', clubId: 'c', clubName: 'F-Code', title: 'Workshop', description: 'React', location: 'Lab', status: 'UPCOMING' };
+
+test('activity details retain completed/cancelled activities without exposing attendance or broadening the discovery feed', () => {
+    for (const status of ['COMPLETED', 'CANCELLED']) {
+        const raw = { ...activity, status, participants: [{ userId: 10 }], attendances: [{ userId: 11 }] };
+        assert.equal(mapActivityDetailItem(raw).status, status);
+        assert.equal('participants' in mapActivityDetailItem(raw), false);
+        assert.equal('attendances' in mapActivityDetailItem(raw), false);
+        assert.deepEqual(mapActivityFeed([raw]), []);
+    }
+});
 
 test('activity feed maps only current display-safe statuses and deduplicates', () => {
     const items = mapActivityFeed({ items: [activity, { ...activity, title: 'Duplicate' }, { id: 'old', status: 'COMPLETED' }] });

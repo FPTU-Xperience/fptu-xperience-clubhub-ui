@@ -1,26 +1,55 @@
-import { useState } from 'react';
-import { ArrowUpRight, Plus } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
+import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import ActivityCard from '../../../../components/v2/activity-card/ActivityCard';
+import { SearchField } from '../../../../components/v2/DiscoveryLayout';
+import '../../../../components/v2/directory-filter/DirectoryFilters.scss';
+import '../../activities-page/ActivitiesPage.scss';
 import { useAuth } from '../../../../context/AuthContext';
 import PageState from '../../../../components/v2/PageState';
-import ActivityDetail from '../../../../components/v2/activity-detail/ActivityDetail';
 import V2Modal from '../../../../components/v2/common/modal/V2Modal';
-import ImagePicker from '../../../../components/media/ImagePicker';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
+import { sortActivitiesNewestFirst } from '../../activity-data';
 
 export default function ActivitiesTab({ manager = false, dashboard, workspace }) {
     const clubId = workspace?.clubId;
     const { api } = useAuth();
-    const [selected, setSelected] = useState(null);
+    const { semester } = useWorkspaceSemester();
+    const navigate = useNavigate();
     const [creating, setCreating] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [imageActivity, setImageActivity] = useState(null);
-    const [coverFile, setCoverFile] = useState(null);
+    const [query, setQuery] = useState('');
+    const [status, setStatus] = useState('ALL');
+    useEffect(() => {
+        setCreating(false);
+    }, [semester?.id]);
     const activities = dashboard.data?.activities || [];
+    const visibleActivities = useMemo(
+        () =>
+            sortActivitiesNewestFirst(
+                activities.filter(
+                    (activity) =>
+                        (status === 'ALL' ||
+                            activity.status === status ||
+                            (status === 'UPCOMING' && activity.status === 'SCHEDULED')) &&
+                        `${activity.title} ${activity.description || ''} ${activity.location || ''}`
+                            .toLocaleLowerCase('vi')
+                            .includes(query.trim().toLocaleLowerCase('vi')),
+                ),
+            ),
+        [activities, query, status],
+    );
     const result = {
-        status: dashboard.status === 'ready'
-            ? dashboard.data?.activityAvailable ? (activities.length ? 'populated' : 'empty') : 'error'
-            : dashboard.status,
+        status:
+            dashboard.status === 'ready'
+                ? dashboard.data?.activityAvailable
+                    ? activities.length
+                        ? 'populated'
+                        : 'empty'
+                    : 'error'
+                : dashboard.status,
         data: activities,
         retry: dashboard.retry,
     };
@@ -49,31 +78,15 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
         }
     };
 
-    const saveCover = async (event) => {
-        event.preventDefault();
-        if (!manager || !imageActivity || !coverFile || submitting) return;
-        setSubmitting(true);
-        setSubmitError('');
-        try {
-            const url = await api.uploadPublicImage(coverFile, 'activity-cover', imageActivity.id);
-            await api.updateActivityCoverImage(imageActivity.id, url);
-            setImageActivity(null);
-            setCoverFile(null);
-            result.retry();
-        } catch (error) {
-            setSubmitError(error?.status === 404
-                ? 'Máy chủ chưa hỗ trợ lưu ảnh hoạt động.'
-                : error?.message || 'Không thể lưu ảnh hoạt động.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     return (
         <>
             <WorkspaceTabLayout
                 title="Hoạt động của CLB"
-                description="Theo dõi lịch hoạt động và những điều sắp diễn ra."
+                description={
+                    semester?.startUtc && semester?.endUtc
+                        ? `Hoạt động trong ${semester.label}.`
+                        : 'Theo dõi hoạt động toàn CLB.'
+                }
                 action={
                     manager ? (
                         <button
@@ -87,46 +100,65 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
                 }
                 records={result.data || []}
             >
-                {(records) =>
+                {() =>
                     result.status === 'populated' ? (
-                        <div className="v2-preview-events">
-                            {records.map((record) => {
-                                const date = new Date(record.startTime);
-                                return (
-                                    <article key={record.id}>
-                                        <time>
-                                            <strong>
-                                                {Number.isNaN(date.getTime())
-                                                    ? '—'
-                                                    : String(date.getDate()).padStart(2, '0')}
-                                            </strong>
-                                            <span>
-                                                {Number.isNaN(date.getTime())
-                                                    ? 'ĐANG CẬP NHẬT'
-                                                    : `THÁNG ${date.getMonth() + 1}`}
-                                            </span>
-                                        </time>
-                                        <div>
-                                            {record.coverImageUrl && <img className="v2-workspace-event-cover" src={record.coverImageUrl} alt="" />}
-                                            <span>
-                                                {record.status === 'COMPLETED' ? 'Đã hoàn thành' : record.status === 'LIVE' ? 'Đang diễn ra' : 'Đã lên lịch'}
-                                                {record.location ? ` · ${record.location}` : ''}
-                                            </span>
-                                            <h2>{record.title}</h2>
-                                            <p>{record.description || 'Thông tin chi tiết đang được cập nhật.'}</p>
-                                            {manager && <button className="v2-workspace-image-action" type="button" onClick={() => { setImageActivity(record); setCoverFile(null); setSubmitError(''); }}>Ảnh hoạt động</button>}
-                                        </div>
+                        <>
+                            <div className="v2-filter-bar v2-event-filter-bar">
+                                <div className="v2-tabs" role="group" aria-label="Trạng thái hoạt động">
+                                    {[
+                                        ['ALL', 'Tất cả'],
+                                        ['UPCOMING', 'Sắp diễn ra'],
+                                        ['LIVE', 'Đang diễn ra'],
+                                        ['COMPLETED', 'Đã hoàn thành'],
+                                    ].map(([value, label]) => (
                                         <button
                                             type="button"
-                                            aria-label={`Xem ${record.title}`}
-                                            onClick={() => setSelected(record)}
+                                            key={value}
+                                            aria-pressed={status === value}
+                                            className={status === value ? 'active' : ''}
+                                            onClick={() => setStatus(value)}
                                         >
-                                            <ArrowUpRight size={20} />
+                                            {label}
                                         </button>
-                                    </article>
-                                );
-                            })}
-                        </div>
+                                    ))}
+                                </div>
+                                <SearchField value={query} onChange={setQuery} placeholder="Tìm hoạt động..." />
+                            </div>
+                            <p className="v2-event-result-count" role="status">
+                                {visibleActivities.length} hoạt động{status !== 'ALL' || query ? ' phù hợp' : ''}
+                            </p>
+                            {visibleActivities.length ? (
+                                <div className="v2-event-grid">
+                                    {visibleActivities.map((record) => (
+                                        <ActivityCard
+                                            key={record.id}
+                                            activity={{ ...record, clubName: workspace.name }}
+                                            onOpen={(activity) =>
+                                                navigate(
+                                                    manager
+                                                        ? `/v2/my-clubs/${encodeURIComponent(workspace.clubCode)}/activities/${activity.id}`
+                                                        : `/v2/activities/${activity.id}`,
+                                                )
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div>
+                                    <PageState status="empty" title="Không tìm thấy hoạt động" />
+                                    <button
+                                        className="v2-button"
+                                        type="button"
+                                        onClick={() => {
+                                            setStatus('ALL');
+                                            setQuery('');
+                                        }}
+                                    >
+                                        Xóa bộ lọc
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <PageState
                             status={result.status}
@@ -136,14 +168,6 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
                     )
                 }
             </WorkspaceTabLayout>
-            <ActivityDetail activity={selected ? { ...selected, clubCode: workspace?.clubCode } : null} onClose={() => setSelected(null)} />
-            {imageActivity && <V2Modal title={`Ảnh hoạt động: ${imageActivity.title}`} onClose={() => !submitting && setImageActivity(null)}>
-                <form className="v2-workspace-activity-form" onSubmit={saveCover}>
-                    <ImagePicker label="Ảnh bìa hoạt động" value={imageActivity.coverImageUrl} file={coverFile} onChange={setCoverFile} disabled={submitting} />
-                    {submitError && <p className="v2-workspace-form-error" role="alert">{submitError}</p>}
-                    <div><button className="v2-button" type="button" onClick={() => setImageActivity(null)} disabled={submitting}>Hủy</button><button className="v2-button v2-button--primary" disabled={submitting || !coverFile}>{submitting ? 'Đang lưu…' : 'Lưu ảnh'}</button></div>
-                </form>
-            </V2Modal>}
             {creating && (
                 <V2Modal title="Tạo hoạt động nội bộ" onClose={() => !submitting && setCreating(false)}>
                     <form className="v2-workspace-activity-form" onSubmit={createActivity}>

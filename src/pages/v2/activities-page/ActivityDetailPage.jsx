@@ -1,38 +1,70 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { mapActivityFeedItem, useActivityFeed } from '../activity-data';
+import { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useActivityDetail } from '../activity-data';
 import { useClubDirectory } from '../discover-data';
 import PageState from '../../../components/v2/PageState';
-import './ActivitiesPage.scss';
+import ActivityProfileLayout, { ActivityOverview } from '../../../components/v2/activity-detail/ActivityProfileLayout';
+import ActivityResources from '../../../components/v2/activity-detail/ActivityResources';
+import ActivityAttendance from '../../../components/v2/activity-detail/ActivityAttendance';
+import { publicActivityResources } from '../../../components/v2/activity-detail/activity-resources-data';
+import '../../../components/v2/activity-card/ActivityCard.scss';
 import './ActivityDetailPage.scss';
-import '../../../components/v2/activity-detail/ActivityDetail.scss';
+
+const tabs = [
+    ['overview', 'Tổng quan'],
+    ['documents', 'Tài liệu'],
+    ['media', 'Media'],
+    ['attendance', 'Điểm danh của tôi'],
+];
+function PublicActivityProfile({ activity, clubCode, sessionKey }) {
+    const [tab, setTab] = useState('overview');
+    const resources = publicActivityResources(activity.resources);
+    const clubLink = clubCode ? (
+        <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(clubCode)}`}>
+            Xem CLB
+        </Link>
+    ) : null;
+    return (
+        <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink}>
+            {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
+            {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
+            {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
+            {tab === 'attendance' && (
+                <div className="v2-activity-profile-panel">
+                    <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager={false} />
+                </div>
+            )}
+        </ActivityProfileLayout>
+    );
+}
 
 export default function ActivityDetailPage({ api, sessionKey }) {
     const { activityId } = useParams();
-    const location = useLocation();
-    const result = useActivityFeed(api, sessionKey);
-    const activity = mapActivityFeedItem(location.state?.activity || {}) || result.data?.find((item) => item.id === activityId);
+    const result = useActivityDetail(api, sessionKey, activityId);
+    const activity = result.data;
     const directory = useClubDirectory(api, sessionKey);
-    const clubCode = activity?.clubCode || directory.data?.find((club) => club.id === activity?.clubId)?.code || '';
-
-    if (!activity && result.status !== 'populated') {
-        return <div className="v2-public-content"><PageState status={result.status} onRetry={result.retry} /></div>;
-    }
-    if (!activity) {
-        return <div className="v2-public-content v2-activities-page"><h1>Không tìm thấy hoạt động</h1><Link className="v2-button" to="/v2/activities">Quay lại hoạt động</Link></div>;
-    }
-
+    const clubCode =
+        activity?.clubCode || directory.data?.find((club) => String(club.id) === activity?.clubId)?.code || '';
     return (
-        <div className="v2-public-content v2-activities-page v2-activity-detail-page">
-            <Link className="v2-text-link" to="/v2/activities">← Quay lại hoạt động</Link>
-            <section>
-                {activity.coverImageUrl && <img className="v2-activity-cover" src={activity.coverImageUrl} alt="" />}
-                <span className="v2-activity-pill">{activity.status === 'LIVE' ? 'Đang diễn ra' : 'Sắp diễn ra'}</span>
-                <h1>{activity.title}</h1>
-                <p className="v2-activity-description">{activity.description}</p>
-                <div className="v2-activity-facts"><span>{activity.startTime ? new Date(activity.startTime).toLocaleString('vi-VN') : 'Đang cập nhật thời gian'}</span><span>{activity.location || 'Địa điểm đang cập nhật'}</span></div>
-                <aside className="v2-activity-prepare"><h3>Bạn cần chuẩn bị gì?</h3><p>Đến trước 10 phút, mang thẻ sinh viên và tinh thần sẵn sàng trải nghiệm.</p></aside>
-                {clubCode && <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(clubCode)}`}>Xem CLB</Link>}
-            </section>
+        <div className="v2-public-content v2-activity-detail-page">
+            <Link className="v2-text-link" to="/v2/activities">
+                ← Quay lại hoạt động
+            </Link>
+            {result.status === 'populated' ? (
+                <PublicActivityProfile
+                    key={`${sessionKey}:${activity.id}`}
+                    activity={activity}
+                    clubCode={clubCode}
+                    sessionKey={sessionKey}
+                />
+            ) : (
+                <PageState
+                    status={result.status}
+                    onRetry={result.retry}
+                    title={result.status === 'not-found' ? 'Không tìm thấy hoạt động' : undefined}
+                    description={result.status === 'not-found' ? 'Hoạt động không tồn tại hoặc đã bị xóa.' : undefined}
+                />
+            )}
         </div>
     );
 }

@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ActivityCard from '../../../components/v2/activity-card/ActivityCard';
-import ActivityDetail from '../../../components/v2/activity-detail/ActivityDetail';
 import { EmptyState } from '../../../components/v2/DiscoveryLayout';
 import PageState from '../../../components/v2/PageState';
 import { useActivityFeed } from '../activity-data';
@@ -19,7 +18,7 @@ function accessibleClubIds(clubAccess = []) {
 
 export function MySchedulePage({ api, sessionKey, clubAccess }) {
     const result = useActivityFeed(api, sessionKey);
-    const [selected, setSelected] = useState(null);
+    const navigate = useNavigate();
     const clubIds = useMemo(() => accessibleClubIds(clubAccess), [clubAccess]);
     const activities = useMemo(
         () => (result.data || []).filter((activity) => clubIds.has(activity.clubId)),
@@ -36,7 +35,7 @@ export function MySchedulePage({ api, sessionKey, clubAccess }) {
                 {activities.length ? (
                     <div className="v2-activity-list">
                         {activities.map((activity) => (
-                            <ActivityCard key={activity.id} activity={activity} onOpen={setSelected} />
+                            <ActivityCard key={activity.id} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} variant="schedule" />
                         ))}
                     </div>
                 ) : (
@@ -50,7 +49,6 @@ export function MySchedulePage({ api, sessionKey, clubAccess }) {
                     </EmptyState>
                 )}
             </PageState>
-            <ActivityDetail activity={selected} onClose={() => setSelected(null)} />
         </div>
     );
 }

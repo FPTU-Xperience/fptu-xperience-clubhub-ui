@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ActivityCard from '../../../components/v2/activity-card/ActivityCard';
-import ActivityDetail from '../../../components/v2/activity-detail/ActivityDetail';
 import { filterActivityFeed, useRecommendedActivities } from '../activity-data';
 import ClubCard from '../../../components/v2/club-card/ClubCard';
 import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryFilters';
@@ -24,7 +23,7 @@ const MAX_SUGGESTED_CLUBS = PAGE_SIZE * MAX_PAGES;
 
 export default function DiscoverPage({ api, sessionKey }) {
     const recommendations = useRecommendedActivities(api, sessionKey);
-    const [selectedActivity, setSelectedActivity] = useState(null);
+    const navigate = useNavigate();
     const [activityStatus, setActivityStatus] = useState('ALL');
     const recommendedActivities = useMemo(() => filterActivityFeed(recommendations.data.map(({ activity }) => activity), '', activityStatus), [recommendations.data, activityStatus]);
     const result = useClubDirectory(api, sessionKey);
@@ -67,11 +66,10 @@ export default function DiscoverPage({ api, sessionKey }) {
                 </SectionHeading>
                 <div className="v2-tabs v2-activity-filter-tabs" role="group" aria-label="Trạng thái hoạt động">{[['ALL','Tất cả'],['UPCOMING','Sắp diễn ra'],['LIVE','Đang diễn ra']].map(([value,label]) => <button key={value} type="button" aria-pressed={activityStatus === value} className={activityStatus === value ? 'active' : ''} onClick={() => setActivityStatus(value)}>{label}</button>)}</div>
                 <PageState status={recommendations.status} onRetry={recommendations.retry}>
-                    <div className="v2-activity-list">
-                        {recommendedActivities.map((activity) => <ActivityCard key={activity.id} activity={activity} onOpen={setSelectedActivity} />)}
+                    <div className="v2-event-grid">
+                        {recommendedActivities.map((activity) => <ActivityCard key={activity.id} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
                     </div>
                 </PageState>
-                <ActivityDetail activity={selectedActivity} onClose={() => setSelectedActivity(null)} />
             </section>
             <section id="club-directory">
                 <SectionHeading

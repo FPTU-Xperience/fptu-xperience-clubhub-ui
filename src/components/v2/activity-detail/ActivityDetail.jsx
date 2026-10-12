@@ -1,14 +1,23 @@
 import { CalendarDays, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import V2Modal from '../common/modal/V2Modal';
+import ActivityAttendance from './ActivityAttendance';
 import './ActivityDetail.scss';
 
-export default function ActivityDetail({ activity, onClose }) {
+export default function ActivityDetail({ activity, onClose, manager }) {
     if (!activity) return null;
     return (
-        <V2Modal title={activity.title} onClose={onClose}>
+        <V2Modal title={activity.title} onClose={onClose} wide>
             {activity.coverImageUrl && <img className="v2-activity-cover" src={activity.coverImageUrl} alt="" />}
-            <span className="v2-activity-pill">{activity.status === 'COMPLETED' ? 'Đã hoàn thành' : activity.status === 'CANCELLED' ? 'Đã hủy' : activity.status === 'LIVE' ? 'Đang diễn ra' : 'Đã lên lịch'}</span>
+            <span className="v2-activity-pill">
+                {activity.status === 'COMPLETED'
+                    ? 'Đã hoàn thành'
+                    : activity.status === 'CANCELLED'
+                      ? 'Đã hủy'
+                      : activity.status === 'LIVE'
+                        ? 'Đang diễn ra'
+                        : 'Đã lên lịch'}
+            </span>
             <p className="v2-activity-description">
                 {activity.description ||
                     'Một buổi gặp gỡ để học điều mới, chia sẻ trải nghiệm và cùng tạo ra những kết nối ý nghĩa.'}
@@ -29,8 +38,13 @@ export default function ActivityDetail({ activity, onClose }) {
                 <h3>Bạn cần chuẩn bị gì?</h3>
                 <p>Đến trước 10 phút, mang thẻ sinh viên và tinh thần sẵn sàng trải nghiệm.</p>
             </aside>
+            <ActivityAttendance key={activity.id} activity={activity} manager={manager} />
             <div className="v2-activity-actions">
-                {activity.clubCode && <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(activity.clubCode)}`}>Xem CLB</Link>}
+                {activity.clubCode && (
+                    <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(activity.clubCode)}`}>
+                        Xem CLB
+                    </Link>
+                )}
                 <Link className="v2-button primary" to={`/v2/activities/${activity.id}`} state={{ activity }}>
                     Xem chi tiết
                 </Link>

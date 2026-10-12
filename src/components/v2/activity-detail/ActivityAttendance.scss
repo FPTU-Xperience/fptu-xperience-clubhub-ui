@@ -1,0 +1,99 @@
+.v2-activity-attendance {
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid #e1e8f1;
+    > header {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #e96516;
+    }
+    h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #15365b;
+    }
+    header p {
+        margin: 6px 0 18px;
+        color: #637895;
+        font-size: 12px;
+    }
+    .v2-activity-attendance-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+        span {
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: #f5f8fc;
+            font-size: 12px;
+            color: #637895;
+        }
+        strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 22px;
+            color: #15365b;
+        }
+    }
+    .v2-activity-attendance-count {
+        color: #637895;
+        font-size: 12px;
+    }
+    .v2-activity-attendance-list {
+        border: 1px solid #e1e8f1;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    article {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 16px;
+        border-bottom: 1px solid #edf1f6;
+        &:last-child {
+            border: 0;
+        }
+        strong {
+            color: #15365b;
+            font-size: 13px;
+        }
+        small {
+            display: block;
+            margin-top: 3px;
+            color: #637895;
+            font-size: 11px;
+        }
+    }
+    .v2-attendance-status {
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #edf1f7;
+        color: #637895;
+        font-size: 11px;
+        white-space: nowrap;
+        &.is-present {
+            background: #e5f8ee;
+            color: #13744e;
+        }
+        &.is-late {
+            background: #fff0df;
+            color: #ad5e13;
+        }
+        &.is-absent {
+            background: #fef0f0;
+            color: #a83131;
+        }
+    }
+    .v2-activity-attendance-pages {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 14px;
+        color: #637895;
+        font-size: 12px;
+    }
+}
