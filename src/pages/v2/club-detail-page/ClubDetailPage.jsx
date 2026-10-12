@@ -44,15 +44,25 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
         let active = true;
         setInvitation(null);
         if (!invitationId || !club?.id) return undefined;
-        api.getMyMemberships().then((memberships) => {
-            const match = (Array.isArray(memberships) ? memberships : memberships?.items || []).find((member) =>
-                String(member.id) === invitationId && String(member.clubId) === String(club.id)
-                && isPendingClubInvitation(member));
-            if (active && match) setInvitation({ id: match.id, clubId: String(club.id) });
-        }).catch((issue) => { if (active) setJoinError(issue?.message || 'Không thể tải lời mời.'); });
-        return () => { active = false; };
+        api.getMyMemberships()
+            .then((memberships) => {
+                const match = (Array.isArray(memberships) ? memberships : memberships?.items || []).find(
+                    (member) =>
+                        String(member.id) === invitationId &&
+                        String(member.clubId) === String(club.id) &&
+                        isPendingClubInvitation(member),
+                );
+                if (active && match) setInvitation({ id: match.id, clubId: String(club.id) });
+            })
+            .catch((issue) => {
+                if (active) setJoinError(issue?.message || 'Không thể tải lời mời.');
+            });
+        return () => {
+            active = false;
+        };
     }, [api, club?.id, invitationId, sessionKey]);
-    const acceptingInvitation = invitation && String(invitation.id) === invitationId && invitation.clubId === String(club?.id);
+    const acceptingInvitation =
+        invitation && String(invitation.id) === invitationId && invitation.clubId === String(club?.id);
     const updateForm = (event) => {
         const { name, type, checked, value } = event.target;
         setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
@@ -123,7 +133,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                         </div>
                         <div className="v2-club-identity">
                             <ClubMark club={club} large />
-                            <div>
+                            <div className="v2-club-identity-copy">
                                 <div className="v2-inline">
                                     <Pill>{club.category || 'Chưa phân loại'}</Pill>
                                     <Pill tone={club.isRecruiting ? 'orange' : ''}>
@@ -136,19 +146,22 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                 </div>
                                 <h1>{club.fullName}</h1>
                                 <p>{club.tagline}</p>
-                                <div className="v2-club-detail-actions">
-                                    {joined ? (
-                                        <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>
-                                    ) : acceptingInvitation || canJoinClub(club) ? (
-                                        <button
-                                            className="v2-button v2-button--primary"
-                                            type="button"
-                                            onClick={openJoin}
-                                        >
-                                            {acceptingInvitation ? 'Chấp nhận lời mời' : 'Nộp hồ sơ gia nhập'}
-                                        </button>
-                                    ) : null}
-                                </div>
+                            </div>
+                            <div className="v2-club-detail-actions">
+                                {['MEMBER', 'MANAGER'].includes(club.viewerRelationship) ? (
+                                    <Link
+                                        className="v2-button v2-button--primary"
+                                        to={`/v2/my-clubs/${encodeURIComponent(club.code || clubCode)}`}
+                                    >
+                                        Đến CLB
+                                    </Link>
+                                ) : joined ? (
+                                    <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>
+                                ) : acceptingInvitation || canJoinClub(club) ? (
+                                    <button className="v2-button v2-button--primary" type="button" onClick={openJoin}>
+                                        {acceptingInvitation ? 'Chấp nhận lời mời' : 'Nộp hồ sơ gia nhập'}
+                                    </button>
+                                ) : null}
                             </div>
                         </div>
                         <div className="v2-detail-columns">
@@ -232,7 +245,11 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                 )}
             </PageState>
             {joinOpen && (
-                <V2Modal title={`${acceptingInvitation ? 'Chấp nhận lời mời từ' : 'Gia nhập'} ${club.name}`} onClose={() => !submitting && setJoinOpen(false)} wide>
+                <V2Modal
+                    title={`${acceptingInvitation ? 'Chấp nhận lời mời từ' : 'Gia nhập'} ${club.name}`}
+                    onClose={() => !submitting && setJoinOpen(false)}
+                    wide
+                >
                     <form className="v2-club-join-form" onSubmit={submitJoin}>
                         <p>Hồ sơ sẽ được gửi đến ban chủ nhiệm CLB để xem xét.</p>
                         <p className="v2-club-join-profile">
@@ -262,11 +279,15 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                 />
                             </label>
                             <label>
-                                <span className="v2-club-join-field-label">Địa chỉ <small>(không bắt buộc)</small></span>
+                                <span className="v2-club-join-field-label">
+                                    Địa chỉ <small>(không bắt buộc)</small>
+                                </span>
                                 <input value={form.address} readOnly maxLength="500" />
                             </label>
                             <label>
-                                <span className="v2-club-join-field-label">Giới tính <small aria-hidden="true">&nbsp;</small></span>
+                                <span className="v2-club-join-field-label">
+                                    Giới tính <small aria-hidden="true">&nbsp;</small>
+                                </span>
                                 <select name="gender" value={form.gender} onChange={updateForm} required>
                                     <option value="">Chọn giới tính</option>
                                     <option value="MALE">Nam</option>
@@ -288,15 +309,21 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                         </label>
                         <div className="v2-club-join-form-grid">
                             <label>
-                                <span className="v2-club-join-field-label">Sở thích <small>(lấy từ hồ sơ)</small></span>
+                                <span className="v2-club-join-field-label">
+                                    Sở thích <small>(lấy từ hồ sơ)</small>
+                                </span>
                                 <textarea value={form.hobbies} readOnly maxLength="1000" rows="3" />
                             </label>
                             <label>
-                                <span className="v2-club-join-field-label">Kỹ năng <small>(lấy từ hồ sơ)</small></span>
+                                <span className="v2-club-join-field-label">
+                                    Kỹ năng <small>(lấy từ hồ sơ)</small>
+                                </span>
                                 <textarea value={form.skills} readOnly maxLength="1000" rows="3" />
                             </label>
                             <label>
-                                <span className="v2-club-join-field-label">Kỳ vọng <small>(không bắt buộc)</small></span>
+                                <span className="v2-club-join-field-label">
+                                    Kỳ vọng <small>(không bắt buộc)</small>
+                                </span>
                                 <textarea
                                     name="expectations"
                                     value={form.expectations}
@@ -306,7 +333,9 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                 />
                             </label>
                             <label>
-                                <span className="v2-club-join-field-label">Đóng góp mong muốn <small>(không bắt buộc)</small></span>
+                                <span className="v2-club-join-field-label">
+                                    Đóng góp mong muốn <small>(không bắt buộc)</small>
+                                </span>
                                 <textarea
                                     name="contributions"
                                     value={form.contributions}
@@ -317,7 +346,9 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                             </label>
                         </div>
                         <label>
-                            <span className="v2-club-join-field-label">Lời nhắn cho CLB <small>(không bắt buộc)</small></span>
+                            <span className="v2-club-join-field-label">
+                                Lời nhắn cho CLB <small>(không bắt buộc)</small>
+                            </span>
                             <textarea
                                 name="message"
                                 value={form.message}
