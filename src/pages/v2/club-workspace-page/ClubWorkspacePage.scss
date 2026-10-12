@@ -75,6 +75,18 @@
     color: #193554;
 }
 
+.v2-workspace-term select {
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: #193554;
+    font: inherit;
+    padding: 6px 24px 6px 0;
+    max-width: 220px;
+    cursor: pointer;
+}
+.v2-workspace-term select:focus-visible { outline: 2px solid #f97316; outline-offset: 3px; }
+
 .v2-workspace-content {
     padding: 42px 40px 64px;
 }

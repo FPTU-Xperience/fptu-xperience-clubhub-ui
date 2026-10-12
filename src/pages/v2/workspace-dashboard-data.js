@@ -1,3 +1,4 @@
+import { workspaceSemesterQuery, workspaceSemesterKey } from './club-workspace-page/workspace-semester-data.js';
 import { useEffect, useState } from 'react';
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
@@ -13,25 +14,31 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
     const memberCount = Number.isInteger(clubData?.memberCount)
         ? clubData.memberCount
         : Array.isArray(clubData?.members)
-            ? clubData.members.filter((member) => String(member.status).toUpperCase() === 'APPROVED').length
-            : null;
-    const activeActivities = activityRows?.filter((activity) =>
-        String(activity.status).toUpperCase() !== 'CANCELLED') || null;
+          ? clubData.members.filter((member) => String(member.status).toUpperCase() === 'APPROVED').length
+          : null;
+    const activeActivities =
+        activityRows?.filter((activity) => String(activity.status).toUpperCase() !== 'CANCELLED') || null;
     const upcomingActivities = activeActivities
-        ?.filter((activity) => String(activity.status).toUpperCase() === 'SCHEDULED'
-            && Number.isFinite(Date.parse(activity.startTimeUtc || activity.startTime))
-            && Date.parse(activity.startTimeUtc || activity.startTime) >= now)
-        .sort((left, right) => Date.parse(left.startTimeUtc || left.startTime) - Date.parse(right.startTimeUtc || right.startTime));
+        ?.filter(
+            (activity) =>
+                String(activity.status).toUpperCase() === 'SCHEDULED' &&
+                Number.isFinite(Date.parse(activity.startTimeUtc || activity.startTime)) &&
+                Date.parse(activity.startTimeUtc || activity.startTime) >= now,
+        )
+        .sort(
+            (left, right) =>
+                Date.parse(left.startTimeUtc || left.startTime) - Date.parse(right.startTimeUtc || right.startTime),
+        );
     const upcomingActivity = upcomingActivities?.[0];
     const approvedMembers = Array.isArray(clubData?.members)
         ? clubData.members
-            .filter((member) => String(member.status).toUpperCase() === 'APPROVED')
-            .map((member) => ({
-                id: member.id,
-                name: member.fullName,
-                role: member.role,
-                joinedAt: member.reviewedAtUtc || member.requestedAtUtc,
-            }))
+              .filter((member) => String(member.status).toUpperCase() === 'APPROVED')
+              .map((member) => ({
+                  id: member.id,
+                  name: member.fullName,
+                  role: member.role,
+                  joinedAt: member.reviewedAtUtc || member.requestedAtUtc,
+              }))
         : null;
 
     return {
@@ -42,59 +49,86 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
             : null,
         isRecruiting: typeof clubData?.isRecruiting === 'boolean' ? clubData.isRecruiting : null,
         activityCount: activeActivities?.length ?? null,
-        activities: activeActivities?.map((activity) => ({
-            id: activity.id,
-            clubId: activity.clubId,
-            title: activity.title,
-            description: activity.description,
-            location: activity.location,
-            startTime: activity.startTimeUtc || activity.startTime,
-            status: String(activity.status).toUpperCase(),
-            coverImageUrl: activity.coverImageUrl || '',
-        })) || null,
+        ongoingActivityCount:
+            activeActivities?.filter((activity) =>
+                ['SCHEDULED', 'UPCOMING', 'LIVE'].includes(String(activity.status).toUpperCase()),
+            ).length ?? null,
+        activities:
+            activeActivities?.map((activity) => ({
+                id: activity.id,
+                clubId: activity.clubId,
+                title: activity.title,
+                description: activity.description,
+                location: activity.location,
+                startTime: activity.startTimeUtc || activity.startTime,
+                status: String(activity.status).toUpperCase(),
+                coverImageUrl: activity.coverImageUrl || '',
+            })) || null,
         upcomingCount: upcomingActivities?.length ?? null,
         pendingApplications: membershipRows
             ? membershipRows.filter((membership) => String(membership.status).toUpperCase() === 'PENDING').length
             : null,
         pendingMemberships: membershipRows
-            ? membershipRows.filter((membership) => String(membership.status).toUpperCase() === 'PENDING')
-                .map((membership) => ({ id: membership.id, name: membership.fullName }))
+            ? membershipRows
+                  .filter((membership) => String(membership.status).toUpperCase() === 'PENDING')
+                  .map((membership) => ({ id: membership.id, name: membership.fullName }))
             : null,
         approvedReportCount: Number.isInteger(reportData?.total)
             ? reportData.total
-            : Array.isArray(reportData) ? reportData.length : null,
+            : Array.isArray(reportData)
+              ? reportData.length
+              : null,
         upcomingActivity: upcomingActivity
             ? {
-                title: upcomingActivity.title,
-                startTime: upcomingActivity.startTimeUtc || upcomingActivity.startTime,
-                location: upcomingActivity.location,
-            }
+                  title: upcomingActivity.title,
+                  startTime: upcomingActivity.startTimeUtc || upcomingActivity.startTime,
+                  location: upcomingActivity.location,
+              }
             : null,
         activityAvailable: activityRows !== null,
     };
 }
 
-export function useWorkspaceDashboard(api, clubId, manager, sessionKey) {
-    const [result, setResult] = useState({ clubId, status: 'loading', data: null });
+export function useWorkspaceDashboard(api, clubId, manager, sessionKey, semester = null, refreshKey = null) {
+    const scopeKey = workspaceSemesterKey(semester);
+    const [result, setResult] = useState({ clubId, scopeKey, refreshKey, status: 'loading', data: null });
     const [version, setVersion] = useState(0);
     useEffect(() => {
         let active = true;
         const numericClubId = Number(clubId);
         if (!Number.isSafeInteger(numericClubId) || numericClubId <= 0) {
-            setResult({ clubId, status: 'unavailable', data: null });
+            setResult({ clubId, scopeKey, refreshKey, status: 'unavailable', data: null });
             return undefined;
         }
-        setResult({ clubId, status: 'loading', data: null });
+        setResult({ clubId, scopeKey, refreshKey, status: 'loading', data: null });
         Promise.allSettled([
             api.getClub(numericClubId),
-            api.getActivities(numericClubId),
+            api.getActivities(numericClubId, workspaceSemesterQuery(semester, 'activities')),
             manager ? api.getClubMemberships(numericClubId) : Promise.resolve(null),
-            api.getReports({ clubId: numericClubId, status: 'Approved', page: 1, pageSize: 1 }),
+            api.getReports({
+                ...workspaceSemesterQuery(semester, 'reports'),
+                clubId: numericClubId,
+                status: 'Approved',
+                page: 1,
+                pageSize: 1,
+            }),
         ]).then((results) => {
-            if (active) setResult({ clubId, status: 'ready', data: summarizeWorkspaceDashboard(results, manager) });
+            if (active)
+                setResult({
+                    clubId,
+                    scopeKey,
+                    refreshKey,
+                    status: 'ready',
+                    data: summarizeWorkspaceDashboard(results, manager),
+                });
         });
-        return () => { active = false; };
-    }, [api, clubId, manager, sessionKey, version]);
-    const current = result.clubId === clubId ? result : { clubId, status: 'loading', data: null };
+        return () => {
+            active = false;
+        };
+    }, [api, clubId, manager, sessionKey, version, scopeKey, refreshKey]);
+    const current =
+        result.clubId === clubId && result.scopeKey === scopeKey && result.refreshKey === refreshKey
+            ? result
+            : { clubId, scopeKey, refreshKey, status: 'loading', data: null };
     return { ...current, retry: () => setVersion((value) => value + 1) };
 }

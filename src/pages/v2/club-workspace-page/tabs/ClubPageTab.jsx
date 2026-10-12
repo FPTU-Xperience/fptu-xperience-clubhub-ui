@@ -1,3 +1,4 @@
+import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
@@ -23,6 +24,7 @@ function useImagePreview(file, savedUrl) {
 export default function ClubPageTab({ manager = false, workspace }) {
     const clubId = workspace?.clubId;
     const { api } = useAuth();
+    const { semester } = useWorkspaceSemester();
     const [club, setClub] = useState(null);
     const [profileDraft, setProfileDraft] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -67,7 +69,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
         return () => {
             requestVersion.current++;
         };
-    }, [api, clubId, attempt]);
+    }, [api, clubId, attempt, semester?.id]);
 
     const openEditor = (section) => {
         if (!manager || saving) return;

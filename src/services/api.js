@@ -640,13 +640,15 @@ class ApiService {
     }
 
     // Activity endpoints
-    async getActivities(clubId) {
+    async getActivities(clubId, params = {}) {
         const hasClubId = clubId !== undefined && clubId !== null && clubId !== '';
         const numericClubId = Number(clubId);
         if (hasClubId && (!Number.isSafeInteger(numericClubId) || numericClubId <= 0)) {
             throw new TypeError('Activity clubId must be a positive numeric club ID.');
         }
-        const query = hasClubId ? `?clubId=${numericClubId}` : '';
+        const filters = new URLSearchParams(Object.entries(params).filter(([, value]) => value != null && value !== ''));
+        if (hasClubId) filters.set('clubId', String(numericClubId));
+        const query = filters.size ? `?${filters}` : '';
         return this.request(`/api/activities${query}`);
     }
 

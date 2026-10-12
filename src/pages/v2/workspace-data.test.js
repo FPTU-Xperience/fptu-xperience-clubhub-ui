@@ -31,7 +31,7 @@ test('production workspace stays V2-local and does not consume demo state', () =
     assert.match(tabView, /ActivitiesTab/);
     assert.match(tabView, /ClubPageTab/);
     assert.doesNotMatch(tabView, /SettingsTab/);
-    assert.match(activities, /v2-preview-events/);
+    assert.match(activities, /components\/v2\/activity-card\/ActivityCard/);
     assert.match(activities, /dashboard\.data\?\.activities/);
     assert.match(activities, /api\.createActivity/);
     assert.match(activities, /V2Modal/);

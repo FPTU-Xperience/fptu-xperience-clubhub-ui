@@ -2,12 +2,14 @@ import { useCallback } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import useWorkspaceResource from './useWorkspaceResource';
+import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 
 const money = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(amount);
 
 export default function FinanceTab({ workspace }) {
     const clubId = workspace?.clubId;
     const { api } = useAuth();
+    const { semester } = useWorkspaceSemester();
     const load = useCallback(async (id) => {
         const [proposals, transactions] = await Promise.allSettled([
             api.getBudgetProposals({ clubId: id, page: 1, pageSize: 100 }),
@@ -17,12 +19,12 @@ export default function FinanceTab({ workspace }) {
             proposals: proposals.status === 'fulfilled' ? proposals.value : null,
             transactions: transactions.status === 'fulfilled' ? transactions.value : null,
         };
-    }, [api]);
-    const result = useWorkspaceResource(clubId, load);
+    }, [api, semester?.id]);
+    const result = useWorkspaceResource(clubId, load, semester?.id || 'global');
     const proposals = result.data?.proposals?.items || [];
     const transactions = Array.isArray(result.data?.transactions) ? result.data.transactions : [];
     return (
-        <WorkspaceTabLayout title="Tài chính" description="Đề xuất ngân sách và giao dịch của CLB theo quyền truy cập." records={proposals}>
+        <WorkspaceTabLayout title="Tài chính" description="Đề xuất ngân sách và giao dịch toàn CLB theo quyền truy cập." records={proposals}>
             {() => (
                 <>
                     {result.status === 'loading' && <p className="v2-workspace-data-note" role="status">Đang tải dữ liệu tài chính…</p>}

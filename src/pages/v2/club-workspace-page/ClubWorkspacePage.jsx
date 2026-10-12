@@ -1,4 +1,9 @@
 import {
+    WorkspaceSemesterProvider,
+    WorkspaceSemesterSelect,
+    useWorkspaceSemesterSelection,
+} from './WorkspaceSemesterContext';
+import {
     ArrowRight,
     ArrowUpRight,
     Award,
@@ -8,12 +13,13 @@ import {
     FileText,
     Users,
 } from 'lucide-react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import PageState from '../../../components/v2/PageState';
 import { useClubWorkspace } from '../workspace-data';
 import { useWorkspaceDashboard } from '../workspace-dashboard-data';
 import WorkspaceTabView from './tabs/WorkspaceTabView';
 import WorkspaceLeftRail, { getWorkspaceSections } from './WorkspaceLeftRail';
+import ActivityManagementPage from './tabs/activities/ActivityManagementPage';
 import './ClubWorkspacePage.scss';
 const dateLabel = (value) => {
     const date = new Date(value);
@@ -52,9 +58,12 @@ function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
     const summary = dashboard.data;
     const metric = (value) => value ?? (dashboard.status === 'loading' ? '…' : '—');
     const loadingNote = 'Đang tải dữ liệu…';
-    const activityNote = dashboard.status === 'loading' ? loadingNote : summary?.activityAvailable
-        ? summary.upcomingActivity?.title || 'Chưa có hoạt động sắp tới'
-        : 'Không tải được lịch hoạt động';
+    const activityNote =
+        dashboard.status === 'loading'
+            ? loadingNote
+            : summary?.activityAvailable
+              ? summary.upcomingActivity?.title || 'Chưa có hoạt động sắp tới'
+              : 'Không tải được lịch hoạt động';
     return (
         <>
             <section className="v2-workspace-intro">
@@ -75,7 +84,12 @@ function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
                 </Link>
             </section>
             <div className="v2-workspace-stats">
-                <Stat label="Thành viên CLB" value={metric(summary?.memberCount)} note="Thành viên đã được duyệt" Icon={Users} />
+                <Stat
+                    label="Thành viên CLB"
+                    value={metric(summary?.memberCount)}
+                    note="Thành viên đã được duyệt"
+                    Icon={Users}
+                />
                 <Stat
                     label="Hoạt động của CLB"
                     value={metric(summary?.activityCount)}
@@ -131,18 +145,24 @@ function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
                         title={manager ? 'Đơn tham gia mới' : 'Hoạt động của CLB'}
                         copy={
                             manager
-                                ? dashboard.status === 'loading' ? loadingNote : summary?.pendingApplications == null
-                                    ? 'Không tải được đơn tham gia'
-                                    : `${summary.pendingApplications} đơn đang chờ xem xét`
+                                ? dashboard.status === 'loading'
+                                    ? loadingNote
+                                    : summary?.pendingApplications == null
+                                      ? 'Không tải được đơn tham gia'
+                                      : `${summary.pendingApplications} đơn đang chờ xem xét`
                                 : activityNote
                         }
                     />
                     <Review
                         icon={FileText}
                         title="Báo cáo đã duyệt"
-                        copy={dashboard.status === 'loading' ? loadingNote : summary?.approvedReportCount == null
-                            ? 'Không tải được báo cáo'
-                            : `${summary.approvedReportCount} báo cáo có thể xem`}
+                        copy={
+                            dashboard.status === 'loading'
+                                ? loadingNote
+                                : summary?.approvedReportCount == null
+                                  ? 'Không tải được báo cáo'
+                                  : `${summary.approvedReportCount} báo cáo có thể xem`
+                        }
                     />
                 </section>
                 <section className="v2-workspace-schedule">
@@ -163,7 +183,9 @@ function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
                             <strong>{activityNote}</strong>
                             <span>
                                 {summary?.upcomingActivity?.location ||
-                                    (summary?.activityAvailable ? 'Xem tất cả hoạt động của CLB.' : 'Vui lòng thử lại sau.')}
+                                    (summary?.activityAvailable
+                                        ? 'Xem tất cả hoạt động của CLB.'
+                                        : 'Vui lòng thử lại sau.')}
                             </span>
                         </div>
                     </article>
@@ -179,7 +201,17 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     const navigate = useNavigate();
     const result = useClubWorkspace(api, sessionKey, routeClubCode);
     const manager = result.workspace?.role === 'MANAGER';
-    const dashboard = useWorkspaceDashboard(api, result.status === 'populated' ? result.clubId : null, manager, sessionKey);
+    const semesterSelection = useWorkspaceSemesterSelection(sessionKey, result.clubId, result.workspace?.semesters);
+    // Refresh shared summaries when entering activities or the member roster.
+    const dashboardRefreshKey = /\/(activities|members)\/?$/.test(location.pathname) ? location.key : null;
+    const dashboard = useWorkspaceDashboard(
+        api,
+        result.status === 'populated' ? result.clubId : null,
+        manager,
+        sessionKey,
+        semesterSelection.semester,
+        dashboardRefreshKey,
+    );
     const base = `/v2/my-clubs/${encodeURIComponent(result.workspace?.clubCode || routeClubCode || '')}`;
     if (result.status !== 'populated')
         return (
@@ -205,40 +237,67 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
         );
     const availableSections = getWorkspaceSections(manager);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
+    if (relativePath === 'attendance') return <Navigate to={`${base}/activities`} replace />;
     const activeSection = availableSections.find(([path]) => path === relativePath);
+    const activityDetailId = location.pathname.slice(base.length).match(/^\/activities\/([^/]+)\/?$/)?.[1];
     const sectionLabel = activeSection?.[1] || 'Trang không khả dụng';
     return (
-        <div className="v2-production-workspace">
-            <WorkspaceLeftRail
-                workspace={{ ...result.workspace, pendingApplications: dashboard.data?.pendingApplications ?? null }}
-                selections={result.data}
-                base={base}
-                manager={manager}
-                onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
-            />
-            <main className="v2-workspace-main">
-                <header className="v2-workspace-bar">
-                    <div>
-                        CLB của tôi <ChevronRight size={14} /> {result.workspace.name} <ChevronRight size={14} />{' '}
-                        <strong>{sectionLabel}</strong>
+        <WorkspaceSemesterProvider value={semesterSelection}>
+            <div className="v2-production-workspace">
+                <WorkspaceLeftRail
+                    workspace={{
+                        ...result.workspace,
+                        pendingApplications: dashboard.data?.pendingApplications ?? null,
+                        ongoingActivityCount: dashboard.data?.ongoingActivityCount ?? null,
+                    }}
+                    selections={result.data}
+                    base={base}
+                    manager={manager}
+                    onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
+                />
+                <main className="v2-workspace-main">
+                    <header className="v2-workspace-bar">
+                        <div>
+                            CLB của tôi <ChevronRight size={14} /> {result.workspace.name} <ChevronRight size={14} />{' '}
+                            <strong>{sectionLabel}</strong>
+                        </div>
+                        <div>
+                            <span className={`v2-workspace-role ${manager ? 'is-manager' : ''}`}>
+                                {manager ? 'Chủ nhiệm' : 'Thành viên'}
+                            </span>
+                            <WorkspaceSemesterSelect />
+                        </div>
+                    </header>
+                    <div className="v2-workspace-content">
+                        {activityDetailId ? (
+                            <ActivityManagementPage
+                                key={`${sessionKey}:${result.clubId}:${activityDetailId}`}
+                                api={api}
+                                sessionKey={sessionKey}
+                                activityId={activityDetailId}
+                                workspace={result.workspace}
+                                manager={manager}
+                                base={base}
+                            />
+                        ) : activeSection && !relativePath ? (
+                            <WorkspaceHome
+                                workspace={result.workspace}
+                                manager={manager}
+                                base={base}
+                                viewer={viewer}
+                                dashboard={dashboard}
+                            />
+                        ) : (
+                            <WorkspaceTabView
+                                label={sectionLabel}
+                                manager={manager}
+                                dashboard={dashboard}
+                                workspace={result.workspace}
+                            />
+                        )}
                     </div>
-                    <div>
-                        <span className={`v2-workspace-role ${manager ? 'is-manager' : ''}`}>
-                            {manager ? 'Chủ nhiệm' : 'Thành viên'}
-                        </span>
-                        <span className="v2-workspace-term">
-                            <CalendarDays size={16} /> Học kỳ hiện tại <ChevronDown size={16} />
-                        </span>
-                    </div>
-                </header>
-                <div className="v2-workspace-content">
-                    {activeSection && !relativePath ? (
-                        <WorkspaceHome workspace={result.workspace} manager={manager} base={base} viewer={viewer} dashboard={dashboard} />
-                    ) : (
-                        <WorkspaceTabView label={sectionLabel} manager={manager} dashboard={dashboard} workspace={result.workspace} />
-                    )}
-                </div>
-            </main>
-        </div>
+                </main>
+            </div>
+        </WorkspaceSemesterProvider>
     );
 }

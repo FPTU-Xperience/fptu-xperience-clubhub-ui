@@ -1,8 +1,8 @@
+import { useWorkspaceSemester } from '../../WorkspaceSemesterContext';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Clock, RotateCcw } from 'lucide-react';
 import {
     CLUB_DAYS,
-    CLUB_TERMS,
     DAY_MINUTES,
     clampClubTime,
     defaultClubSchedule,
@@ -14,7 +14,9 @@ import {
 import './ClubScheduleEditor.scss';
 
 const ClubScheduleEditor = forwardRef(function ClubScheduleEditor({ value, onChange, disabled = false }, ref) {
-    const [schedule, setSchedule] = useState(() => parseClubSchedule(value) || defaultClubSchedule());
+    const { semester } = useWorkspaceSemester();
+    const selectedPeriod = semester?.term && semester?.year ? { term: semester.term, year: semester.year } : null;
+    const [schedule, setSchedule] = useState(() => ({ ...(parseClubSchedule(value) || defaultClubSchedule()), ...selectedPeriod }));
     const [touched, setTouched] = useState(false);
     const [invalid, setInvalid] = useState(false);
     const firstDay = useRef(null);
@@ -32,7 +34,7 @@ const ClubScheduleEditor = forwardRef(function ClubScheduleEditor({ value, onCha
         [valid],
     );
     const update = (patch) => {
-        const next = { ...schedule, ...patch };
+        const next = { ...schedule, ...selectedPeriod, ...patch };
         setSchedule(next);
         setTouched(true);
         setInvalid(false);
@@ -40,41 +42,10 @@ const ClubScheduleEditor = forwardRef(function ClubScheduleEditor({ value, onCha
     };
     const changeTime = (handle, value) =>
         update({ [handle]: clampClubTime(value, handle, schedule.start, schedule.end) });
-    const year = new Date().getFullYear();
-    const years = [...new Set([year - 1, year, year + 1, year + 2, schedule.year])].sort();
     return (
         <div className="club-schedule-editor">
             <input type="hidden" name="scheduleLabel" value={value} />
-            <div className="club-schedule-period">
-                <label>
-                    Học kỳ
-                    <select
-                        value={schedule.term}
-                        onChange={(event) => update({ term: event.target.value })}
-                        disabled={disabled}
-                    >
-                        {CLUB_TERMS.map((term) => (
-                            <option key={term.id} value={term.id}>
-                                {term.label}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label>
-                    Năm
-                    <select
-                        value={schedule.year}
-                        onChange={(event) => update({ year: Number(event.target.value) })}
-                        disabled={disabled}
-                    >
-                        {years.map((item) => (
-                            <option key={item} value={item}>
-                                {item}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-            </div>
+            <p className="governance-muted">Học kỳ áp dụng: <strong>{semester?.label || `${schedule.term}${schedule.year}`}</strong></p>
             <fieldset disabled={disabled} className="club-schedule-days">
                 <legend>Ngày sinh hoạt</legend>
                 <div>

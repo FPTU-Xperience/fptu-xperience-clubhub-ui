@@ -1,11 +1,11 @@
-import { ArrowLeft, Award, CalendarDays, FileText, Flag, Gift, Home, ScanLine, Users, Wallet } from 'lucide-react';
+import { ArrowLeft, Award, CalendarDays, FileText, Flag, Gift, Home, Users, Wallet } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
+import CountBadge from '../../../components/v2/common/CountBadge';
 import './WorkspaceLeftRail.scss';
 
 export const workspaceSections = [
     ['', 'Trang chủ', Home],
     ['activities', 'Hoạt động', CalendarDays],
-    ['attendance', 'Điểm danh', ScanLine],
     ['quests', 'Nhiệm vụ & đóng góp', Flag],
     ['members', 'Thành viên', Users],
     ['points', 'Điểm & thành tích', Award],
@@ -54,10 +54,12 @@ export default function WorkspaceLeftRail({ workspace, selections, base, manager
                     <NavLink key={path || 'home'} end={!path} to={path ? `${base}/${path}` : base}>
                         <Icon size={18} aria-hidden="true" />
                         <span>{label}</span>
-                        {path === 'members' &&
-                            manager &&
-                            Number.isInteger(workspace.pendingApplications) &&
-                            workspace.pendingApplications > 0 && <small>{workspace.pendingApplications}</small>}
+                        {path === 'activities' && (
+                            <CountBadge count={workspace.ongoingActivityCount} label="hoạt động sắp và đang diễn ra" />
+                        )}
+                        {path === 'members' && manager && (
+                            <CountBadge count={workspace.pendingApplications} label="đơn chờ duyệt" />
+                        )}
                     </NavLink>
                 ))}
             </nav>

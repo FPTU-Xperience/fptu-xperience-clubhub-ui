@@ -31,7 +31,7 @@
     object-fit: contain;
 }
 
-.v2-workspace-left-rail-brand>span>span {
+.v2-workspace-left-rail-brand > span > span {
     color: var(--v2-orange, #f97316);
 }
 
@@ -44,7 +44,7 @@
 }
 
 .v2-workspace-left-rail-label,
-.v2-workspace-left-rail-switch>span {
+.v2-workspace-left-rail-switch > span {
     display: block;
     color: #94a3b8;
     font-size: 9px;
@@ -62,7 +62,7 @@
     font-size: 12px;
     font-weight: 550;
     text-decoration: none;
-    margin-top: 21px
+    margin-top: 21px;
 }
 
 .v2-workspace-left-rail-back:hover {
@@ -77,7 +77,7 @@
     margin: 10px 10px 24px;
 }
 
-.v2-workspace-left-rail-club>span {
+.v2-workspace-left-rail-club > span {
     display: grid;
     width: 42px;
     height: 42px;
@@ -166,17 +166,8 @@
     font-weight: 700;
 }
 
-.v2-workspace-left-rail-nav a small {
-    display: grid;
-    min-width: 18px;
-    height: 18px;
-    place-items: center;
+.v2-workspace-left-rail-nav .v2-count-badge {
     margin-left: auto;
-    padding: 0 4px;
-    border-radius: 9px;
-    background: #f97316;
-    color: #fff;
-    font-size: 9px;
 }
 
 .v2-workspace-left-rail a:focus-visible,

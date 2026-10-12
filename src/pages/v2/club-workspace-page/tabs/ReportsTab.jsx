@@ -1,3 +1,5 @@
+import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
+import { workspaceSemesterQuery, workspaceSemesterKey } from '../workspace-semester-data';
 import { useCallback } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -13,13 +15,14 @@ const statusLabel = (status) => ({
 export default function ReportsTab({ workspace }) {
     const clubId = workspace?.clubId;
     const { api } = useAuth();
-    const load = useCallback((id) => api.getReports({ clubId: id, page: 1, pageSize: 100 }), [api]);
-    const result = useWorkspaceResource(clubId, load);
+    const { semester } = useWorkspaceSemester();
+    const load = useCallback((id) => api.getReports({ ...workspaceSemesterQuery(semester, 'reports'), clubId: id, page: 1, pageSize: 100 }), [api, semester]);
+    const result = useWorkspaceResource(clubId, load, workspaceSemesterKey(semester));
     const reports = result.data?.items || [];
     return (
         <WorkspaceTabLayout
             title="Báo cáo"
-            description="Báo cáo thực tế của CLB, theo quyền truy cập của bạn."
+            description={semester?.reportPeriod ? `Báo cáo trong ${semester.label}.` : 'Báo cáo toàn CLB theo quyền truy cập.'}
             action={<Link className="v2-button v2-button--primary" to="/reports/create">Tạo báo cáo</Link>}
             records={reports}
         >
