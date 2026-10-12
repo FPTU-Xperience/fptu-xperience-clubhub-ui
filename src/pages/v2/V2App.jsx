@@ -1,3 +1,4 @@
+import { WorkspaceSemesterProvider, WorkspaceSemesterSelect, useWorkspaceSemesterSelection } from './club-workspace-page/WorkspaceSemesterContext';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { ThemeProvider } from '../../context/ThemeContext';
@@ -16,6 +17,7 @@ import StudySchedulePage from './personal-pages/StudySchedulePage';
 import ProfilePage from './profile-page/ProfilePage';
 import { useProfileImages } from './profile-page/profile-images';
 import V2Access from './V2Access';
+import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import './V2App.scss';
 // The legacy demo and access styles remain available while their rules are
 // progressively moved beside the components that own them.
@@ -67,6 +69,28 @@ function AuthenticatedV2App() {
 }
 
 export default function V2App() {
+    const location = useLocation();
+    const previewSemester = useWorkspaceSemesterSelection('synthetic-ui-reviewer', 'synthetic-preview-club');
+    // Public developer rehearsal uses synthetic people only, never a live auth provider.
+    if (import.meta.env.DEV && location.pathname === '/v2/preview/club-governance') {
+        return (
+            <ThemeProvider>
+                <div className="v2-app v2-app--workspace">
+                    <WorkspaceSemesterProvider value={previewSemester}><main className="governance-preview-page">
+                        <a className="governance-preview-back" href="/v2">
+                            ← Về ClubHub
+                        </a>
+                        <WorkspaceSemesterSelect />
+                        <ClubGovernancePreview
+                            actorId="synthetic-ui-reviewer"
+                            clubId="synthetic-preview-club"
+                            actorName="Chủ nhiệm"
+                        />
+                    </main></WorkspaceSemesterProvider>
+                </div>
+            </ThemeProvider>
+        );
+    }
     return (
         <ThemeProvider>
             <AuthProvider>

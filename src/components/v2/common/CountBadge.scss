@@ -1,0 +1,15 @@
+.v2-count-badge {
+    display: inline-grid;
+    flex-shrink: 0;
+    min-width: 18px;
+    height: 18px;
+    place-items: center;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #f97316;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+    box-sizing: border-box;
+}

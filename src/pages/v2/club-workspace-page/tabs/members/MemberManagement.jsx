@@ -1,18 +1,15 @@
+import { useWorkspaceSemester } from '../../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../../../context/AuthContext';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
+import CountBadge from '../../../../../components/v2/common/CountBadge';
 import { formatAttendanceStatus } from '../../../../../locales/vi';
 import WorkspaceTabLayout from '../WorkspaceTabLayout';
 import InviteMemberModal from './InviteMemberModal';
 import { projectOwnMemberProfile, useProfile } from '../../../profile-data';
 import ClubRolesInfo from './ClubRolesInfo';
-import {
-    CLUB_MEMBER_ROLES,
-    clubMemberRole,
-    clubMemberRoleLabel as roleLabel,
-    normalizeClubMemberRole,
-    supportedClubRoleChange,
-} from './club-member-roles';
+import ClubGovernancePreview from './governance/ClubGovernancePreview';
+import { CLUB_MEMBER_ROLES, clubMemberRoleLabel as roleLabel } from './club-member-roles';
 import './MemberManagement.scss';
 
 const dateLabel = (value) => (value ? new Date(value).toLocaleDateString('vi-VN') : '—');
@@ -21,6 +18,12 @@ const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 
 export default function MemberManagement({ clubId, dashboard }) {
     const { api, user } = useAuth();
+    const { semester } = useWorkspaceSemester();
+    useEffect(() => {
+        setDialog(null);
+        setInviteOpen(false);
+        setError('');
+    }, [semester?.id]);
     const ownProfile = useProfile(user, String(user?.id || ''), api);
     const [tab, setTab] = useState('members');
     const [search, setSearch] = useState('');
@@ -146,18 +149,6 @@ export default function MemberManagement({ clubId, dashboard }) {
         const member = dialog.member;
         if (dialog.kind === 'delete') {
             mutate(() => api.deleteClubMember(clubId, member.id), 'Đã xóa thành viên khỏi CLB.');
-        } else if (dialog.kind === 'role') {
-            if (!supportedClubRoleChange(member.role, dialog.targetRole)) {
-                setError('Vai trò này chưa được backend hỗ trợ phân công.');
-                return;
-            }
-            mutate(
-                () =>
-                    dialog.targetRole === 'MEMBER'
-                        ? api.removeClubTreasurer(member.id)
-                        : api.assignClubTreasurer(clubId, member.userId, member.fullName),
-                'Đã cập nhật vai trò thành viên.',
-            );
         } else if (dialog.kind === 'approve' || dialog.kind === 'reject') {
             mutate(
                 () =>
@@ -168,12 +159,11 @@ export default function MemberManagement({ clubId, dashboard }) {
             );
         }
     };
-    const pending = applications?.filter((member) => member.status === 'Pending');
+    const pending = applications?.filter((member) => String(member.status).toUpperCase() === 'PENDING');
     const memberRows = rows(members).map((member) => projectOwnMemberProfile(member, user, ownProfile.data));
     const titles = {
         detail: 'Hồ sơ thành viên',
         delete: 'Xóa thành viên',
-        role: 'Đổi vai trò thành viên',
         approve: 'Duyệt đơn tham gia',
         reject: 'Từ chối đơn tham gia',
     };
@@ -219,15 +209,33 @@ export default function MemberManagement({ clubId, dashboard }) {
                         >
                             Quản lý thành viên
                         </button>
+                        {import.meta.env.DEV && (
+                            <button
+                                type="button"
+                                className="v2-button"
+                                aria-pressed={tab === 'governance'}
+                                onClick={() => setTab('governance')}
+                            >
+                                Ban quản lý
+                            </button>
+                        )}
                         <button
                             type="button"
                             className="v2-button"
                             aria-pressed={tab === 'applications'}
                             onClick={() => setTab('applications')}
                         >
-                            Quản lý đơn{pending ? ` (${pending.length})` : ''}
+                            Quản lý đơn <CountBadge count={pending?.length} label="đơn chờ duyệt" />
                         </button>
                     </div>
+                    {tab === 'governance' && import.meta.env.DEV && user?.id && (
+                        <ClubGovernancePreview
+                            key={`${user.id}:${clubId}:${semester?.id}`}
+                            actorId={user.id}
+                            actorName={user.name}
+                            clubId={clubId}
+                        />
+                    )}
                     {notice && (
                         <p className="v2-member-notice" role="status">
                             {notice}
@@ -306,37 +314,9 @@ export default function MemberManagement({ clubId, dashboard }) {
                                                                 <small>{member.phoneNumber}</small>
                                                             </td>
                                                             <td>
-                                                                {member.role === 'CLUB_OWNER' ? (
-                                                                    roleLabel(member.role)
-                                                                ) : (
-                                                                    <select
-                                                                        aria-label={`Vai trò của ${member.fullName}`}
-                                                                        value={normalizeClubMemberRole(member.role)}
-                                                                        disabled={busy}
-                                                                        onChange={(event) =>
-                                                                            openDialog('role', member, {
-                                                                                targetRole: event.target.value,
-                                                                            })
-                                                                        }
-                                                                    >
-                                                                        {!clubMemberRole(member.role) && (
-                                                                            <option
-                                                                                value={normalizeClubMemberRole(
-                                                                                    member.role,
-                                                                                )}
-                                                                            >
-                                                                                {roleLabel(member.role)}
-                                                                            </option>
-                                                                        )}
-                                                                        {CLUB_MEMBER_ROLES.filter(
-                                                                            (item) => item.id !== 'CLUB_OWNER',
-                                                                        ).map((item) => (
-                                                                            <option key={item.id} value={item.id}>
-                                                                                {item.label}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
-                                                                )}
+                                                                <span className="v2-member-role-label">
+                                                                    {roleLabel(member.role)}
+                                                                </span>
                                                             </td>
                                                             <td>{dateLabel(member.joinedAtUtc)}</td>
                                                             <td>
@@ -587,32 +567,8 @@ export default function MemberManagement({ clubId, dashboard }) {
                                                     onChange={(event) => setNote(event.target.value)}
                                                 />
                                             </label>
-                                        ) : dialog.kind === 'role' ? (
-                                            <section className="v2-member-role-proposal">
-                                                <h3>{roleLabel(dialog.targetRole)}</h3>
-                                                <p>{clubMemberRole(dialog.targetRole)?.responsibilities}</p>
-                                                <p>{clubMemberRole(dialog.targetRole)?.permissions}</p>
-                                                <p>{clubMemberRole(dialog.targetRole)?.limits}</p>
-                                                {!supportedClubRoleChange(dialog.member.role, dialog.targetRole) ? (
-                                                    <p role="status">
-                                                        Vai trò này chưa thể lưu phân công. Cần bổ sung API và quyền
-                                                        tương ứng trước khi áp dụng.
-                                                    </p>
-                                                ) : (
-                                                    <p>
-                                                        Xác nhận chuyển từ {roleLabel(dialog.member.role)} sang{' '}
-                                                        {roleLabel(dialog.targetRole)}?
-                                                    </p>
-                                                )}
-                                            </section>
                                         ) : (
-                                            <p>
-                                                {dialog.kind === 'delete'
-                                                    ? 'Xóa thành viên khỏi CLB? Lịch sử điểm danh được giữ lại.'
-                                                    : dialog.member.role === 'TREASURER'
-                                                      ? 'Chuyển thủ quỹ về vai trò thành viên?'
-                                                      : 'Chỉ định thành viên làm thủ quỹ? Mỗi CLB có tối đa 2 thủ quỹ.'}
-                                            </p>
+                                            <p>Xóa thành viên khỏi CLB? Lịch sử điểm danh được giữ lại.</p>
                                         )}
                                         {error && (
                                             <p className="v2-member-error" role="alert">
@@ -631,11 +587,7 @@ export default function MemberManagement({ clubId, dashboard }) {
                                             <button
                                                 type="submit"
                                                 className="v2-button v2-button--primary"
-                                                disabled={
-                                                    busy ||
-                                                    (dialog.kind === 'role' &&
-                                                        !supportedClubRoleChange(dialog.member.role, dialog.targetRole))
-                                                }
+                                                disabled={busy}
                                             >
                                                 {busy ? 'Đang xử lý…' : 'Xác nhận'}
                                             </button>

@@ -1,0 +1,537 @@
+.club-governance-preview {
+    color: #193554;
+    font-size: 14px;
+    line-height: 1.5;
+    h2,
+    h3,
+    p {
+        margin: 0;
+    }
+    button,
+    input,
+    select,
+    textarea {
+        font: inherit;
+    }
+    button {
+        cursor: pointer;
+    }
+    button:focus-visible,
+    select:focus-visible {
+        outline: 2px solid #f97316;
+        outline-offset: 3px;
+    }
+    .v2-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+    }
+    select {
+        padding: 9px 12px;
+        border: 1px solid #dbe5f0;
+        border-radius: 8px;
+        background: #fff;
+        color: #193554;
+        min-width: 155px;
+        max-width: 100%;
+    }
+    .governance-report-status {
+        margin-left: auto;
+        border-radius: 20px;
+        padding: 5px 12px;
+        background: #fff0da;
+        color: #97550c;
+        font-size: 11px;
+        font-weight: 650;
+        &.is-submitted {
+            background: #def5e9;
+            color: #236749;
+        }
+    }
+    .governance-toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+    .governance-period-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: #72839a;
+        font-size: 12px;
+    }
+    .governance-toolbar-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-left: auto;
+        .v2-button {
+            font-size: 12px;
+        }
+    }
+    .governance-sheet-period {
+        color: #7d8da3;
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+    .governance-reports-panel .governance-report-status {
+        display: inline-block;
+        margin-top: 10px;
+    }
+    .governance-section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 18px;
+        h3 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+        p {
+            font-size: 12px;
+            color: #71839a;
+            margin-top: 4px;
+        }
+    }
+    .governance-groups {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+    .governance-group {
+        background: #fff;
+        border: 1px solid #dfe8f2;
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        > header {
+            display: flex;
+            gap: 11px;
+            align-items: center;
+            h3 {
+                font-size: 17px;
+                font-weight: 700;
+            }
+            small {
+                color: #8695a8;
+                font-size: 11px;
+            }
+            > button {
+                margin-left: auto;
+            }
+        }
+        &.is-protected {
+            border-color: #bfd1e6;
+            background: linear-gradient(140deg, #f4f8fd, #fff);
+        }
+        > footer {
+            margin-top: auto;
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            border-top: 1px solid #edf1f6;
+        }
+    }
+    .governance-group-icon {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        border-radius: 11px;
+        background: #eef4fb;
+        color: #346090;
+    }
+    .governance-group-description {
+        color: #7d8da1;
+        font-size: 12px;
+        margin: 14px 0;
+    }
+    .governance-permission-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-height: 32px;
+        margin-bottom: 15px;
+        span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f3f6fa;
+            border-radius: 6px;
+            padding: 4px 7px;
+            color: #58718e;
+            font-size: 10px;
+        }
+    }
+    .governance-group-people {
+        margin-bottom: 16px;
+    }
+    .governance-person-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 0;
+        + .governance-person-row {
+            border-top: 1px solid #edf1f6;
+        }
+        strong {
+            font-size: 12px;
+        }
+        small {
+            display: block;
+            color: #8c9aad;
+            font-size: 10px;
+        }
+    }
+    .governance-avatar {
+        background: #f1e7dc;
+        color: #8b6241;
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font-size: 11px;
+        font-weight: 750;
+    }
+    .governance-person-actions {
+        display: flex;
+        gap: 3px;
+        margin-left: auto;
+        button {
+            border: 0;
+            color: #7c8ca0;
+            background: #f5f7fa;
+            border-radius: 6px;
+            padding: 7px;
+            &:hover {
+                color: #ea580c;
+                background: #fff0e5;
+            }
+        }
+    }
+    .governance-text-button {
+        border: 0;
+        background: transparent;
+        color: #da621f;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .governance-danger {
+        color: #8a98ab;
+        font-weight: 400;
+    }
+    .governance-muted {
+        color: #7c8ca0;
+        font-size: 12px;
+        margin: 12px 0;
+    }
+    .governance-empty {
+        padding: 36px 22px;
+        border: 1px dashed #d7e2ef;
+        border-radius: 12px;
+        text-align: center;
+        color: #8393a8;
+        background: #f9fbfe;
+    }
+    .governance-notice,
+    .governance-nominations {
+        padding: 12px 15px;
+        border-radius: 9px;
+        background: #edf8f1;
+        color: #317351;
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+    .governance-nominations {
+        background: #fff6e8;
+        color: #8a6324;
+        p {
+            margin-top: 5px;
+        }
+    }
+    .governance-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        select {
+            font-size: 12px;
+        }
+    }
+    .governance-timeline {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        li {
+            display: flex;
+            gap: 16px;
+            position: relative;
+            padding-bottom: 16px;
+            &:not(:last-child)::before {
+                content: '';
+                width: 1px;
+                background: #dce6f1;
+                position: absolute;
+                left: 6px;
+                top: 16px;
+                bottom: 0;
+            }
+        }
+        article {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid #e1e9f3;
+            border-radius: 12px;
+            background: #fff;
+            padding: 16px 20px;
+            header {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                flex-wrap: wrap;
+                font-size: 12px;
+            }
+            time {
+                font-size: 11px;
+                color: #8596aa;
+            }
+            p {
+                font-size: 12px;
+                margin: 7px 0;
+            }
+            small {
+                color: #708198;
+                font-size: 12px;
+            }
+            footer {
+                color: #95a3b4;
+                font-size: 10px;
+                margin-top: 8px;
+            }
+        }
+    }
+    .governance-timeline-dot {
+        background: #f49348;
+        width: 13px;
+        height: 13px;
+        border: 3px solid #ffeddd;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 20px;
+    }
+    .governance-granted {
+        color: #2b7a54;
+    }
+    .governance-revoked {
+        color: #ab6150;
+    }
+    .governance-report-list article {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        border: 1px solid #e2eaf3;
+        border-radius: 12px;
+        background: white;
+        margin-bottom: 12px;
+        > div {
+            flex: 1;
+        }
+        small {
+            display: block;
+            font-size: 11px;
+            color: #8293aa;
+            margin-top: 4px;
+        }
+        p {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    }
+}
+.governance-modal {
+    .governance-form {
+        display: grid;
+        gap: 19px;
+        font-size: 13px;
+        color: #193554;
+    }
+    label:not(.governance-check):not(.governance-person-choice) {
+        display: grid;
+        gap: 7px;
+        font-weight: 600;
+    }
+    input:not([type='checkbox']),
+    select,
+    textarea {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 12px;
+        border: 1px solid #dbe5f0;
+        background: #fff;
+        border-radius: 8px;
+        color: #193554;
+        font: inherit;
+        font-weight: 400;
+    }
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline: 2px solid #fed7aa;
+        outline-offset: 2px;
+    }
+    input[type='checkbox'] {
+        accent-color: #ee762d;
+        width: 16px;
+        height: 16px;
+        min-height: 0;
+        padding: 0;
+        margin: 0;
+        flex-shrink: 0;
+    }
+    .governance-form-pair,
+    .governance-permission-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+    fieldset {
+        border: 1px solid #e0e8f2;
+        border-radius: 10px;
+        padding: 16px;
+    }
+    legend {
+        font-weight: 700;
+        padding: 0 6px;
+    }
+    .governance-permission-grid strong {
+        display: block;
+        font-size: 11px;
+        color: #8a9ab0;
+        margin-bottom: 10px;
+    }
+    .governance-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+    .governance-muted {
+        color: #8190a4;
+        font-size: 12px;
+        font-weight: 400;
+        margin-bottom: 15px;
+    }
+    .governance-picker {
+        max-height: 290px;
+        overflow-y: auto;
+        border: 1px solid #e0e8f1;
+        border-radius: 10px;
+    }
+    .governance-person-choice {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        + label {
+            border-top: 1px solid #edf1f6;
+        }
+        small {
+            display: block;
+            margin-top: 3px;
+            color: #8a99ad;
+            font-size: 11px;
+        }
+    }
+    .governance-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        padding-top: 15px;
+        border-top: 1px solid #e1e9f2;
+    }
+    .governance-report-preview {
+        max-height: 340px;
+        overflow-y: auto;
+        display: grid;
+        gap: 12px;
+        article {
+            padding: 12px 15px;
+            border-radius: 9px;
+            background: #f5f8fc;
+            p {
+                margin: 6px 0;
+            }
+            small {
+                color: #7c8da3;
+            }
+        }
+    }
+}
+.governance-error {
+    color: #b54636;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fff0ec;
+    font-size: 12px;
+}
+.governance-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+.governance-preview-page {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 35px;
+    background: #fbfcfe;
+    min-height: 100vh;
+    .governance-preview-back {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #647a95;
+        font-size: 13px;
+    }
+}
+@media (max-width: 800px) {
+    .club-governance-preview {
+        .governance-groups {
+            grid-template-columns: 1fr;
+        }
+        .governance-report-status {
+            margin-left: 0;
+        }
+        .governance-toolbar-actions {
+            margin-left: 0;
+        }
+        .governance-report-list article {
+            flex-wrap: wrap;
+        }
+    }
+    .governance-preview-page {
+        padding: 20px 15px;
+    }
+}
+@media (max-width: 520px) {
+    .governance-modal .governance-form-pair,
+    .governance-modal .governance-permission-grid {
+        grid-template-columns: 1fr;
+    }
+}

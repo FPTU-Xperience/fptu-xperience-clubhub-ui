@@ -103,6 +103,9 @@
         border-bottom: 1px solid #dfe7f1;
     }
     .v2-member-switch .v2-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         border-color: transparent;
         padding: 9px 14px;
         color: #637895;

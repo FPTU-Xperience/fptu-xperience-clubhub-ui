@@ -1,10 +1,10 @@
+import { useWorkspaceSemester } from '../../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
-import { STUDY_TERMS, defaultStudyPeriod } from '../../../study-schedule-data';
-import { eligibleInvitationCandidates, semesterCode } from '../../../../../services/club-invitations';
+import { eligibleInvitationCandidates } from '../../../../../services/club-invitations';
 
 export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
-    const [period, setPeriod] = useState(defaultStudyPeriod);
+    const { semester } = useWorkspaceSemester();
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [version, setVersion] = useState(0);
@@ -15,7 +15,7 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
     const [error, setError] = useState('');
     const active = useRef(true);
     const lock = useRef(false);
-    const semesterId = semesterCode(period);
+    const semesterId = semester?.invitationCode || '';
     useEffect(() => {
         active.current = true;
         return () => {
@@ -29,7 +29,7 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
         setError('');
         if (!semesterId) {
             setLoading(false);
-            setError('Chọn học kỳ và năm hợp lệ (2000–2100).');
+            setError('Học kỳ ở header chưa có cấu hình tra cứu.');
             return undefined;
         }
         if (search.trim().length < 2) {
@@ -114,41 +114,9 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
                         Tra cứu danh sách sinh viên trong học kỳ do CTSV quản lý. Sinh viên nhận lời mời tại “CLB của
                         tôi” và cần tự xác nhận nội quy, cam kết tham gia trước khi CLB duyệt.
                     </p>
-                    <div className="v2-member-invite-period">
-                        <label>
-                            Học kỳ
-                            <select
-                                aria-label="Học kỳ tra cứu"
-                                value={period.term}
-                                disabled={sending}
-                                onChange={(event) => {
-                                    setPeriod((value) => ({ ...value, term: event.target.value }));
-                                    setPage(1);
-                                }}
-                            >
-                                {STUDY_TERMS.map((term) => (
-                                    <option key={term.id} value={term.id}>
-                                        {term.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                        <label>
-                            Năm
-                            <input
-                                aria-label="Năm tra cứu"
-                                type="number"
-                                min="2000"
-                                max="2100"
-                                value={period.year}
-                                disabled={sending}
-                                onChange={(event) => {
-                                    setPeriod((value) => ({ ...value, year: event.target.value }));
-                                    setPage(1);
-                                }}
-                            />
-                        </label>
-                    </div>
+                    <p>
+                        Học kỳ tra cứu: <strong>{semester?.label || 'Chưa cấu hình học kỳ ở header'}</strong>
+                    </p>
                     <label>
                         Tìm sinh viên
                         <input

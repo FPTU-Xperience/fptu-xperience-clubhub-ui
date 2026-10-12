@@ -15,9 +15,9 @@ const ROLE_PERMISSION_SCOPE = {
     CLUB_OWNER: CLUB_ROLE_PERMISSION_COLUMNS.map((permission) => permission.id),
     VICE_PRESIDENT: CLUB_ROLE_PERMISSION_COLUMNS.map((permission) => permission.id),
     CONTENT: ['profile', 'eventContent'],
-    EVENT: ['eventContent', 'eventStaff', 'eventApplications'],
-    HR: ['profile', 'recruitment', 'profile'],
-    SECRETARY: ['eventApplications', 'recruitment', 'reports', 'finance'],
+    EVENT: ['eventStaff', 'eventApplications'],
+    HR: ['profile', 'recruitment'],
+    SECRETARY: ['reports'],
     TREASURER: ['finance'],
     MEMBER: [],
 };

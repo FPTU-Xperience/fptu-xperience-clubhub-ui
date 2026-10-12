@@ -24,6 +24,7 @@ test('leadership has all club scopes and specialist scopes match assigned duties
         CONTENT: ['participate', 'profile', 'eventContent'],
         EVENT: ['participate', 'eventStaff', 'eventApplications'],
         HR: ['participate', 'profile', 'recruitment'],
+        SECRETARY: ['participate', 'reports'],
     })) {
         for (const permission of CLUB_ROLE_PERMISSION_COLUMNS)
             assert.equal(clubRoleHasResponsibility(role, permission.id), scopes.includes(permission.id));
