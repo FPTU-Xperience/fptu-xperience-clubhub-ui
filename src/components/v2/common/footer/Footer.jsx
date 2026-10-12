@@ -8,7 +8,7 @@ export default function Footer() {
                 clubhub<span>.</span>
             </Link>
             <p>Một phần của hành trình FPTU Xperience.</p>
-            <small>FPT UNIVERSITY · CLUBHUB</small>
+            <small>FPT University</small>
         </footer>
     );
 }
