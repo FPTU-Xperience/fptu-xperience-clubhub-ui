@@ -74,7 +74,7 @@ const results = wrappers.map((wrapper) => {
             route:
                 wrapper.name === 'getMyClubSelection'
                     ? '/api/clubs/me/access + /api/clubs'
-                    : '/api/clubs/me/memberships',
+                    : '/api/clubs/me/memberships + /api/clubs',
         };
     const literal = wrapper.body.match(
         /(?:this\.(?:request|buildUrl)\(|\$\{this\.baseUrl\})(['"`]?)(\/api\/[^'"`\n]*)/,
@@ -89,7 +89,7 @@ const counts = Object.fromEntries(
     ['DECLARED', 'COMPOSED', 'ABSENT', 'UNRESOLVED'].map((s) => [s, results.filter((r) => r.status === s).length]),
 );
 const backendHead = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: backend, encoding: 'utf8' }).trim();
-const report = `# FE facade / BE declaration inventory — ${auditDate}\n\nGenerated with \`node scripts/audit-api-contracts.mjs\`. BE local HEAD: \`${backendHead}\`; remote comparison is a separate check recorded in the lifecycle audit; this generator does not fetch or verify remote main. This inventories declarations, not handler reachability, DTO compatibility, authorization or deployed health. Report submodule prefix is explicitly resolved from ReportEndpoints.cs. Unresolved group declarations: ${unresolvedGroups.length}; retained below for manual review.\n\n${results.length} wrappers: ${counts.DECLARED} declared, ${counts.COMPOSED} composed, ${counts.ABSENT} absent, ${counts.UNRESOLVED} unresolved.\n\n| Wrapper | HTTP | Normalized path | Declaration status / source |\n| --- | --- | --- | --- |\n${results.map((r) => `| ${r.name} | ${r.method} | \`${r.route}\` | ${r.status}${r.declared ? ` — ${r.declared.file}:${r.declared.line}` : ''} |`).join('\n')}\n\n## Unresolved declaration groups\n\n${unresolvedGroups.length ? unresolvedGroups.map((v) => `- \`${v}\``).join('\n') : 'None.'}\n`;
+const report = `# FE facade / BE declaration inventory — ${auditDate}\n\nImplement Status: Done\n\nStatus Scope: Documentation declaration inventory only; not backend feature or live integration completion.\n\nGenerated with \`node scripts/audit-api-contracts.mjs\`. BE local HEAD: \`${backendHead}\`; remote comparison is a separate check recorded in the lifecycle audit; this generator does not fetch or verify remote main. This inventories declarations, not handler reachability, DTO compatibility, authorization or deployed health. Report submodule prefix is explicitly resolved from ReportEndpoints.cs. Unresolved group declarations: ${unresolvedGroups.length}; retained below for manual review.\n\n${results.length} wrappers: ${counts.DECLARED} declared, ${counts.COMPOSED} composed, ${counts.ABSENT} absent, ${counts.UNRESOLVED} unresolved.\n\n| Wrapper | HTTP | Normalized path | Declaration status / source |\n| --- | --- | --- | --- |\n${results.map((r) => `| ${r.name} | ${r.method} | \`${r.route}\` | ${r.status}${r.declared ? ` — ${r.declared.file}:${r.declared.line}` : ''} |`).join('\n')}\n\n## Unresolved declaration groups\n\n${unresolvedGroups.length ? unresolvedGroups.map((v) => `- \`${v}\``).join('\n') : 'None.'}\n`;
 fs.writeFileSync(path.join(root, 'docs/contracts/api-declaration-inventory.md'), report);
 console.log(
     JSON.stringify(

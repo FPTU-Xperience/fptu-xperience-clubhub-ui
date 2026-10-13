@@ -1,5 +1,13 @@
 # Activity Discovery Contract
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Canonical /api/v2 activity feed/detail/recommendations are absent from service endpoints and Gateway; existing management activity reads do not meet this display-safe discovery contract.
+
 **Status**: Proposed dependency for implementation. This document specifies the display-safe
 boundary required by the UI; it does not claim the endpoints already exist.
 

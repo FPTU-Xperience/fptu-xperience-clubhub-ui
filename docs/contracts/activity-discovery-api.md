@@ -1,5 +1,13 @@
 # Privacy-safe activity discovery and recommendations
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ActivityService activity list/detail remain access-scoped management reads; no /api/v2 feed, published-visibility model or recommendation Gateway route. Inspect ActivityEndpoints.cs, ActivityContracts.cs and Gateway/ApiGateway/yarp.json.
+
 D11; 2026-10-09 main 80818266. Refines the existing [activity feature contract](../../specs/003-activity-discovery/contracts/activity-discovery-contract.md). Canonical route names below retain its `/api/v2` prefix. New Gateway routing is required; `/v2` browser routes do not imply `/api/v2` already exists.
 
 Current FE uses `getActivities()` and ranks the first six as temporary recommendations. Existing ActivityService list/detail are membership-scoped and contain participant/attendance data. They remain management reads. Club directory has dynamic categories and can still provide a clearly non-personalized curated subset.

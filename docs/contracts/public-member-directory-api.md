@@ -1,5 +1,13 @@
 # Optional opt-in public club member directory
 
+Implement Status: Not Yet
+
+Status Scope: Optional/deferred backend capability, not cancelled
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: MemberManagementEndpoints.cs provides private management reads, but no opt-in member public route or per-club consent persistence. Public leaders/count do not satisfy a consent-based directory; deferral does not mean cancellation.
+
 D13; proposed/deferred. Current non-manager workspace shows public leaders and member count; it does not require exposing the full roster. Backend source main 80818266 has manager members/detail reads, not this privacy projection.
 
 Only if product enables the full member directory: GET `/api/clubs/{clubId}/members/public?page=1&pageSize=20` returns `{items:[{displayName,clubRole,avatarUrl?,joinedAt?}],page,pageSize,totalItems,totalPages}`. Include only approved active members who explicitly opted in; exclude user/membership IDs, student code, email, address, phone, birthday, application answers, point balances and internal roles. Directory pagination totals count visible opted-in rows, not private approved membership count. Public leaders remain separately controlled by existing public leader policy.

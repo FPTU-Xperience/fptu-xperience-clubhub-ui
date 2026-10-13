@@ -1,6 +1,14 @@
 # Backend API implementation handoff
 
-Updated 2026-10-12 for the next BE batch. Start with [contract lifecycle audit](contract-lifecycle-audit.md), [debt register](frontend-api-debt-register.md), [declaration inventory](api-declaration-inventory.md), and [shared conventions](api-contract-conventions.md). API baseline: remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-12. Frontend includes current uncommitted governance rehearsal; no backend source was changed. Recheck main before implementation and reconcile any new routes, migrations and permissions.
+Implement Status: Not Yet
+
+Status Scope: Backend work tracked by this handoff
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: The dependency waves remain open: own withdrawal, media/profile, governance, semester roster, credit/rewards, discovery and timetable persistence are absent or incomplete in the source contexts/endpoints.
+
+Updated 2026-10-13 for the next BE batch. Start with [contract lifecycle audit](contract-lifecycle-audit.md), [debt register](frontend-api-debt-register.md), [declaration inventory](api-declaration-inventory.md), and [shared conventions](api-contract-conventions.md). API baseline: remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-13. Frontend session commit b9832cd and later uncommitted branding updates were inspected; no backend source was changed. Recheck main before implementation and reconcile any new routes, migrations and permissions.
 
 ## Contract precedence and decisions
 
@@ -39,7 +47,7 @@ Every unchecked task requires code/migration/tests plus FE integration; checking
 - [ ] Implement independent term report submissions with exact-version snapshots and supplementary history; submission never grants/revokes rights and has no whole-BQL review gate.
 - [ ] Implement CTSV-approved vice appointments; reuse existing owner transfer workflow; protected leadership cannot be granted through custom groups. Synchronize shared access, Finance/Report/Activity action policies/recipients, cache invalidation and legacy role-writer cutover.
 - [ ] Replace DEV-only governance rehearsal with authoritative facade adapters/approved-member paging/capability gates after BE verification; do not migrate synthetic people, sample semesters or browser grants.
-- [ ] Implement self withdrawal/history and active-record uniqueness/reapply; optional richer My Clubs reads only if replacing composed adapters. [My Clubs](my-clubs-membership-api.md).
+- [ ] Implement self withdrawal/history, authoritative source/canWithdraw/version and active-record uniqueness/reapply; optional richer My Clubs reads only if replacing composed adapters. [My Clubs](my-clubs-membership-api.md).
 - [ ] Extend semester with admin calendar block dates and safe student projection, implement private weekly timetable and transactional template import. [Study schedule](study-schedule-api.md). No second semester table.
 - [ ] Wire Admin roster/calendar and ClubHub invite/timetable UI; two-account consent must still await manager approval.
 
@@ -87,3 +95,11 @@ The handoff is ready for implementation planning; these choices are clearly isol
 ## Audit verification boundary
 
 Routes, DTOs and handlers were inspected from an exported fresh-main snapshot. GitNexus runner/index tools were unavailable, so dependency/callflow graph analysis was not performed. Validation passed for 282 local links across 27 contract documents, 15 JSON examples, 95 public async wrapper enumeration and documentation diff whitespace; no backend tests, migrations, live authorization, database or R2 checks were run. The existing API checkout and its pre-existing documentation changes were retained.
+
+## Session navigation/inbox batch — 2026-10-13
+
+Scope includes the complete latest FE commit `b9832cd33f7d8e17c09982e68a5acca0fc2b21ce`, not just uncommitted follow-up edits. The [commit coverage matrix](club-navigation-applications-api.md#latest-commit-coverage) maps all 16 changed files to a BE obligation, an existing API to reuse, or presentation-only work. Imported parent `9321f84` was checked as well; CSS/markup/demo-loading changes add no new API writer.
+
+- [ ] Follow [club navigation/applications](club-navigation-applications-api.md) for source/capability metadata, canonical code/logo and the seven-day display rule. Use existing reviewedAtUtc; hiding results must never delete approved memberships.
+- [ ] Implement optional durable pins when cross-device preference sync is selected, with self-only reads/writes, unique user+club and current access revalidation. Browser pins currently remain temporary.
+- [ ] Keep pin/role presentation independent of authorization; verify self withdrawal through the actual deployed route before enabling it.

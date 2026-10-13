@@ -1,6 +1,23 @@
 # ClubHub FE ↔ BE integration checklist by page
 
+Implement Status: Not Yet
+
+Status Scope: Complete FE/BE integration and live acceptance
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Several pages use existing live-shaped reads, but source declarations do not complete media/profile/governance/credit/timetable/withdrawal contracts or authenticated deployment checks. See current audit and per-page unchecked tasks.
+
 Source declarations/contracts rechecked **2026-10-12**: API remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**; FE includes the new governance rehearsal. Existing page/DTO findings below are the 2026-10-09 audit of that same BE commit. Scope includes production pages/facade/workspace and shared flows; `/v2/demo/*` and the DEV-only `/v2/preview/club-governance` are not live integration. Start with [lifecycle audit](contract-lifecycle-audit.md), [implementation handoff](backend-api-implementation-handoff.md) and [debt register](frontend-api-debt-register.md).
+
+## Navigation/application session — 2026-10-13
+
+- [x] Workspace quick switch, canonical logoUrl/clubCode fallback, account-scoped local pins and direct pinned workspace links are implemented in FE; display roles remain separate from authority.
+- [x] Sent pending applications remain visible; reviewed APPROVED/REJECTED results expire after seven elapsed days from reviewedAtUtc; invitations remain separate.
+- [x] Withdrawal button consumes authoritative canWithdraw for pending sent requests. Current backend lacks that flag and route, so it stays disabled.
+- [ ] Implement own withdrawal/history/reapply, explicit application source/capabilities/version and code/logo metadata in the existing self read. [Session contract](club-navigation-applications-api.md).
+- [ ] Optional cross-device pin persistence requires self-only server preferences and access revalidation; current local pins are not synchronized.
+- [ ] Verify these flows through the deployed authenticated Gateway with separate accounts, decision/withdraw races and exact expiry boundaries.
 
 ## Governance UI batch — 2026-10-12
 
@@ -11,7 +28,7 @@ Source declarations/contracts rechecked **2026-10-12**: API remote main and loca
 - [ ] Implement and deploy [canonical governance groups API](club-governance-groups-api.md), migrate legacy roles, integrate scoped capabilities and approved-member paging through the existing facade; validate shared service revocation/finance recipients and CTSV vice workflow.
 - [ ] Replace local rehearsal storage with authoritative API data and verify cross-account/device persistence. Board reporting must not gate specialist grants; histories must survive demotion/soft deletion.
 
-`[x]` means **verified from current source**. `[ ]` is an outstanding integration or live acceptance check. A declared BE route alone does not prove that a page is complete. Source evidence: [FE API audit](frontend-api-audit.md), [BE changes](backend-changes-for-frontend.md), [image contract](public-image-api.md), [FE routes](../../src/App.jsx), [V2 routes](../../src/pages/v2/V2App.jsx), [BE gateway](../../../fptu-xperience-clubhub-api/src/Gateway/ApiGateway/yarp.json). No authenticated end-to-end run, database check, or deployment probe was performed.
+`[x]` means **verified from current source**. `[ ]` is an outstanding integration or live acceptance check. A declared BE route alone does not prove that a page is complete. Source evidence: [FE API audit](contract-lifecycle-audit.md), [BE changes](backend-changes-for-frontend.md), [image contract](public-image-api.md), [FE routes](../../src/App.jsx), [V2 routes](../../src/pages/v2/V2App.jsx), [BE gateway](../../../fptu-xperience-clubhub-api/src/Gateway/ApiGateway/yarp.json). No authenticated end-to-end run, database check, or deployment probe was performed.
 
 ## Cross-page blockers and decisions
 

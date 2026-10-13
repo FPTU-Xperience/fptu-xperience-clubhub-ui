@@ -24,7 +24,7 @@ The backend implementation must configure the same read base URL in its server-s
 `r2.dev` is the selected development delivery endpoint and is rate-limited; use a custom domain for production delivery per [Cloudflare documentation](https://developers.cloudflare.com/r2/buckets/public-buckets/#public-development-url).
 
 The source-backed existing/missing API comparison and proposed backend request/response contract are in [contracts/public-image-api.md](contracts/public-image-api.md).
-The audit of every frontend API method is in [contracts/frontend-api-audit.md](contracts/frontend-api-audit.md).
+The audit of every frontend API method is in [contracts/contract-lifecycle-audit.md](contracts/contract-lifecycle-audit.md).
 
 ## Image inventory
 

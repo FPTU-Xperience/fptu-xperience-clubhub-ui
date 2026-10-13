@@ -1,5 +1,13 @@
 # Shared workspace semester — 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Admin SemesterEndpoints.cs requires BackofficeUser. No club-safe /semesters projection with configured activity bounds/report aliases, finance attribution or term-indexed schedules; shared FE selection is not server authority.
+
 The workspace header is the single selector. Previously it was a static span; governance, invitations and club schedule editing used independent choices. `WorkspaceSemesterContext` now owns shared selection, keyed by authenticated account + club; tab navigation preserves it, switching club/account does not reuse another scope's selection. Every WorkspaceTabView receives selected metadata. No term/year selector belongs inside a tab or its modal.
 
 ## FE audit / current behavior

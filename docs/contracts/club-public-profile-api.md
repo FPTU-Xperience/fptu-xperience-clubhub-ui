@@ -1,5 +1,13 @@
 # Club public profile editing
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ClubEndpoints.cs has admin PUT and public reads but no manager public-profile PATCH. Club model has ScheduleLabel only; no structured term schedule or persisted cover; category persistence alone does not satisfy this contract.
+
 Status: **proposed manager-scoped API, not implemented in the current backend** (2026-10-09). The frontend exposes the full page preview first and opens separate text, logo, and cover dialogs. All writes use `src/services/api.js`. Editing text never uploads files or changes image fields; image saves do not submit public text fields.
 
 ## Public text update

@@ -1,5 +1,13 @@
 # Student study schedule API contract
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Semester catalog persistence exists, but AuthDbContext/AdminDbContext have no private weekly timetable or academic block-date resources, import/cell routes or academic-calendar Gateway prefix.
+
 Status: **proposed for backend implementation**, updated 2026-10-07. `/v2/study-schedule` currently uses an account-scoped browser mock repository. These endpoints do not exist in the backend yet. Keep `dev-login` unchanged.
 
 ## Scope and ownership

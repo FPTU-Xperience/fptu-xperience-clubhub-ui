@@ -1,5 +1,13 @@
 # Discover UI Contract
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation: partial directory/detail foundations
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ClubEndpoints.cs supplies active directory/public detail and ClubCategories persistence. ClubDirectoryResponse still includes manager identities and contacts; strictly minimal directory projection and server-authorized personalized recommendation behavior are not fully implemented.
+
 This is the interface contract consumed by the ClubHub UI. It documents required behavior; it does
 not assert that every field exists in the current backend response.
 

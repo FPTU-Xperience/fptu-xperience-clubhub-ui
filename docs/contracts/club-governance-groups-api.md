@@ -1,5 +1,13 @@
 # Club governance groups API — BE implementation contract
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ClubDbContext/ClubContracts and shared access retain memberships, active owner assignments and boolean treasurer access; no governance terms/groups/revisions/change sets/board snapshots/vice nomination entities or endpoints.
+
 Canonical D06 contract, 2026-10-12. **Proposed: no governance group/report/history/vice nomination routes exist in API main `80818266`.** Remote main and local HEAD were checked and matched on this date. This replaces the retired `club-member-roles-api.md` single-primary-role proposal. [Product decisions](club-governance-groups-proposal.md), [conventions](api-contract-conventions.md), [current audit](contract-lifecycle-audit.md).
 
 ## Binding decisions and UI boundary

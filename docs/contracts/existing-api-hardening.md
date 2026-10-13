@@ -1,5 +1,13 @@
 # Existing API contracts requiring changes, not duplicate endpoints
 
+Implement Status: Not Yet
+
+Status Scope: Backend/consumer hardening
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: MemberManagementEndpoints.cs still permits managed personal snapshot writes; ManagerEndpoints.cs trusts client ManagerName; QuestEndpoints.cs accepts target StudentUserId; ReportContracts.cs exposes StoragePath. Existing routes are not proof of the required fixes.
+
 D14; source audit 2026-10-09, main 80818266. Follow [conventions](api-contract-conventions.md). The following are explicit backend or FE integration tasks rather than evidence that every route is absent.
 
 | Finding and source | Required change | Acceptance |
@@ -19,3 +27,12 @@ D14; source audit 2026-10-09, main 80818266. Follow [conventions](api-contract-c
 Structured error `code/errors` are currently lost by the FE client after message formatting. Add non-breaking Error metadata when wiring new contracts; retain existing status handling and refresh logic. Endpoint existence is not production proof. Read/write authorization, campus policy, DB migration and gateway behavior must be validated separately.
 
 Backend-only existing workflows (disband/transfer/reviews, global roles, audit, manual finance adjustment, approved-report activity creation) are FE work if adding screens; do not duplicate them as missing endpoints. Finance submit routes whose existing handler is acknowledgment-only require lifecycle verification before a button is treated as a state transition.
+
+## Compatibility notes retained from the retired facade audit — 2026-10-13
+
+- User create/update management supports its existing restricted role catalog; Google sign-in is the credential flow, not a client-supplied password. SYSTEM_ADMIN self editing must use the future canonical self profile, not broaden management PUT.
+- Admin club PUT accepts logoUrl and can default isActive to true; preserve state in existing callers. Assigned club managers require the scoped public-profile/media writers rather than admin PUT. Activity generic PUT has no cover-image field.
+- Activity registration/check-in/completion return action results, not ActivityResponse. Existing FE reloads authorized detail after actions, does not send status in the core edit request, and maps attendance's paged response. Keep that response compatibility when extending resources.
+- Existing authenticated report downloads are the attachment transport; never use StoragePath as a browser URL. D14 still must redact the JSON storage path.
+- Dashboard counts/next activity compose existing club, activity, manager-membership and report reads. No contribution-review total is fabricated; D07 owns that missing projection. Upcoming/pending card summaries remain optional richer selection data.
+- Existing owner transfer/disband/reviews, roles/audit, manual finance adjustments and approved-report activity creation are established backend workflows, not missing APIs just because there is no UI facade/screen. Keep final lifecycle verification separate from route declarations.

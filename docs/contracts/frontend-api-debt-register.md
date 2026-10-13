@@ -1,8 +1,16 @@
-# Frontend API debt register — rechecked 2026-10-12
+# Frontend API debt register — rechecked 2026-10-13
 
-Current declaration recheck and contract cleanup: [lifecycle audit](contract-lifecycle-audit.md), [per-wrapper inventory](api-declaration-inventory.md). API remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-12 without modifying BE. The earlier detailed audit was 2026-10-09; its source-marker counts below are dated evidence, not current file/import counts.
+Implement Status: Not Yet
 
-Earlier 2026-10-09 scan covered 145 JS/JSX source files, 113 production-reachable imports and 88 matching production lines in [literal evidence](api-debt-source-inventory.md). The 2026-10-12 recheck covers every current facade wrapper and all contract owners, plus governance-related DTO/policy/UI changes. No deployed service, migration, database, live R2 or authenticated BE end-to-end behavior was tested.
+Status Scope: Backend/integration debt tracked here
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Regenerated facade inventory retains six absent operations and two composed reads. Topic resource/policy/persistence gaps remain; D10 now also references durable pin preferences and seven-day inbox behavior.
+
+Current declaration recheck and contract cleanup: [lifecycle audit](contract-lifecycle-audit.md), [per-wrapper inventory](api-declaration-inventory.md). API remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-13 without modifying BE. The earlier detailed audit was 2026-10-09; its source-marker counts below are dated evidence, not current file/import counts.
+
+The 2026-10-13 source recheck regenerates every current facade declaration and reviews all retained topic/spec contracts. The stale 2026-10-09 literal-marker snapshot has been retired; current route counts come from [declaration inventory](api-declaration-inventory.md). Source review does not verify deployed services, databases, migrations or authenticated integration.
 
 API facade: **95 async public wrappers**, excluding `request`, `parseResponse`, `getErrorMessage`. Of these, **87 have direct declared backend operations**, **2 are composed reads**, and **6 target absent routes**. Direct existence does not imply DTO/authorization compatibility. Backend Admin semester/catalog/quest/declaration/radar routes are largely not represented in this facade yet.
 
@@ -47,3 +55,7 @@ Invitation POST `/members` exists but ignores semester eligibility and trusts su
 ## Handoff
 
 [Start the next implementation session here](backend-api-implementation-handoff.md). It specifies dependency waves, concrete endpoint/database tasks, contract precedence, acceptance tests and open product choices. All new routes in this package are proposed until verified in source and through the running gateway.
+
+## Session follow-up — 2026-10-13
+
+D10 also covers the [navigation/application addendum](club-navigation-applications-api.md): authoritative self-withdraw capability/source, canonical clubCode/logo for all inbox rows, existing reviewedAtUtc for the seven-day result rule, and optional durable account pin synchronization. Quick switching and branding/badge styling do not need new backend endpoints. Current local pins are not persisted server preferences.

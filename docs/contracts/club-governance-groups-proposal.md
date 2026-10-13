@@ -1,5 +1,13 @@
 # Đề xuất BQL CLB theo học kỳ và phân quyền theo group
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation of retained product decisions
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: This remains useful product context for the canonical governance contract. Existing TransferEndpoints.cs/treasurer rules are foundations, not multi-group assignments or report/history implementation; do not retire the agreed decisions.
+
 Ngày nghiên cứu/cập nhật: 2026-10-12. Trạng thái: **đã có bản chạy thử UI development**, backend chưa triển khai. [Contract API cho đợt BE](club-governance-groups-api.md) sở hữu endpoint/DTO; tài liệu này giữ quyết định nghiệp vụ và hướng UI. [Audit vòng đời contract](contract-lifecycle-audit.md) ghi nhận contract thay thế.
 
 ## 1. Yêu cầu và kết luận

@@ -1,5 +1,13 @@
 # Activity profile / resources — proposed BE contract, 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ActivityEndpoints.cs and ActivityWriteEndpoints.cs provide core CRUD/attendance, but ActivityContracts.cs has no resource gallery/capabilities or cover field; resource upload/commit routes and public activity projection are absent.
+
 This extends [event operations](club-event-operations-api.md), [discovery](activity-discovery-api.md) and the media-intent boundary in [backend handoff](backend-api-implementation-handoff.md). It does not replace registrations, attendance or governance authorization. Source audit: sibling API HEAD `80818266f617bd5144ab1b1a6cd0e74983983a4d`. Existing activity GET/PUT and attendance are declared; activity cover attachment, resource gallery, document/video upload and embedded-link persistence are absent. No BE source/migration was changed.
 
 ## Pages and access

@@ -1,4 +1,12 @@
-# FE facade / BE declaration inventory — 2026-10-12
+# FE facade / BE declaration inventory — 2026-10-13
+
+Implement Status: Done
+
+Status Scope: Documentation: regenerated declaration inventory, not backend feature completion
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: scripts/audit-api-contracts.mjs was executed against current source: 95 wrappers, 87 declared, 2 composed, 6 absent, 0 unresolved wrappers. Unresolved helper groups remain listed explicitly; no handler/deployment sign-off.
 
 Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f617bd5144ab1b1a6cd0e74983983a4d`; remote comparison is a separate check recorded in the lifecycle audit; this generator does not fetch or verify remote main. This inventories declarations, not handler reachability, DTO compatibility, authorization or deployed health. Report submodule prefix is explicitly resolved from ReportEndpoints.cs. Unresolved group declarations: 17; retained below for manual review.
 
@@ -26,7 +34,7 @@ Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f
 | deleteClub | DELETE | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:78 |
 | getMyMemberships | GET | `/api/clubs/me/memberships` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:46 |
 | getMyClubSelection | GET | `/api/clubs/me/access + /api/clubs` | COMPOSED |
-| getMyMembershipApplications | GET | `/api/clubs/me/memberships` | COMPOSED |
+| getMyMembershipApplications | GET | `/api/clubs/me/memberships + /api/clubs` | COMPOSED |
 | withdrawMyMembershipApplication | POST | `/api/clubs/me/membership-applications/{}/withdraw` | ABSENT |
 | getMyClubAccess | GET | `/api/clubs/me/access` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:51 |
 | getManagedClubs | GET | `/api/clubs/me/managed` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:41 |

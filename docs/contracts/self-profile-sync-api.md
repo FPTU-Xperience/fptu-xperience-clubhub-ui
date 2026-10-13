@@ -1,5 +1,13 @@
 # Self profile and club member projection
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: AuthDbContext has Users/Roles/RefreshTokens, no canonical profile store. UserEndpoints.cs exposes users/me identity and admin updates but no self profile GET/PATCH; club personal data remains membership snapshots.
+
 Scope agreed: UI and contract first, temporary data; no backend source modifications or live synchronization claims.
 
 ## Current UI behavior

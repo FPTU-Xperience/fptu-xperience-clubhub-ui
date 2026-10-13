@@ -1,5 +1,13 @@
 # Profile service boundary — refreshed 2026-10-09
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Canonical self-profile GET/PATCH/media/experience/owned-cosmetics contracts remain missing from Auth/Club source. Account-local browser state and membership imports are not durable self-profile integration.
+
 ## Current temporary implementation
 
 Consumer: `src/pages/v2/profile-page/ProfilePage.jsx`; temporary owner: `src/pages/v2/profile-data.js`. Authenticated identity remains immutable. Profile/cover presentation is saved in account-keyed localStorage; image blobs are account-keyed IndexedDB. Missing account identity never creates an anonymous shared record. No demo provider is used.

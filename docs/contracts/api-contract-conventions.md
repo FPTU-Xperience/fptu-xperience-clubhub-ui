@@ -1,5 +1,13 @@
 # API debt: shared implementation conventions
 
+Implement Status: Not Yet
+
+Status Scope: Backend adoption of proposed conventions
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Shared auth/error/outbox infrastructure exists, but proposed endpoints do not yet implement this package-wide version, principal, idempotency and migration contract. ClubMembershipResponse lacks version/capability/source; no own withdrawal/pin resources.
+
 Audit date: 2026-10-09. These conventions apply to the **proposed** endpoints in this package; existing production routes retain their compatibility until an explicit migration. See [implementation handoff](backend-api-implementation-handoff.md).
 
 ## Authority and transport

@@ -1,8 +1,16 @@
 # Backend changes needed after frontend integration
 
-Rechecked 2026-10-12: remote main and local API HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**. [Contract lifecycle audit](contract-lifecycle-audit.md) records retained/retired contracts and [declaration inventory](api-declaration-inventory.md) covers all current facade wrappers. Source existence and verified deployment are separate; no live gateway/database/R2 behavior was tested.
+Implement Status: Not Yet
 
-Start the backend session with [implementation handoff](backend-api-implementation-handoff.md). It contains dependency waves, migration/integration tasks, acceptance checks and unresolved product choices. [Debt register](frontend-api-debt-register.md) owns classifications; [source inventory](api-debt-source-inventory.md) records frontend markers; [shared conventions](api-contract-conventions.md) owns transport, errors, pagination and idempotency.
+Status Scope: Backend work indexed here
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: All D01-D14 obligations remain active; source foundations are available but missing capabilities are documented in each topic contract and the current lifecycle matrix.
+
+Rechecked 2026-10-13: remote main and local API HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**. [Contract lifecycle audit](contract-lifecycle-audit.md) records retained/retired contracts and [declaration inventory](api-declaration-inventory.md) covers all current facade wrappers. Source existence and verified deployment are separate; no live gateway/database/R2 behavior was tested.
+
+Start the backend session with [implementation handoff](backend-api-implementation-handoff.md). It contains dependency waves, migration/integration tasks, acceptance checks and unresolved product choices. [Debt register](frontend-api-debt-register.md) owns classifications; [declaration inventory](api-declaration-inventory.md) records current facade-to-BE route matches; [shared conventions](api-contract-conventions.md) owns transport, errors, pagination and idempotency.
 
 ## Contract owners
 
@@ -25,10 +33,14 @@ Start the backend session with [implementation handoff](backend-api-implementati
 
 ## What is already present
 
-The facade has 95 public async wrappers: 87 declared direct operations, two composed reads and six absent operations. The [facade audit](frontend-api-audit.md) lists them. Existing invitation POST is an upgrade rather than a missing route. Persisted semester/category catalogs, Admin declarations/radar/quest infrastructure, notifications and management workflows should be reused.
+The facade has 95 public async wrappers: 87 declared direct operations, two composed reads and six absent operations. The [facade audit](contract-lifecycle-audit.md) lists them. Existing invitation POST is an upgrade rather than a missing route. Persisted semester/category catalogs, Admin declarations/radar/quest infrastructure, notifications and management workflows should be reused.
 
 Raw experience, credited club points and money remain distinct. Admin XP ledger presence does not establish a spendable club wallet. The 200-point reward samples and local cosmetic grants are temporary UI data, never production credit. Common styles remain free; club-issued rewards are exchanged in the club store and appear as separate colors/shapes in the editor.
 
 ## Implementation boundary
 
 No backend source was modified during this scan. Proposed APIs remain contracts until migrations, scoped authorization, Gateway routing, frontend adapters and live integration have been verified. Do not implement old PUT self-profile or student-profile aliases alongside canonical GET/PATCH. Preserve current backend local changes and fetch main again before the next session.
+
+## Navigation and applications — 2026-10-13
+
+[Session addendum](club-navigation-applications-api.md) extends D10 with own withdrawal capability/source metadata, canonical code/logo for inbox cards, seven-day reviewedAtUtc filtering and optional persistent account pins. Existing logo/access/review-date reads are reused; no BE changes are needed for branding, icon alignment or badge colors.

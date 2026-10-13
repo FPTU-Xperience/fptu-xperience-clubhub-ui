@@ -1,5 +1,13 @@
 # Cover cosmetics and club point redemption
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Admin quest/XP models exist; no server cosmetic catalog/inventory, club wallet, redemption receipt or verified shape publication entities/endpoints. FE cosmetic ownership remains local sample state.
+
 Frontend scope: independent background-color and shape selection, identical preview/live renderer, uploaded cover mode, and a temporary club reward store. `ProfileCoverArt` renders a scalable 1400×270 composition everywhere; colors change the palette, shapes change the geometry. Existing profiles retain the petal shape by default.
 
 ## Temporary data boundary

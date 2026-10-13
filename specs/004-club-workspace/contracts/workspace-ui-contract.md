@@ -1,5 +1,13 @@
 # Production Workspace UI Contract
 
+Implement Status: Not Yet
+
+Status Scope: Backend/integration scope: partial authorized workspace
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Current route resolves server clubCode from existing own-access/directory composition and role-gates the workspace; richer selection is optional and absent. Governance, profile/media, semester, credit/rewards and withdrawal dependencies remain open.
+
 ## Optional proposed rich server projection
 
 `GET /api/clubs/me/selection` remains absent on API main 80818266. Current production selection instead composes existing `/api/clubs/me/access`, active directory and self memberships. The optional richer projection would use this shape; its upcoming activity and manager-only pending counts are not available from the current composed reads:
@@ -8,6 +16,7 @@
 [
   {
     "clubId": "string",
+    "clubCode": "canonical server code",
     "name": "string",
     "logoUrl": "string optional",
     "role": "MEMBER | MANAGER",
@@ -23,14 +32,14 @@
 
 ## UI mapping and access boundary
 
-- The client must discard entries without `clubId` or a role of `MEMBER`/`MANAGER`.
-- The route is displayable only if its decoded `clubId` exactly matches one mapped entry.
+- The client must discard entries without `clubId`, canonical `clubCode`, or a role of `MEMBER`/`MANAGER`.
+- The route is displayable only if its decoded `clubCode` matches an authorized selection entry (case-normalized); clubId remains the server resource ID.
 - `pendingApplications` is omitted for members and normalized to `null` for a manager if unavailable.
 - The response must not contain roster members, personal contact data, points, finance, report, or membership-application detail solely to support this MVP.
 
 ## Future workspace contracts (not implemented here)
 
-Each production area requires a separate current-user, club-scoped contract and server authorization before a real screen can replace its unavailable state:
+The original MVP deferred these areas; several now use existing backend APIs as described in the implementation section below. Their scoped authorization remains mandatory:
 
 - activities and attendance
 - members and applications

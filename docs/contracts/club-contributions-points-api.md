@@ -1,5 +1,13 @@
 # Club tasks, contributions and credited points
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: AdminDbContext declares Quests, QuestParticipants and XpLedgerEntries, but ClubDbContext has no club task evidence/review, wallet or credit-ledger entities/routes. Admin raw XP is not this spendable credit lifecycle.
+
 D07; proposed, main 80818266 audited 2026-10-09. `QuestsTab` and `PointsTab` currently show unavailable states. AdminService quest catalog/participants and declaration raw scoring exist; they do not implement this club-scoped evidence/review/wallet lifecycle. Shared [conventions](api-contract-conventions.md) apply.
 
 ## Tasks and submissions

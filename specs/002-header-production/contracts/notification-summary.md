@@ -1,5 +1,13 @@
 # UI Contract: Header Notification Summary
 
+Implement Status: Done
+
+Status Scope: Backend source implementation of existing notification read contract
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: NotificationEndpoints.cs GetNotificationsAsync uses authenticated actor and scoped recipients; NotificationExtensions.cs applies access filtering and safe DTO mapping; notification persistence and Gateway route exist. Bounded six-item presentation is FE-only; no live or newly executed service-test claim.
+
 ## Scope
 
 The V2 production header reads a bounded presentation of notifications belonging to the current authenticated user. This is a UI-consumption contract; server-side identity and authorization remain authoritative.

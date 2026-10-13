@@ -1,5 +1,13 @@
 # Event content, staff and registration applications
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ActivityWriteEndpoints.cs contains CRUD, participants, check-in and attendance; specialist content PATCH, staff assignment, versioned registration forms and reviewed registration application resources are absent.
+
 D12; proposed gap behind the agreed role matrix. Existing ActivityService CRUD, participant registration, check-in and attendance remain available. There is no staff/form/submitted-answer approval contract in main 80818266. Do not replace attendance with application records. Shared [conventions](api-contract-conventions.md) apply.
 
 2026-10-12: role names below describe presets. Authorization resolves [effective governance group capabilities](club-governance-groups-api.md); membership in any BQL group is not blanket event authority. Report submission never grants these capabilities.

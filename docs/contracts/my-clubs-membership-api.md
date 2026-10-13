@@ -1,5 +1,13 @@
 # Own memberships, applications and self withdrawal
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation: existing composed reads only
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: ClubEndpoints.cs exposes own access/memberships and review timestamps; MembershipEndpoints.cs has no self withdrawal route. ClubWorkflowStatuses.cs lacks WITHDRAWN, and ClubMembershipResponse lacks source/capability/version/code/logo.
+
 D10; 2026-10-09, main 80818266. Existing GET `/api/clubs/me/access`, GET `/api/clubs/me/memberships`, public club detail, join and manager approve/reject are usable. Do not duplicate them unless replacing composed reads with the richer projections below.
 
 ## Required withdrawal
@@ -23,3 +31,11 @@ GET `/api/clubs/me/membership-applications` -> array `{applicationId,club:{clubI
 Until these richer reads exist, preserve composed facade methods; absence of extra metadata does not break the current club card. Profile CLB đồng hành can continue membership read + club lookup for `logoUrl`/`clubCode`, including code fallback when an image fails. Returned code must come from canonical club data, not initials derived from club name.
 
 Tests: self/another user, manager/admin cannot impersonate applicant, pending withdrawal retry, stale approved state, reapply and race, invitation consent not membership approval, inactive clubs, privacy, role precedence and safe logo/code projection. FE: my-clubs adapter/page, ProfileClubLogo and invitation consent navigation.
+
+## Current FE consumption — 2026-10-13
+
+The [navigation/inbox addendum](club-navigation-applications-api.md) owns durable pin preference routes and the seven-day result display rule; this file remains the canonical withdrawal workflow. Selection composes own access + active directory, retaining organizational displayRole separately from the coarse MANAGER/MEMBER access gate. Applications now compose self memberships + directory for code/logo and carry requestedAtUtc/reviewedAtUtc. Directory fallback cannot resolve every inactive club, so canonical self DTO metadata is still needed.
+
+The adapter no longer fixes canWithdraw to false: it consumes authoritative true only for a pending sent request, excluding invitations. The inspected backend does not send that capability or implement withdrawal, so the current button remains disabled. Pending invitations remain a separate section. Sent pending requests persist indefinitely in the inbox; approved/rejected results disappear exactly seven elapsed days after reviewedAtUtc, while historical membership/access records remain intact. Unknown/missing/future review times do not qualify as recent results.
+
+Use explicit source/canAcceptInvitation metadata in the deployed replacement rather than permanently inferring invitation status from consent flags. Current browser-local pins are account-scoped UI preferences and do not grant club authority.

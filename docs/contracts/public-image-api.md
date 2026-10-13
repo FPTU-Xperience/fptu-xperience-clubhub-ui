@@ -1,5 +1,13 @@
 # Public image API contract (backend work required)
 
+Implement Status: Not Yet
+
+Status Scope: Backend implementation and storage integration
+
+Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Source Evidence: Club.LogoUrl is readable; public detail mapper returns null cover. No media upload intent, public-images PUT, activity cover PUT or user-image persistence; yarp.json has no /api/media route.
+
 Status: proposed contract for `fptu-xperience-clubhub-api`, rechecked on 2026-10-09 against fetched main `80818266`. The three currently called media/club/activity routes remain absent; self image attachment uses the canonical profile contract below. The first three have frontend callers in `src/services/api.js`; self avatar/background and club shape upload need facade integration when the backend contract exists.
 
 ## Existing API baseline
