@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
+import ProfileAvatar from '../../profile-page/ProfileAvatar';
 import ProfileCoverArt from '../../profile-page/ProfileCoverArt';
 import ClubShapeUploadModal from './ClubShapeUploadModal';
 import {
@@ -42,7 +43,7 @@ export default function GiftsTab({ workspace, manager = false }) {
         setError('');
         try {
             setInventory(redeemCoverReward(user, clubId, reward.key, undefined, clubCode));
-            setNotice(`Đã đổi ${reward.label} bằng điểm mẫu. Bạn có thể sử dụng trong ảnh bìa cá nhân.`);
+            setNotice(`Đã đổi ${reward.label} bằng điểm mẫu. Bạn có thể sử dụng trong phần tùy chỉnh ảnh cá nhân.`);
         } catch (issue) {
             setError(issue.message);
         }
@@ -51,7 +52,7 @@ export default function GiftsTab({ workspace, manager = false }) {
     return (
         <WorkspaceTabLayout
             title="Kho quà"
-            description="Đổi điểm đóng góp tại CLB để sở hữu màu nền và shape cho ảnh bìa cá nhân."
+            description="Đổi điểm đóng góp tại CLB để sở hữu nền, shape ảnh bìa và khung ảnh đại diện."
             preview
             action={
                 manager && user ? (
@@ -86,7 +87,7 @@ export default function GiftsTab({ workspace, manager = false }) {
                     </div>
                     {notice && (
                         <p role="status">
-                            {notice} <Link to="/v2/profile">Tùy chỉnh ảnh bìa →</Link>
+                            {notice} <Link to="/v2/profile">Tùy chỉnh ảnh cá nhân →</Link>
                         </p>
                     )}
                     {error && (
@@ -99,18 +100,26 @@ export default function GiftsTab({ workspace, manager = false }) {
                             const owned = inventory.owned.includes(reward.key);
                             return (
                                 <article key={reward.key}>
-                                    <ProfileCoverArt
-                                        color={reward.colorId || (reward.kind === 'color' ? reward.id : 'horizon')}
-                                        shape={reward.shapeId || (reward.kind === 'shape' ? reward.id : 'petals')}
-                                        shapeAssetUrl={reward.assetUrl || ''}
-                                    />
+                                    {reward.kind === 'frame' ? (
+                                        <div className="v2-gift-frame-preview">
+                                            <ProfileAvatar profile={{ initials: 'SV' }} frame={reward.id} large />
+                                        </div>
+                                    ) : (
+                                        <ProfileCoverArt
+                                            color={reward.colorId || (reward.kind === 'color' ? reward.id : 'horizon')}
+                                            shape={reward.shapeId || (reward.kind === 'shape' ? reward.id : 'petals')}
+                                            shapeAssetUrl={reward.assetUrl || ''}
+                                        />
+                                    )}
                                     <div>
                                         <small>
                                             {reward.kind === 'combo'
                                                 ? 'COMBO MÀU + SHAPE'
                                                 : reward.kind === 'color'
                                                   ? 'MÀU NỀN'
-                                                  : 'SHAPE'}
+                                                  : reward.kind === 'frame'
+                                                    ? 'KHUNG ẢNH ĐẠI DIỆN'
+                                                    : 'SHAPE'}
                                         </small>
                                         <h2>{reward.label}</h2>
                                         {reward.kind === 'shape' && (

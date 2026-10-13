@@ -6,6 +6,8 @@ import ClubPagePreview from './club-page/ClubPagePreview';
 import ClubPageInfoModal from './club-page/ClubPageInfoModal';
 import ClubPageImageModal from './club-page/ClubPageImageModal';
 import './ClubPageTab.scss';
+import { useEntityMedia } from '../../../../components/media/EntityMediaContext';
+import { subscribePublicMediaSaved } from '../../../../services/public-media-sync';
 
 function useImagePreview(file, savedUrl) {
     const [preview, setPreview] = useState(null);
@@ -23,9 +25,10 @@ function useImagePreview(file, savedUrl) {
 
 export default function ClubPageTab({ manager = false, workspace }) {
     const clubId = workspace?.clubId;
-    const { api } = useAuth();
+    const { api, user } = useAuth();
     const { semester } = useWorkspaceSemester();
-    const [club, setClub] = useState(null);
+    const [clubRecord, setClub] = useState(null);
+    const club = useEntityMedia('club', clubRecord);
     const [profileDraft, setProfileDraft] = useState(null);
     const [imageFile, setImageFile] = useState(null);
     const [editor, setEditor] = useState(null);
@@ -71,6 +74,14 @@ export default function ClubPageTab({ manager = false, workspace }) {
         };
     }, [api, clubId, attempt, semester?.id]);
 
+    useEffect(() => subscribePublicMediaSaved('club', (signal) => {
+        if (signal.id !== String(clubId)) return;
+        const version = requestVersion.current;
+        api.getClub(clubId).then((data) => {
+            if (version === requestVersion.current) setClub(data);
+        }).catch(() => { /* Retain the acknowledged media and current editor on refresh failure. */ });
+    }), [api, clubId]);
+
     const openEditor = (section) => {
         if (!manager || saving) return;
         setImageFile(null);
@@ -84,24 +95,30 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setImageFile(null);
         setModalError('');
     };
-    const saveImage = async (event) => {
+    const saveImage = async (event, selectedFile = imageFile) => {
         event.preventDefault();
-        if (!manager || saving || !imageFile || !imageEditor) return;
+        if (!manager || saving || !selectedFile || !imageEditor) return;
         const version = requestVersion.current;
         const field = editor === 'logo' ? 'logoUrl' : 'coverImageUrl';
         const label = editor === 'logo' ? 'logo' : 'ảnh bìa';
+        setImageFile(selectedFile);
         setSaving(true);
         setModalError('');
         try {
-            const url = await api.uploadPublicImage(imageFile, editor === 'logo' ? 'club-logo' : 'club-cover', clubId);
+            const url = await api.uploadPublicImage(
+                selectedFile,
+                editor === 'logo' ? 'club-logo' : 'club-cover',
+                clubId,
+            );
             if (version !== requestVersion.current) return;
-            const images = { logoUrl: club.logoUrl ?? null, coverImageUrl: club.coverImageUrl ?? null, [field]: url };
+            const images = { [field]: url };
             const updated = await api.updateClubPublicImages(clubId, images);
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...images, ...(updated || {}) }));
             setImageFile(null);
             setEditor(null);
             setNotice(`Đã cập nhật ${label} CLB.`);
+            return url;
         } catch (issue) {
             if (version !== requestVersion.current) return;
             setModalError(
@@ -204,7 +221,12 @@ export default function ClubPageTab({ manager = false, workspace }) {
                         <button type="button" className="v2-button" onClick={cancelPreview} disabled={saving}>
                             Hủy
                         </button>
-                        <button type="button" className="v2-button v2-button--primary" onClick={saveInfo} disabled={saving}>
+                        <button
+                            type="button"
+                            className="v2-button v2-button--primary"
+                            onClick={saveInfo}
+                            disabled={saving}
+                        >
                             {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
                         </button>
                     </div>
@@ -213,6 +235,9 @@ export default function ClubPageTab({ manager = false, workspace }) {
             {manager && club && imageEditor && (
                 <ClubPageImageModal
                     kind={editor}
+                    clubName={club.name || workspace?.name || workspace?.clubName}
+                    clubIdentity={club.id ?? club.name}
+                    graphicStorageKey={user?.id != null ? `clubhub:v2:graphic-banner:${user.id}:club:${clubId}` : null}
                     value={editor === 'logo' ? club.logoUrl : club.coverImageUrl}
                     file={imageFile}
                     onChange={(file) => {

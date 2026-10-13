@@ -1,10 +1,18 @@
-import { Camera, CalendarDays, Image, Mail, Pencil, Phone } from 'lucide-react';
+import GraphicBanner from '../../../../../components/media/GraphicBanner';
+import { defaultGraphicBanner } from '../../../../../components/media/graphic-banner';
+import { Camera, CalendarDays, Mail, Pencil, Phone } from 'lucide-react';
 import { CLUB_CATEGORY_LABELS } from './club-page-fields';
 import { displayClubSchedule } from './club-schedule-data';
 
 function EditButton({ label, onClick, disabled }) {
     return (
-        <button className="club-page-edit-button" type="button" onClick={onClick} aria-label={label} disabled={disabled}>
+        <button
+            className="club-page-edit-button"
+            type="button"
+            onClick={onClick}
+            aria-label={label}
+            disabled={disabled}
+        >
             <Pencil size={15} aria-hidden="true" />
             <span>Chỉnh sửa thông tin</span>
         </button>
@@ -22,13 +30,18 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                     {cover ? (
                         <img src={cover} alt="Ảnh bìa CLB" />
                     ) : (
-                        <div className="club-page-cover-empty">
-                            <Image size={38} aria-hidden="true" />
-                            <span>Thêm ảnh bìa cho câu chuyện của CLB</span>
-                        </div>
+                        <GraphicBanner
+                            design={defaultGraphicBanner('club', club.id ?? club.name)}
+                            label={`Banner ${club.name}`}
+                        />
                     )}
                     {manager && (
-                        <button className="club-page-change-cover" type="button" onClick={() => onEdit('cover')} disabled={disabled}>
+                        <button
+                            className="club-page-change-cover"
+                            type="button"
+                            onClick={() => onEdit('cover')}
+                            disabled={disabled}
+                        >
                             <Camera size={17} aria-hidden="true" /> Đổi ảnh bìa
                         </button>
                     )}
@@ -63,7 +76,11 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                             <div className="club-page-name-row">
                                 <h2>{club.name}</h2>
                                 {manager && (
-                                    <EditButton label="Chỉnh sửa thông tin CLB" onClick={() => onEdit('info')} disabled={disabled} />
+                                    <EditButton
+                                        label="Chỉnh sửa thông tin CLB"
+                                        onClick={() => onEdit('info')}
+                                        disabled={disabled}
+                                    />
                                 )}
                             </div>
                         </div>

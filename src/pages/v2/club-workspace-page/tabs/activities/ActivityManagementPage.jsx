@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../../../../context/AuthContext';
 import { Camera, Eye, Pencil } from 'lucide-react';
 import { useActivityDetail } from '../../../activity-data';
 import PageState from '../../../../../components/v2/PageState';
@@ -8,7 +9,7 @@ import ActivityProfileLayout, {
 } from '../../../../../components/v2/activity-detail/ActivityProfileLayout';
 import ActivityAttendance from '../../../../../components/v2/activity-detail/ActivityAttendance';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
-import ImagePicker from '../../../../../components/media/ImagePicker';
+import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
 import { saveActivityResource } from '../../../../../services/activity-resources';
 
@@ -26,6 +27,7 @@ const localDateTime = (value) => {
 };
 
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
+    const { user } = useAuth();
     const result = useActivityDetail(api, sessionKey, manager ? activityId : null);
     const activity = result.data;
     const [tab, setTab] = useState('overview');
@@ -113,20 +115,22 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
             if (alive.current) setBusy(false);
         }
     };
-    const saveCover = async (event) => {
+    const saveCover = async (event, selectedFile = coverFile) => {
         event.preventDefault();
-        if (!coverFile || busy) return;
+        if (!selectedFile || busy) return;
+        setCoverFile(selectedFile);
         setBusy(true);
         setError('');
         setNotice('');
         try {
-            const url = await api.uploadPublicImage(coverFile, 'activity-cover', activity.id);
+            const url = await api.uploadPublicImage(selectedFile, 'activity-cover', activity.id);
             await api.updateActivityCoverImage(activity.id, url);
             if (alive.current) {
                 setCoverOpen(false);
                 setCoverFile(null);
                 setNotice('Đã lưu ảnh bìa.');
                 result.retry();
+                return url;
             }
         } catch (issue) {
             if (alive.current)
@@ -210,12 +214,18 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
             )}
             <ActivityProfileLayout
                 activity={displayed}
+                preview={Boolean(coverUrl)}
                 tabs={tabs}
                 tab={tab}
                 onTabChange={setTab}
                 actions={
                     <>
-                    <Link className="v2-button" to={`/v2/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">
+                        <Link
+                            className="v2-button"
+                            to={`/v2/activities/${activity.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <Eye size={15} />
                             Xem trang công khai
                         </Link>
@@ -340,46 +350,26 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 </V2Modal>
             )}
             {coverOpen && (
-                <V2Modal title="Ảnh bìa hoạt động" onClose={() => !busy && setCoverOpen(false)}>
-                    <form className="v2-activity-edit-form" onSubmit={saveCover}>
-                        <ImagePicker
-                            label="Ảnh bìa hoạt động"
-                            value={activity.coverImageUrl}
-                            file={coverFile}
-                            onChange={setCoverFile}
-                            disabled={busy}
-                        />
-                        {error && (
-                            <p role="alert" className="v2-activity-profile-error">
-                                {error}
-                            </p>
-                        )}
-                        <footer>
-                            <button
-                                className="v2-button"
-                                type="button"
-                                onClick={() => {
-                                    setCoverOpen(false);
-                                    setCoverFile(null);
-                                }}
-                                disabled={busy}
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                className="v2-button"
-                                type="button"
-                                onClick={() => setCoverOpen(false)}
-                                disabled={busy || !coverFile}
-                            >
-                                Xem trước
-                            </button>
-                            <button className="v2-button v2-button--primary" disabled={busy || !coverFile}>
-                                {busy ? 'Đang lưu…' : 'Lưu ảnh bìa'}
-                            </button>
-                        </footer>
-                    </form>
-                </V2Modal>
+                <CoverImageModal
+                    kind="activity"
+                    identity={activity.id}
+                    storageKey={
+                        user?.id != null ? `clubhub:v2:graphic-banner:${user.id}:activity:${activity.id}` : null
+                    }
+                    title="Ảnh bìa hoạt động"
+                    value={activity.coverImageUrl}
+                    file={coverFile}
+                    onChange={setCoverFile}
+                    saving={busy}
+                    error={error}
+                    onClose={() => {
+                        if (!busy) {
+                            setCoverOpen(false);
+                            setCoverFile(null);
+                        }
+                    }}
+                    onSave={saveCover}
+                />
             )}
         </div>
     );
