@@ -65,6 +65,7 @@
 
 .v2-left-rail-nav {
     display: grid;
+    grid-auto-rows: max-content;
     gap: 5px;
     min-height: 0;
     overflow-y: auto;
@@ -101,12 +102,15 @@
 }
 
 .v2-left-rail-nav a,
+.v2-left-rail-nav-group-trigger,
 .v2-left-rail-notification-button {
     display: flex;
+    box-sizing: border-box;
     min-height: 42px;
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
+    margin: 0;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -114,6 +118,7 @@
     font: inherit;
     font-size: 12px;
     font-weight: 550;
+    line-height: 18px;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
@@ -133,25 +138,18 @@
 }
 
 .v2-left-rail-nav-group {
-    margin-top: 5px;
+    display: contents;
 }
 
 .v2-left-rail-nav-group-trigger {
-    display: flex;
     width: 100%;
-    min-height: 42px;
-    align-items: center;
     justify-content: space-between;
-    padding: 10px 12px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: #64748b;
-    cursor: pointer;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 550;
-    text-align: left;
+    appearance: none;
+}
+.v2-left-rail-nav-label {
+    display: block;
+    min-width: 0;
+    line-height: 18px;
 }
 
 .v2-left-rail-nav-group-trigger:hover,
@@ -161,6 +159,7 @@
 }
 
 .v2-left-rail-nav-group-trigger svg {
+    flex-shrink: 0;
     transition: transform .18s ease;
 }
 
@@ -234,13 +233,16 @@
     height: 37px;
     flex: 0 0 auto;
     place-items: center;
-    border: 2px solid #fff;
     border-radius: 50%;
-    background: linear-gradient(145deg, #fe8c03, #ffc94c 48%, #f97316);
     color: #0f172a;
     font-size: 11px;
     font-weight: 700;
-    overflow: hidden;
+    overflow: visible;
+    .v2-framed-avatar {
+        width: 37px;
+        height: 37px;
+    }
+    .v2-framed-avatar-image { border-width: 2px; }
 }
 
 .v2-left-rail-avatar img {

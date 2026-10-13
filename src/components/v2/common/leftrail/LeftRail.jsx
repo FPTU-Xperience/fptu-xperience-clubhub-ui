@@ -4,6 +4,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useHeaderNotifications } from '../../../../pages/v2/header-data';
 import { usePinnedClubs } from '../../../../pages/v2/pinned-clubs';
+import ProfileAvatar from '../../../../pages/v2/profile-page/ProfileAvatar';
 import './LeftRail.scss';
 
 function NotificationContent({ status, data, retry }) {
@@ -49,7 +50,7 @@ const personalNavigation = [
     ['/v2/study-schedule', 'Lịch học'],
 ];
 
-export default function LeftRail({ user, avatarUrl, onLogout, api }) {
+export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
     const location = useLocation();
     const { pinnedClubs = [], togglePin } = usePinnedClubs() || {};
     const accountMenuRef = useRef(null);
@@ -60,7 +61,7 @@ export default function LeftRail({ user, avatarUrl, onLogout, api }) {
     const { theme, toggleTheme } = useTheme();
     const sessionKey = user?.id || user?.email || null;
     const notifications = useHeaderNotifications(api, sessionKey);
-    const displayName = user?.name || user?.fullName || 'Sinh viên FPTU';
+    const displayName = profile?.displayName || user?.name || user?.fullName || 'Sinh viên FPTU';
     const secondaryIdentifier = user?.email || user?.studentCode || 'ClubHub';
     const avatar = user?.avatar || displayName.slice(0, 2).toUpperCase();
 
@@ -109,19 +110,20 @@ export default function LeftRail({ user, avatarUrl, onLogout, api }) {
             <p className="v2-left-rail-campus">FPTU Hồ Chí Minh</p>
             <nav className="v2-left-rail-nav" aria-label="Điều hướng chính">
                 {navigation.map(([to, label, end]) => (
-                    <NavLink key={to} to={to} end={end}>
-                        {label}
+                    <NavLink key={to} to={to} end={end} className="v2-left-rail-nav-row">
+                        <span className="v2-left-rail-nav-label">{label}</span>
                     </NavLink>
                 ))}
                 <div className="v2-left-rail-nav-group">
                     <button
-                        className="v2-left-rail-nav-group-trigger"
+                        className="v2-left-rail-nav-row v2-left-rail-nav-group-trigger"
                         type="button"
                         aria-expanded={isPersonalNavOpen}
                         aria-controls="v2-left-rail-personal-nav"
                         onClick={() => setIsPersonalNavOpen((open) => !open)}
                     >
-                        Của tôi <ChevronRight size={15} aria-hidden="true" />
+                        <span className="v2-left-rail-nav-label">Của tôi</span>
+                        <ChevronRight size={15} aria-hidden="true" />
                     </button>
                     {isPersonalNavOpen && (
                         <div id="v2-left-rail-personal-nav" className="v2-left-rail-nav-group-items">
@@ -177,7 +179,7 @@ export default function LeftRail({ user, avatarUrl, onLogout, api }) {
                         onClick={() => setIsAccountMenuOpen((open) => !open)}
                     >
                         <span className="v2-left-rail-avatar" aria-hidden="true">
-                            {avatarUrl ? <img src={avatarUrl} alt="" /> : avatar}
+                            <ProfileAvatar profile={profile || { initials: avatar, avatarUrl: user?.avatarUrl }} imageUrl={avatarUrl} />
                         </span>
                         <span>
                             <strong>{displayName}</strong>
