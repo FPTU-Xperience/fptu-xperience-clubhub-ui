@@ -1,5 +1,6 @@
 import { ArrowRight, ArrowUpRight, CalendarDays, Compass, Heart, Search, Sparkles, Users } from 'lucide-react';
 import { useState } from 'react';
+import { useEntityMedia } from '../media/EntityMediaContext';
 import { Link } from 'react-router-dom';
 import './DiscoveryLayout.scss';
 import './ClubArt.scss';
@@ -62,7 +63,8 @@ export function ClubArt({ club, hero = false }) {
     );
 }
 
-export function ClubLogo({ club, hero = false }) {
+export function ClubLogo({ club: input, hero = false }) {
+    const club = useEntityMedia('club', input);
     const [failedUrl, setFailedUrl] = useState('');
     if (!club.logoUrl || failedUrl === club.logoUrl) return <ClubArt club={club} hero={hero} />;
 

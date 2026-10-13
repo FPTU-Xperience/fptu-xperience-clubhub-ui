@@ -34,7 +34,12 @@ test('directory adapter exposes only the V2 card model and preserves unavailable
 });
 
 test('club detail resolves a route code to the numeric API identifier', () => {
-    const directory = { items: [{ id: 7, code: 'F-CODE' }, { id: 9, code: 'F-STYLE' }] };
+    const directory = {
+        items: [
+            { id: 7, code: 'F-CODE' },
+            { id: 9, code: 'F-STYLE' },
+        ],
+    };
     assert.equal(findClubIdByCode(directory, 'f-code'), 7);
     assert.equal(findClubIdByCode(directory, 'missing'), null);
 });
@@ -119,7 +124,13 @@ test('production V2 modules do not import demo state and demo links stay under /
         const source = readFileSync(new URL(file, import.meta.url), 'utf8');
         assert.doesNotMatch(source, /DemoContext|\.\/model|UI LAB/);
     }
-    for (const file of ['DemoApp.jsx', 'Discovery.jsx', 'club-workspace/Workspace.jsx', 'profile-page/Profile.jsx', 'ui.jsx']) {
+    for (const file of [
+        'DemoApp.jsx',
+        'Discovery.jsx',
+        'club-workspace/Workspace.jsx',
+        'profile-page/Profile.jsx',
+        'ui.jsx',
+    ]) {
         const source = readFileSync(new URL(file, import.meta.url), 'utf8');
         const paths = source.match(/\/v2[^'"`\s}]*/g) || [];
         assert.equal(
@@ -151,7 +162,10 @@ test('production routing isolates demo, all-clubs, and club-detail pages', () =>
 test('production left rail is V2-local, production-routed, and accessible', () => {
     const app = readFileSync(new URL('V2App.jsx', import.meta.url), 'utf8');
     const rail = readFileSync(new URL('../../components/v2/common/leftrail/LeftRail.jsx', import.meta.url), 'utf8');
-    const railStyles = readFileSync(new URL('../../components/v2/common/leftrail/LeftRail.scss', import.meta.url), 'utf8');
+    const railStyles = readFileSync(
+        new URL('../../components/v2/common/leftrail/LeftRail.scss', import.meta.url),
+        'utf8',
+    );
 
     assert.match(app, /import LeftRail from '..\/..\/components\/v2\/common\/leftrail\/LeftRail'/);
     assert.match(rail, /to="\/v2"/);
@@ -190,9 +204,12 @@ test('production Discover composes the complete discovery layout', () => {
     assert.match(allClubsPage, /onlyRecruiting/);
 
     const layout = readFileSync(new URL('../../components/v2/DiscoveryLayout.jsx', import.meta.url), 'utf8');
-    const filters = readFileSync(new URL('../../components/v2/directory-filter/DirectoryFilters.jsx', import.meta.url), 'utf8');
+    const filters = readFileSync(
+        new URL('../../components/v2/directory-filter/DirectoryFilters.jsx', import.meta.url),
+        'utf8',
+    );
     const card = readFileSync(new URL('../../components/v2/club-card/ClubCard.jsx', import.meta.url), 'utf8');
-    assert.match(card, /ClubLogo/);
+    assert.match(card, /ClubCardMedia/);
     assert.doesNotMatch(card, /ClubArt/);
     assert.match(layout, /failedUrl === club\.logoUrl/);
     assert.match(layout, /onError/);
@@ -206,7 +223,11 @@ test('production Discover composes the complete discovery layout', () => {
         'v2-directory-label',
         'v2-club-card',
     ]) {
-        assert.equal(`${layout}${filters}${card}`.includes(className), true, `${className} must remain available in production`);
+        assert.equal(
+            `${layout}${filters}${card}`.includes(className),
+            true,
+            `${className} must remain available in production`,
+        );
     }
 
     const productionStyles = readFileSync(new URL('../../components/v2/DiscoveryLayout.scss', import.meta.url), 'utf8');

@@ -1,3 +1,6 @@
+import GraphicBanner from '../../media/GraphicBanner';
+import { defaultGraphicBanner, ACTIVITY_BANNER_SIZE } from '../../media/graphic-banner';
+import { useEntityMedia } from '../../media/EntityMediaContext';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
 import './ActivityProfileLayout.scss';
 
@@ -8,7 +11,8 @@ const statuses = {
     COMPLETED: ['completed', 'Đã hoàn thành'],
     CANCELLED: ['cancelled', 'Đã hủy'],
 };
-export default function ActivityProfileLayout({ activity, tabs, tab, onTabChange, actions, coverAction, children }) {
+export default function ActivityProfileLayout({ activity: input, tabs, tab, onTabChange, actions, coverAction, children, preview = false }) {
+    const activity = useEntityMedia('activity', input, { preview });
     const [tone, label] = statuses[activity.status] || ['unknown', 'Đang cập nhật'];
     const date = new Date(activity.startTime || '');
     const valid = Number.isFinite(date.getTime());
@@ -18,19 +22,12 @@ export default function ActivityProfileLayout({ activity, tabs, tab, onTabChange
                 {activity.coverImageUrl ? (
                     <img src={activity.coverImageUrl} alt={`Ảnh bìa ${activity.title}`} />
                 ) : (
-                    <div className="v2-activity-profile-cover-art" aria-hidden="true">
-                        <span>CLUBHUB / EXPERIENCES</span>
-                        <strong>
-                            Một hoạt động.
-                            <br />
-                            Nhiều điều đáng nhớ.
-                        </strong>
-                    </div>
+                    <GraphicBanner size={ACTIVITY_BANNER_SIZE} preserveAspectRatio="xMinYMid slice" design={defaultGraphicBanner('activity')} label={`Banner ${activity.title}`} />
                 )}
                 {coverAction && <div className="v2-activity-profile-cover-action">{coverAction}</div>}
             </div>
             <header className="v2-activity-profile-identity">
-            <div className={`v2-activity-profile-mark is-${tone}`} aria-hidden="true">
+                <div className={`v2-activity-profile-mark is-${tone}`} aria-hidden="true">
                     <CalendarDays size={27} />
                     <strong>{valid ? String(date.getDate()).padStart(2, '0') : '—'}</strong>
                     <span>{valid ? `THÁNG ${date.getMonth() + 1}` : 'HOẠT ĐỘNG'}</span>

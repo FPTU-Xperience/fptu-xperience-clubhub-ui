@@ -1,46 +1,34 @@
 import { ArrowRight, CalendarDays, Pin, PinOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ClubCardMedia, { ClubCardLogo } from '../club-card/ClubCardMedia';
+import { useEntityMedia } from '../../media/EntityMediaContext';
 
 const dateLabel = (value) =>
     new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 
-export default function MyClubCard({ club, pinned = false, onTogglePin }) {
+export default function MyClubCard({ club: input, pinned = false, onTogglePin }) {
+    const club = useEntityMedia('club', input);
     const manager = club.role === 'MANAGER';
     return (
         <article className="v2-my-club-card">
-            <div className="v2-my-club-art" aria-hidden="true">
-                <span className="v2-my-club-art-meta">
-                    FPTU COMMUNITY
-                    <br />
-                    EST. 2017
-                </span>
-                <span className="v2-my-club-art-arrow">↗</span>
-                {club.logoUrl ? <img src={club.logoUrl} alt="" /> : <strong>{club.clubCode}</strong>}
-                <em>{club.name} · Grow together</em>
-            </div>
+            <ClubCardMedia club={club} showLogo={false} />
             <div className="v2-my-club-body">
-                <div className="v2-my-club-top">
-                    <span className="v2-my-club-mark" aria-hidden="true">
-                        {club.logoUrl ? (
-                            <img src={club.logoUrl} alt="" />
-                        ) : (
-                            <span className="v2-my-application-club-code" title={club.clubCode}>
-                                {club.clubCode}
-                            </span>
-                        )}
-                    </span>
-                    <span className={`v2-my-club-role ${manager ? 'is-manager' : ''}`}>
-                        {manager ? 'Chủ nhiệm' : 'Thành viên'}
-                    </span>
-                </div>
-                <h2>{club.name}</h2>
-                <p>
-                    {manager
-                        ? club.pendingApplications === null
-                            ? 'Đơn tham gia đang cập nhật'
-                            : `${club.pendingApplications} đơn tham gia đang chờ bạn xem xét`
-                        : 'Hôm nay bạn muốn đóng góp điều gì?'}
-                </p>
+                <header className="v2-my-club-identity">
+                    <ClubCardLogo club={club} />
+                    <div className="v2-my-club-identity-copy">
+                        <span className={`v2-my-club-role ${manager ? 'is-manager' : ''}`}>
+                            {manager ? 'Chủ nhiệm' : 'Thành viên'}
+                        </span>
+                        <h2>{club.name}</h2>
+                        <p>
+                            {manager
+                                ? club.pendingApplications === null
+                                    ? 'Đơn tham gia đang cập nhật'
+                                    : `${club.pendingApplications} đơn tham gia đang chờ bạn xem xét`
+                                : 'Hôm nay bạn muốn đóng góp điều gì?'}
+                        </p>
+                    </div>
+                </header>
                 <div className="v2-my-club-activity">
                     <CalendarDays size={18} />
                     <div>

@@ -1,15 +1,18 @@
+import GraphicBanner from '../../media/GraphicBanner';
+import { defaultGraphicBanner } from '../../media/graphic-banner';
+import { useEntityMedia } from '../../media/EntityMediaContext';
 import { useState } from 'react';
 import { CalendarDays, MapPin } from 'lucide-react';
 import { Pill } from '../DiscoveryLayout';
 import './ClubProfileHeader.scss';
 
-export default function ClubProfileHeader({ club, children }) {
+export default function ClubProfileHeader({ club: input, children }) {
+    const club = useEntityMedia('club', input);
     const [failedCover, setFailedCover] = useState(null);
     const [failedLogo, setFailedLogo] = useState(null);
-    const palette = [...String(club.id ?? club.name)].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
     return (
         <>
-            <div className={`v2-club-profile-cover v2-club-profile-cover--${palette}`}>
+            <div className="v2-club-profile-cover">
                 {club.coverImageUrl && failedCover !== club.coverImageUrl ? (
                     <img
                         src={club.coverImageUrl}
@@ -17,14 +20,11 @@ export default function ClubProfileHeader({ club, children }) {
                         onError={() => setFailedCover(club.coverImageUrl)}
                     />
                 ) : (
-                    <div className="v2-club-profile-cover-art" aria-hidden="true">
-                        <span>CLUBHUB / COMMUNITY</span>
-                        <strong>
-                            Một cộng đồng.
-                            <br />
-                            Cùng nhau trưởng thành.
-                        </strong>
-                    </div>
+                    <GraphicBanner
+                        preserveAspectRatio="xMinYMid slice"
+                        design={defaultGraphicBanner('club', club.id ?? club.name)}
+                        label={`Banner ${club.name}`}
+                    />
                 )}
             </div>
             <header className="v2-club-profile-identity">

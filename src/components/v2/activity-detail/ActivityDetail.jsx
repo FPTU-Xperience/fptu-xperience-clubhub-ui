@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import V2Modal from '../common/modal/V2Modal';
 import ActivityAttendance from './ActivityAttendance';
 import './ActivityDetail.scss';
+import { useEntityMedia } from '../../media/EntityMediaContext';
 
-export default function ActivityDetail({ activity, onClose, manager }) {
+export default function ActivityDetail({ activity: input, onClose, manager }) {
+    const activity = useEntityMedia('activity', input);
     if (!activity) return null;
     return (
         <V2Modal title={activity.title} onClose={onClose} wide>

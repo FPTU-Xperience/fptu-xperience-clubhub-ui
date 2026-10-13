@@ -10,7 +10,7 @@
 }
 .v2-activity-profile-cover {
     position: relative;
-    height: 245px;
+    height: clamp(220px, 25vw, 340px);
     overflow: hidden;
     border-radius: 18px;
     background: #174650;
@@ -18,27 +18,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-    }
-}
-.v2-activity-profile-cover-art {
-    height: 100%;
-    padding: 32px 38px;
-    color: #fff;
-    background:
-        radial-gradient(circle at 80% 10%, #ffffff12 0 160px, transparent 161px),
-        radial-gradient(circle at 85% 30%, #ffffff0b 0 210px, transparent 211px),
-        linear-gradient(125deg, #133c49, #277475);
-    span {
-        font-size: 10px;
-        letter-spacing: 0.17em;
-        opacity: 0.65;
-    }
-    strong {
-        display: block;
-        margin-top: 25px;
-        font-size: 31px;
-        line-height: 1.2;
-        letter-spacing: -0.03em;
+        object-position: left center;
     }
 }
 .v2-activity-profile-cover-action {
@@ -224,9 +204,6 @@
     }
 }
 @media (max-width: 600px) {
-    .v2-activity-profile-cover {
-        height: 205px;
-    }
     .v2-activity-profile-identity {
         gap: 12px;
         padding-left: 8px;

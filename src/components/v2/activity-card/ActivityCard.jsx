@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { ArrowUpRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
+import GraphicBanner from '../../media/GraphicBanner';
+import { defaultGraphicBanner, ACTIVITY_BANNER_SIZE } from '../../media/graphic-banner';
+import { useEntityMedia } from '../../media/EntityMediaContext';
 import './ActivityCard.scss';
 
 const statuses = {
@@ -10,7 +13,8 @@ const statuses = {
     CANCELLED: ['cancelled', 'Đã hủy'],
 };
 
-export default function ActivityCard({ activity, onOpen, variant = 'poster' }) {
+export default function ActivityCard({ activity: input, onOpen, variant = 'poster' }) {
+    const activity = useEntityMedia('activity', input);
     const [failedImage, setFailedImage] = useState(null);
     const date = new Date(activity.startTime || '');
     const hasDate = Number.isFinite(date.getTime());
@@ -38,13 +42,7 @@ export default function ActivityCard({ activity, onOpen, variant = 'poster' }) {
                             onError={() => setFailedImage(activity.coverImageUrl)}
                         />
                     ) : (
-                        <div className="v2-event-art-fallback" aria-hidden="true">
-                            <span className="v2-event-art-kicker">{activity.clubName || 'CLUBHUB · HOẠT ĐỘNG'}</span>
-                            <strong>{activity.title}</strong>
-                            <span className="v2-event-art-date">
-                                {dateLabel} <ArrowUpRight size={22} />
-                            </span>
-                        </div>
+                        <GraphicBanner size={ACTIVITY_BANNER_SIZE} preserveAspectRatio="xMinYMid slice" design={defaultGraphicBanner('activity')} label={`Banner ${activity.title}`} />
                     )}
                     <span className={`v2-event-status is-${tone}`}>{label}</span>
                 </div>

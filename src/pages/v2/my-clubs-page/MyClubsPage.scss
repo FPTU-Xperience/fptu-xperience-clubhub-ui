@@ -13,9 +13,10 @@
     box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
 }
 .v2-my-club-card {
-    display: grid;
-    grid-template-columns: 140px minmax(0, 1fr);
-    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
 }
 .v2-my-club-art {
     position: relative;
@@ -74,7 +75,6 @@
     letter-spacing: normal;
     line-height: 1.2;
     text-align: center;
-
 }
 .v2-my-club-art img {
     position: relative;
@@ -97,8 +97,32 @@
 }
 .v2-my-club-body {
     position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     min-width: 0;
-    padding: 25px 31px 30px;
+    padding: 20px;
+}
+.v2-my-club-identity {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+}
+.v2-my-club-identity-copy {
+    min-width: 0;
+    p {
+        margin: 0;
+        color: var(--v2-muted);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+}
+.v2-my-club-identity > .v2-club-card-logo {
+    position: static;
+    width: 64px;
+    height: 64px;
+    border-radius: 15px;
 }
 .v2-my-club-top {
     display: flex;
@@ -119,6 +143,7 @@
 }
 .v2-my-club-role,
 .v2-my-application-status {
+    display: inline-flex;
     border-radius: 7px;
     background: #dcfce7;
     color: #166534;
@@ -131,9 +156,11 @@
     color: #ea580c;
 }
 .v2-my-club-body h2 {
-    margin: 23px 0 10px;
+    margin: 8px 0 6px;
     color: #111827;
-    font-size: 25px;
+    font-size: 21px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
     letter-spacing: -0.04em;
 }
 .v2-my-club-body > p,
@@ -144,8 +171,8 @@
 .v2-my-club-activity {
     display: flex;
     gap: 11px;
-    margin: 22px 0 19px;
-    padding: 21px 0;
+    margin: 20px 0 18px;
+    padding: 16px 0;
     border-top: 1px solid var(--v2-line);
     border-bottom: 1px solid var(--v2-line);
     color: #94a3b8;
@@ -172,7 +199,7 @@
     font-size: 10px;
 }
 .v2-my-club-body .v2-button {
-    min-height: 51px;
+    min-height: 44px;
     padding-inline: 20px;
     font-size: 13px;
 }
@@ -213,6 +240,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: auto;
 }
 .v2-my-club-pin {
     flex-shrink: 0;
@@ -280,13 +308,10 @@
     font-size: 28px;
 }
 @media (max-width: 1180px) {
-    .v2-my-club-card {
-        grid-template-columns: 120px minmax(0, 1fr);
-    }
     .v2-my-club-art {
         min-height: 300px;
     }
     .v2-my-club-body {
-        padding: 22px;
+        padding: 18px;
     }
 }
