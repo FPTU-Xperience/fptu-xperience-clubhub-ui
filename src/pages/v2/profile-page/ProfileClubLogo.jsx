@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useEntityMedia } from '../../../components/media/EntityMediaContext';
 
-export default function ProfileClubLogo({ club }) {
+export default function ProfileClubLogo({ club: input }) {
+    const club = useEntityMedia('club', input);
     const [failedUrl, setFailedUrl] = useState('');
     const showLogo = club.logoUrl && club.logoUrl !== failedUrl;
     return (

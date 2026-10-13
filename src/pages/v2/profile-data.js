@@ -1,8 +1,12 @@
+import { normalizeInitialsDesign, DEFAULT_INITIALS_DESIGN } from '../../components/media/initials-design.js';
+import { AVATAR_FRAMES } from './profile-page/avatar-frames.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isPaletteColor } from '../../components/media/color-palette.js';
 import { formatBirthDate, parseBirthDate } from './profile-date.js';
 import { COVER_COLORS, getCoverShapes, canUseCoverItem, readCoverInventory } from './profile-page/cover-cosmetics.js';
 
 import { normalizeCoverTransform, normalizeCoverText } from './profile-page/cover-design.js';
+import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 
 export const PROFILE_STORAGE_VERSION = 1;
 const MAX_DISPLAY_NAME = 120;
@@ -47,8 +51,16 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
     const skills = value.skills === undefined ? fallback.skills : normalizeList(value.skills, 'Kỹ năng');
     const interests = value.interests === undefined ? fallback.interests : normalizeList(value.interests, 'Sở thích');
     const avatarUrl = value.avatarUrl === undefined ? fallback.avatarUrl : text(value.avatarUrl);
+    const avatarMode = value.avatarMode ?? fallback.avatarMode ?? 'image';
+    if (!['image', 'default'].includes(avatarMode)) throw new Error('Loại ảnh đại diện không hợp lệ.');
+    const avatarDesign = normalizeInitialsDesign(value.avatarDesign, fallback.avatarDesign);
+    const avatarFrame = text(value.avatarFrame ?? fallback.avatarFrame ?? 'none');
+    if (!AVATAR_FRAMES.some((frame) => frame.id === avatarFrame)) throw new Error('Khung ảnh đại diện không hợp lệ.');
     const coverPreset = value.coverPreset === undefined ? fallback.coverPreset : text(value.coverPreset);
     const coverShape = value.coverShape === undefined ? fallback.coverShape || 'petals' : text(value.coverShape);
+    const coverBackgroundPaint = value.coverBackgroundPaint ?? fallback.coverBackgroundPaint ?? '';
+    if (typeof coverBackgroundPaint !== 'string' || (coverBackgroundPaint && !isPaletteColor(coverBackgroundPaint)))
+        throw new Error('Màu nền ảnh bìa không hợp lệ.');
     const coverBackgroundColor =
         coverPreset !== 'custom'
             ? coverPreset
@@ -75,9 +87,13 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
         skills,
         interests,
         avatarUrl,
+        avatarFrame,
+        avatarMode,
+        avatarDesign,
         coverPreset,
         coverShape,
         coverBackgroundColor,
+        coverBackgroundPaint,
         coverShapeTransform: normalizeCoverTransform(value.coverShapeTransform, fallback.coverShapeTransform),
         coverText: normalizeCoverText(value.coverText, fallback.coverText),
     };
@@ -169,8 +185,11 @@ export function createMockProfile(user) {
     return {
         profile: {
             displayName,
-            avatarUrl: '',
+            avatarUrl: text(user?.avatarUrl),
             coverPreset: 'default',
+            avatarFrame: 'none',
+            avatarMode: 'image',
+            avatarDesign: { ...DEFAULT_INITIALS_DESIGN },
             coverShape: 'petals',
             initials: text(user?.avatar, initials(displayName)),
             headline: 'Học hỏi, kết nối và tạo dấu ấn theo cách của mình.',
@@ -261,6 +280,8 @@ export function saveProfile(user, patch, storage = globalThis.localStorage) {
     ) {
         throw new Error('Bạn cần đổi màu hoặc shape này tại Kho quà của CLB trước khi sử dụng.');
     }
+    if (!canUseCoverItem('frame', profile.avatarFrame, inventory, storage))
+        throw new Error('Bạn cần đổi khung này tại Kho quà của CLB trước khi sử dụng.');
     const personal = editablePersonal(patch?.personal || {}, current.personal);
     const academic = editableAcademic(patch?.academic || {}, current.academic);
     const record = { version: PROFILE_STORAGE_VERSION, profile, personal, academic, savedAt: new Date().toISOString() };
@@ -352,13 +373,12 @@ export async function loadProfileMemberships(api) {
     if (!api.getClub) return memberships;
     return Promise.all(
         memberships.map(async (membership) => {
-            if (membership.logoUrl && membership.clubCode) return membership;
             try {
                 const club = await api.getClub(membership.clubId);
                 return {
                     ...membership,
                     clubCode: club?.code || club?.clubCode || membership.clubCode,
-                    logoUrl: club?.logoUrl || membership.logoUrl,
+                    logoUrl: club && Object.hasOwn(club, 'logoUrl') ? club.logoUrl || '' : membership.logoUrl,
                 };
             } catch {
                 // A failed logo lookup must not hide an approved membership.
@@ -369,6 +389,7 @@ export async function loadProfileMemberships(api) {
 }
 
 export function useProfileMemberships(api, sessionKey) {
+    const mediaRevision = usePublicMediaRevision('club');
     const [result, setResult] = useState({ status: 'loading', data: [] });
     useEffect(() => {
         let active = true;
@@ -383,7 +404,7 @@ export function useProfileMemberships(api, sessionKey) {
         return () => {
             active = false;
         };
-    }, [api, sessionKey]);
+    }, [api, sessionKey, mediaRevision]);
     return result;
 }
 
@@ -440,7 +461,10 @@ export function useProfile(user, sessionKey, api) {
     useEffect(() => {
         const key = profileStorageKey(user);
         const updated = (event) => {
-            if (event.key === key || event.detail?.key === key) setVersion((value) => value + 1);
+            if (key && (event.key === key || event.detail?.key === key || (event.type === 'storage' && event.key === null))) {
+                gate.current.invalidate();
+                setResult({ status: 'populated', data: readProfile(user), error: null });
+            }
         };
         window.addEventListener('storage', updated);
         window.addEventListener('clubhub:profile-updated', updated);
@@ -453,6 +477,7 @@ export function useProfile(user, sessionKey, api) {
     const retry = useCallback(() => setVersion((value) => value + 1), []);
     const save = useCallback(
         async (patch) => {
+            gate.current.invalidate();
             const snapshot = previewProfile(result.data || readProfile(user), patch);
             const data = saveProfile(user, {
                 ...snapshot.profile,

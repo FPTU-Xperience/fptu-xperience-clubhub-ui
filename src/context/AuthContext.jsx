@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { hasPermission as userHasPermission, ROLES } from '../auth/permissions';
+import { PersonalMediaProvider } from '../components/media/PersonalMediaContext';
 
 const AuthContext = createContext(null);
 // Local-only escape hatch while backend authentication is unavailable during UI work.
@@ -38,6 +39,7 @@ function toAuthUser(summary) {
     isActive: summary.isActive,
     isLocked: summary.isLocked,
     avatar: summary.fullName ? summary.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U',
+    avatarUrl: summary.avatarUrl || '',
   };
 }
 
@@ -195,7 +197,9 @@ export function AuthProvider({ children }) {
       refreshClubAccess,
       api,
     }}>
-      {children}
+      <PersonalMediaProvider key={user?.id || user?.email || 'anonymous'} user={user} api={api}>
+        {children}
+      </PersonalMediaProvider>
     </AuthContext.Provider>
   );
 }

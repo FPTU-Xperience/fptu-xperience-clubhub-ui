@@ -1,0 +1,34 @@
+.v2-framed-avatar {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    vertical-align: middle;
+    &.is-large {
+        width: 108px;
+        height: 108px;
+        font-size: 30px;
+    }
+    .v2-framed-avatar-image {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        border: 4px solid white;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #ffedd5;
+        color: #9a3412;
+        font-weight: 750;
+    }
+    .v2-avatar-frame-overlay {
+        position: absolute;
+        inset: -6%;
+        width: 112%;
+        height: 112%;
+        pointer-events: none;
+        overflow: visible;
+    }
+}

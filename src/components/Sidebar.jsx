@@ -1,3 +1,4 @@
+import { AccountAvatar } from './media/PersonalMediaContext';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -222,7 +223,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 {/* User Section */}
                 <div className="vanguard-panel mx-1 p-3 flex items-center gap-2.5 group relative">
                     <div className="theme-avatar w-[40px] h-[40px] rounded-[50%] flex items-center justify-center font-bold text-[10px]">
-                        {user?.avatar || 'AC'}
+                        <AccountAvatar />
                     </div>
                     <div className="flex-1 min-w-0">
                         <strong className="block text-[11px] mx-auto my-auto font-semibold text-ink truncate">

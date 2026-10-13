@@ -1,0 +1,97 @@
+.v2-avatar-form {
+    display: grid;
+    gap: 18px;
+    color: #193554;
+    font:
+        13px/1.65 'Inter',
+        sans-serif;
+    .v2-avatar-preview {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        padding: 18px;
+        border-radius: 12px;
+        background: #fff7ed;
+    }
+    p {
+        margin: 0;
+    }
+    .v2-avatar-note,
+    .v2-avatar-preview p {
+        color: #637895;
+        font-size: 12px;
+    }
+    .v2-profile-image-picker.is-avatar {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    a {
+        color: #c2410c;
+    }
+    footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        position: sticky;
+        bottom: 0;
+        padding: 16px 0;
+        border-top: 1px solid #e2e8f0;
+        background: white;
+    }
+    button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+}
+.v2-avatar-frames {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 5px;
+    button {
+        display: grid;
+        justify-items: center;
+        gap: 8px;
+        padding: 18px 10px;
+        border: 1px solid #d8e3f0;
+        border-radius: 10px;
+        background: white;
+        color: #193554;
+        font: inherit;
+        cursor: pointer;
+    }
+    .v2-framed-avatar {
+        width: 72px;
+        height: 72px;
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+    strong,
+    small {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    small {
+        font-size: 11px;
+        color: #637895;
+    }
+    button[aria-pressed='true'] {
+        border-color: #f97316;
+        box-shadow: 0 0 0 2px #fff0e3;
+    }
+    button:focus-visible {
+        outline: 3px solid #fed7aa;
+        outline-offset: 2px;
+    }
+}
+.v2-avatar-locked {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fff7ed;
+    color: #9a3412;
+}
+@media (max-width: 380px) {
+    .v2-avatar-frames {
+        grid-template-columns: 1fr;
+    }
+}

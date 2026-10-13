@@ -16,9 +16,9 @@ import {
     Undo2,
 } from 'lucide-react';
 import PageState from '../../../components/v2/PageState';
-import V2Modal from '../../../components/v2/common/modal/V2Modal';
-import ProfileImagePicker from './ProfileImagePicker';
-import { previewProfile, toSharedProfile, useProfile, useProfileMemberships } from '../profile-data';
+import ProfileAvatar from './ProfileAvatar';
+import ProfileAvatarModal from './ProfileAvatarModal';
+import { previewProfile, toSharedProfile, useProfileMemberships } from '../profile-data';
 import { campusLabel } from '../profile-options';
 import EditProfileModal from './EditProfileModal';
 import ProfileCoverModal from './ProfileCoverModal';
@@ -87,74 +87,7 @@ function Stat({ icon: Icon, label, value, note, hidden }) {
     );
 }
 
-function ProfileAvatar({ profile, imageUrl, large = false }) {
-    return imageUrl || profile.avatarUrl ? (
-        <img className={`v2-profile-avatar${large ? ' is-large' : ''}`} src={imageUrl || profile.avatarUrl} alt="" />
-    ) : (
-        <span className={`v2-profile-avatar${large ? ' is-large' : ''}`} aria-hidden="true">
-            {profile.initials}
-        </span>
-    );
-}
-
-function ProfileImageModal({ images, profile, onClose, onSave }) {
-    const [file, setFile] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
-    const submit = async (event) => {
-        event.preventDefault();
-        if (saving || !file) return;
-        setSaving(true);
-        setError('');
-        try {
-            await onSave({ file });
-            onClose();
-        } catch (issue) {
-            setError(issue.message || 'Không thể lưu ảnh.');
-        } finally {
-            setSaving(false);
-        }
-    };
-    return (
-        <V2Modal
-            title="Đổi ảnh đại diện"
-            onClose={() => {
-                if (!saving) onClose();
-            }}
-            className="v2-profile-image-modal"
-        >
-            <form className="v2-profile-form v2-profile-image-form" onSubmit={submit}>
-                <ProfileImagePicker
-                    file={file}
-                    value={images.avatar || profile.avatarUrl}
-                    initials={profile.initials}
-                    onChange={setFile}
-                    disabled={saving}
-                />
-                <p className="v2-profile-image-note">
-                    <Info size={16} />
-                    <span>Ảnh chỉ được lưu cho tài khoản của bạn trên thiết bị này.</span>
-                </p>
-                {error && (
-                    <p className="v2-profile-form-error" role="alert">
-                        {error}
-                    </p>
-                )}
-                <footer>
-                    <button type="button" className="v2-button" disabled={saving} onClick={onClose}>
-                        Hủy
-                    </button>
-                    <button type="submit" className="v2-button v2-button--primary" disabled={saving || !file}>
-                        {saving ? 'Đang lưu…' : 'Lưu ảnh'}
-                    </button>
-                </footer>
-            </form>
-        </V2Modal>
-    );
-}
-
-export default function ProfilePage({ user, sessionKey, api, profileImages }) {
-    const result = useProfile(user, sessionKey, api);
+export default function ProfilePage({ user, sessionKey, api, profileImages, profileResult: result }) {
     const { images, error: imageError, saveImage } = profileImages;
     const [shared, setShared] = useState(false);
     const [tab, setTab] = useState('overview');
@@ -199,9 +132,21 @@ export default function ProfilePage({ user, sessionKey, api, profileImages }) {
     const coverPreset =
         data?.profile.coverPreset === 'custom' && !images.cover ? 'default' : data?.profile.coverPreset || 'default';
     const customCover = coverPreset === 'custom' && images.cover;
-    const saveSelectedImage = async ({ file, preset, shape, shapeTransform, backgroundColor, coverText }) => {
+    const saveSelectedImage = async ({
+        file,
+        preset,
+        shape,
+        shapeTransform,
+        backgroundColor,
+        backgroundPaint,
+        coverText,
+        frame,
+        avatarMode,
+        avatarDesign,
+    }) => {
         if (imageModal === 'avatar') {
-            await saveImage('avatar', file);
+            if (file) await saveImage('avatar', file);
+            await result.save({ avatarFrame: frame, avatarMode, avatarDesign });
         } else if (imageModal === 'cover') {
             if (file) await saveImage('cover', file);
             await result.save({
@@ -209,6 +154,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages }) {
                 coverShape: shape,
                 coverShapeTransform: shapeTransform,
                 coverBackgroundColor: backgroundColor,
+                coverBackgroundPaint: backgroundPaint,
                 coverText,
             });
         }
@@ -232,6 +178,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages }) {
         <div className="v2-public-content v2-personal-page v2-profile-page">
             <section className="v2-profile-cover">
                 <ProfileCoverArt
+                    backgroundPaint={data.profile.coverBackgroundPaint || ''}
                     color={coverPreset === 'custom' ? data.profile.coverBackgroundColor || 'default' : coverPreset}
                     shape={data.profile.coverShape || 'petals'}
                     imageUrl={customCover || ''}
@@ -267,7 +214,6 @@ export default function ProfilePage({ user, sessionKey, api, profileImages }) {
                 <div className="v2-profile-grow">
                     <div>
                         <h1>{data.profile.displayName}</h1>
-                        <ShieldCheck size={21} aria-label="Hồ sơ trải nghiệm" />
                     </div>
                     <p>{data.profile.headline}</p>
                     <small>
@@ -478,9 +424,8 @@ export default function ProfilePage({ user, sessionKey, api, profileImages }) {
                 />
             )}
             {imageModal === 'avatar' && (
-                <ProfileImageModal
-                    kind={imageModal}
-                    value={coverPreset}
+                <ProfileAvatarModal
+                    user={user}
                     images={images}
                     profile={data.profile}
                     onClose={() => setImageModal('')}

@@ -1,3 +1,4 @@
+import { AccountAvatar } from './media/PersonalMediaContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -246,7 +247,7 @@ export default function Header({ title, onMenuClick }) {
                     >
                         <div className="theme-avatar-panel rounded-[50%]">
                             <div className="theme-avatar w-[34px] h-[34px] rounded-xl flex items-center justify-center font-bold text-[10px] shadow-lg shadow-cyan-500/20">
-                                {user?.avatar || 'AC'}
+                                <AccountAvatar />
                             </div>
                         </div>
                     </button>
@@ -263,7 +264,7 @@ export default function Header({ title, onMenuClick }) {
                             >
                                 <div className="flex items-center gap-3 pb-3 px-1 ">
                                     <div className="theme-avatar w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-bold">
-                                        {user?.avatar || 'AC'}
+                                        <AccountAvatar />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-bold text-ink text-[13px] truncate">

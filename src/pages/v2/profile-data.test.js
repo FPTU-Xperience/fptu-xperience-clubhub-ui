@@ -227,17 +227,18 @@ test('profile memberships load club logos and preserve approved clubs when a log
         getClub: async (id) => {
             requested.push(id);
             if (id === 9) throw new Error('Unavailable');
+            if (id === 10) return { id, code: 'C10', logoUrl: 'https://cdn.example.com/updated-10.png' };
             return { id, code: 'F-CODE', logoUrl: 'https://cdn.example.com/7.png' };
         },
     });
-    assert.deepEqual(requested, [7, 9]);
+    assert.deepEqual(requested, [7, 9, 10]);
     assert.deepEqual(clubs.map((club) => club.clubCode), ['F-CODE', '', 'C10']);
     assert.deepEqual(
         clubs.map((club) => [club.clubId, club.logoUrl]),
         [
             [7, 'https://cdn.example.com/7.png'],
             [9, ''],
-            [10, 'https://cdn.example.com/10.png'],
+            [10, 'https://cdn.example.com/updated-10.png'],
         ],
     );
 });
@@ -260,6 +261,6 @@ test('authenticated V2 router owns the production profile route', () => {
     const source = readFileSync(new URL('./V2App.jsx', import.meta.url), 'utf8');
     assert.match(
         source,
-        /path="profile" element=\{<ProfilePage user=\{user\} sessionKey=\{sessionKey\} api=\{api\} profileImages=\{profileImages\} \/>\}/,
+        /path="profile"\s+element=\{<ProfilePage[\s\S]*?profileResult=\{profileResult\}/,
     );
 });

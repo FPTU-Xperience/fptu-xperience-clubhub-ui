@@ -1,3 +1,4 @@
+import { AccountAvatar } from '../../components/media/PersonalMediaContext';
 import React, { useEffect, useState } from "react";
 import {
   Check,
@@ -165,7 +166,7 @@ export default function SystemAdminProfile({ user }) {
             <div className="profile-id">
               <div className="avatar-shell">
                 <div className="avatar-glow" />
-                <div className="avatar-main">{user?.avatar || "SA"}</div>
+                <div className="avatar-main"><AccountAvatar /></div>
                 <span className="online-mark">
                   <Check size={13} />
                 </span>

@@ -4,8 +4,9 @@ import { Check, LockKeyhole } from 'lucide-react';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import ProfileCoverArt from './ProfileCoverArt';
 import ProfileImagePicker from './ProfileImagePicker';
+import PaletteColorPicker from '../../../components/media/PaletteColorPicker';
 import { COVER_COLORS, getCoverShapes, canUseCoverItem, readCoverInventory } from './cover-cosmetics';
-import { DEFAULT_COVER_TRANSFORM, DEFAULT_COVER_TEXT } from './cover-design';
+import { COVER_FONTS, DEFAULT_COVER_TRANSFORM, DEFAULT_COVER_TEXT, normalizeCoverText } from './cover-design';
 import './ProfileCoverModal.scss';
 
 export default function ProfileCoverModal({ user, profile, savedImage, onClose, onSave }) {
@@ -13,6 +14,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
         profile.coverPreset === 'custom' ? profile.coverBackgroundColor || 'default' : profile.coverPreset || 'default',
     );
     const [shape, setShape] = useState(profile.coverShape || 'petals');
+    const [backgroundPaint, setBackgroundPaint] = useState(profile.coverBackgroundPaint || '');
     const [mode, setMode] = useState(profile.coverPreset === 'custom' && savedImage ? 'upload' : 'design');
     const [tab, setTab] = useState('background');
     const tabId = useId();
@@ -21,7 +23,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
         ...DEFAULT_COVER_TRANSFORM,
         ...profile.coverShapeTransform,
     });
-    const [coverText, setCoverText] = useState({ ...DEFAULT_COVER_TEXT, ...profile.coverText });
+    const [coverText, setCoverText] = useState(() => normalizeCoverText(profile.coverText));
     const [file, setFile] = useState(null);
     const [previewImage, setPreviewImage] = useState('');
     const [inventory, setInventory] = useState(() => readCoverInventory(user));
@@ -51,12 +53,13 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
     }, [user]);
     const unlocked = canUseCoverItem('color', color, inventory) && canUseCoverItem('shape', shape, inventory);
     const changed =
+        backgroundPaint !== (profile.coverBackgroundPaint || '') ||
         (mode === 'upload' ? !!file || profile.coverPreset !== 'custom' : profile.coverPreset !== color) ||
         (profile.coverShape || 'petals') !== shape ||
         (mode === 'upload' && (profile.coverBackgroundColor || 'default') !== color) ||
         JSON.stringify(shapeTransform) !==
             JSON.stringify({ ...DEFAULT_COVER_TRANSFORM, ...profile.coverShapeTransform }) ||
-        JSON.stringify(coverText) !== JSON.stringify({ ...DEFAULT_COVER_TEXT, ...profile.coverText });
+        JSON.stringify(coverText) !== JSON.stringify(normalizeCoverText(profile.coverText));
     const beginLayerDrag = (event) => {
         if (
             saving ||
@@ -165,6 +168,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                 shape,
                 shapeTransform,
                 backgroundColor: color,
+                backgroundPaint,
                 coverText,
             });
             onClose();
@@ -202,12 +206,15 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         <ProfileCoverArt
                             color={color}
                             shape={shape}
+                            backgroundPaint={backgroundPaint}
                             imageUrl={mode === 'upload' ? previewImage || savedImage : ''}
                             shapeTransform={shapeTransform}
                             coverText={coverText}
                         />
                     </div>
-                    <p className="v2-cover-preview-note">Xem trước toàn bộ ảnh bìa · Cùng bố cục với trang cá nhân.</p>
+                    <p className="v2-cover-preview-note">
+                        Xem trước toàn bộ ảnh bìa · Đề xuất 1200 × 300px (4:1) · Cùng bố cục với trang cá nhân.
+                    </p>
                     <div className="v2-cover-modes" role="tablist" aria-label="Tùy chỉnh ảnh bìa">
                         {[
                             ['background', 'Nền'],
@@ -280,8 +287,11 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     kind: 'color',
                                     label: 'Màu nền',
                                     items: COVER_COLORS,
-                                    selected: color,
-                                    select: setColor,
+                                    selected: backgroundPaint ? '' : color,
+                                    select: (next) => {
+                                        setColor(next);
+                                        setBackgroundPaint('');
+                                    },
                                 })
                             ) : (
                                 <ProfileImagePicker
@@ -291,6 +301,21 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     value={savedImage}
                                     onChange={setFile}
                                     disabled={saving}
+                                />
+                            )}
+                            {mode === 'design' && (
+                                <PaletteColorPicker
+                                    label="Màu nền tùy chọn"
+                                    value={
+                                        backgroundPaint ||
+                                        COVER_COLORS.find((item) => item.id === color)?.background ||
+                                        '#fff1df'
+                                    }
+                                    disabled={saving}
+                                    onChange={(paint) => {
+                                        setBackgroundPaint(paint);
+                                        setColor('default');
+                                    }}
                                 />
                             )}
                         </>
@@ -326,6 +351,9 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                             max={max}
                                             step={1}
                                             value={shapeTransform[key]}
+                                            style={{
+                                                '--range-progress': `${((shapeTransform[key] - min) / (max - min)) * 100}%`,
+                                            }}
                                             disabled={saving || shape === 'none'}
                                             onChange={(event) =>
                                                 setShapeTransform((value) => ({
@@ -352,30 +380,6 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                     )}
                     {tab === 'text' && (
                         <div className="v2-cover-text-controls">
-                            <p className="v2-cover-preview-note">
-                                Kéo phần chữ trên ảnh xem trước để đổi vị trí, hoặc dùng thanh điều chỉnh bên dưới.
-                            </p>
-                            {[
-                                ['x', 'Vị trí chữ ngang'],
-                                ['y', 'Vị trí chữ dọc'],
-                            ].map(([axis, label]) => (
-                                <label key={axis}>
-                                    {label}: {coverText[axis]}%
-                                    <input
-                                        type="range"
-                                        aria-label={label}
-                                        min={-100}
-                                        max={100}
-                                        step={1}
-                                        value={coverText[axis]}
-                                        disabled={saving || !coverText.visible}
-                                        onChange={(event) =>
-                                            setCoverText((value) => ({ ...value, [axis]: Number(event.target.value) }))
-                                        }
-                                    />
-                                </label>
-                            ))}
-
                             <label className="v2-cover-check">
                                 <input
                                     type="checkbox"
@@ -392,18 +396,42 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 ['title', 'Tiêu đề', 60],
                                 ['subtitle', 'Dòng chữ nhấn', 60],
                             ].map(([key, label, limit]) => (
-                                <label key={key}>
-                                    {label}
-                                    <input
-                                        type="text"
-                                        maxLength={limit}
-                                        value={coverText[key]}
-                                        disabled={saving || !coverText.visible}
-                                        onChange={(event) =>
-                                            setCoverText((value) => ({ ...value, [key]: event.target.value }))
-                                        }
-                                    />
-                                </label>
+                                <div className="v2-cover-text-row" key={key}>
+                                    <label htmlFor={`${tabId}-text-${key}`}>{label}</label>
+                                    <div className="v2-cover-text-row-fields">
+                                        <input
+                                            id={`${tabId}-text-${key}`}
+                                            type="text"
+                                            maxLength={limit}
+                                            value={coverText[key]}
+                                            disabled={saving || !coverText.visible}
+                                            onChange={(event) =>
+                                                setCoverText((value) => ({ ...value, [key]: event.target.value }))
+                                            }
+                                        />
+                                        <select
+                                            aria-label={`Phông chữ ${label.toLowerCase()}`}
+                                            value={coverText.fonts[key]}
+                                            disabled={saving || !coverText.visible}
+                                            onChange={(event) =>
+                                                setCoverText((value) => ({
+                                                    ...value,
+                                                    fonts: { ...value.fonts, [key]: event.target.value },
+                                                }))
+                                            }
+                                        >
+                                            {COVER_FONTS.map((font) => (
+                                                <option
+                                                    key={font.id}
+                                                    value={font.id}
+                                                    style={{ fontFamily: font.family }}
+                                                >
+                                                    {font.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                             ))}
                             <label className="v2-cover-check">
                                 <input
@@ -422,17 +450,12 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 Dùng màu chữ theo bảng màu
                             </label>
                             {coverText.color && (
-                                <label>
-                                    Màu chữ
-                                    <input
-                                        type="color"
-                                        value={coverText.color}
-                                        disabled={saving || !coverText.visible}
-                                        onChange={(event) =>
-                                            setCoverText((value) => ({ ...value, color: event.target.value }))
-                                        }
-                                    />
-                                </label>
+                                <PaletteColorPicker
+                                    label="Màu chữ"
+                                    value={coverText.color}
+                                    disabled={saving || !coverText.visible}
+                                    onChange={(paint) => setCoverText((value) => ({ ...value, color: paint }))}
+                                />
                             )}
                             <label>
                                 Cỡ chữ: {coverText.size}px
@@ -441,12 +464,39 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     min={24}
                                     max={240}
                                     value={coverText.size}
+                                    aria-label="Cỡ chữ"
+                                    style={{ '--range-progress': `${((coverText.size - 24) / 216) * 100}%` }}
                                     disabled={saving || !coverText.visible}
                                     onChange={(event) =>
                                         setCoverText((value) => ({ ...value, size: Number(event.target.value) }))
                                     }
                                 />
                             </label>
+                            <p className="v2-cover-preview-note">
+                                Kéo phần chữ trên ảnh xem trước để đổi vị trí, hoặc dùng thanh điều chỉnh bên dưới.
+                            </p>
+                            {[
+                                ['x', 'Vị trí chữ ngang'],
+                                ['y', 'Vị trí chữ dọc'],
+                            ].map(([axis, label]) => (
+                                <label key={axis}>
+                                    {label}: {coverText[axis]}%
+                                    <input
+                                        type="range"
+                                        aria-label={label}
+                                        min={-100}
+                                        max={100}
+                                        step={1}
+                                        value={coverText[axis]}
+                                        style={{ '--range-progress': `${(coverText[axis] + 100) / 2}%` }}
+                                        disabled={saving || !coverText.visible}
+                                        onChange={(event) =>
+                                            setCoverText((value) => ({ ...value, [axis]: Number(event.target.value) }))
+                                        }
+                                    />
+                                </label>
+                            ))}
+
                             <button
                                 type="button"
                                 className="v2-button"
@@ -466,9 +516,6 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                 <Link className="v2-cover-store-link" to="/v2/my-clubs">
                     Mở Kho quà tại CLB của tôi để đổi màu & shape →
                 </Link>
-                <p className="v2-cover-preview-note">
-                    Thiết kế và quyền sở hữu đang lưu tạm theo tài khoản trên thiết bị này.
-                </p>
                 {error && (
                     <p className="v2-profile-form-error" role="alert">
                         {error}

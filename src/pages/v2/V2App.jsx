@@ -19,7 +19,8 @@ import ClubWorkspacePage from './club-workspace-page/ClubWorkspacePage';
 import { MySchedulePage } from './personal-pages/PersonalPages';
 import StudySchedulePage from './personal-pages/StudySchedulePage';
 import ProfilePage from './profile-page/ProfilePage';
-import { useProfileImages } from './profile-page/profile-images';
+import { usePersonalMedia } from '../../components/media/PersonalMediaContext';
+import { EntityMediaProvider } from '../../components/media/EntityMediaContext';
 import V2Access from './V2Access';
 import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import './V2App.scss';
@@ -30,7 +31,7 @@ function AuthenticatedV2App() {
     const { user, logout, clubAccess, api } = useAuth();
     const location = useLocation();
     const sessionKey = user?.id || user?.email || 'anonymous';
-    const profileImages = useProfileImages(user, sessionKey);
+    const { profileImages, profileResult } = usePersonalMedia();
 
     if (location.pathname.startsWith('/v2/demo')) {
         return (
@@ -45,13 +46,14 @@ function AuthenticatedV2App() {
     const workspace = location.pathname.startsWith('/v2/my-clubs/');
 
     return (
+        <EntityMediaProvider api={api}>
         <PinnedClubsProvider key={sessionKey} api={api} accountKey={sessionKey}>
             <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}`}>
                 <a className="v2-skip-link" href="#v2-main">
                     Đến nội dung chính
                 </a>
                 {!workspace && (
-                    <LeftRail user={user} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />
+                    <LeftRail user={user} profile={profileResult.data?.profile} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />
                 )}
                 <main id="v2-main" className="v2-main">
                     <Routes>
@@ -72,7 +74,7 @@ function AuthenticatedV2App() {
                             element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />}
                         />
                         <Route path="study-schedule" element={<StudySchedulePage key={sessionKey} user={user} />} />
-                        <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} profileImages={profileImages} />} />
+                        <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} profileImages={profileImages} profileResult={profileResult} />} />
                         <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
                         <Route
                             path="clubs/:clubCode"
@@ -90,6 +92,7 @@ function AuthenticatedV2App() {
                 {!workspace && <Footer />}
             </div>
         </PinnedClubsProvider>
+        </EntityMediaProvider>
     );
 }
 

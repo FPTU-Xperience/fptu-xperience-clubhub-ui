@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { ImagePlus, Upload, X } from 'lucide-react';
 import { validateImage } from '../../../components/media/ImagePicker';
+import ImageCropModal from '../../../components/media/ImageCropModal';
+import { PROFILE_COVER_SIZE } from './cover-design';
 
 export default function ProfileImagePicker({
     cover,
@@ -17,6 +19,7 @@ export default function ProfileImagePicker({
     const [preview, setPreview] = useState('');
     const [error, setError] = useState('');
     const [dragging, setDragging] = useState(false);
+    const [cropFile, setCropFile] = useState(null);
 
     useEffect(() => {
         if (!file) {
@@ -32,17 +35,28 @@ export default function ProfileImagePicker({
         if (disabled || !next) return;
         const issue = validateImage(next);
         setError(issue);
-        if (!issue) onChange(next);
+        if (!issue) setCropFile(next);
     };
     const image = preview || value;
 
     return (
         <section className={`v2-profile-image-picker${cover ? ' is-cover' : ' is-avatar'}`}>
+            {cropFile && (
+                <ImageCropModal
+                    file={cropFile}
+                    size={cover ? PROFILE_COVER_SIZE : { width: 300, height: 300 }}
+                    label={cover ? 'Ảnh bìa' : 'Ảnh đại diện'}
+                    onClose={() => setCropFile(null)}
+                    onApply={(cropped) => {
+                        onChange(cropped);
+                        setCropFile(null);
+                    }}
+                />
+            )}
             {!hidePreview && (
                 <>
                     <div className="v2-profile-image-preview-heading">
                         <strong>Xem trước</strong>
-                        <span>{file ? 'Ảnh vừa chọn' : 'Ảnh sẽ hiển thị'}</span>
                     </div>
                     <div className={`v2-profile-image-preview is-${preset || 'default'}`}>
                         {image ? (

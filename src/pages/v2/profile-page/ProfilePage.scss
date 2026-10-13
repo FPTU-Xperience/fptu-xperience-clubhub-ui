@@ -184,7 +184,7 @@
 .v2-profile-image-initials { display: grid; place-items: center; background: #ffedd5; color: #9a3412; font-size: 32px; font-weight: 750; }
 .is-cover .v2-profile-image-preview {
     min-height: 0;
-    aspect-ratio: 3.6;
+    aspect-ratio: 4 / 1;
     background: linear-gradient(120deg, #fff7ed, #ffedd5 52%, #fff);
     &.is-sunset { background: linear-gradient(120deg, #fff4d9, #ffc494 48%, #ee775f); }
     &.is-horizon { background: linear-gradient(120deg, #e8f6ff, #b7daf2 55%, #fcd9b0); }

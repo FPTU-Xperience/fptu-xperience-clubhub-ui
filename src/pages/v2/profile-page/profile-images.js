@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { profileStorageKey } from '../profile-data';
 import { validateImageUpload } from '../../../services/media-upload';
+import { publishProfileImageSaved, subscribeProfileImageSaved } from '../../../services/profile-image-sync';
 
 const DATABASE = 'clubhub-profile-images';
 const STORE = 'images';
@@ -38,25 +39,38 @@ export function useProfileImages(user, sessionKey) {
     const [images, setImages] = useState({ avatar: '', cover: '' });
     const [error, setError] = useState('');
     const urls = useRef({ avatar: '', cover: '' });
+    const versions = useRef({ avatar: 0, cover: 0 });
+    const lifetime = useRef(null);
+    const source = useRef(`${Date.now()}-${Math.random()}`);
     const account = profileStorageKey(user);
 
     useEffect(() => {
-        let active = true;
+        const token = { account };
+        lifetime.current = token;
         setImages({ avatar: '', cover: '' });
         setError('');
-        if (account) {
-            Promise.all(['avatar', 'cover'].map((kind) => imageRecord(user, kind))).then((blobs) => {
-                if (!active) return;
-                const next = Object.fromEntries(blobs.map((blob, index) => {
-                    const url = blob instanceof Blob ? URL.createObjectURL(blob) : '';
-                    return [['avatar', 'cover'][index], url];
-                }));
-                urls.current = next;
-                setImages(next);
-            }).catch(() => { if (active) setError('Không thể đọc ảnh đã lưu trên thiết bị.'); });
-        }
+        const reload = async (kind) => {
+            const version = ++versions.current[kind];
+            try {
+                const blob = await imageRecord(user, kind);
+                if (lifetime.current !== token || versions.current[kind] !== version) return;
+                const url = blob instanceof Blob ? URL.createObjectURL(blob) : '';
+                if (urls.current[kind]) URL.revokeObjectURL(urls.current[kind]);
+                urls.current = { ...urls.current, [kind]: url };
+                setImages((current) => ({ ...current, [kind]: url }));
+                setError('');
+            } catch {
+                if (lifetime.current === token && versions.current[kind] === version)
+                    setError('Không thể đọc ảnh đã lưu trên thiết bị.');
+            }
+        };
+        if (account) ['avatar', 'cover'].forEach(reload);
+        const unsubscribe = subscribeProfileImageSaved(account, (signal) => {
+            if (signal.source !== source.current) reload(signal.kind);
+        });
         return () => {
-            active = false;
+            lifetime.current = null;
+            unsubscribe();
             Object.values(urls.current).forEach((url) => { if (url) URL.revokeObjectURL(url); });
             urls.current = { avatar: '', cover: '' };
         };
@@ -65,7 +79,12 @@ export function useProfileImages(user, sessionKey) {
     const saveImage = useCallback(async (kind, file) => {
         if (!['avatar', 'cover'].includes(kind)) throw new Error('Loại ảnh không hợp lệ.');
         validateImageUpload(file);
+        const token = lifetime.current;
+        const version = ++versions.current[kind];
         await imageRecord(user, kind, file);
+        publishProfileImageSaved(account, kind, source.current);
+        if (lifetime.current !== token || token?.account !== account || versions.current[kind] !== version)
+            throw new Error('Phiên chỉnh ảnh đã thay đổi. Vui lòng mở lại hồ sơ.');
         const url = URL.createObjectURL(file);
         if (urls.current[kind]) URL.revokeObjectURL(urls.current[kind]);
         urls.current = { ...urls.current, [kind]: url };
@@ -73,7 +92,7 @@ export function useProfileImages(user, sessionKey) {
             return { ...current, [kind]: url };
         });
         return url;
-    }, [user]);
+    }, [user, account]);
 
     return { images, error, saveImage };
 }

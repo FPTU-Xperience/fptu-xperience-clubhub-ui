@@ -1,3 +1,4 @@
+import { AccountAvatar } from '../components/media/PersonalMediaContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -23,7 +24,7 @@ function ExistingProfile() {
                 >
                     <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-500 via-orange-500 to-red-500 p-1">
                         <div className="flex h-full w-full items-center justify-center rounded-xl bg-slate-950 text-3xl font-bold text-white">
-                            {user?.avatar || '?'}
+                            <AccountAvatar />
                         </div>
                     </div>
                     <h3 className="mt-5 text-xl font-bold text-white">{user?.name || 'Người dùng'}</h3>

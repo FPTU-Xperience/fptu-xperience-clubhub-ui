@@ -1,10 +1,22 @@
+import { isPaletteColor } from '../../../components/media/color-palette.js';
+
 export const DEFAULT_COVER_TRANSFORM = { x: 0, y: 0, scale: 100 };
+export const PROFILE_COVER_SIZE = { width: 1200, height: 300 };
+export const COVER_FONTS = [
+    { id: 'default', label: 'Mặc định', family: 'Inter, sans-serif' },
+    { id: 'inter', label: 'Inter', family: 'Inter, sans-serif' },
+    { id: 'arial', label: 'Arial', family: 'Arial, sans-serif' },
+    { id: 'georgia', label: 'Georgia', family: 'Georgia, serif' },
+    { id: 'times', label: 'Times New Roman', family: '"Times New Roman", serif' },
+    { id: 'courier', label: 'Courier New', family: '"Courier New", monospace' },
+];
 export const DEFAULT_COVER_TEXT = {
     visible: true,
     eyebrow: 'THE EXPERIENCE IS YOURS.',
     title: 'Make your time',
     subtitle: 'mean something.',
     color: '',
+    fonts: { eyebrow: 'default', title: 'default', subtitle: 'default' },
     size: 42,
     x: 0,
     y: 0,
@@ -25,13 +37,18 @@ export function normalizeCoverTransform(value = {}, fallback = DEFAULT_COVER_TRA
 
 export function normalizeCoverText(value = {}, fallback = DEFAULT_COVER_TEXT) {
     const next = { ...DEFAULT_COVER_TEXT, ...fallback, ...value };
+    const fonts = {};
+    for (const field of ['eyebrow', 'title', 'subtitle']) {
+        fonts[field] = value.fonts?.[field] ?? value.font ?? fallback.fonts?.[field] ?? fallback.font ?? 'default';
+        if (!COVER_FONTS.some((font) => font.id === fonts[field])) throw new Error('Phông chữ ảnh bìa không hợp lệ.');
+    }
     if (typeof next.visible !== 'boolean' || !Number.isFinite(next.size) || next.size < 24 || next.size > 240)
         throw new Error('Cài đặt chữ ảnh bìa không hợp lệ.');
     for (const axis of ['x', 'y']) {
         if (!Number.isFinite(next[axis]) || next[axis] < -100 || next[axis] > 100)
             throw new Error('Vị trí chữ ảnh bìa không hợp lệ.');
     }
-    if (typeof next.color !== 'string' || (next.color && !/^#[0-9a-f]{6}$/i.test(next.color)))
+    if (typeof next.color !== 'string' || (next.color && !isPaletteColor(next.color)))
         throw new Error('Màu chữ không hợp lệ.');
     const lines = {};
     for (const [field, limit] of [
@@ -43,5 +60,13 @@ export function normalizeCoverText(value = {}, fallback = DEFAULT_COVER_TEXT) {
             throw new Error(`Nội dung chữ ảnh bìa tối đa ${limit} ký tự.`);
         lines[field] = next[field];
     }
-    return { ...lines, visible: next.visible, color: next.color, size: next.size, x: next.x, y: next.y };
+    return {
+        ...lines,
+        visible: next.visible,
+        color: next.color,
+        fonts,
+        size: next.size,
+        x: next.x,
+        y: next.y,
+    };
 }

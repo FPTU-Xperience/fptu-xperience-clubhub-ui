@@ -1,3 +1,5 @@
+import { AVATAR_FRAMES, AVATAR_FRAME_REWARDS } from './avatar-frames.js';
+
 export const COVER_COLORS = [
     {
         id: 'default',
@@ -154,7 +156,7 @@ export function getClubCoverRewards(clubId, storage = globalThis.localStorage, c
             .toUpperCase()
             .replace(/[^A-Z0-9]/g, '') === 'FPTDEV';
     return [
-        ...(fptDev ? FPT_DEV_COMBOS : []),
+        ...(fptDev ? [...FPT_DEV_COMBOS, ...AVATAR_FRAME_REWARDS] : []),
         ...readClubShapes(storage).filter((item) => String(item.clubId) === String(clubId)),
     ];
 }
@@ -185,7 +187,7 @@ export function publishClubShape({ clubId, clubName, label, cost, assetUrl }, st
     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('clubhub:cover-rewards-updated'));
     return shape;
 }
-export const COVER_REWARDS = FPT_DEV_COMBOS;
+export const COVER_REWARDS = [...FPT_DEV_COMBOS, ...AVATAR_FRAME_REWARDS];
 const identity = (user) => (user?.id === undefined || user?.id === null ? '' : String(user.id));
 export const cosmeticsStorageKey = (user) => (identity(user) ? `clubhub:v2:cover-rewards:${identity(user)}` : null);
 export function readCoverInventory(user, storage = globalThis.localStorage) {
@@ -211,7 +213,9 @@ export function readCoverInventory(user, storage = globalThis.localStorage) {
     }
 }
 export function canUseCoverItem(kind, id, inventory, storage = globalThis.localStorage) {
-    const item = (kind === 'color' ? COVER_COLORS : getCoverShapes(storage)).find((item) => item.id === id);
+    const item = (kind === 'color' ? COVER_COLORS : kind === 'frame' ? AVATAR_FRAMES : getCoverShapes(storage)).find(
+        (item) => item.id === id,
+    );
     return !!item && (item.free || inventory.owned.includes(`${kind}:${id}`));
 }
 // Temporary per-club credits for exercising the UI; never a live points balance.
