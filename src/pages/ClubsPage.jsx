@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePublicMediaRevision } from '../services/use-public-media-revision';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Modal from '../components/Modal';
@@ -338,6 +339,7 @@ export default function ClubsPage() {
         reviewerSignature: '',
     });
 
+    const mediaRevision = usePublicMediaRevision('club');
     const loadData = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -375,7 +377,7 @@ export default function ClubsPage() {
 
     useEffect(() => {
         loadData();
-    }, [loadData]);
+    }, [loadData, mediaRevision]);
 
     const membershipByClub = useMemo(() => new Map(memberships.map((item) => [item.clubId, item])), [memberships]);
 

@@ -16,6 +16,7 @@ import { Link, NavLink } from 'react-router-dom';
 import CountBadge from '../../../components/v2/common/CountBadge';
 import { clubMemberRoleLabel } from './tabs/members/club-member-roles';
 import './WorkspaceLeftRail.scss';
+import { useEntityMedia } from '../../../components/media/EntityMediaContext';
 
 export const workspaceSections = [
     ['', 'Trang chủ', Home],
@@ -33,7 +34,8 @@ export function getWorkspaceSections(manager) {
     return workspaceSections.filter((section) => !section[3] || manager);
 }
 
-function ClubIdentity({ club }) {
+function ClubIdentity({ club: input }) {
+    const club = useEntityMedia('club', input);
     return (
         <>
             <span className="v2-workspace-club-logo" aria-hidden="true">

@@ -1,6 +1,8 @@
 import { formatErrorMessage, vi } from '../locales/vi';
 import { putImageWithIntent, validateImageUpload } from './media-upload';
 import { applicationsFromMemberships, selectionFromClubAccess } from './my-clubs-adapter';
+import { publishPublicMediaSaved } from './public-media-sync';
+import { createEntityMediaStore } from './entity-media-store.js';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000').replace(/\/+$/, '');
 // Keep API failures in-page during local UI work. Production always preserves the login redirect.
@@ -9,6 +11,7 @@ const AUTH_BYPASS_ENABLED = import.meta.env.DEV && import.meta.env.VITE_DISABLE_
 class ApiService {
     constructor() {
         this.baseUrl = API_BASE_URL;
+        this.media = createEntityMediaStore();
     }
 
     buildUrl(endpoint) {
@@ -32,6 +35,7 @@ class ApiService {
     }
 
     clearTokens() {
+        this.media.reset();
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
     }
@@ -135,6 +139,7 @@ class ApiService {
             method: 'POST',
             body: JSON.stringify({ email: (email || '').trim() }),
         });
+        this.media.reset();
         this.setToken(data.accessToken);
         if (data.refreshToken) {
             this.setRefreshToken(data.refreshToken);
@@ -147,6 +152,7 @@ class ApiService {
             method: 'POST',
             body: JSON.stringify({ credential }),
         });
+        this.media.reset();
         this.setToken(data.accessToken);
         if (data.refreshToken) {
             this.setRefreshToken(data.refreshToken);
@@ -225,18 +231,32 @@ class ApiService {
 
     // Club endpoints
     async getClubs() {
-        return this.request('/api/clubs?active=true');
+        return this.readMedia('club', '/api/clubs?active=true');
     }
 
     async getClub(id) {
-        return this.request(`/api/clubs/${id}`);
+        return this.readMedia('club', `/api/clubs/${id}`);
+    }
+
+    async readMedia(kind, endpoint) {
+        const ticket = this.media.ticket();
+        return this.media.ingest(kind, await this.request(endpoint), ticket);
+    }
+
+    acknowledgeMedia(kind, id, fields, response, ticket = this.media.ticket()) {
+        if (ticket.generation !== this.media.ticket().generation) return response;
+        this.media.commit(kind, id, { ...fields, ...(response || {}) });
+        publishPublicMediaSaved(kind, id);
+        return response;
     }
 
     async updateClub(id, data) {
-        return this.request(`/api/clubs/${encodeURIComponent(id)}`, {
+        const ticket = this.media.ticket();
+        const updated = await this.request(`/api/clubs/${encodeURIComponent(id)}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
+        return this.acknowledgeMedia('club', id, data, updated, ticket);
     }
 
     async uploadPublicImage(file, kind, ownerId = '') {
@@ -258,10 +278,12 @@ class ApiService {
     }
 
     async updateClubPublicImages(clubId, images) {
-        return this.request(`/api/clubs/${encodeURIComponent(clubId)}/public-images`, {
+        const ticket = this.media.ticket();
+        const updated = await this.request(`/api/clubs/${encodeURIComponent(clubId)}/public-images`, {
             method: 'PUT',
             body: JSON.stringify(images),
         });
+        return this.acknowledgeMedia('club', clubId, images, updated, ticket);
     }
 
     // Provisional manager-scoped contract; the current admin PUT /clubs/{id} cannot be used here.
@@ -273,10 +295,12 @@ class ApiService {
     }
 
     async updateActivityCoverImage(activityId, coverImageUrl) {
-        return this.request(`/api/activities/${encodeURIComponent(activityId)}/cover-image`, {
+        const ticket = this.media.ticket();
+        const updated = await this.request(`/api/activities/${encodeURIComponent(activityId)}/cover-image`, {
             method: 'PUT',
             body: JSON.stringify({ coverImageUrl }),
         });
+        return this.acknowledgeMedia('activity', activityId, { coverImageUrl }, updated, ticket);
     }
 
     async deleteClub(id) {
@@ -308,7 +332,7 @@ class ApiService {
     }
 
     async getManagedClubs() {
-        return this.request('/api/clubs/me/managed');
+        return this.readMedia('club', '/api/clubs/me/managed');
     }
 
     async joinClub(clubId, request) {
@@ -650,25 +674,30 @@ class ApiService {
         const filters = new URLSearchParams(Object.entries(params).filter(([, value]) => value != null && value !== ''));
         if (hasClubId) filters.set('clubId', String(numericClubId));
         const query = filters.size ? `?${filters}` : '';
-        return this.request(`/api/activities${query}`);
+        return this.readMedia('activity', `/api/activities${query}`);
     }
 
     async getActivity(id) {
-        return this.request(`/api/activities/${id}`);
+        return this.readMedia('activity', `/api/activities/${id}`);
     }
 
     async createActivity(data) {
-        return this.request('/api/activities', {
+        const ticket = this.media.ticket();
+        const created = await this.request('/api/activities', {
             method: 'POST',
             body: JSON.stringify(data),
         });
+        if (created?.id) this.acknowledgeMedia('activity', created.id, data, created, ticket);
+        return created;
     }
 
     async updateActivity(activityId, data) {
-        return this.request(`/api/activities/${activityId}`, {
+        const ticket = this.media.ticket();
+        const updated = await this.request(`/api/activities/${activityId}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
+        return this.acknowledgeMedia('activity', activityId, data, updated, ticket);
     }
 
     async cancelActivity(activityId) {

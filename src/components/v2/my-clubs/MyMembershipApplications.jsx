@@ -1,4 +1,11 @@
+import { useEntityMedia } from '../../media/EntityMediaContext';
+
 const labels = { PENDING: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Từ chối', WITHDRAWN: 'Đã rút đơn' };
+
+function ApplicationLogo({ club: input }) {
+    const club = useEntityMedia('club', input);
+    return club.logoUrl ? <img src={club.logoUrl} alt="" /> : <span className="v2-my-application-club-code" title={club.clubCode}>{club.clubCode}</span>;
+}
 
 export default function MyMembershipApplications({
     applications,
@@ -22,13 +29,7 @@ export default function MyMembershipApplications({
                 applications.map((item) => (
                     <div className="v2-my-application" key={item.applicationId}>
                         <div className="v2-my-club-mark" aria-hidden="true">
-                            {item.club.logoUrl ? (
-                                <img src={item.club.logoUrl} alt="" />
-                            ) : (
-                                <span className="v2-my-application-club-code" title={item.club.clubCode}>
-                                    {item.club.clubCode}
-                                </span>
-                            )}
+                            <ApplicationLogo club={item.club} />
                         </div>
                         <div>
                             <strong>{item.club.name}</strong>

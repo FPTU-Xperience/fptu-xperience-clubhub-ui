@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { mapActivityResources } from '../../components/v2/activity-detail/activity-resources-data.js';
+import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 
 export function classifyActivityError(error) {
     if (error?.status === 403) return 'forbidden';
@@ -38,6 +39,7 @@ export function mapActivityFeedItem(raw = {}) {
 }
 
 export function useActivityDetail(api, sessionKey, activityId) {
+    const mediaRevision = usePublicMediaRevision('activity');
     const identity = `${sessionKey}:${activityId}`;
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ identity, status: 'loading', data: null });
@@ -73,7 +75,7 @@ export function useActivityDetail(api, sessionKey, activityId) {
         return () => {
             active = false;
         };
-    }, [api, activityId, sessionKey, version]);
+    }, [api, activityId, sessionKey, version, mediaRevision]);
     const current = result.identity === identity ? result : { status: 'loading', data: null };
     return { ...current, retry: () => setVersion((value) => value + 1) };
 }
@@ -130,6 +132,7 @@ export function filterActivityFeed(items, query = '', status = 'ALL') {
 }
 
 function useActivityRequest(loader, mapper, sessionKey) {
+    const mediaRevision = usePublicMediaRevision('activity');
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ status: 'loading', data: [] });
     const request = useRef(0);
@@ -149,7 +152,7 @@ function useActivityRequest(loader, mapper, sessionKey) {
         return () => {
             request.current += 1;
         };
-    }, [loader, mapper, sessionKey, version]);
+    }, [loader, mapper, sessionKey, version, mediaRevision]);
     return { ...result, retry: () => setVersion((value) => value + 1) };
 }
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 
 const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null);
 const rows = (value) => (Array.isArray(value) ? value : value?.items || value?.content || []);
@@ -31,6 +32,7 @@ export function mapClubDirectoryEntry(raw = {}) {
         category,
         description: String(firstDefined(raw.description, raw.purpose, '')),
         logoUrl: raw.logoUrl || '',
+        coverImageUrl: firstDefined(raw.coverImageUrl, raw.coverUrl, ''),
         scheduleLabel: firstDefined(raw.scheduleLabel, raw.schedule, raw.expectedSchedule, ''),
         hasRecruitmentStatus: recruitmentValue !== undefined,
         isRecruiting: recruitmentValue === undefined ? null : Boolean(recruitmentValue),
@@ -141,6 +143,7 @@ export function classifyApiError(error) {
 }
 
 function useRequest(loader, mapper, dependencies) {
+    const mediaRevision = usePublicMediaRevision('club');
     const gateRef = useRef(null);
     if (!gateRef.current) gateRef.current = createRequestGate();
     const [version, setVersion] = useState(0);
@@ -166,7 +169,7 @@ function useRequest(loader, mapper, dependencies) {
             });
         return () => gateRef.current.invalidate();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [...dependencies, version]);
+    }, [...dependencies, version, mediaRevision]);
 
     const retry = useCallback(() => setVersion((current) => current + 1), []);
     return useMemo(() => ({ ...result, retry }), [result, retry]);

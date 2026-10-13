@@ -13,6 +13,7 @@ export function selectionFromClubAccess(accessResponse, clubsResponse) {
                 clubCode: club?.code || '',
                 name: club?.name || access.clubName,
                 logoUrl: club?.logoUrl || '',
+                coverImageUrl: club?.coverImageUrl || club?.coverUrl || '',
                 role: access.isManager ? 'MANAGER' : 'MEMBER',
                 displayRole: access.isManager ? 'CLUB_OWNER' : access.isTreasurer ? 'TREASURER' : 'MEMBER',
                 pendingApplications: access.isManager ? null : undefined,
@@ -29,7 +30,8 @@ export function applicationsFromMemberships(membershipsResponse, clubsResponse) 
             club: {
                 clubId: membership.clubId,
                 name: clubs.get(String(membership.clubId))?.name || membership.clubName,
-                logoUrl: clubs.get(String(membership.clubId))?.logoUrl || membership.logoUrl || '',
+                logoUrl: clubs.has(String(membership.clubId)) && Object.hasOwn(clubs.get(String(membership.clubId)), 'logoUrl')
+                    ? clubs.get(String(membership.clubId)).logoUrl || '' : membership.logoUrl || '',
                 clubCode: clubs.get(String(membership.clubId))?.code || membership.clubCode || '',
             },
             reason: membership.reason || membership.requestMessage || '',
@@ -37,8 +39,10 @@ export function applicationsFromMemberships(membershipsResponse, clubsResponse) 
             requestedAtUtc: membership.requestedAtUtc || '',
             reviewedAtUtc: membership.reviewedAtUtc || '',
             // Only advertise self withdrawal when the backend declares the capability.
-            canWithdraw: String(membership.status).toUpperCase() === 'PENDING'
-                && !isPendingClubInvitation(membership) && membership.canWithdraw === true,
+            canWithdraw:
+                String(membership.status).toUpperCase() === 'PENDING' &&
+                !isPendingClubInvitation(membership) &&
+                membership.canWithdraw === true,
             canAcceptInvitation: isPendingClubInvitation(membership),
         }));
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 const text = (value, fallback = '') => String(value ?? fallback);
@@ -46,6 +47,7 @@ export function mapMyClubSelection(value) {
                 clubCode,
                 name: text(raw.name, 'Câu lạc bộ'),
                 logoUrl: text(raw.logoUrl),
+                coverImageUrl: text(raw.coverImageUrl || raw.coverUrl),
                 role,
                 displayRole: text(raw.displayRole, role === 'MANAGER' ? 'CLUB_OWNER' : 'MEMBER'),
                 workspacePath: `/v2/my-clubs/${encodeURIComponent(clubCode)}`,
@@ -86,22 +88,24 @@ export function visibleSentApplications(applications, now = Date.now()) {
 }
 
 function useRequest(loader, mapper, sessionKey) {
+    const mediaRevision = usePublicMediaRevision('club');
     const gate = useRef(createRequestGate());
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ status: 'loading', data: [] });
     useEffect(() => {
         const id = gate.current.next();
-        setResult({ status: 'loading', data: [] });
+        setResult((current) => current.sessionKey === sessionKey && current.status === 'populated'
+            ? current : { sessionKey, status: 'loading', data: [] });
         Promise.resolve().then(loader).then((value) => {
             if (!gate.current.isCurrent(id)) return;
             const data = mapper(value);
-            setResult({ status: data.length ? 'populated' : 'empty', data });
+            setResult({ sessionKey, status: data.length ? 'populated' : 'empty', data });
         }).catch((error) => {
-            if (gate.current.isCurrent(id)) setResult({ status: classifyMyClubsError(error), data: [], error });
+            if (gate.current.isCurrent(id)) setResult({ sessionKey, status: classifyMyClubsError(error), data: [], error });
         });
         return () => gate.current.invalidate();
-    }, [loader, mapper, sessionKey, version]);
-    return { ...result, retry: () => setVersion((item) => item + 1) };
+    }, [loader, mapper, sessionKey, version, mediaRevision]);
+    return { ...(result.sessionKey === sessionKey ? result : { status: 'loading', data: [] }), retry: () => setVersion((item) => item + 1) };
 }
 
 export function useMyClubSelection(api, sessionKey) {

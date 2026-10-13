@@ -9,7 +9,7 @@ function getInitials(name = '') {
 function isBlockedLogoUrl(value) {
   if (!value) return true
   try {
-    const url = new URL(value, window.location.origin)
+    const url = new URL(value, globalThis.location?.origin || 'http://localhost')
     return url.hostname === 'storage.local'
   } catch {
     return true
@@ -17,16 +17,16 @@ function isBlockedLogoUrl(value) {
 }
 
 export default function ClubLogo({ name, logoUrl, className = '' }) {
-  const [failed, setFailed] = useState(() => isBlockedLogoUrl(logoUrl))
+  const [failedUrl, setFailedUrl] = useState(null)
   const initials = useMemo(() => getInitials(name), [name])
 
-  if (!failed && logoUrl) {
+  if (!isBlockedLogoUrl(logoUrl) && failedUrl !== logoUrl) {
     return (
       <span className={`block overflow-hidden ${className}`}>
         <img
           src={logoUrl}
           alt={`Logo ${name || 'câu lạc bộ'}`}
-          onError={() => setFailed(true)}
+          onError={() => setFailedUrl(logoUrl)}
           className="block h-full w-full object-cover"
         />
       </span>

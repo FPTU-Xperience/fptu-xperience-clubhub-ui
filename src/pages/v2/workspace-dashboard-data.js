@@ -1,3 +1,4 @@
+import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 import { workspaceSemesterQuery, workspaceSemesterKey } from './club-workspace-page/workspace-semester-data.js';
 import { useEffect, useState } from 'react';
 
@@ -90,6 +91,7 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
 }
 
 export function useWorkspaceDashboard(api, clubId, manager, sessionKey, semester = null, refreshKey = null) {
+    const mediaRevision = usePublicMediaRevision('activity');
     const scopeKey = workspaceSemesterKey(semester);
     const [result, setResult] = useState({ clubId, scopeKey, refreshKey, status: 'loading', data: null });
     const [version, setVersion] = useState(0);
@@ -125,7 +127,7 @@ export function useWorkspaceDashboard(api, clubId, manager, sessionKey, semester
         return () => {
             active = false;
         };
-    }, [api, clubId, manager, sessionKey, version, scopeKey, refreshKey]);
+    }, [api, clubId, manager, sessionKey, version, scopeKey, refreshKey, mediaRevision]);
     const current =
         result.clubId === clubId && result.scopeKey === scopeKey && result.refreshKey === refreshKey
             ? result

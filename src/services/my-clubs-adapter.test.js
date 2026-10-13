@@ -12,8 +12,8 @@ test('selection uses only current-user access and strips private club details', 
         { id: 3, code: 'THREE', name: 'Three' },
     ]);
     assert.deepEqual(result, [
-        { clubId: 1, clubCode: 'ONE', name: 'One', logoUrl: 'https://example.test/one.png', role: 'MANAGER', displayRole: 'CLUB_OWNER', pendingApplications: null },
-        { clubId: 2, clubCode: '', name: 'Two', logoUrl: '', role: 'MEMBER', displayRole: 'MEMBER', pendingApplications: undefined },
+        { clubId: 1, clubCode: 'ONE', name: 'One', logoUrl: 'https://example.test/one.png', coverImageUrl: '', role: 'MANAGER', displayRole: 'CLUB_OWNER', pendingApplications: null },
+        { clubId: 2, clubCode: '', name: 'Two', logoUrl: '', coverImageUrl: '', role: 'MEMBER', displayRole: 'MEMBER', pendingApplications: undefined },
     ]);
 });
 
