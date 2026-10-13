@@ -1,0 +1,106 @@
+.media-palette-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+.media-palette-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    height: 42px;
+    padding: 8px;
+    border: 1px solid #d8e3f0;
+    border-radius: 8px;
+    background: white;
+    color: #637895;
+    cursor: pointer;
+}
+.media-palette-preview {
+    flex: 1;
+    height: 24px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}
+.media-palette-popup {
+    position: fixed;
+    z-index: 60;
+    box-sizing: border-box;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 16px;
+    border: 1px solid #d8e3f0;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 12px 36px #0f172a26;
+    color: #193554;
+    font:
+        13px/1.5 'Inter',
+        sans-serif;
+    .media-palette-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+    .media-palette-heading button {
+        display: grid;
+        place-items: center;
+        padding: 4px;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: #637895;
+        cursor: pointer;
+    }
+    .media-palette-section-title {
+        display: block;
+        margin: 12px 0 8px;
+        font-size: 12px;
+    }
+    .media-palette-swatches {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .media-palette-swatches button {
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        padding: 0;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        cursor: pointer;
+        color: white;
+    }
+    .media-palette-swatches button[aria-pressed='true'] {
+        outline: 2px solid #f97316;
+        outline-offset: 2px;
+    }
+    .media-palette-swatches svg {
+        filter: drop-shadow(0 1px 2px #000);
+    }
+    .media-palette-custom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .media-palette-custom input[type='color'] {
+        width: 48px;
+        height: 32px;
+        padding: 3px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: white;
+    }
+}
+.media-palette-trigger:focus-visible,
+.media-palette-popup button:focus-visible {
+    outline: 3px solid #fed7aa;
+    outline-offset: 2px;
+}

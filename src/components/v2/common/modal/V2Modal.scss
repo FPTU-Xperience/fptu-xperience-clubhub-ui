@@ -66,6 +66,15 @@
     scrollbar-gutter: stable;
     padding: 24px;
 }
+.v2-modal-footer {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: white;
+}
 
 @media (max-width: 560px) {
     .v2-modal-backdrop {

@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { ImagePlus } from 'lucide-react';
+import ImageCropModal from './ImageCropModal';
 import './ImagePicker.scss';
 
 export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
@@ -12,9 +14,25 @@ export function validateImage(file) {
     return '';
 }
 
-export default function ImagePicker({ label, value, file, onChange, disabled = false, hint = '' }) {
+export default function ImagePicker({
+    label,
+    value,
+    file,
+    onChange,
+    disabled = false,
+    hint = '',
+    recommendedSize,
+    renderPreview,
+    compact = false,
+    positioning = false,
+    previewHandlers,
+}) {
+    const inputRef = useRef(null);
+    const hintId = useId();
+    const [dragging, setDragging] = useState(false);
     const [preview, setPreview] = useState('');
     const [error, setError] = useState('');
+    const [cropFile, setCropFile] = useState(null);
 
     useEffect(() => {
         if (!file) {
@@ -26,24 +44,139 @@ export default function ImagePicker({ label, value, file, onChange, disabled = f
         return () => URL.revokeObjectURL(url);
     }, [file]);
 
-    const select = (event) => {
-        const next = event.target.files?.[0] || null;
+    const selectFile = (next) => {
+        if (disabled || !next) return;
         const issue = validateImage(next);
         setError(issue);
-        onChange(issue ? null : next);
-        event.target.value = '';
+        if (!issue) {
+            if (recommendedSize) setCropFile(next);
+            else onChange(next);
+        }
     };
 
     return (
         <div className="media-image-picker">
-            <label>
-                <span>{label}</span>
-                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={select} disabled={disabled} />
-            </label>
-            {(preview || value) && <img src={preview || value} alt={`Xem trước ${label.toLowerCase()}`} />}
-            {file && <button type="button" onClick={() => onChange(null)} disabled={disabled}>Bỏ ảnh đã chọn</button>}
-            <small>{hint || 'JPG, PNG hoặc WebP · tối đa 5 MB'}</small>
+            {recommendedSize ? (
+                <input
+                    ref={inputRef}
+                    hidden
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={disabled}
+                    onChange={(event) => {
+                        selectFile(event.target.files?.[0]);
+                        event.target.value = '';
+                    }}
+                />
+            ) : (
+                <label>
+                    <span>{label}</span>
+                    <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(event) => {
+                            selectFile(event.target.files?.[0]);
+                            event.target.value = '';
+                        }}
+                        disabled={disabled}
+                    />
+                </label>
+            )}
+            {recommendedSize ? (
+                <div className="media-cover-guide">
+                    <button
+                        type="button"
+                        className={`media-cover-guide-frame is-upload${recommendedSize.width === recommendedSize.height ? ' is-square' : ''}${dragging ? ' is-dragging' : ''}${positioning ? ' is-positioning' : ''}`}
+                        style={{ aspectRatio: `${recommendedSize.width} / ${recommendedSize.height}` }}
+                        aria-label={
+                            positioning
+                                ? 'Kéo trên ảnh xem trước để đổi vị trí lớp đang chọn'
+                                : `Chọn hoặc đổi ${label.toLowerCase()}`
+                        }
+                        aria-describedby={hintId}
+                        disabled={disabled}
+                        onClick={(event) => {
+                            if (positioning) event.preventDefault();
+                            else inputRef.current?.click();
+                        }}
+                        onPointerDown={previewHandlers?.onPointerDown}
+                        onPointerMove={previewHandlers?.onPointerMove}
+                        onPointerUp={previewHandlers?.onPointerUp}
+                        onPointerCancel={previewHandlers?.onPointerCancel}
+                        onLostPointerCapture={previewHandlers?.onLostPointerCapture}
+                        onDragOver={(event) => {
+                            event.preventDefault();
+                            if (!disabled) setDragging(true);
+                        }}
+                        onDragLeave={(event) => {
+                            if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false);
+                        }}
+                        onDrop={(event) => {
+                            event.preventDefault();
+                            setDragging(false);
+                            selectFile(event.dataTransfer.files?.[0]);
+                        }}
+                    >
+                        {renderPreview ? (
+                            renderPreview(preview || value)
+                        ) : preview || value ? (
+                            <img src={preview || value} alt={`Xem trước ${label.toLowerCase()}`} />
+                        ) : (
+                            <span className="media-upload-empty">
+                                <ImagePlus size={28} aria-hidden="true" />
+                                <strong>Nhấn để chọn ảnh</strong>
+                                <span>hoặc kéo thả ảnh vào khung này</span>
+                            </span>
+                        )}
+                        {(preview || value || renderPreview) && (
+                            <span className="media-upload-replace">
+                                <ImagePlus size={16} aria-hidden="true" />
+                                {positioning ? 'Kéo để đổi vị trí' : 'Chọn ảnh khác'}
+                            </span>
+                        )}
+                    </button>
+                    {!compact && (
+                        <small>
+                            {recommendedSize.width === recommendedSize.height
+                                ? 'Khung vuông tỉ lệ 1:1.'
+                                : 'Ảnh sẽ được crop theo đúng khung đề xuất trước khi lưu.'}
+                        </small>
+                    )}
+                </div>
+            ) : (
+                (preview || value) && <img src={preview || value} alt={`Xem trước ${label.toLowerCase()}`} />
+            )}
+            {file && (
+                <button
+                    type="button"
+                    onClick={() => {
+                        onChange(null);
+                        setError('');
+                    }}
+                    disabled={disabled}
+                >
+                    Bỏ ảnh đã chọn
+                </button>
+            )}
+            {file && !compact && (
+                <small className="media-upload-file" title={file.name}>
+                    {file.name}
+                </small>
+            )}
+            <small id={hintId}>{hint || 'JPG, PNG hoặc WebP · tối đa 5 MB'}</small>
             {error && <p role="alert">{error}</p>}
+            {cropFile && (
+                <ImageCropModal
+                    file={cropFile}
+                    size={recommendedSize}
+                    label={label}
+                    onClose={() => setCropFile(null)}
+                    onApply={(cropped) => {
+                        onChange(cropped);
+                        setCropFile(null);
+                    }}
+                />
+            )}
         </div>
     );
 }

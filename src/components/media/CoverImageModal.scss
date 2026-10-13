@@ -1,0 +1,73 @@
+.media-cover-modal-form {
+    display: grid;
+    gap: 18px;
+    color: #193554;
+    font:
+        13px/1.65 'Inter',
+        sans-serif;
+    button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+    .media-cover-modal-error {
+        margin: 0;
+        padding: 12px;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        color: #b91c1c;
+        background: #fff7f7;
+    }
+}
+
+.media-cover-modal .v2-modal-content {
+    overflow-x: hidden;
+}
+.media-cover-modal .v2-modal-footer button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+.media-cover-editor-heading {
+    position: sticky;
+    top: -24px;
+    z-index: 2;
+    display: grid;
+    gap: 14px;
+    padding: 12px 0;
+    background: white;
+    box-shadow: 0 8px 12px white;
+}
+.media-cover-editor-heading .media-editor-tabs {
+    gap: 32px;
+}
+.media-cover-editor-heading .media-editor-tabs button {
+    padding: 14px 0;
+    font-size: 14px;
+}
+.media-cover-editor-panel {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+.media-cover-background-mode {
+    display: flex;
+    gap: 8px;
+}
+.media-cover-background-mode button[aria-pressed='true'] {
+    color: #c2410c;
+    background: #fff7ed;
+    border-color: #fdba74;
+}
+.media-cover-image-note {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+}
+.media-cover-image-note p {
+    margin: 0;
+    color: #637895;
+    font-size: 12px;
+}
+.media-cover-modal.is-activity-banner .media-cover-guide-frame {
+    max-width: 600px;
+    justify-self: center;
+}
