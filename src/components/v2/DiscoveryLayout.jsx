@@ -1,10 +1,12 @@
 import { ArrowRight, ArrowUpRight, CalendarDays, Compass, Heart, Search, Sparkles, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import './DiscoveryLayout.scss';
+import './ClubArt.scss';
 
 export function SectionHeading({ title, description, children }) {
     return (
-        <div className="dx-section-heading">
+        <div className="v2-discovery-section-heading">
             <div>
                 <h2>{title}</h2>
                 {description && <p>{description}</p>}
@@ -16,7 +18,7 @@ export function SectionHeading({ title, description, children }) {
 
 export function SearchField({ value, onChange, placeholder = 'Tìm kiếm...' }) {
     return (
-        <label className="dx-search">
+        <label className="v2-discovery-search">
             <Search size={18} />
             <input
                 aria-label="Tìm kiếm"
@@ -30,7 +32,7 @@ export function SearchField({ value, onChange, placeholder = 'Tìm kiếm...' })
 
 export function EmptyState({ title = 'Chưa có nội dung', text, children }) {
     return (
-        <div className="dx-empty">
+        <div className="v2-discovery-empty">
             <Compass size={34} />
             <h3>{title}</h3>
             <p>{text}</p>
@@ -40,35 +42,22 @@ export function EmptyState({ title = 'Chưa có nội dung', text, children }) {
 }
 
 export function Pill({ children, tone = '' }) {
-    return <span className={`dx-pill ${tone}`}>{children}</span>;
+    return <span className={`v2-discovery-pill ${tone}`}>{children}</span>;
 }
 
 export function ClubMark({ club, large = false }) {
     return (
-        <span className={`dx-mark ${large ? 'large' : ''}`} style={{ '--club': club.color }}>
+        <span className={`v2-discovery-mark ${large ? 'large' : ''}`} style={{ '--club': club.color }}>
             {club.mark}
         </span>
     );
 }
 
 export function ClubArt({ club, hero = false }) {
+    const palette = [...String(club.id ?? club.name)].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
     return (
-        <div className={`dx-art ${club.tone} ${hero ? 'hero' : ''}`} aria-hidden="true">
-            <span className="dx-art-grid" />
-            <span className="dx-art-orbit" />
-            <span className="dx-art-orbit second" />
-            <span className="dx-art-word">{club.mark}</span>
-            <span className="dx-art-stamp">
-                FPTU COMMUNITY
-                {club.founded && (
-                    <>
-                        <br />
-                        EST. {club.founded}
-                    </>
-                )}
-            </span>
-            <span className="dx-art-caption">{club.tagline}</span>
-            <ArrowUpRight className="dx-art-arrow" size={28} />
+        <div className={`v2-club-banner v2-club-art v2-club-art--${palette} ${hero ? 'hero' : ''}`} aria-hidden="true">
+            <strong>{club.name}</strong>
         </div>
     );
 }
@@ -78,7 +67,7 @@ export function ClubLogo({ club, hero = false }) {
     if (!club.logoUrl || failedUrl === club.logoUrl) return <ClubArt club={club} hero={hero} />;
 
     return (
-        <div className={`dx-art dx-club-logo ${hero ? 'hero' : ''}`}>
+        <div className={`v2-club-banner v2-club-logo ${hero ? 'hero' : ''}`}>
             <img src={club.logoUrl} alt={`Logo ${club.name}`} onError={() => setFailedUrl(club.logoUrl)} />
         </div>
     );
@@ -87,10 +76,10 @@ export function ClubLogo({ club, hero = false }) {
 export function DiscoverHero() {
     return (
         <>
-            <section className="dx-discover-hero">
-                <div className="dx-hero-copy">
-                    <div className="dx-eyebrow">
-                        <span className="dx-live-dot" /> MỘT CAMPUS. NHIỀU CÁCH TỎA SÁNG.
+            <section className="v2-discovery-hero">
+                <div className="v2-discovery-hero-copy">
+                    <div className="v2-discovery-eyebrow">
+                        <span className="v2-discovery-live-dot" /> MỘT CAMPUS. NHIỀU CÁCH TỎA SÁNG.
                     </div>
                     <h1>
                         Tìm cộng đồng.
@@ -102,11 +91,11 @@ export function DiscoverHero() {
                         <br />
                         Hành trình đại học đáng nhớ bắt đầu từ một câu lạc bộ.
                     </p>
-                    <a href="#club-directory" className="dx-button primary">
+                    <a href="#club-directory" className="v2-discovery-button primary">
                         Khám phá các CLB <ArrowRight size={18} />
                     </a>
-                    <div className="dx-hero-note">
-                        <div className="dx-avatar-stack">
+                    <div className="v2-discovery-hero-note">
+                        <div className="v2-discovery-avatar-stack">
                             <span>KL</span>
                             <span>NM</span>
                             <span>HA</span>
@@ -117,14 +106,14 @@ export function DiscoverHero() {
                         </div>
                     </div>
                 </div>
-                <div className="dx-hero-collage" aria-hidden="true">
-                    <div className="dx-collage-note">
+                <div className="v2-discovery-hero-collage" aria-hidden="true">
+                    <div className="v2-discovery-collage-note">
                         YOUR NEXT
                         <br />
                         <em>chapter.</em>
                         <Sparkles size={38} />
                     </div>
-                    <div className="dx-collage-ticket">
+                    <div className="v2-discovery-collage-ticket">
                         <span>THE CAMPUS PASS</span>
                         <strong>
                             Explore.
@@ -133,20 +122,20 @@ export function DiscoverHero() {
                             <br />
                             Belong.
                         </strong>
-                        <div className="dx-ticket-line" />
+                        <div className="v2-discovery-ticket-line" />
                         <small>FPTU XPERIENCE &nbsp; / &nbsp; FALL 2026</small>
                     </div>
-                    <div className="dx-floating-tag">
+                    <div className="v2-discovery-floating-tag">
                         <Heart size={17} /> Những điều hay đang chờ bạn
                     </div>
-                    <div className="dx-circle-label">
+                    <div className="v2-discovery-circle-label">
                         BE PART
                         <br />
                         OF SOMETHING
                     </div>
                 </div>
             </section>
-            <div className="dx-discovery-strip">
+            <div className="v2-discovery-strip">
                 <span>
                     <Compass size={18} />
                     Khám phá theo sở thích
@@ -166,13 +155,13 @@ export function DiscoverHero() {
 
 export function BottomCallout() {
     return (
-        <section className="dx-bottom-callout">
+        <section className="v2-discovery-bottom-callout">
             <div>
-                <span className="dx-eyebrow">KHÁM PHÁ THÊM CỘNG ĐỒNG</span>
+                <span className="v2-discovery-eyebrow">KHÁM PHÁ THÊM CỘNG ĐỒNG</span>
                 <h2>Nếu vẫn chưa thấy CLB phù hợp, xem nhiều hơn tại đây.</h2>
                 <p>Khám phá toàn bộ câu lạc bộ để tìm cộng đồng phù hợp với sở thích của bạn.</p>
             </div>
-            <Link className="dx-button" to="/v2/clubs">
+            <Link className="v2-discovery-button" to="/v2/clubs">
                 Xem tất cả câu lạc bộ <ArrowUpRight size={18} />
             </Link>
         </section>

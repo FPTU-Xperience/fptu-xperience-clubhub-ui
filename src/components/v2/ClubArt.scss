@@ -1,0 +1,76 @@
+.v2-club-logo {
+    display: grid;
+    place-items: center;
+    background: #f8fafc;
+}
+.v2-club-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.v2-club-logo.hero img {
+    width: 100%;
+    max-width: none;
+}
+
+.v2-club-banner {
+    height: 174px;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+.v2-club-banner.hero {
+    height: 300px;
+}
+// Match the event poster fallback's gradients, rings and title treatment.
+.v2-club-banner.v2-club-art {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 45px 18px 12px;
+    box-sizing: border-box;
+    isolation: isolate;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(125deg, #123b47, #1e6f6d);
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        width: 280px;
+        height: 280px;
+        right: -105px;
+        top: -105px;
+        border: 1px solid #ffffff30;
+        border-radius: 50%;
+    }
+
+    &::after {
+        right: -70px;
+        top: -70px;
+        border-width: 35px;
+        border-color: #ffffff0b;
+    }
+
+    > strong {
+        max-width: 90%;
+        font-size: 22px;
+        line-height: 1.18;
+        letter-spacing: -0.025em;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+    }
+
+    &.v2-club-art--1 {
+        background: linear-gradient(125deg, #392f63, #7963a2);
+    }
+    &.v2-club-art--2 {
+        background: linear-gradient(125deg, #793a23, #b85e35);
+    }
+}

@@ -46,7 +46,7 @@
 .v2-event-filter-bar {
     margin: 25px 0 18px;
     flex-wrap: wrap;
-    .dx-search:focus-within,
+    .v2-discovery-search:focus-within,
     .v2-tabs button:focus-visible {
         outline: 2px solid #fb923c;
         outline-offset: 3px;
@@ -58,10 +58,10 @@
         max-width: 100%;
         padding-bottom: 3px;
     }
-    .v2-event-filter-bar .dx-search {
+    .v2-event-filter-bar .v2-discovery-search {
         flex: 1;
     }
-    .v2-event-filter-bar .dx-search input {
+    .v2-event-filter-bar .v2-discovery-search input {
         width: 100%;
     }
 }

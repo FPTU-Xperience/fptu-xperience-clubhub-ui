@@ -1,12 +1,13 @@
 import { ArrowLeft, CalendarDays, Mail, MapPin, Phone, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ClubLogo, ClubMark, Pill } from '../../../components/v2/DiscoveryLayout';
+import { Pill } from '../../../components/v2/DiscoveryLayout';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import PageState from '../../../components/v2/PageState';
 import { canJoinClub, useClubDetail } from '../discover-data';
 import { useProfile } from '../profile-data';
 import { isPendingClubInvitation } from '../../../services/club-invitations';
+import ClubProfileHeader from '../../../components/v2/club-detail/ClubProfileHeader';
 import './ClubDetailPage.scss';
 
 const joinProfile = (viewer, profileSnapshot) => ({
@@ -117,53 +118,29 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
         }
     };
     return (
-        <div className="v2-public-content">
+        <div className="v2-public-content v2-club-detail-page">
             <Link to="/v2/clubs" className="v2-back">
                 <ArrowLeft size={16} /> Tất cả câu lạc bộ
             </Link>
             <PageState status={result.status} onRetry={result.retry}>
                 {club && (
                     <>
-                        <div className="v2-detail-cover">
-                            {club.coverImageUrl ? (
-                                <img src={club.coverImageUrl} alt="" />
-                            ) : (
-                                <ClubLogo club={club} hero />
-                            )}
-                        </div>
-                        <div className="v2-club-identity">
-                            <ClubMark club={club} large />
-                            <div className="v2-club-identity-copy">
-                                <div className="v2-inline">
-                                    <Pill>{club.category || 'Chưa phân loại'}</Pill>
-                                    <Pill tone={club.isRecruiting ? 'orange' : ''}>
-                                        {club.hasRecruitmentStatus
-                                            ? club.isRecruiting
-                                                ? 'Đang tuyển thành viên'
-                                                : 'Chưa mở tuyển'
-                                            : 'Trạng thái tuyển đang cập nhật'}
-                                    </Pill>
-                                </div>
-                                <h1>{club.fullName}</h1>
-                                <p>{club.tagline}</p>
-                            </div>
-                            <div className="v2-club-detail-actions">
-                                {['MEMBER', 'MANAGER'].includes(club.viewerRelationship) ? (
-                                    <Link
-                                        className="v2-button v2-button--primary"
-                                        to={`/v2/my-clubs/${encodeURIComponent(club.code || clubCode)}`}
-                                    >
-                                        Đến CLB
-                                    </Link>
-                                ) : joined ? (
-                                    <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>
-                                ) : acceptingInvitation || canJoinClub(club) ? (
-                                    <button className="v2-button v2-button--primary" type="button" onClick={openJoin}>
-                                        {acceptingInvitation ? 'Chấp nhận lời mời' : 'Nộp hồ sơ gia nhập'}
-                                    </button>
-                                ) : null}
-                            </div>
-                        </div>
+                        <ClubProfileHeader club={club}>
+                            {['MEMBER', 'MANAGER'].includes(club.viewerRelationship) ? (
+                                <Link
+                                    className="v2-button v2-button--primary"
+                                    to={`/v2/my-clubs/${encodeURIComponent(club.code || clubCode)}`}
+                                >
+                                    Đến CLB
+                                </Link>
+                            ) : joined ? (
+                                <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>
+                            ) : acceptingInvitation || canJoinClub(club) ? (
+                                <button className="v2-button v2-button--primary" type="button" onClick={openJoin}>
+                                    {acceptingInvitation ? 'Chấp nhận lời mời' : 'Nộp hồ sơ gia nhập'}
+                                </button>
+                            ) : null}
+                        </ClubProfileHeader>
                         <div className="v2-detail-columns">
                             <div>
                                 <section className="v2-panel">

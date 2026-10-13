@@ -7,6 +7,7 @@ import { CAMPUSES, inferStudentFromEmail, inferStudentYear } from '../../../page
 import { formatBirthDate, parseBirthDate } from '../../../pages/v2/profile-date';
 import OnboardingProfileFields from './OnboardingProfileFields';
 import OnboardingAutofill from './OnboardingAutofill';
+import '../../../pages/v2/V2Access.scss';
 import './StudentOnboarding.scss';
 
 export default function StudentOnboarding({ user, onComplete }) {
@@ -74,20 +75,20 @@ export default function StudentOnboarding({ user, onComplete }) {
     };
 
     return (
-        <div className="dx-app dx-access-page dx-student-onboarding">
-            <header className="dx-onboarding-header">
-                <a className="dx-brand" href="/v2">
+        <div className="v2-access-shell v2-access-page v2-student-onboarding">
+            <header className="v2-onboarding-header">
+                <a className="v2-access-brand" href="/v2">
                     <img src="/fptux.png" alt="" />
                     <span>
-                        clubhub<span className="dx-brand-dot">.</span>
+                        clubhub<span className="v2-access-brand-dot">.</span>
                     </span>
                 </a>
                 <span>BƯỚC {step} / 3 · {stepLabels[step - 1]}</span>
             </header>
-            <main className="dx-onboarding-shell">
-                <section className="dx-onboarding-intro">
-                    <span className="dx-onboarding-number">0{step}</span>
-                    <span className="dx-eyebrow">
+            <main className="v2-onboarding-shell">
+                <section className="v2-onboarding-intro">
+                    <span className="v2-onboarding-number">0{step}</span>
+                    <span className="v2-access-eyebrow">
                         CHÀO {user.name?.split(' ').slice(-1)[0]?.toUpperCase() || 'BẠN'}
                     </span>
                     <h1>
@@ -96,7 +97,7 @@ export default function StudentOnboarding({ user, onComplete }) {
                         <em>muốn bắt đầu?</em>
                     </h1>
                     <p>Hoàn thiện hồ sơ và chọn những điều bạn quan tâm để bắt đầu hành trình cùng ClubHub.</p>
-                    <div className="dx-onboarding-benefit">
+                    <div className="v2-onboarding-benefit">
                         <GraduationCap size={20} />
                         <span>
                             <strong>Một lần nhập, một hồ sơ thống nhất</strong>
@@ -104,16 +105,16 @@ export default function StudentOnboarding({ user, onComplete }) {
                         </span>
                     </div>
                 </section>
-                <form className="dx-onboarding-form" onSubmit={submit}>
-                    <nav className="dx-onboarding-steps" aria-label="Tiến trình onboarding">{['Email', 'Hồ sơ', 'Sở thích'].map((label, index) => <span key={label} aria-current={step === index + 1 ? 'step' : undefined}><b>{index + 1}</b>{label}</span>)}</nav>
+                <form className="v2-onboarding-form" onSubmit={submit}>
+                    <nav className="v2-onboarding-steps" aria-label="Tiến trình onboarding">{['Email', 'Hồ sơ', 'Sở thích'].map((label, index) => <span key={label} aria-current={step === index + 1 ? 'step' : undefined}><b>{index + 1}</b>{label}</span>)}</nav>
                     <h2 ref={headingRef} tabIndex="-1">{step === 1 ? 'Thông tin từ email của bạn' : step === 2 ? 'Làm quen với bạn' : 'Bạn quan tâm điều gì?'}</h2>
-                    <p className="dx-onboarding-description">{step === 1 ? 'Kiểm tra campus và mã sinh viên để bắt đầu.' : step === 2 ? 'Chuyên ngành là bắt buộc. Những thông tin còn lại có thể bổ sung sau.' : `Chọn ít nhất ${MIN_INTERESTS} lĩnh vực. Sở thích sẽ xuất hiện trong hồ sơ của bạn.`}</p>
+                    <p className="v2-onboarding-description">{step === 1 ? 'Kiểm tra campus và mã sinh viên để bắt đầu.' : step === 2 ? 'Chuyên ngành là bắt buộc. Những thông tin còn lại có thể bổ sung sau.' : `Chọn ít nhất ${MIN_INTERESTS} lĩnh vực. Sở thích sẽ xuất hiện trong hồ sơ của bạn.`}</p>
                     {step === 1 ? <OnboardingAutofill email={user?.email} inferred={inferred} draft={draft} onChange={updateDraft} /> : step === 2 ? <OnboardingProfileFields draft={draft} onChange={updateDraft} /> : <fieldset>
                         <legend>Bạn quan tâm điều gì?</legend>
                         <p>
                             Chọn ít nhất {MIN_INTERESTS} lĩnh vực · Đã chọn {interests.length}
                         </p>
-                        <div className="dx-interest-grid">
+                        <div className="v2-access-interest-grid">
                             {INTERESTS.map((interest) => {
                                 const selected = interests.includes(interest.id);
                                 return (
@@ -133,18 +134,18 @@ export default function StudentOnboarding({ user, onComplete }) {
                                 );
                             })}
                         </div>
-                        {interests.filter((id) => !INTERESTS.some((item) => item.id === id)).length > 0 && <div className="dx-onboarding-custom-interests"><p>Sở thích đã thêm trong hồ sơ</p>{interests.filter((id) => !INTERESTS.some((item) => item.id === id)).map((label) => <button type="button" key={label} onClick={() => toggleInterest(label)} aria-label={`Bỏ sở thích ${label}`}>{label} ×</button>)}</div>}
+                        {interests.filter((id) => !INTERESTS.some((item) => item.id === id)).length > 0 && <div className="v2-onboarding-custom-interests"><p>Sở thích đã thêm trong hồ sơ</p>{interests.filter((id) => !INTERESTS.some((item) => item.id === id)).map((label) => <button type="button" key={label} onClick={() => toggleInterest(label)} aria-label={`Bỏ sở thích ${label}`}>{label} ×</button>)}</div>}
                     </fieldset>}
-                    <p className="dx-onboarding-sync-note"><RefreshCw size={16} aria-hidden="true" />Thông tin được đồng bộ với hồ sơ và lưu trên thiết bị này.</p>
+                    <p className="v2-onboarding-sync-note"><RefreshCw size={16} aria-hidden="true" />Thông tin được đồng bộ với hồ sơ và lưu trên thiết bị này.</p>
                     {error && (
-                        <p className="dx-form-error" role="alert">
+                        <p className="v2-access-form-error" role="alert">
                             {error}
                         </p>
                     )}
-                    <div className="dx-onboarding-actions">
-                        {step > 1 ? <button className="dx-button" type="button" onClick={() => { setStep((current) => current - 1); setError(''); }}><ArrowLeft size={16} /> Quay lại</button> : <span>Bạn có thể điều chỉnh thông tin đã điền.</span>}
+                    <div className="v2-onboarding-actions">
+                        {step > 1 ? <button className="v2-access-button" type="button" onClick={() => { setStep((current) => current - 1); setError(''); }}><ArrowLeft size={16} /> Quay lại</button> : <span>Bạn có thể điều chỉnh thông tin đã điền.</span>}
                         <button
-                            className="dx-button primary"
+                            className="v2-access-button primary"
                             type="submit"
                             disabled={(step > 1 && !draft.major) || (step === 3 && interests.length < MIN_INTERESTS)}
                         >

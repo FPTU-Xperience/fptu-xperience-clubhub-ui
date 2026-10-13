@@ -5,14 +5,16 @@ import StudentOnboarding from '../../components/v2/student-onboarding/StudentOnb
 import { useAuth } from '../../context/AuthContext';
 import { readOnboarding } from './onboarding';
 
+import './V2Access.scss';
+
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const ADMIN_ROLES = new Set(['ADMIN', 'SYSTEM_ADMIN', 'STUDENT_AFFAIRS_ADMIN']);
 
 function LoadingScreen() {
     return (
-        <div className="dx-app dx-access-page" role="status">
-            <div className="dx-access-loading">
-                <span className="dx-access-spinner" />
+        <div className="v2-access-shell v2-access-page" role="status">
+            <div className="v2-access-loading">
+                <span className="v2-access-spinner" />
                 <p>Đang mở ClubHub...</p>
             </div>
         </div>
@@ -98,18 +100,18 @@ function V2Login() {
     };
 
     return (
-        <div className="dx-app dx-access-page">
-            <main className="dx-login-layout">
-                <section className="dx-login-story">
-                    <a className="dx-brand" href="/v2" aria-label="ClubHub">
+        <div className="v2-access-shell v2-access-page">
+            <main className="v2-access-login-layout">
+                <section className="v2-access-login-story">
+                    <a className="v2-access-brand" href="/v2" aria-label="ClubHub">
                         <img src="/fptux.png" alt="" />
                         <span>
-                            clubhub<span className="dx-brand-dot">.</span>
+                            clubhub<span className="v2-access-brand-dot">.</span>
                             <small>YOUR CAMPUS, YOUR COMMUNITY</small>
                         </span>
                     </a>
                     <div>
-                        <span className="dx-eyebrow">FPTU XPERIENCE · STUDENT COMMUNITY</span>
+                        <span className="v2-access-eyebrow">FPTU XPERIENCE · STUDENT COMMUNITY</span>
                         <h1>
                             Tìm nơi bạn thuộc về.
                             <br />
@@ -117,7 +119,7 @@ function V2Login() {
                         </h1>
                         <p>Khám phá câu lạc bộ, hoạt động và những người bạn cùng sở thích trong campus.</p>
                     </div>
-                    <div className="dx-login-proof">
+                    <div className="v2-access-login-proof">
                         <Sparkles size={18} />
                         <span>
                             <strong>Một tài khoản FPTU</strong>
@@ -125,9 +127,9 @@ function V2Login() {
                         </span>
                     </div>
                 </section>
-                <section className="dx-login-panel" aria-labelledby="v2-login-title">
-                    <div className="dx-login-card">
-                        <span className="dx-login-icon">
+                <section className="v2-access-login-panel" aria-labelledby="v2-login-title">
+                    <div className="v2-access-login-card">
+                        <span className="v2-access-login-icon">
                             <LogIn size={24} />
                         </span>
                         <h2 id="v2-login-title">Chào mừng bạn</h2>
@@ -136,21 +138,21 @@ function V2Login() {
                             <>
                                 <div
                                     ref={googleButtonRef}
-                                    className={`dx-google-button ${busy ? 'disabled' : ''}`}
+                                    className={`v2-access-google-button ${busy ? 'disabled' : ''}`}
                                     aria-label="Đăng nhập bằng Google"
                                 />
                                 {!googleReady && <small>Đang tải đăng nhập Google...</small>}
-                                <div className="dx-login-divider">
+                                <div className="v2-access-login-divider">
                                     <span>hoặc dùng email</span>
                                 </div>
                             </>
                         ) : (
-                            <div className="dx-login-divider">
+                            <div className="v2-access-login-divider">
                                 <span>Đăng nhập bằng email</span>
                             </div>
                         )}
                         <form onSubmit={submitEmail} noValidate>
-                            <label className="dx-field">
+                            <label className="v2-access-field">
                                 <span>Email FPTU</span>
                                 <input
                                     type="email"
@@ -166,15 +168,15 @@ function V2Login() {
                                 />
                             </label>
                             {error && (
-                                <p className="dx-form-error" id="v2-login-error" role="alert">
+                                <p className="v2-access-form-error" id="v2-login-error" role="alert">
                                     {error}
                                 </p>
                             )}
-                            <button className="dx-button primary full" type="submit" disabled={busy}>
+                            <button className="v2-access-button primary full" type="submit" disabled={busy}>
                                 {busy ? 'Đang xác thực...' : 'Tiếp tục'} <ArrowRight size={17} />
                             </button>
                         </form>
-                        <small className="dx-login-note">
+                        <small className="v2-access-login-note">
                             Bằng việc tiếp tục, bạn đồng ý sử dụng tài khoản theo quy định của Trường Đại học FPT.
                         </small>
                     </div>

@@ -1,3 +1,4 @@
+import './demo.scss';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Bell, ChevronDown, RotateCcw, FlaskConical } from 'lucide-react';

@@ -4,15 +4,15 @@ import { CAMPUSES, campusLabel } from '../../../pages/v2/profile-options';
 export default function OnboardingAutofill({ email, inferred, draft, onChange }) {
     const recognized = Boolean(inferred.studentCode || inferred.campus);
     return (
-        <section className="dx-onboarding-autofill">
-            <div className="dx-onboarding-email">
+        <section className="v2-onboarding-autofill">
+            <div className="v2-onboarding-email">
                 <Mail size={20} aria-hidden="true" />
                 <div>
                     <small>Email đăng nhập</small>
                     <strong>{email || 'Chưa có email'}</strong>
                 </div>
             </div>
-            <p className="dx-onboarding-autofill-message">
+            <p className="v2-onboarding-autofill-message">
                 <Sparkles size={18} aria-hidden="true" />
                 <span>
                     {recognized
@@ -20,8 +20,8 @@ export default function OnboardingAutofill({ email, inferred, draft, onChange })
                         : 'Bạn có thể chọn campus và nhập mã sinh viên bên dưới để bổ sung vào hồ sơ.'}
                 </span>
             </p>
-            <div className="dx-onboarding-fields">
-                <label className="dx-field">
+            <div className="v2-onboarding-fields">
+                <label className="v2-access-field">
                     <span>Mã sinh viên</span>
                     <input
                         name="studentCode"
@@ -31,7 +31,7 @@ export default function OnboardingAutofill({ email, inferred, draft, onChange })
                         placeholder="Ví dụ: CE161131"
                     />
                 </label>
-                <label className="dx-field">
+                <label className="v2-access-field">
                     <span>Campus</span>
                     <select
                         name="campus"
@@ -46,7 +46,7 @@ export default function OnboardingAutofill({ email, inferred, draft, onChange })
                         ))}
                     </select>
                 </label>
-                <label className="dx-field">
+                <label className="v2-access-field">
                     <span>Khóa học</span>
                     <input
                         name="year"

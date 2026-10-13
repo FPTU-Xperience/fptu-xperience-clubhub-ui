@@ -175,7 +175,7 @@ test('production left rail is V2-local, production-routed, and accessible', () =
     assert.doesNotMatch(railStyles, /\.dx-/);
 });
 
-test('production Discover composes the complete demo layout instead of a redesigned page', () => {
+test('production Discover composes the complete discovery layout', () => {
     const page = readFileSync(new URL('discovery-page/DiscoveryPage.jsx', import.meta.url), 'utf8');
     for (const component of ['DiscoverHero', 'DirectoryFilters', 'DirectoryPagination', 'ClubCard', 'BottomCallout']) {
         assert.match(page, new RegExp(component));
@@ -199,18 +199,18 @@ test('production Discover composes the complete demo layout instead of a redesig
     assert.match(layout, /return <ClubArt club={club} hero={hero} \/>/);
     assert.match(layout, /to="\/v2\/clubs"/);
     for (const className of [
-        'dx-discover-hero',
-        'dx-discovery-strip',
-        'dx-bottom-callout',
+        'v2-discovery-hero',
+        'v2-discovery-strip',
+        'v2-discovery-bottom-callout',
         'v2-filter-bar',
         'v2-directory-label',
         'v2-club-card',
     ]) {
-        assert.equal(`${layout}${filters}${card}`.includes(className), true, `${className} must remain demo-derived`);
+        assert.equal(`${layout}${filters}${card}`.includes(className), true, `${className} must remain available in production`);
     }
 
-    const productionStyles = readFileSync(new URL('discovery-page/DiscoveryPage.scss', import.meta.url), 'utf8');
-    assert.match(productionStyles, /\.dx-discover-hero/);
+    const productionStyles = readFileSync(new URL('../../components/v2/DiscoveryLayout.scss', import.meta.url), 'utf8');
+    assert.match(productionStyles, /\.v2-discovery-hero/);
 });
 
 test('every production availability outcome has a distinct presentation', () => {

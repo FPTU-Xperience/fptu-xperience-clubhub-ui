@@ -1,4 +1,8 @@
-import { WorkspaceSemesterProvider, WorkspaceSemesterSelect, useWorkspaceSemesterSelection } from './club-workspace-page/WorkspaceSemesterContext';
+import {
+    WorkspaceSemesterProvider,
+    WorkspaceSemesterSelect,
+    useWorkspaceSemesterSelection,
+} from './club-workspace-page/WorkspaceSemesterContext';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { ThemeProvider } from '../../context/ThemeContext';
@@ -6,7 +10,7 @@ import Footer from '../../components/v2/common/footer/Footer';
 import LeftRail from '../../components/v2/common/leftrail/LeftRail';
 import AllClubsPage from './all-clubs-page/AllClubsPage';
 import ClubDetailPage from './club-detail-page/ClubDetailPage';
-import DemoApp from './DemoApp';
+import { lazy, Suspense } from 'react';
 import DiscoverPage from './discovery-page/DiscoveryPage';
 import ActivitiesPage from './activities-page/ActivitiesPage';
 import ActivityDetailPage from './activities-page/ActivityDetailPage';
@@ -19,9 +23,7 @@ import { useProfileImages } from './profile-page/profile-images';
 import V2Access from './V2Access';
 import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import './V2App.scss';
-// The legacy demo and access styles remain available while their rules are
-// progressively moved beside the components that own them.
-import './demo.scss';
+const DemoApp = lazy(() => import('./DemoApp'));
 
 function AuthenticatedV2App() {
     const { user, logout, clubAccess, api } = useAuth();
@@ -31,9 +33,11 @@ function AuthenticatedV2App() {
 
     if (location.pathname.startsWith('/v2/demo')) {
         return (
-            <Routes>
-                <Route path="demo/*" element={<DemoApp sessionUser={user} onLogout={logout} />} />
-            </Routes>
+            <Suspense fallback={<div role="status">Đang mở bản demo...</div>}>
+                <Routes>
+                    <Route path="demo/*" element={<DemoApp sessionUser={user} onLogout={logout} />} />
+                </Routes>
+            </Suspense>
         );
     }
 
@@ -50,16 +54,27 @@ function AuthenticatedV2App() {
                     <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
                     <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
                     <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
-                    <Route path="activities/:activityId" element={<ActivityDetailPage api={api} sessionKey={sessionKey} />} />
+                    <Route
+                        path="activities/:activityId"
+                        element={<ActivityDetailPage api={api} sessionKey={sessionKey} />}
+                    />
                     <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
-                    <Route path="my-clubs/:clubCode/*" element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />} />
-                    <Route path="my-schedule" element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />} />
+                    <Route
+                        path="my-clubs/:clubCode/*"
+                        element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />}
+                    />
+                    <Route
+                        path="my-schedule"
+                        element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />}
+                    />
                     <Route path="study-schedule" element={<StudySchedulePage key={sessionKey} user={user} />} />
                     <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} profileImages={profileImages} />} />
                     <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
                     <Route
                         path="clubs/:clubCode"
-                        element={<ClubDetailPage api={api} viewer={user} viewerAccess={clubAccess} sessionKey={sessionKey} />}
+                        element={
+                            <ClubDetailPage api={api} viewer={user} viewerAccess={clubAccess} sessionKey={sessionKey} />
+                        }
                     />
                 </Routes>
             </main>
@@ -76,17 +91,19 @@ export default function V2App() {
         return (
             <ThemeProvider>
                 <div className="v2-app v2-app--workspace">
-                    <WorkspaceSemesterProvider value={previewSemester}><main className="governance-preview-page">
-                        <a className="governance-preview-back" href="/v2">
-                            ← Về ClubHub
-                        </a>
-                        <WorkspaceSemesterSelect />
-                        <ClubGovernancePreview
-                            actorId="synthetic-ui-reviewer"
-                            clubId="synthetic-preview-club"
-                            actorName="Chủ nhiệm"
-                        />
-                    </main></WorkspaceSemesterProvider>
+                    <WorkspaceSemesterProvider value={previewSemester}>
+                        <main className="governance-preview-page">
+                            <a className="governance-preview-back" href="/v2">
+                                ← Về ClubHub
+                            </a>
+                            <WorkspaceSemesterSelect />
+                            <ClubGovernancePreview
+                                actorId="synthetic-ui-reviewer"
+                                clubId="synthetic-preview-club"
+                                actorName="Chủ nhiệm"
+                            />
+                        </main>
+                    </WorkspaceSemesterProvider>
                 </div>
             </ThemeProvider>
         );

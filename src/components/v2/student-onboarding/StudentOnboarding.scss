@@ -1,58 +1,374 @@
-.dx-app.dx-student-onboarding { min-width: 0; }
-.dx-student-onboarding {
-    .dx-onboarding-shell { grid-template-columns: minmax(300px, .7fr) minmax(0, 1.3fr); }
-    .dx-onboarding-intro { align-self: start; position: sticky; top: 0; min-height: calc(100dvh - 82px); box-sizing: border-box; }
-    .dx-onboarding-intro .dx-onboarding-benefit { position: static; margin-top: 60px; }
-    .dx-onboarding-form { min-width: 0; padding: 40px clamp(24px, 4vw, 64px); }
-    .dx-onboarding-form h2 { margin: 24px 0 8px; font-size: 25px; color: #111827; }
-    .dx-onboarding-form h2:focus { outline: none; }
-    .dx-onboarding-description { color: #64748b; font-size: 13px; line-height: 1.7; }
-    .dx-onboarding-section { padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
-    .dx-onboarding-section legend { font-size: 14px; }
-    .dx-onboarding-section > p { color: #64748b; line-height: 1.6; }
-    .dx-onboarding-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-    .dx-field { display: grid; min-width: 0; gap: 7px; margin-top: 16px; }
-    .dx-onboarding-fields .dx-field { margin-top: 0; }
-    .dx-field input, .dx-field select, .dx-field textarea { width: 100%; box-sizing: border-box; margin-top: 0; }
-    .dx-field textarea { min-height: 96px; resize: vertical; }
-    .dx-onboarding-actions { position: sticky; bottom: 0; z-index: 1; margin-bottom: -40px; padding: 18px 0 24px; background: #fff; }
-    .dx-onboarding-sync-note { display: flex; align-items: flex-start; gap: 8px; padding: 12px; border-radius: 9px; background: #f8fafc; color: #64748b; font-size: 12px; line-height: 1.6; }
-    .dx-onboarding-sync-note svg { flex-shrink: 0; margin-top: 2px; }
-    .dx-onboarding-custom-interests { margin-top: 16px; font-size: 12px; }
-    .dx-onboarding-custom-interests button { margin: 4px 6px 0 0; padding: 6px 10px; border: 1px solid #fed7aa; border-radius: 20px; background: #fff7ed; color: #9a3412; cursor: pointer; }
-    .dx-onboarding-autofill { margin-top: 28px; }
-    .dx-onboarding-email { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
-    .dx-onboarding-email > svg { flex-shrink: 0; color: #ea580c; }
-    .dx-onboarding-email > div { min-width: 0; }
-    .dx-onboarding-email small { display: block; color: #64748b; font-size: 11px; }
-    .dx-onboarding-email strong { display: block; overflow-wrap: anywhere; font-size: 13px; }
-    .dx-onboarding-autofill-message { display: flex; gap: 8px; margin: 18px 0 24px; color: #9a3412; font-size: 13px; line-height: 1.7; }
-    .dx-onboarding-autofill-message > svg { flex-shrink: 0; margin-top: 3px; }
-    .dx-onboarding-autofill > .dx-onboarding-description { margin-top: 18px; }
+.v2-onboarding-benefit {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    color: #c2410c;
 }
-.dx-onboarding-steps {
-    display: flex; gap: 24px; color: #94a3b8; font-size: 12px;
-    span { display: flex; gap: 8px; align-items: center; }
-    b { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: #f1f5f9; }
-    [aria-current="step"] { color: #c2410c; font-weight: 650; }
-    [aria-current="step"] b { background: #fff7ed; box-shadow: inset 0 0 0 1px #fed7aa; }
+.v2-onboarding-benefit span {
+    display: block;
+}
+.v2-onboarding-benefit small {
+    margin-top: 2px;
+}
+
+.v2-onboarding-header {
+    height: 82px;
+    padding: 0 54px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid #fed7aa;
+}
+.v2-onboarding-header > span {
+    color: #9a3412;
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 0.13em;
+}
+
+.v2-onboarding-shell {
+    min-height: calc(100vh - 82px);
+    display: grid;
+    grid-template-columns: minmax(390px, 0.72fr) minmax(650px, 1.28fr);
+}
+
+.v2-onboarding-intro {
+    position: relative;
+    overflow: hidden;
+    padding: 82px 5vw 60px;
+    background: linear-gradient(145deg, #fff7ed, #ffedd5);
+    border-right: 1px solid #fed7aa;
+}
+.v2-onboarding-intro h1 {
+    font-size: 45px;
+    line-height: 1.13;
+    margin: 20px 0;
+}
+.v2-onboarding-intro h1 em {
+    color: #ea580c;
+    font-style: normal;
+}
+.v2-onboarding-intro > p {
+    max-width: 420px;
+    font-size: 14px;
+    line-height: 1.8;
+}
+.v2-onboarding-intro .v2-onboarding-benefit {
+    position: absolute;
+    left: 5vw;
+    bottom: 58px;
+}
+
+.v2-onboarding-number {
+    position: absolute;
+    right: 25px;
+    top: 20px;
+    font-size: 170px;
+    line-height: 1;
+    color: rgba(249, 115, 22, 0.062745098);
+    font-weight: 700;
+}
+
+.v2-onboarding-form {
+    padding: 55px 6vw 44px;
+    background: white;
+}
+.v2-onboarding-form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 30px 0 25px;
+}
+.v2-onboarding-form legend,
+.v2-onboarding-form > .v2-access-field > span {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 650;
+}
+.v2-onboarding-form fieldset > p {
+    font-size: 11px;
+    margin: 4px 0 15px;
+}
+.v2-onboarding-form > .v2-access-field {
+    margin-top: 0;
+}
+.v2-onboarding-form select {
+    margin-top: 5px;
+}
+
+.v2-access-interest-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+.v2-access-interest-grid button {
+    min-height: 72px;
+    padding: 13px 15px;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: white;
+    transition: 0.15s ease;
+}
+.v2-access-interest-grid button > span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 600;
+}
+.v2-access-interest-grid button small {
+    margin-top: 4px;
+}
+.v2-access-interest-grid button:hover {
+    border-color: #fdba74;
+    background: #fffaf5;
+}
+.v2-access-interest-grid button.selected {
+    border-color: #f97316;
+    background: #fff7ed;
+    color: #c2410c;
+    box-shadow: 0 0 0 1px #f97316;
+}
+
+.v2-onboarding-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-top: 24px;
+    margin-top: 25px;
+    border-top: 1px solid #e2e8f0;
+}
+.v2-onboarding-actions > span {
+    color: #64748b;
+    font-size: 11px;
+}
+.v2-access-shell.v2-student-onboarding {
+    min-width: 0;
+}
+.v2-student-onboarding {
+    .v2-onboarding-shell {
+        grid-template-columns: minmax(300px, 0.7fr) minmax(0, 1.3fr);
+    }
+    .v2-onboarding-intro {
+        align-self: start;
+        position: sticky;
+        top: 0;
+        min-height: calc(100dvh - 82px);
+        box-sizing: border-box;
+    }
+    .v2-onboarding-intro .v2-onboarding-benefit {
+        position: static;
+        margin-top: 60px;
+    }
+    .v2-onboarding-form {
+        min-width: 0;
+        padding: 40px clamp(24px, 4vw, 64px);
+    }
+    .v2-onboarding-form h2 {
+        margin: 24px 0 8px;
+        font-size: 25px;
+        color: #111827;
+    }
+    .v2-onboarding-form h2:focus {
+        outline: none;
+    }
+    .v2-onboarding-description {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+    .v2-onboarding-section {
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .v2-onboarding-section legend {
+        font-size: 14px;
+    }
+    .v2-onboarding-section > p {
+        color: #64748b;
+        line-height: 1.6;
+    }
+    .v2-onboarding-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+    .v2-access-field {
+        display: grid;
+        min-width: 0;
+        gap: 7px;
+        margin-top: 16px;
+    }
+    .v2-onboarding-fields .v2-access-field {
+        margin-top: 0;
+    }
+    .v2-access-field input,
+    .v2-access-field select,
+    .v2-access-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 0;
+    }
+    .v2-access-field textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+    .v2-onboarding-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        margin-bottom: -40px;
+        padding: 18px 0 24px;
+        background: #fff;
+    }
+    .v2-onboarding-sync-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+    .v2-onboarding-sync-note svg {
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .v2-onboarding-custom-interests {
+        margin-top: 16px;
+        font-size: 12px;
+    }
+    .v2-onboarding-custom-interests button {
+        margin: 4px 6px 0 0;
+        padding: 6px 10px;
+        border: 1px solid #fed7aa;
+        border-radius: 20px;
+        background: #fff7ed;
+        color: #9a3412;
+        cursor: pointer;
+    }
+    .v2-onboarding-autofill {
+        margin-top: 28px;
+    }
+    .v2-onboarding-email {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+    .v2-onboarding-email > svg {
+        flex-shrink: 0;
+        color: #ea580c;
+    }
+    .v2-onboarding-email > div {
+        min-width: 0;
+    }
+    .v2-onboarding-email small {
+        display: block;
+        color: #64748b;
+        font-size: 11px;
+    }
+    .v2-onboarding-email strong {
+        display: block;
+        overflow-wrap: anywhere;
+        font-size: 13px;
+    }
+    .v2-onboarding-autofill-message {
+        display: flex;
+        gap: 8px;
+        margin: 18px 0 24px;
+        color: #9a3412;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+    .v2-onboarding-autofill-message > svg {
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+    .v2-onboarding-autofill > .v2-onboarding-description {
+        margin-top: 18px;
+    }
+}
+.v2-onboarding-steps {
+    display: flex;
+    gap: 24px;
+    color: #94a3b8;
+    font-size: 12px;
+    span {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    b {
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        border-radius: 50%;
+        background: #f1f5f9;
+    }
+    [aria-current='step'] {
+        color: #c2410c;
+        font-weight: 650;
+    }
+    [aria-current='step'] b {
+        background: #fff7ed;
+        box-shadow: inset 0 0 0 1px #fed7aa;
+    }
 }
 @media (max-width: 900px) {
-    .dx-student-onboarding {
-        .dx-onboarding-shell { grid-template-columns: 1fr; }
-        .dx-onboarding-intro { position: relative; min-height: 0; padding: 32px 24px; border-right: 0; border-bottom: 1px solid #fed7aa; }
-        .dx-onboarding-intro h1 { font-size: 32px; }
-        .dx-onboarding-intro .dx-onboarding-benefit { margin-top: 24px; }
-        .dx-onboarding-header { height: 70px; padding: 0 24px; gap: 16px; }
-        .dx-onboarding-header > span { font-size: 9px; text-align: right; }
-        .dx-onboarding-form { padding: 28px 24px 40px; }
+    .v2-student-onboarding {
+        .v2-onboarding-shell {
+            grid-template-columns: 1fr;
+        }
+        .v2-onboarding-intro {
+            position: relative;
+            min-height: 0;
+            padding: 32px 24px;
+            border-right: 0;
+            border-bottom: 1px solid #fed7aa;
+        }
+        .v2-onboarding-intro h1 {
+            font-size: 32px;
+        }
+        .v2-onboarding-intro .v2-onboarding-benefit {
+            margin-top: 24px;
+        }
+        .v2-onboarding-header {
+            height: 70px;
+            padding: 0 24px;
+            gap: 16px;
+        }
+        .v2-onboarding-header > span {
+            font-size: 9px;
+            text-align: right;
+        }
+        .v2-onboarding-form {
+            padding: 28px 24px 40px;
+        }
     }
 }
 @media (max-width: 560px) {
-    .dx-student-onboarding {
-        .dx-onboarding-fields, .dx-interest-grid { grid-template-columns: 1fr; }
-        .dx-onboarding-actions { gap: 12px; flex-wrap: wrap; }
-        .dx-onboarding-actions > span { width: 100%; }
-        .dx-onboarding-actions > button { flex: 1; }
+    .v2-student-onboarding {
+        .v2-onboarding-fields,
+        .v2-access-interest-grid {
+            grid-template-columns: 1fr;
+        }
+        .v2-onboarding-actions {
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .v2-onboarding-actions > span {
+            width: 100%;
+        }
+        .v2-onboarding-actions > button {
+            flex: 1;
+        }
     }
 }
