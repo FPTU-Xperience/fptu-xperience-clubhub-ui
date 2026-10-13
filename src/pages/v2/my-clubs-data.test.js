@@ -6,6 +6,8 @@ import {
     createRequestGate,
     mapMyClubSelection,
     mapMyMembershipApplications,
+    visibleSentApplications,
+    APPLICATION_RESULT_WINDOW_MS,
 } from './my-clubs-data.js';
 
 test('selection maps only display-safe eligible roles and deduplicates cards', () => {
@@ -61,6 +63,34 @@ test('availability outcomes and request gate remain distinct', () => {
     assert.equal(gate.isCurrent(second), true);
     gate.invalidate();
     assert.equal(gate.isCurrent(second), false);
+});
+
+test('sent applications retain pending requests and expire results exactly seven days after review', () => {
+    const now = Date.parse('2026-10-13T12:00:00+07:00');
+    const timestamp = (offset) => new Date(now + offset).toISOString();
+    const records = [
+        { applicationId: 'pending', status: 'PENDING', requestedAtUtc: timestamp(-30 * 86400000) },
+        { applicationId: 'invitation', status: 'PENDING', canAcceptInvitation: true },
+        { applicationId: 'recent-approved', status: 'APPROVED', reviewedAtUtc: timestamp(-APPLICATION_RESULT_WINDOW_MS + 1) },
+        { applicationId: 'recent-rejected', status: 'REJECTED', reviewedAtUtc: timestamp(0) },
+        { applicationId: 'expired', status: 'APPROVED', reviewedAtUtc: timestamp(-APPLICATION_RESULT_WINDOW_MS) },
+        { applicationId: 'old', status: 'REJECTED', reviewedAtUtc: timestamp(-APPLICATION_RESULT_WINDOW_MS - 1) },
+        { applicationId: 'missing', status: 'APPROVED', requestedAtUtc: timestamp(-1) },
+        { applicationId: 'invalid', status: 'REJECTED', reviewedAtUtc: 'invalid' },
+        { applicationId: 'future', status: 'APPROVED', reviewedAtUtc: timestamp(1) },
+        { applicationId: 'withdrawn', status: 'WITHDRAWN' },
+    ];
+    assert.deepEqual(visibleSentApplications(records, now).map((item) => item.applicationId),
+        ['pending', 'recent-approved', 'recent-rejected']);
+});
+
+test('application mapper carries review time through to the visibility filter', () => {
+    const reviewedAtUtc = '2026-10-13T05:00:00Z';
+    const [application] = mapMyMembershipApplications([
+        { applicationId: 1, clubId: 3, status: 'APPROVED', reviewedAtUtc, requestedAtUtc: '2026-10-01T05:00:00Z' },
+    ]);
+    assert.equal(application.reviewedAtUtc, reviewedAtUtc);
+    assert.equal(visibleSentApplications([application], Date.parse(reviewedAtUtc)).length, 1);
 });
 
 test('invitation acceptance is retained only for pending current-user records', () => {

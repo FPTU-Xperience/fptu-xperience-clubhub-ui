@@ -4,13 +4,34 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageState from '../../../components/v2/PageState';
 import MyClubCard from '../../../components/v2/my-clubs/MyClubCard';
 import MyMembershipApplications from '../../../components/v2/my-clubs/MyMembershipApplications';
-import { isMyClubsMockEnabled, useMyClubSelection, useMyMembershipApplications } from '../my-clubs-data';
+import {
+    APPLICATION_RESULT_WINDOW_MS,
+    isMyClubsMockEnabled,
+    useMyMembershipApplications,
+    visibleSentApplications,
+} from '../my-clubs-data';
+import { usePinnedClubs } from '../pinned-clubs';
 import PersonalPageHeading from '../personal-pages/PersonalPageHeading';
 import './MyClubsPage.scss';
 
 export default function MyClubsPage({ api, sessionKey }) {
-    const selection = useMyClubSelection(api, sessionKey);
+    const { selection, pinnedClubs, togglePin } = usePinnedClubs();
     const applications = useMyMembershipApplications(api, sessionKey);
+    const [now, setNow] = useState(Date.now);
+    useEffect(() => {
+        setNow(Date.now());
+    }, [applications.data]);
+    useEffect(() => {
+        const currentTime = Date.now();
+        const deadlines = applications.data
+            .filter((item) => ['APPROVED', 'REJECTED'].includes(item.status))
+            .filter((item) => Date.parse(item.reviewedAtUtc) <= currentTime)
+            .map((item) => Date.parse(item.reviewedAtUtc) + APPLICATION_RESULT_WINDOW_MS)
+            .filter((deadline) => deadline > currentTime);
+        if (!deadlines.length) return;
+        const timer = setTimeout(() => setNow(Date.now()), Math.min(...deadlines) - currentTime);
+        return () => clearTimeout(timer);
+    }, [applications.data, now]);
     const [withdrawingId, setWithdrawingId] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
     const [mockWithdrawnIds, setMockWithdrawnIds] = useState([]);
@@ -24,7 +45,9 @@ export default function MyClubsPage({ api, sessionKey }) {
         invitationLock.current = false;
         setAcceptingId('');
         setInvitationError('');
-        return () => { invitationRequest.current++; };
+        return () => {
+            invitationRequest.current++;
+        };
     }, [sessionKey]);
     const openInvitation = async (item) => {
         if (invitationLock.current || !item.canAcceptInvitation) return;
@@ -40,10 +63,18 @@ export default function MyClubsPage({ api, sessionKey }) {
         } catch (issue) {
             if (request === invitationRequest.current) setInvitationError(issue?.message || 'Không thể mở lời mời.');
         } finally {
-            if (request === invitationRequest.current) { invitationLock.current = false; setAcceptingId(''); }
+            if (request === invitationRequest.current) {
+                invitationLock.current = false;
+                setAcceptingId('');
+            }
         }
     };
     const withdraw = async (applicationId) => {
+        if (
+            withdrawingId ||
+            !applications.data.some((item) => item.applicationId === applicationId && item.canWithdraw)
+        )
+            return;
         setWithdrawingId(applicationId);
         setWithdrawError('');
         try {
@@ -83,7 +114,12 @@ export default function MyClubsPage({ api, sessionKey }) {
                 {selection.data.length ? (
                     <div className="v2-my-clubs-grid">
                         {selection.data.map((club) => (
-                            <MyClubCard key={club.clubId} club={club} />
+                            <MyClubCard
+                                key={club.clubId}
+                                club={club}
+                                pinned={pinnedClubs.some((pinned) => pinned.clubId === club.clubId)}
+                                onTogglePin={() => togglePin(club.clubId)}
+                            />
                         ))}
                     </div>
                 ) : null}
@@ -95,7 +131,7 @@ export default function MyClubsPage({ api, sessionKey }) {
                 description={applications.status === 'empty' ? 'Bạn chưa có đơn tham gia nào.' : undefined}
             >
                 <MyMembershipApplications
-                    applications={applications.data.filter(
+                    applications={visibleSentApplications(applications.data, now).filter(
                         (application) => !mockWithdrawnIds.includes(application.applicationId),
                     )}
                     withdrawingId={withdrawingId}
@@ -103,7 +139,19 @@ export default function MyClubsPage({ api, sessionKey }) {
                     acceptingId={acceptingId}
                     onAcceptInvitation={openInvitation}
                 />
-                {invitationError && <p className="v2-my-clubs-error" role="alert">{invitationError}</p>}
+                {applications.data.some((item) => item.canAcceptInvitation) && (
+                    <MyMembershipApplications
+                        invitations
+                        applications={applications.data.filter((item) => item.canAcceptInvitation)}
+                        acceptingId={acceptingId}
+                        onAcceptInvitation={openInvitation}
+                    />
+                )}
+                {invitationError && (
+                    <p className="v2-my-clubs-error" role="alert">
+                        {invitationError}
+                    </p>
+                )}
                 {withdrawError && (
                     <p className="v2-my-clubs-error" role="alert">
                         {withdrawError}

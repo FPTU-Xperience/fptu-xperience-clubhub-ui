@@ -1,4 +1,4 @@
-const labels = { PENDING: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Chưa được duyệt', WITHDRAWN: 'Đã rút đơn' };
+const labels = { PENDING: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Từ chối', WITHDRAWN: 'Đã rút đơn' };
 
 export default function MyMembershipApplications({
     applications,
@@ -6,13 +6,17 @@ export default function MyMembershipApplications({
     onWithdraw,
     acceptingId,
     onAcceptInvitation,
+    invitations = false,
 }) {
     return (
         <section className="v2-my-applications">
-            <div>
-                <span className="v2-eyebrow">THEO DÕI HÀNH TRÌNH</span>
-                <h2>Đơn tham gia và lời mời của tôi</h2>
-                <p>Theo dõi phản hồi và lời mời từ các cộng đồng bạn quan tâm.</p>
+            <div className="v2-my-applications-header">
+                <h2>{invitations ? 'Lời mời tham gia CLB' : 'Đơn tham gia của tôi'}</h2>
+                <p>
+                    {invitations
+                        ? 'Xem và phản hồi lời mời từ các câu lạc bộ.'
+                        : 'Đơn đang chờ duyệt và kết quả duyệt trong 7 ngày gần đây.'}
+                </p>
             </div>
             {applications.length ? (
                 applications.map((item) => (
@@ -21,7 +25,9 @@ export default function MyMembershipApplications({
                             {item.club.logoUrl ? (
                                 <img src={item.club.logoUrl} alt="" />
                             ) : (
-                                item.club.name.slice(0, 3).toUpperCase()
+                                <span className="v2-my-application-club-code" title={item.club.clubCode}>
+                                    {item.club.clubCode}
+                                </span>
                             )}
                         </div>
                         <div>
@@ -32,7 +38,7 @@ export default function MyMembershipApplications({
                                 item.reason && <p>{item.reason}</p>
                             )}
                         </div>
-                        <span className="v2-my-application-status">
+                        <span className={`v2-my-application-status is-${item.status.toLowerCase()}`}>
                             {item.canAcceptInvitation ? 'Lời mời tham gia' : labels[item.status]}
                         </span>
                         {item.canAcceptInvitation && (
@@ -45,20 +51,26 @@ export default function MyMembershipApplications({
                                 {acceptingId === item.applicationId ? 'Đang mở…' : 'Xem lời mời'}
                             </button>
                         )}
-                        {item.canWithdraw && (
-                            <button
-                                className="v2-button"
-                                type="button"
-                                disabled={withdrawingId === item.applicationId}
-                                onClick={() => onWithdraw(item.applicationId)}
-                            >
-                                {withdrawingId === item.applicationId ? 'Đang rút...' : 'Rút đơn'}
-                            </button>
+                        {item.status === 'PENDING' && !item.canAcceptInvitation && (
+                            <div className="v2-my-application-withdraw">
+                                <button
+                                    className="v2-button"
+                                    type="button"
+                                    disabled={!item.canWithdraw || Boolean(withdrawingId)}
+                                    onClick={() => onWithdraw(item.applicationId)}
+                                >
+                                    {withdrawingId === item.applicationId ? 'Đang rút...' : 'Rút đơn'}
+                                </button>
+                            </div>
                         )}
                     </div>
                 ))
             ) : (
-                <p className="v2-muted">Bạn chưa có đơn tham gia hoặc lời mời nào.</p>
+                <p className="v2-muted">
+                    {invitations
+                        ? 'Bạn chưa có lời mời tham gia nào.'
+                        : 'Bạn không có đơn chờ duyệt hoặc kết quả duyệt trong 7 ngày gần đây.'}
+                </p>
             )}
         </section>
     );

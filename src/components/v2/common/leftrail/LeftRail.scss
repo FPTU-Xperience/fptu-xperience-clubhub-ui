@@ -13,7 +13,8 @@
 }
 
 .v2-left-rail-brand {
-    display: flex;
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
     align-items: center;
     gap: 10px;
     color: inherit;
@@ -25,21 +26,32 @@
 }
 
 .v2-left-rail-brand img {
-    width: 35px;
-    height: 39px;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
 }
 
 .v2-left-rail-brand small {
     display: block;
-    margin-top: 2px;
+    margin-top: 4px;
     color: #64748b;
-    font-size: 7px;
-    letter-spacing: 1.35px;
+    font-size: 6px;
+    letter-spacing: 0.8px;
+    line-height: 1.3;
 }
 
 .v2-left-rail-brand-dot {
     color: var(--v2-orange, #f97316);
+}
+.v2-left-rail-brand .v2-left-rail-brand-eyebrow {
+    margin: 0 0 3px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 9px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0.25px;
+    line-height: 1.2;
+    text-transform: none;
 }
 
 .v2-left-rail-campus {
@@ -54,6 +66,38 @@
 .v2-left-rail-nav {
     display: grid;
     gap: 5px;
+    min-height: 0;
+    overflow-y: auto;
+}
+.v2-left-rail-club-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.v2-left-rail-pinned-club {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.v2-left-rail-pinned-club a {
+    flex: 1;
+    min-width: 0;
+}
+.v2-left-rail-unpin {
+    display: grid;
+    width: 28px;
+    height: 32px;
+    flex: 0 0 auto;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+}
+.v2-left-rail-unpin:hover {
+    color: #ea580c;
 }
 
 .v2-left-rail-nav a,

@@ -1,21 +1,26 @@
-import { Bell, ChevronDown, ChevronRight, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
+import { Bell, ChevronDown, ChevronRight, LogOut, Moon, PinOff, Settings, Sun, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useHeaderNotifications } from '../../../../pages/v2/header-data';
+import { usePinnedClubs } from '../../../../pages/v2/pinned-clubs';
 import './LeftRail.scss';
 
 function NotificationContent({ status, data, retry }) {
     if (status === 'loading') return <p className="v2-rail-notification-state">Đang tải thông báo...</p>;
     if (status === 'empty') return <p className="v2-rail-notification-state">Bạn chưa có thông báo mới.</p>;
     if (status === 'unavailable') return <p className="v2-rail-notification-state">Thông báo hiện chưa khả dụng.</p>;
-    if (status === 'forbidden') return <p className="v2-rail-notification-state">Bạn không có quyền xem thông báo này.</p>;
-    if (status === 'unauthorized') return <p className="v2-rail-notification-state">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>;
+    if (status === 'forbidden')
+        return <p className="v2-rail-notification-state">Bạn không có quyền xem thông báo này.</p>;
+    if (status === 'unauthorized')
+        return <p className="v2-rail-notification-state">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>;
     if (status === 'error') {
         return (
             <div className="v2-rail-notification-state">
                 <p>Không thể tải thông báo. Vui lòng thử lại.</p>
-                <button className="v2-rail-notification-retry" type="button" onClick={retry}>Thử lại</button>
+                <button className="v2-rail-notification-retry" type="button" onClick={retry}>
+                    Thử lại
+                </button>
             </div>
         );
     }
@@ -46,6 +51,7 @@ const personalNavigation = [
 
 export default function LeftRail({ user, avatarUrl, onLogout, api }) {
     const location = useLocation();
+    const { pinnedClubs = [], togglePin } = usePinnedClubs() || {};
     const accountMenuRef = useRef(null);
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
     const [isPersonalNavOpen, setIsPersonalNavOpen] = useState(() =>
@@ -93,13 +99,19 @@ export default function LeftRail({ user, avatarUrl, onLogout, api }) {
         <aside className="v2-left-rail" aria-label="Điều hướng ClubHub">
             <Link to="/v2" className="v2-left-rail-brand">
                 <img src={`${import.meta.env.BASE_URL}fptux.png`} alt="FPTU Xperience" />
-                <span>clubhub<span className="v2-left-rail-brand-dot">.</span><small>YOUR CAMPUS, YOUR COMMUNITY</small></span>
+                <span>
+                    <small className="v2-left-rail-brand-eyebrow">FPTU Xperience</small>
+                    clubhub<span className="v2-left-rail-brand-dot">.</span>
+                    <small>YOUR CAMPUS, YOUR COMMUNITY</small>
+                </span>
             </Link>
 
             <p className="v2-left-rail-campus">FPTU Hồ Chí Minh</p>
             <nav className="v2-left-rail-nav" aria-label="Điều hướng chính">
                 {navigation.map(([to, label, end]) => (
-                    <NavLink key={to} to={to} end={end}>{label}</NavLink>
+                    <NavLink key={to} to={to} end={end}>
+                        {label}
+                    </NavLink>
                 ))}
                 <div className="v2-left-rail-nav-group">
                     <button
@@ -114,7 +126,25 @@ export default function LeftRail({ user, avatarUrl, onLogout, api }) {
                     {isPersonalNavOpen && (
                         <div id="v2-left-rail-personal-nav" className="v2-left-rail-nav-group-items">
                             {personalNavigation.map(([to, label]) => (
-                                <NavLink key={label} to={to}>{label}</NavLink>
+                                <NavLink key={label} to={to}>
+                                    {label}
+                                </NavLink>
+                            ))}
+                            {pinnedClubs.map((club) => (
+                                <div className="v2-left-rail-pinned-club" key={club.clubId}>
+                                    <NavLink to={club.workspacePath} title={club.name}>
+                                        <span className="v2-left-rail-club-name">{club.name}</span>
+                                    </NavLink>
+                                    <button
+                                        type="button"
+                                        className="v2-left-rail-unpin"
+                                        aria-label={`Bỏ ghim ${club.name}`}
+                                        title="Bỏ ghim"
+                                        onClick={() => togglePin(club.clubId)}
+                                    >
+                                        <PinOff size={12} aria-hidden="true" />
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     )}
@@ -131,28 +161,68 @@ export default function LeftRail({ user, avatarUrl, onLogout, api }) {
                     onClick={notifications.isOpen ? notifications.close : notifications.open}
                 >
                     <Bell size={18} aria-hidden="true" /> Thông báo
-                    {notifications.unreadCount > 0 && <span aria-label={`${notifications.unreadCount} thông báo chưa đọc`}>{notifications.unreadCount}</span>}
+                    {notifications.unreadCount > 0 && (
+                        <span aria-label={`${notifications.unreadCount} thông báo chưa đọc`}>
+                            {notifications.unreadCount}
+                        </span>
+                    )}
                 </button>
                 <div className="v2-left-rail-account-menu" ref={accountMenuRef}>
-                    <button className="v2-left-rail-account" type="button" aria-label="Mở menu tài khoản" aria-expanded={isAccountMenuOpen} aria-controls="v2-rail-account-menu" onClick={() => setIsAccountMenuOpen((open) => !open)}>
-                        <span className="v2-left-rail-avatar" aria-hidden="true">{avatarUrl ? <img src={avatarUrl} alt="" /> : avatar}</span>
-                        <span><strong>{displayName}</strong><small>{secondaryIdentifier}</small></span>
+                    <button
+                        className="v2-left-rail-account"
+                        type="button"
+                        aria-label="Mở menu tài khoản"
+                        aria-expanded={isAccountMenuOpen}
+                        aria-controls="v2-rail-account-menu"
+                        onClick={() => setIsAccountMenuOpen((open) => !open)}
+                    >
+                        <span className="v2-left-rail-avatar" aria-hidden="true">
+                            {avatarUrl ? <img src={avatarUrl} alt="" /> : avatar}
+                        </span>
+                        <span>
+                            <strong>{displayName}</strong>
+                            <small>{secondaryIdentifier}</small>
+                        </span>
                         <ChevronDown size={15} aria-hidden="true" />
                     </button>
                     {isAccountMenuOpen && (
-                        <div id="v2-rail-account-menu" className="v2-left-rail-account-popover" role="menu" aria-label="Tài khoản">
-                            <Link to="/v2/profile" role="menuitem"><UserRound size={16} /> Hồ sơ</Link>
-                            <Link to="/v2/profile?tab=settings" role="menuitem"><Settings size={16} /> Cài đặt</Link>
-                            <button type="button" role="menuitem" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} Chế độ tối <span>{theme === 'dark' ? 'Bật' : 'Tắt'}</span></button>
-                            <button className="v2-left-rail-logout" type="button" role="menuitem" onClick={signOut}><LogOut size={16} /> Đăng xuất</button>
+                        <div
+                            id="v2-rail-account-menu"
+                            className="v2-left-rail-account-popover"
+                            role="menu"
+                            aria-label="Tài khoản"
+                        >
+                            <Link to="/v2/profile" role="menuitem">
+                                <UserRound size={16} /> Hồ sơ
+                            </Link>
+                            <Link to="/v2/profile?tab=settings" role="menuitem">
+                                <Settings size={16} /> Cài đặt
+                            </Link>
+                            <button type="button" role="menuitem" onClick={toggleTheme}>
+                                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} Chế độ tối{' '}
+                                <span>{theme === 'dark' ? 'Bật' : 'Tắt'}</span>
+                            </button>
+                            <button className="v2-left-rail-logout" type="button" role="menuitem" onClick={signOut}>
+                                <LogOut size={16} /> Đăng xuất
+                            </button>
                         </div>
                     )}
                 </div>
             </div>
 
             {notifications.isOpen && (
-                <section id="v2-rail-notification-popover" className="v2-rail-notification-popover" role="dialog" aria-label="Thông báo">
-                    <div className="v2-rail-notification-heading"><h2>Thông báo</h2><button type="button" onClick={notifications.close} aria-label="Đóng thông báo"><X size={17} /></button></div>
+                <section
+                    id="v2-rail-notification-popover"
+                    className="v2-rail-notification-popover"
+                    role="dialog"
+                    aria-label="Thông báo"
+                >
+                    <div className="v2-rail-notification-heading">
+                        <h2>Thông báo</h2>
+                        <button type="button" onClick={notifications.close} aria-label="Đóng thông báo">
+                            <X size={17} />
+                        </button>
+                    </div>
                     <NotificationContent {...notifications} />
                 </section>
             )}

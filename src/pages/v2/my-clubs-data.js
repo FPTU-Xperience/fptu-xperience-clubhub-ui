@@ -16,7 +16,7 @@ const mockSelection = [
     },
 ];
 const mockApplications = [
-    { applicationId: 'mock-application-1', club: { clubId: 'fmelody', name: 'F-Melody' }, reason: 'Mình muốn tham gia ban truyền thông.', status: 'PENDING', canWithdraw: true },
+    { applicationId: 'mock-application-1', club: { clubId: 'fmelody', clubCode: 'FMELODY', name: 'F-Melody' }, reason: 'Mình muốn tham gia ban truyền thông.', status: 'PENDING', canWithdraw: true },
 ];
 
 export function classifyMyClubsError(error) {
@@ -47,6 +47,7 @@ export function mapMyClubSelection(value) {
                 name: text(raw.name, 'Câu lạc bộ'),
                 logoUrl: text(raw.logoUrl),
                 role,
+                displayRole: text(raw.displayRole, role === 'MANAGER' ? 'CLUB_OWNER' : 'MEMBER'),
                 workspacePath: `/v2/my-clubs/${encodeURIComponent(clubCode)}`,
                 upcomingActivity: activity?.title && activity?.startTime
                     ? { title: text(activity.title), startTime: text(activity.startTime), location: text(activity.location) }
@@ -67,9 +68,21 @@ export function mapMyMembershipApplications(value) {
             const clubId = text(raw.club?.clubId || raw.clubId);
             const status = text(raw.status).toUpperCase();
             if (!applicationId || !clubId || !statuses.has(status)) return null;
-            return { applicationId, club: { clubId, name: text(raw.club?.name || raw.clubName, 'Câu lạc bộ'), logoUrl: text(raw.club?.logoUrl) }, reason: text(raw.reason), status, canWithdraw: status === 'PENDING' && raw.canWithdraw === true, canAcceptInvitation: status === 'PENDING' && raw.canAcceptInvitation === true };
+            return { applicationId, club: { clubId, name: text(raw.club?.name || raw.clubName, 'Câu lạc bộ'), logoUrl: text(raw.club?.logoUrl), clubCode: text(raw.club?.clubCode || raw.clubCode) }, reason: text(raw.reason), status, requestedAtUtc: text(raw.requestedAtUtc), reviewedAtUtc: text(raw.reviewedAtUtc), canWithdraw: status === 'PENDING' && raw.canAcceptInvitation !== true && raw.canWithdraw === true, canAcceptInvitation: status === 'PENDING' && raw.canAcceptInvitation === true };
         })
         .filter(Boolean);
+}
+
+export const APPLICATION_RESULT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function visibleSentApplications(applications, now = Date.now()) {
+    return applications.filter((application) => {
+        if (application.canAcceptInvitation) return false;
+        if (application.status === 'PENDING') return true;
+        if (!['APPROVED', 'REJECTED'].includes(application.status)) return false;
+        const reviewedAt = Date.parse(application.reviewedAtUtc);
+        return Number.isFinite(reviewedAt) && reviewedAt <= now && now < reviewedAt + APPLICATION_RESULT_WINDOW_MS;
+    });
 }
 
 function useRequest(loader, mapper, sessionKey) {

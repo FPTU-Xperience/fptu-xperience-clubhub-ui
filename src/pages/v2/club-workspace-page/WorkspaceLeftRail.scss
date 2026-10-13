@@ -14,7 +14,8 @@
 }
 
 .v2-workspace-left-rail-brand {
-    display: flex;
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
     align-items: center;
     gap: 10px;
     color: inherit;
@@ -26,25 +27,35 @@
 }
 
 .v2-workspace-left-rail-brand img {
-    width: 35px;
-    height: 39px;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
 }
 
 .v2-workspace-left-rail-brand > span > span {
     color: var(--v2-orange, #f97316);
 }
+.v2-workspace-left-rail-brand .v2-workspace-left-rail-brand-eyebrow {
+    margin: 0 0 3px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 9px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0.25px;
+    line-height: 1.2;
+    text-transform: none;
+}
 
 .v2-workspace-left-rail-brand small {
     display: block;
-    margin-top: 2px;
+    margin-top: 4px;
     color: #64748b;
-    font-size: 7px;
-    letter-spacing: 1.35px;
+    font-size: 6px;
+    letter-spacing: 0.8px;
+    line-height: 1.3;
 }
 
-.v2-workspace-left-rail-label,
-.v2-workspace-left-rail-switch > span {
+.v2-workspace-left-rail-label {
     display: block;
     color: #94a3b8;
     font-size: 9px;
@@ -70,14 +81,20 @@
     color: #334155;
 }
 
-.v2-workspace-left-rail-club {
+.v2-workspace-club-switcher {
+    position: relative;
+    margin: 10px 0 24px;
+}
+
+.v2-workspace-left-rail-club,
+.v2-workspace-club-option {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 10px 10px 24px;
+    padding: 0 4px;
 }
 
-.v2-workspace-left-rail-club > span {
+.v2-workspace-club-logo {
     display: grid;
     width: 42px;
     height: 42px;
@@ -91,45 +108,110 @@
     font-weight: 800;
 }
 
-.v2-workspace-left-rail-club img {
+.v2-workspace-club-logo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.v2-workspace-left-rail-club strong,
-.v2-workspace-left-rail-club small {
+.v2-workspace-club-code {
+    width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+    padding: 3px;
+    overflow: hidden;
+    text-align: center;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.v2-workspace-club-copy {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.v2-workspace-club-copy strong,
+.v2-workspace-club-copy small {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.v2-workspace-left-rail-club strong {
+.v2-workspace-club-copy strong {
     font-size: 13px;
 }
 
-.v2-workspace-left-rail-club small {
+.v2-workspace-club-copy small {
     margin-top: 3px;
     color: #64748b;
     font-size: 10px;
 }
 
-.v2-workspace-left-rail-switch {
+.v2-workspace-club-switch-trigger {
     display: grid;
-    gap: 8px;
-    margin: 0 10px 22px;
+    place-items: center;
+    width: 30px;
+    height: 32px;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
 }
 
-.v2-workspace-left-rail-switch select {
-    width: 100%;
-    padding: 9px 10px;
+.v2-workspace-club-switch-trigger:hover,
+.v2-workspace-club-switch-trigger[aria-expanded='true'] {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.v2-workspace-club-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 320px;
+    max-width: calc(100vw - 36px);
+    padding: 6px;
+    box-sizing: border-box;
     border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgb(15 23 42 / 12%);
+}
+
+.v2-workspace-club-dropdown ul {
+    max-height: min(360px, 55vh);
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.v2-workspace-club-option {
+    width: 100%;
+    padding: 10px;
+    border: 0;
     border-radius: 8px;
-    background: #f8fafc;
-    color: #334155;
+    background: transparent;
+    color: inherit;
     font: inherit;
-    font-size: 11px;
+    cursor: pointer;
+}
+
+.v2-workspace-club-option:hover {
+    background: #f8fafc;
+}
+
+.v2-workspace-club-option[aria-current='true'] {
+    background: #fff7ed;
+}
+
+.v2-workspace-club-option > svg {
+    flex-shrink: 0;
+    color: #ea580c;
 }
 
 .v2-workspace-left-rail-label {
@@ -171,7 +253,7 @@
 }
 
 .v2-workspace-left-rail a:focus-visible,
-.v2-workspace-left-rail select:focus-visible {
+.v2-workspace-left-rail button:focus-visible {
     outline: 3px solid #fb923c;
     outline-offset: 3px;
 }

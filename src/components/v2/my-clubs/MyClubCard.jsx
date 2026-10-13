@@ -1,23 +1,75 @@
-import { ArrowRight, CalendarDays } from 'lucide-react';
+import { ArrowRight, CalendarDays, Pin, PinOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const dateLabel = (value) => new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+const dateLabel = (value) =>
+    new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 
-export default function MyClubCard({ club }) {
+export default function MyClubCard({ club, pinned = false, onTogglePin }) {
     const manager = club.role === 'MANAGER';
-    return <article className="v2-my-club-card">
-        <div className="v2-my-club-art" aria-hidden="true">
-            <span className="v2-my-club-art-meta">FPTU COMMUNITY<br />EST. 2017</span>
-            <span className="v2-my-club-art-arrow">↗</span>
-            {club.logoUrl ? <img src={club.logoUrl} alt="" /> : <strong>{club.name.slice(0, 3).toUpperCase()}</strong>}
-            <em>{club.name} · Grow together</em>
-        </div>
-        <div className="v2-my-club-body">
-            <div className="v2-my-club-top"><span className="v2-my-club-mark" aria-hidden="true">{club.name.slice(0, 3).toUpperCase()}</span><span className={`v2-my-club-role ${manager ? 'is-manager' : ''}`}>{manager ? 'Chủ nhiệm' : 'Thành viên'}</span></div>
-            <h2>{club.name}</h2>
-            <p>{manager ? (club.pendingApplications === null ? 'Đơn tham gia đang cập nhật' : `${club.pendingApplications} đơn tham gia đang chờ bạn xem xét`) : 'Hôm nay bạn muốn đóng góp điều gì?'}</p>
-            <div className="v2-my-club-activity"><CalendarDays size={18} /><div><small>HOẠT ĐỘNG SẮP TỚI</small><strong>{club.upcomingActivity?.title || 'Lịch hoạt động đang cập nhật'}</strong>{club.upcomingActivity && <span>{dateLabel(club.upcomingActivity.startTime)}{club.upcomingActivity.location ? ` · ${club.upcomingActivity.location}` : ''}</span>}</div></div>
-            <Link to={club.workspacePath} className="v2-button v2-button--primary">Vào không gian CLB <ArrowRight size={17} /></Link>
-        </div>
-    </article>;
+    return (
+        <article className="v2-my-club-card">
+            <div className="v2-my-club-art" aria-hidden="true">
+                <span className="v2-my-club-art-meta">
+                    FPTU COMMUNITY
+                    <br />
+                    EST. 2017
+                </span>
+                <span className="v2-my-club-art-arrow">↗</span>
+                {club.logoUrl ? <img src={club.logoUrl} alt="" /> : <strong>{club.clubCode}</strong>}
+                <em>{club.name} · Grow together</em>
+            </div>
+            <div className="v2-my-club-body">
+                <div className="v2-my-club-top">
+                    <span className="v2-my-club-mark" aria-hidden="true">
+                        {club.logoUrl ? (
+                            <img src={club.logoUrl} alt="" />
+                        ) : (
+                            <span className="v2-my-application-club-code" title={club.clubCode}>
+                                {club.clubCode}
+                            </span>
+                        )}
+                    </span>
+                    <span className={`v2-my-club-role ${manager ? 'is-manager' : ''}`}>
+                        {manager ? 'Chủ nhiệm' : 'Thành viên'}
+                    </span>
+                </div>
+                <h2>{club.name}</h2>
+                <p>
+                    {manager
+                        ? club.pendingApplications === null
+                            ? 'Đơn tham gia đang cập nhật'
+                            : `${club.pendingApplications} đơn tham gia đang chờ bạn xem xét`
+                        : 'Hôm nay bạn muốn đóng góp điều gì?'}
+                </p>
+                <div className="v2-my-club-activity">
+                    <CalendarDays size={18} />
+                    <div>
+                        <small>HOẠT ĐỘNG SẮP TỚI</small>
+                        <strong>{club.upcomingActivity?.title || 'Lịch hoạt động đang cập nhật'}</strong>
+                        {club.upcomingActivity && (
+                            <span>
+                                {dateLabel(club.upcomingActivity.startTime)}
+                                {club.upcomingActivity.location ? ` · ${club.upcomingActivity.location}` : ''}
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className="v2-my-club-actions">
+                    <Link to={club.workspacePath} className="v2-button v2-button--primary">
+                        Vào không gian CLB <ArrowRight size={17} />
+                    </Link>
+                    <button
+                        type="button"
+                        className="v2-my-club-pin"
+                        aria-pressed={pinned}
+                        aria-label={`${pinned ? 'Bỏ ghim' : 'Ghim'} ${club.name}`}
+                        title={pinned ? 'Bỏ ghim khỏi thanh điều hướng' : 'Ghim vào thanh điều hướng'}
+                        onClick={onTogglePin}
+                    >
+                        {pinned ? <PinOff size={19} aria-hidden="true" /> : <Pin size={19} aria-hidden="true" />}
+                    </button>
+                </div>
+            </div>
+        </article>
+    );
 }

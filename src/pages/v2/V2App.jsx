@@ -23,6 +23,7 @@ import { useProfileImages } from './profile-page/profile-images';
 import V2Access from './V2Access';
 import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import './V2App.scss';
+import { PinnedClubsProvider } from './pinned-clubs';
 const DemoApp = lazy(() => import('./DemoApp'));
 
 function AuthenticatedV2App() {
@@ -44,42 +45,51 @@ function AuthenticatedV2App() {
     const workspace = location.pathname.startsWith('/v2/my-clubs/');
 
     return (
-        <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}`}>
-            <a className="v2-skip-link" href="#v2-main">
-                Đến nội dung chính
-            </a>
-            {!workspace && <LeftRail user={user} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />}
-            <main id="v2-main" className="v2-main">
-                <Routes>
-                    <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
-                    <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
-                    <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
-                    <Route
-                        path="activities/:activityId"
-                        element={<ActivityDetailPage api={api} sessionKey={sessionKey} />}
-                    />
-                    <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
-                    <Route
-                        path="my-clubs/:clubCode/*"
-                        element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />}
-                    />
-                    <Route
-                        path="my-schedule"
-                        element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />}
-                    />
-                    <Route path="study-schedule" element={<StudySchedulePage key={sessionKey} user={user} />} />
-                    <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} profileImages={profileImages} />} />
-                    <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
-                    <Route
-                        path="clubs/:clubCode"
-                        element={
-                            <ClubDetailPage api={api} viewer={user} viewerAccess={clubAccess} sessionKey={sessionKey} />
-                        }
-                    />
-                </Routes>
-            </main>
-            {!workspace && <Footer />}
-        </div>
+        <PinnedClubsProvider key={sessionKey} api={api} accountKey={sessionKey}>
+            <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}`}>
+                <a className="v2-skip-link" href="#v2-main">
+                    Đến nội dung chính
+                </a>
+                {!workspace && (
+                    <LeftRail user={user} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />
+                )}
+                <main id="v2-main" className="v2-main">
+                    <Routes>
+                        <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
+                        <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
+                        <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
+                        <Route
+                            path="activities/:activityId"
+                            element={<ActivityDetailPage api={api} sessionKey={sessionKey} />}
+                        />
+                        <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
+                        <Route
+                            path="my-clubs/:clubCode/*"
+                            element={<ClubWorkspacePage api={api} sessionKey={sessionKey} viewer={user} />}
+                        />
+                        <Route
+                            path="my-schedule"
+                            element={<MySchedulePage api={api} sessionKey={sessionKey} clubAccess={clubAccess} />}
+                        />
+                        <Route path="study-schedule" element={<StudySchedulePage key={sessionKey} user={user} />} />
+                        <Route path="profile" element={<ProfilePage user={user} sessionKey={sessionKey} api={api} profileImages={profileImages} />} />
+                        <Route path="recommended" element={<Navigate to="/v2#club-directory" replace />} />
+                        <Route
+                            path="clubs/:clubCode"
+                            element={
+                                <ClubDetailPage
+                                    api={api}
+                                    viewer={user}
+                                    viewerAccess={clubAccess}
+                                    sessionKey={sessionKey}
+                                />
+                            }
+                        />
+                    </Routes>
+                </main>
+                {!workspace && <Footer />}
+            </div>
+        </PinnedClubsProvider>
     );
 }
 

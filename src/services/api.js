@@ -295,7 +295,8 @@ class ApiService {
     }
 
     async getMyMembershipApplications() {
-        return applicationsFromMemberships(await this.getMyMemberships());
+        const [memberships, clubs] = await Promise.all([this.getMyMemberships(), this.getClubs()]);
+        return applicationsFromMemberships(memberships, clubs);
     }
 
     async withdrawMyMembershipApplication(applicationId) {
