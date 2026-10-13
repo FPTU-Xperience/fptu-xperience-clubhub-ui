@@ -213,9 +213,6 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                         <Info icon={Phone} label="Điện thoại" value={club.contact.phone} />
                                     )}
                                 </section>
-                                <div className="v2-small-note">
-                                    Chỉ thông tin công khai được phép mới hiển thị trên trang này.
-                                </div>
                             </aside>
                         </div>
                     </>
