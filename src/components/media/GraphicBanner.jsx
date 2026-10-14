@@ -1,16 +1,23 @@
 import { useId } from 'react';
-import { INITIALS_FONTS } from './initials-design';
+import TextParagraphLayers from './TextParagraphLayers';
+import { graphicTextParagraphs } from './graphic-banner';
 import { bannerPaint, BANNER_PATHS, normalizeGraphicBanner, CLUB_BANNER_SIZE, bannerLayout } from './graphic-banner';
 import { paletteColorCss } from './color-palette';
 import './GraphicBanner.scss';
 
-export default function GraphicBanner({ design, label = 'Banner graphic', size = CLUB_BANNER_SIZE, preserveAspectRatio = 'xMinYMid meet' }) {
+export default function GraphicBanner({
+    design,
+    label = 'Banner graphic',
+    size = CLUB_BANNER_SIZE,
+    preserveAspectRatio = 'xMinYMid meet',
+    selectedParagraphId,
+    textInteractive = false,
+}) {
     const id = useId().replace(/:/g, '');
     const value = normalizeGraphicBanner(design);
     const layout = bannerLayout(size);
     const background = bannerPaint(value.background, size),
         ink = bannerPaint(value.color, size);
-    const font = (field) => INITIALS_FONTS.find((font) => font.id === value.fonts[field]).family;
     return (
         <svg
             className="media-graphic-banner"
@@ -36,12 +43,8 @@ export default function GraphicBanner({ design, label = 'Banner graphic', size =
                             x2={paint.x2}
                             y2={paint.y2}
                         >
-                            {paint.colors.map((color, index) => (
-                                <stop
-                                    key={index}
-                                    offset={`${(index / (paint.colors.length - 1)) * 100}%`}
-                                    stopColor={color}
-                                />
+                            {paint.stops.map((stop, index) => (
+                                <stop key={index} offset={`${stop.position}%`} stopColor={stop.color} />
                             ))}
                         </linearGradient>
                     ))}
@@ -49,7 +52,7 @@ export default function GraphicBanner({ design, label = 'Banner graphic', size =
             <rect width={size.width} height={size.height} fill={background.color || `url(#${id}-background)`} />
             <g
                 data-layer="shape"
-                transform={`translate(${value.shapeX * layout.xStep} ${value.shapeY * layout.yStep}) translate(${layout.cx} ${layout.cy}) scale(${value.shapeScale / 100 * layout.shapeScale}) translate(-600 -150)`}
+                transform={`translate(${value.shapeX * layout.xStep} ${value.shapeY * layout.yStep}) translate(${layout.cx} ${layout.cy}) scale(${(value.shapeScale / 100) * layout.shapeScale}) translate(-600 -150)`}
             >
                 {value.decoration === 'circles' && (
                     <g fill="white">
@@ -66,27 +69,14 @@ export default function GraphicBanner({ design, label = 'Banner graphic', size =
                 )}
             </g>
             {value.visible && (
-                <g
-                    data-layer="text"
-                    transform={`translate(${value.textX * layout.xStep} ${value.textY * layout.yStep + layout.textOffset})`}
-                    fill={ink.color || `url(#${id}-ink)`}
-                >
-                    <text x="46" y="53" fontSize={12 * layout.textScale} opacity=".65" fontFamily={font('eyebrow')}>
-                        {value.eyebrow}
-                    </text>
-                    <text x="46" y="122" fontSize={value.size * layout.textScale} fontWeight="700" fontFamily={font('title')}>
-                        {value.title}
-                    </text>
-                    <text
-                        x="46"
-                        y={122 + value.size * layout.textScale * 1.2}
-                        fontSize={value.size * layout.textScale}
-                        fontWeight="700"
-                        fontFamily={font('subtitle')}
-                    >
-                        {value.subtitle}
-                    </text>
-                </g>
+                <TextParagraphLayers
+                    paragraphs={graphicTextParagraphs(value, size)}
+                    width={size.width}
+                    height={size.height}
+                    inheritedColor={ink.color || `url(#${id}-ink)`}
+                    selectedId={selectedParagraphId}
+                    interactive={textInteractive}
+                />
             )}
         </svg>
     );

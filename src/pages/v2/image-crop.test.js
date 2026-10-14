@@ -22,3 +22,24 @@ test('zoom and dragging keep the retained region inside image bounds', () => {
     assert.deepEqual(moveImageCrop(imageCropRect(300, 300, 300, 300), 300, 300, 300, 300, 200, 200), { x: 50, y: 50 });
     assert.throws(() => imageCropRect(0, 800, 300, 300));
 });
+test('circular crop can zoom out with transparent padding and pan in either direction', () => {
+    const rect = imageCropRect(200, 200, 512, 512, 0.5, 50, 50, 0.5);
+    assert.deepEqual(rect, { x: -100, y: -100, width: 400, height: 400 });
+    const right = moveImageCrop(rect, 200, 200, 400, 400, 40, 0);
+    assert.equal(imageCropRect(200, 200, 512, 512, 0.5, right.x, right.y, 0.5).x, -140);
+    const left = moveImageCrop(rect, 200, 200, 400, 400, -40, 0);
+    assert.equal(imageCropRect(200, 200, 512, 512, 0.5, left.x, left.y, 0.5).x, -60);
+});
+
+test('zoomed crop selects the requested part of a rectangular image and clamps dragging', () => {
+    const rect = imageCropRect(400, 200, 512, 512, 2, 100, 0, 0.5);
+    assert.deepEqual(rect, { x: 300, y: 0, width: 100, height: 100 });
+    assert.deepEqual(moveImageCrop(rect, 400, 200, 360, 360, -10000, 10000), { x: 100, y: 0 });
+    const centered = imageCropRect(200, 200, 512, 512, 1, 50, 50, 0.5);
+    assert.deepEqual(moveImageCrop(centered, 200, 200, 360, 360, 100, 100), { x: 50, y: 50 });
+});
+
+test('existing rectangular image crop keeps its minimum zoom and aspect ratio', () => {
+    assert.deepEqual(imageCropRect(400, 200, 512, 512, 0.5), { x: 100, y: 0, width: 200, height: 200 });
+    assert.deepEqual(imageCropRect(800, 600, 1200, 300, 1), { x: 0, y: 200, width: 800, height: 200 });
+});

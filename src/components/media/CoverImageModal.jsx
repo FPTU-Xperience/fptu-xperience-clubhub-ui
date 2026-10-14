@@ -11,7 +11,9 @@ import {
     saveGraphicBanner,
     moveBannerLayer,
     bannerSize,
+    graphicTextParagraphs,
 } from './graphic-banner';
+import { moveTextParagraph } from './text-paragraphs';
 import './CoverImageModal.scss';
 
 export default function CoverImageModal({
@@ -31,6 +33,7 @@ export default function CoverImageModal({
     const size = bannerSize(kind);
     const [cached] = useState(() => readGraphicBanner(storageKey, value));
     const [tab, setTab] = useState('background');
+    const [selectedParagraphId, setSelectedParagraphId] = useState('title');
     const [mode, setMode] = useState(cached || !value ? 'graphic' : 'image');
     const [design, setDesign] = useState(() => cached || defaultGraphicBanner(kind, identity));
     const [generating, setGenerating] = useState(false);
@@ -53,15 +56,41 @@ export default function CoverImageModal({
             event.preventDefault();
             const inverse = matrix.inverse();
             const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(inverse);
-            drag.current = { pointerId: event.pointerId, inverse, point, layer: tab, design };
+            const paragraphs = graphicTextParagraphs(design, size);
+            const paragraphId =
+                event.target.closest?.('[data-paragraph-id]')?.getAttribute('data-paragraph-id') ||
+                (paragraphs.some((item) => item.id === selectedParagraphId) ? selectedParagraphId : paragraphs[0]?.id);
+            if (tab === 'text' && !paragraphId) return;
+            if (tab === 'text') setSelectedParagraphId(paragraphId);
+            drag.current = { pointerId: event.pointerId, inverse, point, layer: tab, design, paragraphs, paragraphId };
             event.currentTarget.setPointerCapture(event.pointerId);
         },
         onPointerMove: (event) => {
             const current = drag.current;
             if (!current || current.pointerId !== event.pointerId) return;
             const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(current.inverse);
+            if (current.layer === 'text') {
+                setDesign({
+                    ...current.design,
+                    paragraphs: moveTextParagraph(
+                        current.paragraphs,
+                        current.paragraphId,
+                        point.x - current.point.x,
+                        point.y - current.point.y,
+                        size.width,
+                        size.height,
+                    ),
+                });
+                return;
+            }
             setDesign(
-                moveBannerLayer(current.design, current.layer, point.x - current.point.x, point.y - current.point.y, size),
+                moveBannerLayer(
+                    current.design,
+                    current.layer,
+                    point.x - current.point.x,
+                    point.y - current.point.y,
+                    size,
+                ),
             );
         },
         onPointerUp: finishDrag,
@@ -127,7 +156,12 @@ export default function CoverImageModal({
                             mode === 'image' && image ? (
                                 <img src={image} alt="Xem trước ảnh bìa" />
                             ) : (
-                                <GraphicBanner design={design} size={size} />
+                                <GraphicBanner
+                                    design={design}
+                                    size={size}
+                                    selectedParagraphId={selectedParagraphId}
+                                    textInteractive={tab === 'text'}
+                                />
                             )
                         }
                         hint={
@@ -183,6 +217,8 @@ export default function CoverImageModal({
                     )}
                     {mode === 'graphic' ? (
                         <GraphicBannerEditor
+                            selectedParagraphId={selectedParagraphId}
+                            onSelectParagraph={setSelectedParagraphId}
                             value={design}
                             onChange={setDesign}
                             disabled={busy}

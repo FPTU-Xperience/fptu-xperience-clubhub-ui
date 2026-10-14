@@ -25,6 +25,12 @@
     max-width: 360px;
     justify-self: center;
 }
+.image-crop-preview.is-circular {
+    border: 0;
+    border-radius: 50%;
+    outline: 2px solid #fb923c;
+    background: repeating-conic-gradient(#e2e8f0 0% 25%, #fff 0% 50%) 50% / 20px 20px;
+}
 .image-crop-modal .image-crop-preview > img {
     position: absolute;
     display: block;
@@ -33,6 +39,9 @@
     object-fit: fill;
     border-radius: 0;
     pointer-events: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 .image-crop-grid {
     position: absolute;
@@ -123,6 +132,10 @@
 }
 .image-crop-editor > button {
     justify-self: start;
+}
+.image-crop-zoom-actions {
+    display: flex;
+    gap: 10px;
 }
 .image-crop-preview:focus-visible,
 .image-crop-editor input:focus-visible {

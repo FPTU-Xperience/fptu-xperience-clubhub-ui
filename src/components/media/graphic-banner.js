@@ -1,12 +1,15 @@
 import { INITIALS_FONTS } from './initials-design.js';
 import { getGradient, isPaletteColor } from './color-palette.js';
+import { normalizeTextParagraphs, drawTextParagraphs, PARAGRAPH_FONTS } from './text-paragraphs.js';
 
 export const CLUB_BANNER_SIZE = Object.freeze({ width: 1200, height: 300 });
 export const ACTIVITY_BANNER_SIZE = Object.freeze({ width: 1200, height: 500 });
-export const bannerSize = (kind) => kind === 'activity' ? ACTIVITY_BANNER_SIZE : CLUB_BANNER_SIZE;
+export const bannerSize = (kind) => (kind === 'activity' ? ACTIVITY_BANNER_SIZE : CLUB_BANNER_SIZE);
 export const bannerLayout = (size = CLUB_BANNER_SIZE) => ({
-    xStep: size.width / 100, yStep: size.height / 100,
-    cx: size.width / 2, cy: size.height / 2,
+    xStep: size.width / 100,
+    yStep: size.height / 100,
+    cx: size.width / 2,
+    cy: size.height / 2,
     textOffset: (size.height - 300) / 2,
     textScale: size.height > 400 ? 1.15 : 1,
     shapeScale: size.height > 400 ? 1.35 : 1,
@@ -68,17 +71,49 @@ export function normalizeGraphicBanner(value) {
         next.size > 64
     )
         throw new Error('Thiết kế banner không hợp lệ.');
+    if (next.paragraphs !== undefined) next.paragraphs = normalizeTextParagraphs(next.paragraphs, true);
+    if (
+        next.sizes &&
+        ['eyebrow', 'title', 'subtitle'].some(
+            (field) =>
+                next.sizes[field] != null &&
+                (!Number.isFinite(next.sizes[field]) || next.sizes[field] < 8 || next.sizes[field] > 240),
+        )
+    )
+        throw new Error('Cỡ chữ từng dòng không hợp lệ.');
     return next;
+}
+export function graphicTextParagraphs(value, size = CLUB_BANNER_SIZE) {
+    if (value.paragraphs) return normalizeTextParagraphs(value.paragraphs, true);
+    const layout = bannerLayout(size);
+    return normalizeTextParagraphs(
+        ['eyebrow', 'title', 'subtitle'].map((field, index) => ({
+            id: field,
+            text: value[field],
+            font: value.fonts?.[field] || value.font || 'inter',
+            size: value.sizes?.[field] || (index ? value.size : 12) * layout.textScale,
+            x: 46 / layout.xStep + value.textX,
+            y:
+                ([53, 122, 122 + value.size * layout.textScale * 1.2][index] + layout.textOffset) / layout.yStep +
+                value.textY,
+            color: '',
+            bold: !!index,
+            italic: false,
+            opacity: index ? 1 : 0.65,
+        })),
+        true,
+    );
 }
 export function bannerPaint(value, size = CLUB_BANNER_SIZE) {
     const gradient = getGradient(value);
     if (!gradient) return { color: value };
-    const angle = ['gradient:community', 'gradient:creative', 'gradient:warm'].includes(value) ? 125 : 135;
+    const angle = ['gradient:community', 'gradient:creative', 'gradient:warm'].includes(value) ? 125 : gradient.angle;
     const dx = Math.sin((angle * Math.PI) / 180),
         dy = -Math.cos((angle * Math.PI) / 180);
     const length = size.width * Math.abs(dx) + size.height * Math.abs(dy);
     return {
         colors: gradient.colors,
+        stops: gradient.stops,
         x1: size.width / 2 - (dx * length) / 2,
         y1: size.height / 2 - (dy * length) / 2,
         x2: size.width / 2 + (dx * length) / 2,
@@ -94,19 +129,22 @@ export function moveBannerLayer(design, layer, deltaX, deltaY, size = CLUB_BANNE
     const xLimit = layer === 'shape' ? 50 : 100;
     return {
         ...design,
-        [`${prefix}X`]: Math.max(-xLimit, Math.min(xLimit, Math.round(design[`${prefix}X`] + deltaX / (size.width / 100)))),
+        [`${prefix}X`]: Math.max(
+            -xLimit,
+            Math.min(xLimit, Math.round(design[`${prefix}X`] + deltaX / (size.width / 100))),
+        ),
         [`${prefix}Y`]: Math.max(-100, Math.min(100, Math.round(design[`${prefix}Y`] + deltaY / (size.height / 100)))),
     };
 }
 export async function createGraphicBannerFile(value, size = CLUB_BANNER_SIZE) {
     const layout = bannerLayout(size);
     const design = normalizeGraphicBanner(value);
-    const family = (field) => INITIALS_FONTS.find((font) => font.id === design.fonts[field]).family;
+    const paragraphs = graphicTextParagraphs(design, size);
     await Promise.all(
-        ['eyebrow', 'title', 'subtitle'].map((field) =>
+        paragraphs.map((paragraph) =>
             document.fonts.load(
-                `${field === 'eyebrow' ? 400 : 700} ${(field === 'eyebrow' ? 12 : design.size) * layout.textScale}px ${family(field)}`,
-                design[field],
+                `${paragraph.italic ? 'italic ' : ''}${paragraph.bold ? 700 : 400} ${paragraph.size}px ${PARAGRAPH_FONTS.find((font) => font.id === paragraph.font).family}`,
+                paragraph.text,
             ),
         ),
     );
@@ -119,14 +157,14 @@ export async function createGraphicBannerFile(value, size = CLUB_BANNER_SIZE) {
         const spec = bannerPaint(value, size);
         if (spec.color) return spec.color;
         const gradient = context.createLinearGradient(spec.x1, spec.y1, spec.x2, spec.y2);
-        spec.colors.forEach((color, index) => gradient.addColorStop(index / (spec.colors.length - 1), color));
+        spec.stops.forEach((stop) => gradient.addColorStop(stop.position / 100, stop.color));
         return gradient;
     };
     context.fillStyle = paint(design.background);
     context.fillRect(0, 0, size.width, size.height);
     context.save();
     context.translate(design.shapeX * layout.xStep + layout.cx, design.shapeY * layout.yStep + layout.cy);
-    context.scale(design.shapeScale / 100 * layout.shapeScale, design.shapeScale / 100 * layout.shapeScale);
+    context.scale((design.shapeScale / 100) * layout.shapeScale, (design.shapeScale / 100) * layout.shapeScale);
     context.translate(-600, -150);
     if (design.decoration === 'circles') {
         for (const [x, y, radius, opacity] of [
@@ -143,18 +181,7 @@ export async function createGraphicBannerFile(value, size = CLUB_BANNER_SIZE) {
         BANNER_PATHS[design.decoration].forEach((path) => context.fill(new Path2D(path)));
     }
     context.restore();
-    if (design.visible) {
-        context.translate(design.textX * layout.xStep, design.textY * layout.yStep + layout.textOffset);
-        context.fillStyle = paint(design.color);
-        context.globalAlpha = 0.65;
-        context.font = `400 ${12 * layout.textScale}px ${family('eyebrow')}`;
-        context.fillText(design.eyebrow, 46, 53);
-        context.globalAlpha = 1;
-        context.font = `700 ${design.size * layout.textScale}px ${family('title')}`;
-        context.fillText(design.title, 46, 122);
-        context.font = `700 ${design.size * layout.textScale}px ${family('subtitle')}`;
-        context.fillText(design.subtitle, 46, 122 + design.size * layout.textScale * 1.2);
-    }
+    if (design.visible) drawTextParagraphs(context, paragraphs, size, design.color, paint);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
     if (!blob) throw new Error('Không thể tạo banner.');
     return new File([blob], 'graphic-banner.png', { type: 'image/png' });

@@ -71,6 +71,11 @@ test('generated activity PNG uses the same output size and scaled text placement
         assert.equal(canvas.width, 1200);
         assert.equal(canvas.height, 500);
         assert.ok(calls.some((call) => JSON.stringify(call) === JSON.stringify(['fillRect', 0, 0, 1200, 500])));
-        assert.ok(calls.some((call) => JSON.stringify(call) === JSON.stringify(['translate', 0, 100])));
+        const text = calls.filter(([name]) => name === 'fillText');
+        assert.deepEqual(text.map(([, content]) => content), ['CLUBHUB / EXPERIENCES', 'Một hoạt động.', 'Nhiều điều đáng nhớ.']);
+        for (const [index, expectedY] of [153, 222, 274.44].entries()) {
+            assert.ok(Math.abs(text[index][2] - 46) < 0.001);
+            assert.ok(Math.abs(text[index][3] - expectedY) < 0.001);
+        }
     } finally { globalThis.document = previousDocument; }
 });

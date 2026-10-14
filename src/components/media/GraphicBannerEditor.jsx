@@ -2,10 +2,19 @@ import { useId } from 'react';
 import GraphicBanner from './GraphicBanner';
 import PaletteColorPicker from './PaletteColorPicker';
 import { GRADIENT_COLORS } from './color-palette';
-import { INITIALS_FONTS } from './initials-design';
+import TextParagraphEditor from './TextParagraphEditor';
+import { graphicTextParagraphs } from './graphic-banner';
 import { defaultGraphicBanner, normalizeGraphicBanner, bannerSize } from './graphic-banner';
 
-export default function GraphicBannerEditor({ value, onChange, disabled, tab = 'background', kind = 'club' }) {
+export default function GraphicBannerEditor({
+    value,
+    onChange,
+    disabled,
+    tab = 'background',
+    kind = 'club',
+    selectedParagraphId,
+    onSelectParagraph,
+}) {
     const id = useId();
     const design = normalizeGraphicBanner(value);
     const update = (patch) => onChange({ ...design, ...patch });
@@ -112,85 +121,23 @@ export default function GraphicBannerEditor({ value, onChange, disabled, tab = '
                 </>
             )}
             {tab === 'text' && (
-                <>
-                    <label className="media-banner-check">
-                        <input
-                            type="checkbox"
-                            checked={design.visible}
-                            disabled={disabled}
-                            onChange={(event) => update({ visible: event.target.checked })}
-                        />
-                        Hiển thị chữ trên ảnh bìa
-                    </label>
-                    {[
-                        ['eyebrow', 'Dòng chữ nhỏ'],
-                        ['title', 'Tiêu đề'],
-                        ['subtitle', 'Dòng chữ nhấn'],
-                    ].map(([key, label]) => (
-                        <div className="media-banner-text-row" key={key}>
-                            <label htmlFor={`${id}-${key}`}>{label}</label>
-                            <div>
-                                <input
-                                    id={`${id}-${key}`}
-                                    type="text"
-                                    value={design[key]}
-                                    maxLength={80}
-                                    disabled={disabled || !design.visible}
-                                    onChange={(event) => update({ [key]: event.target.value })}
-                                />
-                                <select
-                                    aria-label={`Phông chữ ${label.toLowerCase()}`}
-                                    value={design.fonts[key]}
-                                    disabled={disabled || !design.visible}
-                                    onChange={(event) =>
-                                        update({ fonts: { ...design.fonts, [key]: event.target.value } })
-                                    }
-                                >
-                                    {INITIALS_FONTS.map((font) => (
-                                        <option key={font.id} value={font.id}>
-                                            {font.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    ))}
-                    <PaletteColorPicker
-                        label="Màu chữ"
-                        value={design.color}
-                        onChange={(color) => update({ color })}
-                        disabled={disabled || !design.visible}
-                    />
-                    {sliders(
-                        [
-                            ['size', 'Cỡ chữ', 24, 64],
-                            ['textX', 'Vị trí chữ ngang', -100, 100],
-                            ['textY', 'Vị trí chữ dọc', -100, 100],
-                        ],
-                        !design.visible,
-                    )}
-                    <button
-                        type="button"
-                        className="v2-button"
-                        disabled={disabled}
-                        onClick={() => {
-                            const initial = defaultGraphicBanner(kind);
-                            update({
-                                eyebrow: initial.eyebrow,
-                                title: initial.title,
-                                subtitle: initial.subtitle,
-                                visible: true,
-                                fonts: initial.fonts,
-                                color: initial.color,
-                                size: initial.size,
-                                textX: 0,
-                                textY: 0,
-                            });
-                        }}
-                    >
-                        Khôi phục chữ mặc định
-                    </button>
-                </>
+                <TextParagraphEditor
+                    paragraphs={graphicTextParagraphs(design, bannerSize(kind))}
+                    selectedId={selectedParagraphId}
+                    onSelect={onSelectParagraph}
+                    onChange={(paragraphs) => update({ paragraphs })}
+                    visible={design.visible}
+                    onVisibleChange={(visible) => update({ visible })}
+                    disabled={disabled}
+                    advanced
+                    onReset={() => {
+                        update({
+                            paragraphs: graphicTextParagraphs(defaultGraphicBanner(kind), bannerSize(kind)),
+                            visible: true,
+                        });
+                        onSelectParagraph('title');
+                    }}
+                />
             )}
         </div>
     );
