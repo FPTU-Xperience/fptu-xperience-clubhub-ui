@@ -1,0 +1,337 @@
+.v2-create-gift-modal {
+    width: min(900px, 100%);
+}
+.v2-create-gift-form {
+    color: #193554;
+    font:
+        13px/1.6 'Inter',
+        sans-serif;
+    fieldset {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+    legend {
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    input,
+    textarea,
+    select {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 12px;
+        border: 1px solid #dfe7f1;
+        border-radius: 8px;
+        color: #193554;
+        background: #fff;
+        font: inherit;
+    }
+    textarea {
+        resize: vertical;
+    }
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+        outline: 2px solid #fb923c;
+        outline-offset: 2px;
+    }
+    .v2-create-gift-types > div {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .v2-create-gift-types label {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+        padding: 14px 12px;
+        border: 1px solid #dfe7f1;
+        border-radius: 10px;
+        cursor: pointer;
+        color: #637895;
+    }
+    .v2-create-gift-types input {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 14px;
+        height: 14px;
+        accent-color: #ea580c;
+    }
+    .v2-create-gift-types strong {
+        color: #193554;
+        font-size: 12px;
+    }
+    .v2-create-gift-types small {
+        font-size: 10px;
+    }
+    .v2-create-gift-types .is-selected {
+        background: #fff7ed;
+        border-color: #fb923c;
+        color: #c2410c;
+    }
+    .v2-create-gift-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+        align-items: start;
+        gap: 24px;
+        margin-top: 24px;
+    }
+    .v2-create-gift-fields {
+        display: grid;
+        gap: 16px;
+    }
+    .v2-create-gift-fields > label,
+    .v2-create-gift-row > label {
+        display: grid;
+        gap: 6px;
+        font-weight: 600;
+    }
+    .v2-create-gift-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        align-items: start;
+        > label > input {
+            height: 52px;
+        }
+    }
+    .v2-create-gift-price-field {
+        display: grid;
+        gap: 6px;
+        min-width: 0;
+        > label {
+            font-weight: 600;
+        }
+    }
+    .v2-gift-price-control {
+        display: flex;
+        align-items: center;
+        height: 52px;
+        box-sizing: border-box;
+        overflow: hidden;
+        border: 1px solid #dfe7f1;
+        border-radius: 8px;
+        background: #fff;
+        > input {
+            flex: 1;
+            width: 0;
+            height: 100%;
+            padding: 10px;
+            border: 0;
+            border-radius: 0;
+            outline: none;
+        }
+        > input:focus-visible {
+            outline: none;
+        }
+        > input:disabled {
+            background: transparent;
+            color: #637895;
+        }
+        &:focus-within {
+            outline: 2px solid #fb923c;
+            outline-offset: 2px;
+        }
+        &.is-free {
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+        .v2-gift-price-unit {
+            color: #637895;
+            font-size: 10px;
+            padding-right: 8px;
+        }
+        .v2-gift-free-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            align-self: stretch;
+            padding: 0 10px;
+            border-left: 1px solid #e2e8f0;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .v2-gift-free-toggle input {
+            width: 14px;
+            height: 14px;
+            margin: 0;
+            padding: 0;
+            accent-color: #16a34a;
+            cursor: pointer;
+        }
+    }
+    .v2-create-gift-colors > div {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .v2-create-gift-upload {
+        display: grid;
+        gap: 8px;
+        > small {
+            color: #637895;
+            font-size: 10px;
+        }
+        > button {
+            justify-self: start;
+            font-size: 11px;
+        }
+    }
+    .v2-create-gift-upload > label {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 6px;
+        padding: 20px 12px;
+        border: 1px dashed #b6c5d8;
+        border-radius: 10px;
+        background: #fafcfe;
+        color: #637895;
+        cursor: pointer;
+        text-align: center;
+    }
+    .v2-create-gift-upload strong {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        font-size: 12px;
+    }
+    .v2-create-gift-upload small {
+        font-size: 10px;
+    }
+    .v2-create-gift-upload input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .v2-create-gift-upload label:focus-within {
+        outline: 2px solid #fb923c;
+        outline-offset: 2px;
+    }
+    .v2-create-gift-preview {
+        overflow: hidden;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #fafcfe;
+    }
+    .v2-create-gift-preview > span {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 10px;
+        color: #637895;
+        letter-spacing: 0.1em;
+    }
+    .v2-create-gift-art {
+        display: grid;
+        place-items: center;
+        height: 180px;
+        margin-bottom: 16px;
+        padding: 14px;
+        border-radius: 8px;
+        background: #eaf0fa;
+        color: #8c9fba;
+    }
+    .v2-create-gift-art.is-physical {
+        background: #fff1df;
+        color: #c18a53;
+    }
+    .v2-create-gift-art > img {
+        width: 100%;
+        height: 100%;
+        max-height: 152px;
+        object-fit: contain;
+        border-radius: 6px;
+    }
+    .v2-create-gift-art .v2-profile-cover-canvas {
+        border-radius: 6px;
+    }
+    .v2-create-gift-preview > small {
+        display: block;
+        font-size: 10px;
+        color: #637895;
+    }
+    .v2-create-gift-preview h3 {
+        margin: 6px 0;
+        font-size: 16px;
+        overflow-wrap: anywhere;
+    }
+    .v2-create-gift-preview p {
+        margin: 0 0 16px;
+        color: #637895;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+    .v2-create-gift-price {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding-top: 12px;
+        margin-bottom: 8px;
+        border-top: 1px solid #e2e8f0;
+        color: #c2410c;
+    }
+    .v2-create-gift-swatches {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 16px;
+        span {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px #19355420;
+        }
+    }
+    .v2-create-gift-note {
+        margin: 20px 0 0;
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #fff7ed;
+        color: #9a3412;
+        font-size: 11px;
+    }
+    .v2-create-frame-color {
+        display: grid;
+        gap: 6px;
+        > label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        input {
+            width: 16px;
+            height: 16px;
+            accent-color: #ea580c;
+        }
+        small {
+            color: #637895;
+            font-size: 11px;
+        }
+    }
+    @media (max-width: 680px) {
+        .v2-create-gift-types > div {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .v2-create-gift-columns {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+    @media (max-width: 480px) {
+        .v2-create-gift-row {
+            grid-template-columns: 1fr;
+        }
+    }
+}

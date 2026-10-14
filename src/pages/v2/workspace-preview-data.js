@@ -130,6 +130,35 @@ const gifts = [
         icon: 'gift',
     },
 ];
+export const physicalGiftPreviews = [
+    {
+        key: 'physical:tshirt',
+        kind: 'physical',
+        label: 'Áo thun CLB',
+        description: 'Mang tinh thần CLB đến mọi hoạt động.',
+        cost: 250,
+        stock: 12,
+        illustration: 'shirt',
+    },
+    {
+        key: 'physical:stickers',
+        kind: 'physical',
+        label: 'Bộ sticker CLB',
+        description: 'Một chút cá tính cho laptop và sổ tay.',
+        cost: 60,
+        stock: 36,
+        illustration: 'stickers',
+    },
+    {
+        key: 'physical:tote',
+        kind: 'physical',
+        label: 'Túi canvas CLB',
+        description: 'Người bạn đồng hành mỗi ngày đến trường.',
+        cost: 180,
+        stock: 8,
+        illustration: 'bag',
+    },
+];
 const reports = [
     {
         title: 'Báo cáo hoạt động tháng 9',
