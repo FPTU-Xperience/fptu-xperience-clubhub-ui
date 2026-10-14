@@ -137,22 +137,27 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
         preset,
         shape,
         shapeTransform,
+        shapeHsl,
+        shapeUsePalette,
         backgroundColor,
         backgroundPaint,
         coverText,
         frame,
         avatarMode,
         avatarDesign,
+        frameUsePalette,
     }) => {
         if (imageModal === 'avatar') {
             if (file) await saveImage('avatar', file);
-            await result.save({ avatarFrame: frame, avatarMode, avatarDesign });
+            await result.save({ avatarFrame: frame, avatarMode, avatarDesign, avatarFrameUsePalette: frameUsePalette });
         } else if (imageModal === 'cover') {
             if (file) await saveImage('cover', file);
             await result.save({
                 coverPreset: preset,
                 coverShape: shape,
                 coverShapeTransform: shapeTransform,
+                coverShapeHsl: shapeHsl,
+                coverShapeUsePalette: shapeUsePalette,
                 coverBackgroundColor: backgroundColor,
                 coverBackgroundPaint: backgroundPaint,
                 coverText,
@@ -183,6 +188,8 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                     shape={data.profile.coverShape || 'petals'}
                     imageUrl={customCover || ''}
                     shapeTransform={data.profile.coverShapeTransform}
+                    shapeHsl={data.profile.coverShapeHsl}
+                    shapeUsePalette={data.profile.coverShapeUsePalette}
                     coverText={data.profile.coverText}
                 />
                 {!shared && (

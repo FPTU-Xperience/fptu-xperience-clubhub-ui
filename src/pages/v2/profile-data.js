@@ -1,11 +1,11 @@
 import { normalizeInitialsDesign, DEFAULT_INITIALS_DESIGN } from '../../components/media/initials-design.js';
-import { AVATAR_FRAMES } from './profile-page/avatar-frames.js';
+import { getAvatarFrames } from './profile-page/cover-cosmetics.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isPaletteColor } from '../../components/media/color-palette.js';
 import { formatBirthDate, parseBirthDate } from './profile-date.js';
-import { COVER_COLORS, getCoverShapes, canUseCoverItem, readCoverInventory } from './profile-page/cover-cosmetics.js';
+import { getCoverColors, getCoverShapes, canUseCoverItem, readCoverInventory } from './profile-page/cover-cosmetics.js';
 
-import { normalizeCoverTransform, normalizeCoverText } from './profile-page/cover-design.js';
+import { normalizeCoverTransform, normalizeCoverText, normalizeShapeHsl } from './profile-page/cover-design.js';
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 
 export const PROFILE_STORAGE_VERSION = 1;
@@ -55,7 +55,12 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
     if (!['image', 'default'].includes(avatarMode)) throw new Error('Loại ảnh đại diện không hợp lệ.');
     const avatarDesign = normalizeInitialsDesign(value.avatarDesign, fallback.avatarDesign);
     const avatarFrame = text(value.avatarFrame ?? fallback.avatarFrame ?? 'none');
-    if (!AVATAR_FRAMES.some((frame) => frame.id === avatarFrame)) throw new Error('Khung ảnh đại diện không hợp lệ.');
+    const avatarFrameUsePalette = value.avatarFrameUsePalette ?? fallback.avatarFrameUsePalette ?? false;
+    const coverShapeUsePalette = value.coverShapeUsePalette ?? fallback.coverShapeUsePalette ?? false;
+    if (typeof avatarFrameUsePalette !== 'boolean' || typeof coverShapeUsePalette !== 'boolean')
+        throw new Error('Cài đặt bộ màu SVG không hợp lệ.');
+    if (!getAvatarFrames(storage).some((frame) => frame.id === avatarFrame))
+        throw new Error('Khung ảnh đại diện không hợp lệ.');
     const coverPreset = value.coverPreset === undefined ? fallback.coverPreset : text(value.coverPreset);
     const coverShape = value.coverShape === undefined ? fallback.coverShape || 'petals' : text(value.coverShape);
     const coverBackgroundPaint = value.coverBackgroundPaint ?? fallback.coverBackgroundPaint ?? '';
@@ -65,7 +70,7 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
         coverPreset !== 'custom'
             ? coverPreset
             : text(value.coverBackgroundColor ?? fallback.coverBackgroundColor ?? 'default');
-    if (!COVER_COLORS.some((item) => item.id === coverBackgroundColor))
+    if (!getCoverColors(storage).some((item) => item.id === coverBackgroundColor))
         throw new Error('Màu nền ảnh bìa không hợp lệ.');
 
     if (!displayName) throw new Error('Vui lòng nhập tên hiển thị.');
@@ -75,7 +80,7 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
     if (avatarUrl && (avatarUrl.length > 1000 || !/^https:\/\//i.test(avatarUrl))) {
         throw new Error('Đường dẫn ảnh đại diện không hợp lệ.');
     }
-    if (![...COVER_COLORS.map((item) => item.id), 'custom'].includes(coverPreset)) {
+    if (![...getCoverColors(storage).map((item) => item.id), 'custom'].includes(coverPreset)) {
         throw new Error('Mẫu ảnh bìa không hợp lệ.');
     }
     if (!getCoverShapes(storage).some((item) => item.id === coverShape)) throw new Error('Shape ảnh bìa không hợp lệ.');
@@ -88,6 +93,8 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
         interests,
         avatarUrl,
         avatarFrame,
+        avatarFrameUsePalette,
+        coverShapeUsePalette,
         avatarMode,
         avatarDesign,
         coverPreset,
@@ -95,6 +102,7 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
         coverBackgroundColor,
         coverBackgroundPaint,
         coverShapeTransform: normalizeCoverTransform(value.coverShapeTransform, fallback.coverShapeTransform),
+        coverShapeHsl: normalizeShapeHsl(value.coverShapeHsl, fallback.coverShapeHsl),
         coverText: normalizeCoverText(value.coverText, fallback.coverText),
     };
 }
@@ -461,7 +469,10 @@ export function useProfile(user, sessionKey, api) {
     useEffect(() => {
         const key = profileStorageKey(user);
         const updated = (event) => {
-            if (key && (event.key === key || event.detail?.key === key || (event.type === 'storage' && event.key === null))) {
+            if (
+                key &&
+                (event.key === key || event.detail?.key === key || (event.type === 'storage' && event.key === null))
+            ) {
                 gate.current.invalidate();
                 setResult({ status: 'populated', data: readProfile(user), error: null });
             }

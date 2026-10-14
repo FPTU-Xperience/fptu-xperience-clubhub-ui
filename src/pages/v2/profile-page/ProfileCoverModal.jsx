@@ -5,8 +5,14 @@ import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import ProfileCoverArt from './ProfileCoverArt';
 import ProfileImagePicker from './ProfileImagePicker';
 import PaletteColorPicker from '../../../components/media/PaletteColorPicker';
-import { COVER_COLORS, getCoverShapes, canUseCoverItem, readCoverInventory } from './cover-cosmetics';
-import { COVER_FONTS, DEFAULT_COVER_TRANSFORM, DEFAULT_COVER_TEXT, normalizeCoverText } from './cover-design';
+import { getCoverColors, getCoverShapes, canUseCoverItem, readCoverInventory } from './cover-cosmetics';
+import { DEFAULT_COVER_TRANSFORM, DEFAULT_COVER_TEXT, normalizeCoverText, normalizeShapeHsl } from './cover-design';
+import ShapeHslControls from './ShapeHslControls';
+import { canSyncPaletteAsset, resolvePaletteAsset } from './palette-asset';
+import ProfilePaletteSync from './ProfilePaletteSync';
+import TextParagraphEditor from '../../../components/media/TextParagraphEditor';
+import { coverTextParagraphs } from './cover-design';
+import { moveTextParagraph } from '../../../components/media/text-paragraphs';
 import './ProfileCoverModal.scss';
 
 export default function ProfileCoverModal({ user, profile, savedImage, onClose, onSave }) {
@@ -17,6 +23,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
     const [backgroundPaint, setBackgroundPaint] = useState(profile.coverBackgroundPaint || '');
     const [mode, setMode] = useState(profile.coverPreset === 'custom' && savedImage ? 'upload' : 'design');
     const [tab, setTab] = useState('background');
+    const [selectedParagraphId, setSelectedParagraphId] = useState('title');
     const tabId = useId();
     const drag = useRef(null);
     const [shapeTransform, setShapeTransform] = useState({
@@ -24,6 +31,10 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
         ...profile.coverShapeTransform,
     });
     const [coverText, setCoverText] = useState(() => normalizeCoverText(profile.coverText));
+    const [shapeHsl, setShapeHsl] = useState(() => normalizeShapeHsl(profile.coverShapeHsl));
+    const [shapeUsePalette, setShapeUsePalette] = useState(profile.coverShapeUsePalette || false);
+    const [syncing, setSyncing] = useState(false);
+    const [syncAsset, setSyncAsset] = useState(null);
     const [file, setFile] = useState(null);
     const [previewImage, setPreviewImage] = useState('');
     const [inventory, setInventory] = useState(() => readCoverInventory(user));
@@ -51,6 +62,25 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             window.removeEventListener('clubhub:cover-rewards-updated', refresh);
         };
     }, [user]);
+    const selectedShape = shapes.find((item) => item.id === shape);
+    const canSyncShape = canSyncPaletteAsset(selectedShape?.assetUrl);
+    const toggleShapePalette = async (checked) => {
+        setShapeUsePalette(checked);
+        setError('');
+        if (!checked) return;
+        const asset = selectedShape?.assetUrl;
+        setSyncing(true);
+        try {
+            const vector = await resolvePaletteAsset(asset);
+            setSyncAsset({ asset, vector });
+        } catch (issue) {
+            setShapeUsePalette(false);
+            setError(issue.message || 'Không thể đồng bộ màu shape.');
+        } finally {
+            setSyncing(false);
+        }
+    };
+    const automaticShape = shape !== 'none' && !selectedShape?.assetUrl;
     const unlocked = canUseCoverItem('color', color, inventory) && canUseCoverItem('shape', shape, inventory);
     const changed =
         backgroundPaint !== (profile.coverBackgroundPaint || '') ||
@@ -59,7 +89,9 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
         (mode === 'upload' && (profile.coverBackgroundColor || 'default') !== color) ||
         JSON.stringify(shapeTransform) !==
             JSON.stringify({ ...DEFAULT_COVER_TRANSFORM, ...profile.coverShapeTransform }) ||
-        JSON.stringify(coverText) !== JSON.stringify(normalizeCoverText(profile.coverText));
+        JSON.stringify(coverText) !== JSON.stringify(normalizeCoverText(profile.coverText)) ||
+        JSON.stringify(shapeHsl) !== JSON.stringify(normalizeShapeHsl(profile.coverShapeHsl)) ||
+        shapeUsePalette !== (profile.coverShapeUsePalette || false);
     const beginLayerDrag = (event) => {
         if (
             saving ||
@@ -70,6 +102,12 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
         )
             return;
         const bounds = event.currentTarget.getBoundingClientRect();
+        const paragraphs = coverTextParagraphs(coverText);
+        const paragraphId =
+            event.target.closest?.('[data-paragraph-id]')?.getAttribute('data-paragraph-id') ||
+            (paragraphs.some((item) => item.id === selectedParagraphId) ? selectedParagraphId : paragraphs[0]?.id);
+        if (tab === 'text' && !paragraphId) return;
+        if (tab === 'text') setSelectedParagraphId(paragraphId);
         drag.current = {
             pointerId: event.pointerId,
             startX: event.clientX,
@@ -77,14 +115,30 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             bounds,
             layer: tab,
             layout: tab === 'text' ? coverText : shapeTransform,
+            paragraphs,
+            paragraphId,
         };
         event.currentTarget.setPointerCapture(event.pointerId);
     };
     const moveLayer = (event) => {
         const current = drag.current;
         if (!current || current.pointerId !== event.pointerId) return;
+        if (current.layer === 'text') {
+            setCoverText({
+                ...current.layout,
+                paragraphs: moveTextParagraph(
+                    current.paragraphs,
+                    current.paragraphId,
+                    event.clientX - current.startX,
+                    event.clientY - current.startY,
+                    current.bounds.width,
+                    current.bounds.height,
+                ),
+            });
+            return;
+        }
         const update = current.layer === 'text' ? setCoverText : setShapeTransform;
-        const xLimit = current.layer === 'text' ? 100 : 50;
+        const xLimit = 100;
         update({
             ...current.layout,
             x: Math.max(
@@ -120,7 +174,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             type="button"
                             aria-pressed={group.selected === item.id}
                             className={!owned ? 'is-locked' : ''}
-                            disabled={saving}
+                            disabled={saving || syncing}
                             onClick={() => group.select(item.id)}
                         >
                             <span className="v2-cover-option-art">
@@ -145,7 +199,8 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     'Đã sở hữu'
                                 ) : (
                                     <>
-                                        <LockKeyhole size={12} /> {item.cost} điểm tại CLB
+                                        <LockKeyhole size={12} />{' '}
+                                        {item.cost === 0 ? 'Miễn phí · Nhận tại CLB' : `${item.cost} điểm tại CLB`}
                                     </>
                                 )}
                             </small>
@@ -158,7 +213,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
     );
     const submit = async (event) => {
         event.preventDefault();
-        if (saving || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)) return;
+        if (saving || syncing || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)) return;
         setSaving(true);
         setError('');
         try {
@@ -167,6 +222,8 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                 preset: mode === 'upload' ? 'custom' : color,
                 shape,
                 shapeTransform,
+                shapeHsl,
+                shapeUsePalette,
                 backgroundColor: color,
                 backgroundPaint,
                 coverText,
@@ -182,7 +239,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
         <V2Modal
             title="Tùy chỉnh ảnh bìa"
             onClose={() => {
-                if (!saving) onClose();
+                if (!saving && !syncing) onClose();
             }}
             wide
             className="v2-cover-modal"
@@ -209,7 +266,12 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             backgroundPaint={backgroundPaint}
                             imageUrl={mode === 'upload' ? previewImage || savedImage : ''}
                             shapeTransform={shapeTransform}
+                            shapeHsl={shapeHsl}
+                            shapeUsePalette={shapeUsePalette}
+                            shapeAssetUrl={syncAsset && syncAsset.asset === selectedShape?.assetUrl ? syncAsset.vector : ''}
                             coverText={coverText}
+                            selectedParagraphId={selectedParagraphId}
+                            textInteractive={tab === 'text'}
                         />
                     </div>
                     <p className="v2-cover-preview-note">
@@ -254,6 +316,27 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         ))}
                     </div>
                 </div>
+                {tab === 'shape' && (
+                    <ProfilePaletteSync
+                        colorId={color}
+                        target="shape"
+                        automatic={automaticShape}
+                        checked={automaticShape || (canSyncShape && shapeUsePalette)}
+                        onChange={toggleShapePalette}
+                        disabled={saving || syncing || !canSyncShape}
+                        reason={
+                            syncing
+                                ? 'Đang chuẩn bị SVG và đồng bộ màu…'
+                                : shape === 'none'
+                                  ? 'Chọn stamp trong tab Shape để dùng bộ màu.'
+                                  : automaticShape
+                                    ? 'Shape có sẵn đã tự động dùng màu chính/phụ từ bộ màu này.'
+                                    : !canSyncShape
+                                      ? 'Thiết kế này chưa hỗ trợ đồng bộ hai màu.'
+                                      : undefined
+                        }
+                    />
+                )}
                 <div
                     className="v2-cover-panel"
                     role="tabpanel"
@@ -286,7 +369,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 renderOptions({
                                     kind: 'color',
                                     label: 'Màu nền',
-                                    items: COVER_COLORS,
+                                    items: getCoverColors(),
                                     selected: backgroundPaint ? '' : color,
                                     select: (next) => {
                                         setColor(next);
@@ -308,7 +391,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     label="Màu nền tùy chọn"
                                     value={
                                         backgroundPaint ||
-                                        COVER_COLORS.find((item) => item.id === color)?.background ||
+                                        getCoverColors().find((item) => item.id === color)?.background ||
                                         '#fff1df'
                                     }
                                     disabled={saving}
@@ -327,22 +410,30 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 label: 'Shape trang trí',
                                 items: shapes,
                                 selected: shape,
-                                select: setShape,
+                                select: (next) => {
+                                    setShape(next);
+                                    setShapeTransform({ ...DEFAULT_COVER_TRANSFORM });
+                                    setShapeHsl(normalizeShapeHsl(shapes.find((item) => item.id === next)?.hsl));
+                                },
                             })}
                             <p className="v2-cover-preview-note">
-                                Shape nằm đè lên nền. Kéo trực tiếp trên ảnh xem trước hoặc dùng thanh điều chỉnh bên
-                                dưới.
+                                Stamp là lớp ảnh độc lập. Kéo trên ảnh xem trước để di chuyển; dùng thanh điều chỉnh để
+                                xoay và scale. Nền không thay đổi khi chỉnh stamp.
                             </p>
                             <div className="v2-cover-controls">
                                 {[
-                                    ['x', 'Vị trí ngang', -50, 50],
+                                    ['x', 'Vị trí ngang', -100, 100],
                                     ['y', 'Vị trí dọc', -100, 100],
-                                    ['scale', 'Kích thước', 25, 200],
+                                    ['scale', 'Kích thước', 10, 400],
+                                    ['rotation', 'Xoay', -180, 180],
                                 ].map(([key, label, min, max]) => (
                                     <label key={key}>
                                         <span>
                                             {label}
-                                            <output>{shapeTransform[key]}%</output>
+                                            <output>
+                                                {shapeTransform[key]}
+                                                {key === 'rotation' ? '°' : '%'}
+                                            </output>
                                         </span>
                                         <input
                                             type="range"
@@ -371,141 +462,30 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 disabled={saving}
                                 onClick={() => setShapeTransform({ ...DEFAULT_COVER_TRANSFORM })}
                             >
-                                Đặt lại vị trí và kích thước
+                                Đặt lại vị trí, kích thước và góc xoay
                             </button>
+                            {shapes.find((item) => item.id === shape)?.assetUrl && (
+                                <ShapeHslControls value={shapeHsl} onChange={setShapeHsl} disabled={saving} />
+                            )}
                             <p className="v2-cover-preview-note">
-                                CLB có thể thêm shape riêng bằng PNG nền trong suốt tại Kho quà.
+                                CLB có thể thêm shape riêng bằng PNG hoặc SVG tối đa 5 MB tại Kho quà.
                             </p>
                         </>
                     )}
                     {tab === 'text' && (
-                        <div className="v2-cover-text-controls">
-                            <label className="v2-cover-check">
-                                <input
-                                    type="checkbox"
-                                    checked={coverText.visible}
-                                    disabled={saving}
-                                    onChange={(event) =>
-                                        setCoverText((value) => ({ ...value, visible: event.target.checked }))
-                                    }
-                                />{' '}
-                                Hiển thị chữ trên ảnh bìa
-                            </label>
-                            {[
-                                ['eyebrow', 'Dòng chữ nhỏ', 80],
-                                ['title', 'Tiêu đề', 60],
-                                ['subtitle', 'Dòng chữ nhấn', 60],
-                            ].map(([key, label, limit]) => (
-                                <div className="v2-cover-text-row" key={key}>
-                                    <label htmlFor={`${tabId}-text-${key}`}>{label}</label>
-                                    <div className="v2-cover-text-row-fields">
-                                        <input
-                                            id={`${tabId}-text-${key}`}
-                                            type="text"
-                                            maxLength={limit}
-                                            value={coverText[key]}
-                                            disabled={saving || !coverText.visible}
-                                            onChange={(event) =>
-                                                setCoverText((value) => ({ ...value, [key]: event.target.value }))
-                                            }
-                                        />
-                                        <select
-                                            aria-label={`Phông chữ ${label.toLowerCase()}`}
-                                            value={coverText.fonts[key]}
-                                            disabled={saving || !coverText.visible}
-                                            onChange={(event) =>
-                                                setCoverText((value) => ({
-                                                    ...value,
-                                                    fonts: { ...value.fonts, [key]: event.target.value },
-                                                }))
-                                            }
-                                        >
-                                            {COVER_FONTS.map((font) => (
-                                                <option
-                                                    key={font.id}
-                                                    value={font.id}
-                                                    style={{ fontFamily: font.family }}
-                                                >
-                                                    {font.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            ))}
-                            <label className="v2-cover-check">
-                                <input
-                                    type="checkbox"
-                                    checked={!coverText.color}
-                                    disabled={saving || !coverText.visible}
-                                    onChange={(event) =>
-                                        setCoverText((value) => ({
-                                            ...value,
-                                            color: event.target.checked
-                                                ? ''
-                                                : COVER_COLORS.find((item) => item.id === color).ink,
-                                        }))
-                                    }
-                                />{' '}
-                                Dùng màu chữ theo bảng màu
-                            </label>
-                            {coverText.color && (
-                                <PaletteColorPicker
-                                    label="Màu chữ"
-                                    value={coverText.color}
-                                    disabled={saving || !coverText.visible}
-                                    onChange={(paint) => setCoverText((value) => ({ ...value, color: paint }))}
-                                />
-                            )}
-                            <label>
-                                Cỡ chữ: {coverText.size}px
-                                <input
-                                    type="range"
-                                    min={24}
-                                    max={240}
-                                    value={coverText.size}
-                                    aria-label="Cỡ chữ"
-                                    style={{ '--range-progress': `${((coverText.size - 24) / 216) * 100}%` }}
-                                    disabled={saving || !coverText.visible}
-                                    onChange={(event) =>
-                                        setCoverText((value) => ({ ...value, size: Number(event.target.value) }))
-                                    }
-                                />
-                            </label>
-                            <p className="v2-cover-preview-note">
-                                Kéo phần chữ trên ảnh xem trước để đổi vị trí, hoặc dùng thanh điều chỉnh bên dưới.
-                            </p>
-                            {[
-                                ['x', 'Vị trí chữ ngang'],
-                                ['y', 'Vị trí chữ dọc'],
-                            ].map(([axis, label]) => (
-                                <label key={axis}>
-                                    {label}: {coverText[axis]}%
-                                    <input
-                                        type="range"
-                                        aria-label={label}
-                                        min={-100}
-                                        max={100}
-                                        step={1}
-                                        value={coverText[axis]}
-                                        style={{ '--range-progress': `${(coverText[axis] + 100) / 2}%` }}
-                                        disabled={saving || !coverText.visible}
-                                        onChange={(event) =>
-                                            setCoverText((value) => ({ ...value, [axis]: Number(event.target.value) }))
-                                        }
-                                    />
-                                </label>
-                            ))}
-
-                            <button
-                                type="button"
-                                className="v2-button"
-                                disabled={saving}
-                                onClick={() => setCoverText({ ...DEFAULT_COVER_TEXT })}
-                            >
-                                Khôi phục chữ mặc định
-                            </button>
-                        </div>
+                        <TextParagraphEditor
+                            paragraphs={coverTextParagraphs(coverText)}
+                            selectedId={selectedParagraphId}
+                            onSelect={setSelectedParagraphId}
+                            onChange={(paragraphs) => setCoverText((current) => ({ ...current, paragraphs }))}
+                            visible={coverText.visible}
+                            onVisibleChange={(visible) => setCoverText((current) => ({ ...current, visible }))}
+                            disabled={saving}
+                            onReset={() => {
+                                setCoverText(normalizeCoverText(DEFAULT_COVER_TEXT));
+                                setSelectedParagraphId('title');
+                            }}
+                        />
                     )}
                 </div>
                 {!unlocked && (
@@ -522,13 +502,15 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                     </p>
                 )}
                 <footer>
-                    <button type="button" className="v2-button" disabled={saving} onClick={onClose}>
+                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
                         Hủy
                     </button>
                     <button
                         type="submit"
                         className="v2-button v2-button--primary"
-                        disabled={saving || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)}
+                        disabled={
+                            saving || syncing || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)
+                        }
                     >
                         {saving ? 'Đang lưu…' : 'Lưu ảnh bìa'}
                     </button>

@@ -1,4 +1,17 @@
 import { AVATAR_FRAMES, AVATAR_FRAME_REWARDS } from './avatar-frames.js';
+import { readClubGifts } from './club-gifts.js';
+import { isFrameAssetUrl } from './avatar-frame-assets.js';
+import { normalizeShapeHsl } from './cover-design.js';
+import { normalizeSvgPalette } from './svg-palette.js';
+import { rewardLifecycle } from './reward-lifecycle.js';
+import { recordGiftClaim } from './gift-sections.js';
+
+export function getCoverColors(storage = globalThis.localStorage) {
+    return [...COVER_COLORS, ...readClubGifts(storage).filter((gift) => gift.kind === 'color')];
+}
+export function getAvatarFrames(storage = globalThis.localStorage) {
+    return [...AVATAR_FRAMES, ...readClubGifts(storage).filter((gift) => gift.kind === 'frame')];
+}
 
 export const COVER_COLORS = [
     {
@@ -135,8 +148,9 @@ export function readClubShapes(storage = globalThis.localStorage) {
                       item.clubId &&
                       item.id?.startsWith('club-') &&
                       Number.isSafeInteger(item.cost) &&
-                      item.cost > 0 &&
-                      /^(https:\/\/|data:image\/(png|webp);base64,)/.test(item.assetUrl || ''),
+                      item.cost >= 0 &&
+                      (isFrameAssetUrl(item.assetUrl) ||
+                          /^(https:\/\/|data:image\/webp;base64,)/.test(item.assetUrl || '')),
               )
             : [];
     } catch {
@@ -158,21 +172,28 @@ export function getClubCoverRewards(clubId, storage = globalThis.localStorage, c
     return [
         ...(fptDev ? [...FPT_DEV_COMBOS, ...AVATAR_FRAME_REWARDS] : []),
         ...readClubShapes(storage).filter((item) => String(item.clubId) === String(clubId)),
+        ...readClubGifts(storage).filter((item) => String(item.clubId) === String(clubId)),
     ];
 }
-export function publishClubShape({ clubId, clubName, label, cost, assetUrl }, storage = globalThis.localStorage) {
+export function publishClubShape(
+    { id: editId, clubId, clubName, label, cost, assetUrl, hsl, svgPalette, hot },
+    storage = globalThis.localStorage,
+) {
     if (
         !clubId ||
         !label?.trim() ||
         label.trim().length > 80 ||
         !Number.isSafeInteger(cost) ||
-        cost < 1 ||
+        cost < 0 ||
         cost > 100000
     )
         throw new Error('Vui lòng nhập tên shape và mức điểm hợp lệ.');
-    if (!/^data:image\/(png|webp);base64,/.test(assetUrl || '') || assetUrl.length > 1500000)
-        throw new Error('Shape cần ảnh PNG/WebP tối đa 1 MB.');
-    const id = `club-${clubId}-${crypto.randomUUID()}`;
+    if (!isFrameAssetUrl(assetUrl)) throw new Error('Shape cần ảnh PNG hoặc SVG tối đa 5 MB.');
+    const existing = editId
+        ? readClubShapes(storage).find((item) => item.id === editId && String(item.clubId) === String(clubId))
+        : null;
+    if (editId && !existing) throw new Error('Không tìm thấy shape của CLB để sửa.');
+    const id = existing?.id || `club-${clubId}-${crypto.randomUUID()}`;
     const shape = {
         id,
         key: `shape:${id}`,
@@ -181,9 +202,16 @@ export function publishClubShape({ clubId, clubName, label, cost, assetUrl }, st
         clubName: String(clubName || ''),
         label: label.trim(),
         cost,
+        hot: hot === true,
+        createdAt: existing ? existing.createdAt || null : new Date().toISOString(),
         assetUrl,
+        hsl: normalizeShapeHsl(hsl),
+        svgPalette: normalizeSvgPalette(svgPalette),
     };
-    storage.setItem(CLUB_SHAPES_KEY, JSON.stringify([...readClubShapes(storage), shape]));
+    storage.setItem(
+        CLUB_SHAPES_KEY,
+        JSON.stringify([...readClubShapes(storage).filter((item) => item.id !== id), shape]),
+    );
     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('clubhub:cover-rewards-updated'));
     return shape;
 }
@@ -200,7 +228,9 @@ export function readCoverInventory(user, storage = globalThis.localStorage) {
             owned: Array.isArray(value.owned)
                 ? value.owned.filter(
                       (key) =>
-                          [...COVER_REWARDS, ...readClubShapes(storage)].some((item) => item.key === key) ||
+                          [...COVER_REWARDS, ...readClubShapes(storage), ...readClubGifts(storage)].some(
+                              (item) => item.kind !== 'physical' && item.key === key,
+                          ) ||
                           FPT_DEV_COMBOS.some(
                               (combo) => key === `color:${combo.colorId}` || key === `shape:${combo.shapeId}`,
                           ),
@@ -213,9 +243,13 @@ export function readCoverInventory(user, storage = globalThis.localStorage) {
     }
 }
 export function canUseCoverItem(kind, id, inventory, storage = globalThis.localStorage) {
-    const item = (kind === 'color' ? COVER_COLORS : kind === 'frame' ? AVATAR_FRAMES : getCoverShapes(storage)).find(
-        (item) => item.id === id,
-    );
+    const item = (
+        kind === 'color'
+            ? getCoverColors(storage)
+            : kind === 'frame'
+              ? getAvatarFrames(storage)
+              : getCoverShapes(storage)
+    ).find((item) => item.id === id);
     return !!item && (item.free || inventory.owned.includes(`${kind}:${id}`));
 }
 // Temporary per-club credits for exercising the UI; never a live points balance.
@@ -228,6 +262,9 @@ export function redeemCoverReward(user, clubId, rewardKey, storage = globalThis.
     if (!key || !clubId) throw new Error('Vui lòng đăng nhập và chọn CLB.');
     const reward = getClubCoverRewards(clubId, storage, clubCode).find((item) => item.key === rewardKey);
     if (!reward) throw new Error('Phần quà không tồn tại.');
+    if (rewardLifecycle(clubId, rewardKey, storage).status !== 'published')
+        throw new Error('Phần quà chưa được publish hoặc đã ngừng đổi.');
+    if (reward.kind === 'physical') throw new Error('Chức năng đổi hiện vật chưa được mở.');
     const inventory = readCoverInventory(user, storage);
     if (inventory.owned.includes(rewardKey)) return inventory;
     const balance = sampleClubBalance(inventory, clubId);
@@ -244,6 +281,7 @@ export function redeemCoverReward(user, clubId, rewardKey, storage = globalThis.
         wallets: { ...inventory.wallets, [String(clubId)]: balance - reward.cost },
     };
     storage.setItem(key, JSON.stringify(next));
+    recordGiftClaim(clubId, rewardKey, storage);
     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('clubhub:cover-rewards-updated'));
     return next;
 }

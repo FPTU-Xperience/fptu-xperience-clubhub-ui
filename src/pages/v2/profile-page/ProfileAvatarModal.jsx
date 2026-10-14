@@ -4,19 +4,24 @@ import { Check, LockKeyhole } from 'lucide-react';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import ImagePicker from '../../../components/media/ImagePicker';
 import ProfileAvatar from './ProfileAvatar';
-import { AVATAR_FRAMES } from './avatar-frames';
+import { getAvatarFrames } from './cover-cosmetics';
 import { canUseCoverItem, readCoverInventory } from './cover-cosmetics';
 import InitialsDesignControls from '../../../components/media/InitialsDesignControls';
 import MediaEditorTabs from '../../../components/media/MediaEditorTabs';
 import { normalizeInitialsDesign } from '../../../components/media/initials-design';
 import './ProfileAvatarModal.scss';
+import { canSyncPaletteAsset, resolvePaletteAsset } from './palette-asset';
+import ProfilePaletteSync from './ProfilePaletteSync';
+import './ShapeHslControls.scss';
 
 export default function ProfileAvatarModal({ user, images, profile, onClose, onSave }) {
     const id = useId();
     const [tab, setTab] = useState(profile.avatarMode === 'default' ? 'default' : 'image');
     const [mode, setMode] = useState(profile.avatarMode || 'image');
     const [design, setDesign] = useState(() => normalizeInitialsDesign(profile.avatarDesign));
-    const draftProfile = { ...profile, avatarMode: mode, avatarDesign: design };
+    const [frameUsePalette, setFrameUsePalette] = useState(profile.avatarFrameUsePalette || false);
+    const [syncing, setSyncing] = useState(false);
+    const draftProfile = { ...profile, avatarMode: mode, avatarDesign: design, avatarFrameUsePalette: frameUsePalette };
     const selectTab = (next) => {
         setTab(next);
         if (next !== 'frame') setMode(next);
@@ -24,6 +29,23 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState('');
     const [frame, setFrame] = useState(profile.avatarFrame || 'none');
+    const selectedFrame = getAvatarFrames().find((item) => item.id === frame);
+    const canSyncFrame = selectedFrame?.assetUrl ? canSyncPaletteAsset(selectedFrame.assetUrl) : !!selectedFrame?.color;
+    const toggleFramePalette = async (checked) => {
+        setFrameUsePalette(checked);
+        setError('');
+        if (!checked || !selectedFrame?.assetUrl) return;
+        setSyncing(true);
+        try {
+            await resolvePaletteAsset(selectedFrame.assetUrl);
+        } catch (issue) {
+            setFrameUsePalette(false);
+            setError(issue.message || 'Không thể đồng bộ màu khung.');
+        } finally {
+            setSyncing(false);
+        }
+    };
+    const paletteId = profile.coverPreset === 'custom' ? profile.coverBackgroundColor : profile.coverPreset;
     const [inventory, setInventory] = useState(() => readCoverInventory(user));
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -50,14 +72,21 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
         (mode === 'image' && !!file) ||
         frame !== (profile.avatarFrame || 'none') ||
         mode !== (profile.avatarMode || 'image') ||
-        JSON.stringify(design) !== JSON.stringify(normalizeInitialsDesign(profile.avatarDesign));
+        JSON.stringify(design) !== JSON.stringify(normalizeInitialsDesign(profile.avatarDesign)) ||
+        frameUsePalette !== (profile.avatarFrameUsePalette || false);
     const submit = async (event) => {
         event.preventDefault();
-        if (saving || !changed || !owned) return;
+        if (saving || syncing || !changed || !owned) return;
         setSaving(true);
         setError('');
         try {
-            await onSave({ file: mode === 'image' ? file : null, frame, avatarMode: mode, avatarDesign: design });
+            await onSave({
+                file: mode === 'image' ? file : null,
+                frame,
+                avatarMode: mode,
+                avatarDesign: design,
+                frameUsePalette,
+            });
             onClose();
         } catch (issue) {
             setError(issue.message || 'Không thể lưu ảnh đại diện.');
@@ -69,7 +98,7 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
         <V2Modal
             title="Tùy chỉnh ảnh đại diện"
             onClose={() => {
-                if (!saving) onClose();
+                if (!saving && !syncing) onClose();
             }}
             className="v2-avatar-modal"
         >
@@ -92,6 +121,24 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                     disabled={saving}
                     label="Tùy chỉnh ảnh đại diện"
                 />
+                {tab === 'frame' && (
+                    <ProfilePaletteSync
+                        colorId={paletteId}
+                        target="khung avatar"
+                        checked={canSyncFrame && frameUsePalette}
+                        onChange={toggleFramePalette}
+                        disabled={saving || syncing || !canSyncFrame}
+                        reason={
+                            syncing
+                                ? 'Đang chuẩn bị SVG và đồng bộ màu…'
+                                : !canSyncFrame
+                                  ? frame === 'none'
+                                      ? 'Chọn khung trong tab Khung để bật đồng bộ màu.'
+                                      : 'Thiết kế này chưa hỗ trợ đồng bộ hai màu.'
+                                  : undefined
+                        }
+                    />
+                )}
                 <div role="tabpanel" id={`${id}-panel-${tab}`} aria-labelledby={`${id}-${tab}`}>
                     {tab === 'image' ? (
                         <ImagePicker
@@ -114,14 +161,14 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                         <InitialsDesignControls value={design} onChange={setDesign} disabled={saving} />
                     ) : (
                         <div className="v2-avatar-frames">
-                            {AVATAR_FRAMES.map((item) => {
+                            {getAvatarFrames().map((item) => {
                                 const unlocked = canUseCoverItem('frame', item.id, inventory);
                                 return (
                                     <button
                                         key={item.id}
                                         type="button"
                                         aria-pressed={frame === item.id}
-                                        disabled={saving}
+                                        disabled={saving || syncing}
                                         onClick={() => setFrame(item.id)}
                                     >
                                         <ProfileAvatar
@@ -139,8 +186,10 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                                                 'Đã sở hữu'
                                             ) : (
                                                 <>
-                                                    <LockKeyhole size={12} aria-hidden="true" /> {item.cost} điểm tại
-                                                    CLB
+                                                    <LockKeyhole size={12} aria-hidden="true" />{' '}
+                                                    {item.cost === 0
+                                                        ? 'Miễn phí · Nhận tại CLB'
+                                                        : `${item.cost} điểm tại CLB`}
                                                 </>
                                             )}
                                         </small>
@@ -164,13 +213,13 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                     </p>
                 )}
                 <footer>
-                    <button type="button" className="v2-button" disabled={saving} onClick={onClose}>
+                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
                         Hủy
                     </button>
                     <button
                         type="submit"
                         className="v2-button v2-button--primary"
-                        disabled={saving || !changed || !owned}
+                        disabled={saving || syncing || !changed || !owned}
                     >
                         {saving ? 'Đang lưu…' : 'Lưu ảnh đại diện'}
                     </button>
