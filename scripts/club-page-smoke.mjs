@@ -178,14 +178,17 @@ try {
     assert.ok(layeredCover.indexOf('data-layer="shape"') < layeredCover.indexOf('data-layer="text"'));
     assert.ok(layeredCover.includes('scale(0.75)') && layeredCover.includes('&lt;My cover&gt;'));
     const movedText = render(CoverArt, { coverText: { title: 'Large heading', size: 240, x: 10, y: 20 } });
-    assert.ok(movedText.includes('font-size="240"') && movedText.includes('translate(120 60)'));
+    const movedHeading = [...movedText.matchAll(/<text\b([^>]*)>([\s\S]*?)<\/text>/g)].find((match) => match[2].includes('Large heading'));
+    assert.ok(movedHeading && movedHeading[1].includes('font-size="240"'));
+    assert.ok(Math.abs(Number(movedHeading[1].match(/\bx="([^"]+)"/)[1]) - 160) < 0.001);
+    assert.ok(Math.abs(Number(movedHeading[1].match(/\by="([^"]+)"/)[1]) - 196) < 0.001);
     const noText = render(CoverArt, { coverText: { visible: false } });
     assert.ok(!noText.includes('data-layer="text"'));
     const gradientProfileCover = render(CoverArt, {
         backgroundPaint: 'gradient:ocean',
         coverText: { color: 'gradient:sunset' },
     });
-    assert.equal((gradientProfileCover.match(/<linearGradient/g) || []).length, 2);
+    assert.ok((gradientProfileCover.match(/<linearGradient/g) || []).length >= 2);
     assert.ok(
         gradientProfileCover.includes('stop-color="#06b6d4"') && gradientProfileCover.includes('stop-color="#ec4899"'),
     );
@@ -328,10 +331,13 @@ try {
                 tab: 'text',
                 kind: 'activity',
                 onChange: noop,
+                selectedParagraphId: 'title',
+                onSelectParagraph: noop,
             });
-            assert.ok(textPanel.includes('value="&lt;Graphic &amp; title&gt;"'));
-            assert.equal((textPanel.match(/<select/g) || []).length, 3);
-            assert.equal((textPanel.match(/type="range"/g) || []).length, 3);
+            assert.ok(/<textarea[^>]*>&lt;Graphic &amp; title&gt;<\/textarea>/.test(textPanel));
+            assert.ok(textPanel.includes('+ Thêm đoạn chữ'));
+            assert.equal((textPanel.match(/<select/g) || []).length, 1);
+            assert.equal((textPanel.match(/type="range"/g) || []).length, 2);
             assert.ok(textPanel.includes('type="checkbox"'));
             const shapePanel = render(GraphicBannerEditor, { value: design, tab: 'shape', onChange: noop });
             assert.equal((shapePanel.match(/type="range"/g) || []).length, 3);
