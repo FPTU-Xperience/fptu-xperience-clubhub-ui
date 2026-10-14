@@ -106,7 +106,6 @@ export function Workspace() {
                                 ))}
                         </select>
                     </label>
-                    <div className="dx-sidebar-label">{manager ? 'VẬN HÀNH CÂU LẠC BỘ' : 'CỘNG ĐỒNG CỦA BẠN'}</div>
                     <nav aria-label="Menu CLB">
                         {nav.map(([path, label, Icon]) => (
                             <NavLink end={path === ''} key={path} to={path ? `${base}/${path}` : base}>

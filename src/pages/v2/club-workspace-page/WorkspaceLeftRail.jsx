@@ -17,6 +17,9 @@ import CountBadge from '../../../components/v2/common/CountBadge';
 import { clubMemberRoleLabel } from './tabs/members/club-member-roles';
 import './WorkspaceLeftRail.scss';
 import { useEntityMedia } from '../../../components/media/EntityMediaContext';
+import { useAuth } from '../../../context/AuthContext';
+import { usePersonalMedia } from '../../../components/media/PersonalMediaContext';
+import RailAccountSection from '../../../components/v2/common/leftrail/RailAccountSection';
 
 export const workspaceSections = [
     ['', 'Trang chủ', Home],
@@ -58,6 +61,8 @@ function ClubIdentity({ club: input }) {
 }
 
 export default function WorkspaceLeftRail({ workspace, selections = [], base, manager, onClubChange }) {
+    const { user, api, logout } = useAuth();
+    const media = usePersonalMedia();
     const availableSections = getWorkspaceSections(manager);
     const [switchOpen, setSwitchOpen] = useState(false);
     const switchRef = useRef(null);
@@ -140,9 +145,6 @@ export default function WorkspaceLeftRail({ workspace, selections = [], base, ma
                     </div>
                 )}
             </div>
-            <span className="v2-workspace-left-rail-label">
-                {manager ? 'VẬN HÀNH CÂU LẠC BỘ' : 'CỘNG ĐỒNG CỦA BẠN'}
-            </span>
             <nav className="v2-workspace-left-rail-nav" aria-label="Menu CLB">
                 {availableSections.map(([path, label, Icon]) => (
                     <NavLink key={path || 'home'} end={!path} to={path ? `${base}/${path}` : base}>
@@ -157,6 +159,13 @@ export default function WorkspaceLeftRail({ workspace, selections = [], base, ma
                     </NavLink>
                 ))}
             </nav>
+            <RailAccountSection
+                user={user}
+                profile={media?.profileResult.data?.profile}
+                avatarUrl={media?.profileImages.images.avatar}
+                onLogout={logout}
+                api={api}
+            />
         </aside>
     );
 }

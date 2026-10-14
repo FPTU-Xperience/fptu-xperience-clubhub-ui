@@ -59,7 +59,7 @@
     color: #94a3b8;
     font-size: 9px;
     font-weight: 700;
-    letter-spacing: .12em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
@@ -160,7 +160,7 @@
 
 .v2-left-rail-nav-group-trigger svg {
     flex-shrink: 0;
-    transition: transform .18s ease;
+    transition: transform 0.18s ease;
 }
 
 .v2-left-rail-nav-group-trigger[aria-expanded='true'] svg {
@@ -242,7 +242,9 @@
         width: 37px;
         height: 37px;
     }
-    .v2-framed-avatar-image { border-width: 2px; }
+    .v2-framed-avatar-image {
+        border-width: 2px;
+    }
 }
 
 .v2-left-rail-avatar img {
@@ -252,9 +254,36 @@
     object-fit: cover;
 }
 
-.v2-left-rail-account>span:nth-child(2) {
+.v2-left-rail-account-copy {
     min-width: 0;
     flex: 1;
+}
+.v2-left-rail-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    flex: 1;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 7px;
+}
+.v2-left-rail-account-trigger {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    &:hover,
+    &[aria-expanded='true'] {
+        background: #ffedd5;
+    }
 }
 
 .v2-left-rail-account strong,

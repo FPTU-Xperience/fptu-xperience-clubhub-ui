@@ -221,6 +221,11 @@
 .v2-workspace-left-rail-nav {
     display: grid;
     gap: 5px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    align-content: start;
+    margin-bottom: 16px;
 }
 
 .v2-workspace-left-rail-nav a {
