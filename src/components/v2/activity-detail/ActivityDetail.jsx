@@ -44,7 +44,7 @@ export default function ActivityDetail({ activity: input, onClose, manager }) {
             <div className="v2-activity-actions">
                 {activity.clubCode && (
                     <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(activity.clubCode)}`}>
-                        Xem CLB
+                        Đến trang CLB
                     </Link>
                 )}
                 <Link className="v2-button primary" to={`/v2/activities/${activity.id}`} state={{ activity }}>

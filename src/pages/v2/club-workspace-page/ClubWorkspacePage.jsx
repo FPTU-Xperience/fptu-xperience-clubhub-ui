@@ -11,6 +11,7 @@ import {
     ChevronDown,
     ChevronRight,
     FileText,
+    PanelsTopLeft,
     Users,
 } from 'lucide-react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -79,9 +80,11 @@ function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
                             : 'Một nơi để theo dõi hành trình cùng cộng đồng.'}
                     </p>
                 </div>
-                <Link className="v2-button v2-button--primary" to={`${base}/activities`}>
-                    <CalendarDays size={17} /> {manager ? 'Quản lý hoạt động' : 'Xem hoạt động'}
-                </Link>
+                {manager && (
+                    <Link className="v2-button" to={`${base}/club-page`}>
+                        <PanelsTopLeft size={16} /> Trang CLB
+                    </Link>
+                )}
             </section>
             <div className="v2-workspace-stats">
                 <Stat

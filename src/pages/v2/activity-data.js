@@ -29,7 +29,7 @@ export function mapActivityDetailItem(raw = {}) {
         },
         location: String(raw.location || ''),
         status,
-        nextAction: raw.nextAction || { kind: 'VIEW_CLUB', label: 'Xem CLB', available: Boolean(raw.clubId) },
+        nextAction: raw.nextAction || { kind: 'VIEW_CLUB', label: 'Đến trang CLB', available: Boolean(raw.clubId) },
     };
 }
 

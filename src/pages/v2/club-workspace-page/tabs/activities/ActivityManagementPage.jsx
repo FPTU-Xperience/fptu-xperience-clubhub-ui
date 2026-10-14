@@ -11,6 +11,7 @@ import ActivityAttendance from '../../../../../components/v2/activity-detail/Act
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
+import ClubNavigationLinks from '../../../../../components/v2/common/ClubNavigationLinks';
 import { saveActivityResource } from '../../../../../services/activity-resources';
 
 const tabs = [
@@ -261,11 +262,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 {tab === 'overview' && (
                     <ActivityOverview
                         activity={activity}
-                        clubLink={
-                            <Link className="v2-button" to={`/v2/clubs/${workspace.clubCode}`}>
-                                Xem CLB
-                            </Link>
-                        }
+                        clubLink={<ClubNavigationLinks clubCode={workspace.clubCode} />}
                     />
                 )}
                 {['documents', 'media'].includes(tab) && (

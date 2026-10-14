@@ -128,10 +128,10 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                         <ClubProfileHeader club={club}>
                             {['MEMBER', 'MANAGER'].includes(club.viewerRelationship) ? (
                                 <Link
-                                    className="v2-button v2-button--primary"
+                                    className="v2-button"
                                     to={`/v2/my-clubs/${encodeURIComponent(club.code || clubCode)}`}
                                 >
-                                    Đến CLB
+                                    Đến không gian CLB
                                 </Link>
                             ) : joined ? (
                                 <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>

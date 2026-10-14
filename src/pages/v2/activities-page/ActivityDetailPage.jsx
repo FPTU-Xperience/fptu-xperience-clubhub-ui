@@ -9,6 +9,7 @@ import ActivityAttendance from '../../../components/v2/activity-detail/ActivityA
 import { publicActivityResources } from '../../../components/v2/activity-detail/activity-resources-data';
 import '../../../components/v2/activity-card/ActivityCard.scss';
 import './ActivityDetailPage.scss';
+import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLinks';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -19,11 +20,7 @@ const tabs = [
 function PublicActivityProfile({ activity, clubCode, sessionKey }) {
     const [tab, setTab] = useState('overview');
     const resources = publicActivityResources(activity.resources);
-    const clubLink = clubCode ? (
-        <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(clubCode)}`}>
-            Xem CLB
-        </Link>
-    ) : null;
+    const clubLink = <ClubNavigationLinks clubCode={clubCode} />;
     return (
         <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink}>
             {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
