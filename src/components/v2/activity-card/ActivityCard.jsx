@@ -29,6 +29,7 @@ export default function ActivityCard({ activity: input, onOpen, variant = 'poste
         <article className={`v2-event-card is-${tone}${schedule ? ' v2-event-card--schedule' : ''}`}>
             {schedule ? (
                 <div className={`v2-event-date-tile is-${tone}`} aria-hidden="true">
+                    <CalendarDays className="v2-event-date-tile-icon" size={18} strokeWidth={2} />
                     <strong>{hasDate ? String(date.getDate()).padStart(2, '0') : '—'}</strong>
                     <span>{hasDate ? `THÁNG ${String(date.getMonth() + 1).padStart(2, '0')}` : 'CHƯA CÓ LỊCH'}</span>
                 </div>
