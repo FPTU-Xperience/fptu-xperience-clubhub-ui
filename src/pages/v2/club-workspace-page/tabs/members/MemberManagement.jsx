@@ -327,8 +327,9 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                                                             </td>
                                                             <td>{dateLabel(member.joinedAtUtc)}</td>
                                                             <td>
-                                                                {member.participation?.attendedActivities ?? 0}/
-                                                                {member.participation?.eligibleActivities ?? 0}
+                                                                {member.participation?.available === false
+                                                                    ? 'Chưa có số liệu'
+                                                                    : `${member.participation?.attendedActivities ?? 0}/${member.participation?.eligibleActivities ?? 0}`}
                                                             </td>
                                                             <td>
                                                                 <div className="v2-member-actions">

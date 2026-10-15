@@ -1,3 +1,26 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Lịch học và academic blocks — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+**⏭ BỎ QUA:** Timetable/tích hợp lịch học/OJT BỎ QUA; không gọi proposal lịch học.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: BỎ QUA — CHƯA CẦN; school integration NGOÀI PHẠM VI.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+**BỎ QUA toàn bộ endpoint đề xuất** academic-calendar/block10W-3W/private weekly timetable/cells/bulk-template import/ghép lịch/FAP sync. Phiếu không yêu cầu lịch học cá nhân; mục4 loại tích hợp API lịch học, không bắt buộc ghép lịch.
+
+GIỮ semester configuration cho radar/plan trong [scoring](experience-scoring-contract.md), activity/recurring sessions trong [attendance](activity-attendance-api.md), không phụ thuộc timetable. UI/mock/repos cũ giữ lại.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Student study schedule API contract
 
 Implement Status: Not Yet
@@ -161,3 +184,6 @@ Link calendar configuration to `Semester.Id`, campus scope and configured year/t
 Add opaque calendar/version and expectedVersion to writes, and per-cell/block version checks to prevent bulk import racing manual edits. Block template import validates all rows and commits atomically; stale configuration/period ->409. Empty calendar dates mean a known semester with missing block configuration, not a nonexistent semester. Semester deactivation prevents new writes without erasing prior personal schedules; authorized historic self reads remain available. The weekly CLB page schedule is presentation metadata and remains separate from the student's 10W/3W timetable.
 
 Acceptance adds authoritative semester alias and cross-campus administration tests, inactive semester, manual-vs-bulk conflict and preservation when calendar dates change. See [conventions](api-contract-conventions.md), D09 [handoff](backend-api-implementation-handoff.md).
+
+
+</details>

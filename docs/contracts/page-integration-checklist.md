@@ -1,3 +1,49 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Checklist FE ↔ BE theo phiếu v1.4 — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| Actor tính chính | Hoàn thành | Chưa hoàn thiện | Chưa triển khai | Còn việc |
+| --- | ---: | ---: | ---: | ---: |
+| Sinh viên | 32 | 0 | 0 | 0 |
+| Quản lý CLB | 23 | 1 | 0 | 1 |
+| Người xác minh | 5 | 3 | 0 | 3 |
+| Quản trị hệ thống | 4 | 6 | 0 | 6 |
+| **Tổng 74 operation** | **64** | **10** | **0** | **10** |
+
+**FE có thể tích hợp:** 32 operation Sinh viên, gồm discovery/recommendations, summary/history, contribution/declaration paging và calculation history, radar PERIOD/CUMULATIVE, nhiệm vụ theo trục thấp và join CLB; cùng 23 API Quản lý CLB đã hoàn thành. **Còn việc trong mốc 74:** Quản lý CLB 1, Người xác minh 3, Quản trị hệ thống 6. API-033/SUP-02 còn thiếu đường đọc version cho manager; các phần BỎ QUA và lịch sử giữ nguyên. Hoàn thành BE không đồng nghĩa màn hình FE/deployment đã xong.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; thay finish criteria cũ.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+| Trang/luồng | Kiểm tra hiện hành |
+| --- | --- |
+| Register/Login/Logout | [ ] Internal account/password/session/locked/error/reload; dev-login không thay F01 |
+| V2 clubs/detail/My Clubs | [ ] Search/filter/published clubs/self join/status/manager approval và scoped roles |
+| V2 activities/direct detail | [ ] Safe feed/detail, server eligibility/paging và register |
+| Workspace activities | [ ] Create/edit/publish/close/cancel/conditions/evidence/recurring session IDs |
+| Check-in | [ ] QR30s/window/geofence/location consent/manual/online/request+review/no self/source dedupe |
+| Contributions/Verifier queue | [ ] Private evidence/revision/assignment/review; upgrade reject giữ điểm; ledger |
+| V2 profile | [ ] Self persisted edit; radar6/+1, semester/cumulative/ERI/tiers/title/breakdown/history |
+| Quests/recommendations | [ ] Low-axis rule/reason/eligibility/select/progress/verified completion không mint lại |
+| Workspace plan/dashboard/report | [ ] Targets/unique/first-time/role/pillar/plan comparison/PDF không budget |
+| Admin | [ ] Accounts/roles/assignments/club/status/semester/versioned policy/audit/correction reason |
+| Header/notifications | [ ] Recipient membership/activity/review/contribution notifications, session isolation/retry |
+| Responsive/load/install | [ ] Mobile web/desktop/loading/error; list/check-in load report, migration và cài lại |
+
+**BỎ QUA:** Finance, Gifts, competitive Points/Leaderboard, public member directory, study-schedule/academic-calendar expansion, official roster, specialist consoles/complex cover. Points tab có thể đổi nghĩa thành experience6+1, không bắt buộc giữ ví. Không xóa UI/code lần này.
+
+Privacy/auth legacy vẫn áp dụng nếu endpoint còn tồn tại. Checklist/build/tests/browser approvals cũ dưới chỉ là lịch sử; không là acceptance mới. [Scoring cases](experience-scoring-contract.md), [handoff](backend-api-implementation-handoff.md) có chi tiết. UI verifier/QR/plan còn cần triển khai; bảng này không khẳng định màn hình/route đã có.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # ClubHub FE ↔ BE integration checklist by page
 
 Implement Status: Not Yet
@@ -121,3 +167,6 @@ Workspace access is resolved from the current user's club selection by code in [
 - [ ] Exercise normal student, unrelated club member, manager/vice, each specialist, treasurer, locked account and CTSV/admin roles through the running Gateway. D13 public directory is optional and consent-dependent.
 
 Existing legacy-page checks below/above remain applicable where their workflows are retained. The current authoritative gap list and exact proposed payloads are in the debt register and topic contracts, not older fullName-only profile proposals.
+
+
+</details>

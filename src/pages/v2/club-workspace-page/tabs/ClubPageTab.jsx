@@ -74,13 +74,21 @@ export default function ClubPageTab({ manager = false, workspace }) {
         };
     }, [api, clubId, attempt, semester?.id]);
 
-    useEffect(() => subscribePublicMediaSaved('club', (signal) => {
-        if (signal.id !== String(clubId)) return;
-        const version = requestVersion.current;
-        api.getClub(clubId).then((data) => {
-            if (version === requestVersion.current) setClub(data);
-        }).catch(() => { /* Retain the acknowledged media and current editor on refresh failure. */ });
-    }), [api, clubId]);
+    useEffect(
+        () =>
+            subscribePublicMediaSaved('club', (signal) => {
+                if (signal.id !== String(clubId)) return;
+                const version = requestVersion.current;
+                api.getClub(clubId)
+                    .then((data) => {
+                        if (version === requestVersion.current) setClub(data);
+                    })
+                    .catch(() => {
+                        /* Retain the acknowledged media and current editor on refresh failure. */
+                    });
+            }),
+        [api, clubId],
+    );
 
     const openEditor = (section) => {
         if (!manager || saving) return;
@@ -111,7 +119,12 @@ export default function ClubPageTab({ manager = false, workspace }) {
                 clubId,
             );
             if (version !== requestVersion.current) return;
-            const images = { [field]: url };
+            const images = {
+                logoUrl: club.logoUrl ?? null,
+                coverImageUrl: club.coverImageUrl ?? null,
+                [field]: url,
+                expectedVersion: club.version,
+            };
             const updated = await api.updateClubPublicImages(clubId, images);
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...images, ...(updated || {}) }));
@@ -152,7 +165,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setError('');
         setNotice('');
         try {
-            const updated = await api.updateClubPublicProfile(clubId, fields);
+            const updated = await api.updateClubPublicProfile(clubId, { ...fields, expectedVersion: club.version });
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...fields, ...(updated || {}) }));
             setProfileDraft(null);

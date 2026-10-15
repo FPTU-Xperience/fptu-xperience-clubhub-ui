@@ -1,3 +1,17 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Discover UI theo phạm vi capstone — cập nhật 2026-10-12
+
+**Quyết định: GIỮ directory/detail/join; BỎ QUA recommendation mở rộng.**
+
+[Phạm vi v1.4](../../../docs/contracts/capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. API mới vẫn là đề xuất tới khi có migration/Gateway/FE/kiểm thử.
+
+GIỮ safe club directory/detail/search/filter/status/session isolation. Join thuộc F02 hiện hành, không chỉ read-only scope cũ. [Club profile](../../../docs/contracts/club-public-profile-api.md) và [My Clubs](../../../docs/contracts/my-clubs-membership-api.md) quyết định write/status.
+
+GIỮ activity low-axis rule trong [discovery](../../../docs/contracts/activity-discovery-api.md); BỎ QUA recommendation clubs/ML/sở thích phức tạp như release requirement. Public student profiles/roster ngoài phạm vi, published club info vẫn giữ.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Discover UI Contract
 
 Implement Status: Not Yet
@@ -69,3 +83,6 @@ authorization checks.
 ## Backend rescan — 2026-10-09
 
 Main 80818266 has active club directory/detail and a persisted dynamic category catalog. Preserve server category codes and fix static normalization in application flows instead of creating another category source. Joining is now handled by the production detail UI through existing routes, beyond this original read-only feature scope. Public-page writes/media remain D04/D01. Activity recommendations require the distinct [discovery API contract](../../../docs/contracts/activity-discovery-api.md); a curated club subset is not personalized ranking. See [handoff](../../../docs/contracts/backend-api-implementation-handoff.md).
+
+
+</details>

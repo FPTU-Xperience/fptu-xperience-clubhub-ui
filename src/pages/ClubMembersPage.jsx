@@ -30,6 +30,7 @@ function formatMemberRole(role) {
 }
 
 function Participation({ value }) {
+    if (value?.available === false) return <span className="text-sm text-neutral-500">Chưa có số liệu</span>;
     const rate = Number(value?.participationRate || 0);
     return (
         <div className="min-w-36">
@@ -418,11 +419,11 @@ export default function ClubMembersPage() {
                             <div className="rounded-xl bg-neutral-100 p-4">
                                 <p className="text-sm font-semibold">Tỷ lệ tham gia</p>
                                 <p className="mt-1 text-3xl font-bold text-cyan-700">
-                                    {Number(selected.participation.participationRate).toFixed(2)}%
+                                    {selected.participation.available === false ? 'Chưa có số liệu' : `${Number(selected.participation.participationRate).toFixed(2)}%`}
                                 </p>
                                 <p className="text-sm text-neutral-500">
-                                    Có mặt {selected.participation.attendedActivities}/
-                                    {selected.participation.eligibleActivities} hoạt động hợp lệ
+                                    {selected.participation.available === false ? 'Dịch vụ thống kê tạm thời chưa khả dụng.'
+                                        : `Có mặt ${selected.participation.attendedActivities}/${selected.participation.eligibleActivities} hoạt động hợp lệ`}
                                 </p>
                             </div>
                             <div>

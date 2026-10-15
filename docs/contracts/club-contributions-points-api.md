@@ -1,3 +1,41 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Đóng góp, nhiệm vụ và điểm trải nghiệm — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-009 | `POST /api/activities/{activityId}/contributions` | **✅ HOÀN THÀNH** | Nộp cho nguồn activity/session đã công bố; proposedAttributes/evidenceRefs/message/expectedActivityVersion và key; unique source chống khai lại cùng công sức. |
+| API-010 | `GET /api/users/me/contributions` | **✅ HOÀN THÀNH** | Hợp nhất canonical + legacy có nhãn, dedup mirror, lọc kỳ/status/pillar, SQL count/paging; calculation hiện trạng. Legacy semester unassigned, không cộng vào điểm verified. |
+| API-011 | `GET /api/contributions/{id}` | **✅ HOÀN THÀNH** | Detail có calculationBreakdown và lịch sử ledger effect/delta/allocation/revision/policy/verification. Snapshot mới bất biến; lịch sử cũ chỉ reconstruct nếu dữ liệu gốc khớp, thiếu căn cứ báo unavailable. |
+| API-012 | `PATCH /api/contributions/{id}` | **✅ HOÀN THÀNH** | Author sửa SUBMITTED/REVISION_REQUESTED theo version; không sửa đóng góp đã ghi điểm. |
+| API-013 | `POST /api/contributions/{id}/role-upgrade-requests` | **✅ HOÀN THÀNH** | Xin nâng cùng contribution; role/result/evidenceRefs/reason/version. Đang chờ không thay điểm; duyệt chỉ ghi delta. |
+| API-014 | `GET /api/users/me/experience-ledger` | **✅ HOÀN THÀNH** | Paged self net ledger với sourceType/sourceId/sourceKey/sourceNamespace, policy/formula/revision/verification; không đưa XP mẫu vào ledger. |
+| API-058 | `GET /api/activities/{activityId}/contributions` | **✅ HOÀN THÀNH** | Paged contribution đúng activity và CLB được phân công; kiểm tra scope kể cả danh sách rỗng. |
+| API-059 | `POST /api/contributions/{id}/reviews` | **✅ HOÀN THÀNH** | ASSIGNED review APPROVE/REJECT/REQUEST_REVISION; version/reason/verifiedAttributes; decision/revision/ledger/outbox nguyên tử; không tự duyệt. |
+| API-060 | `POST /api/contributions/{id}/role-upgrade-requests/{requestId}/reviews` | **✅ HOÀN THÀNH** | Duyệt upgrade theo version của upgrade request; giữ blueprint/policy, ghi delta; reject giữ điểm cũ. |
+| API-068 | `POST /api/contributions/{id}/adjustments` | **✅ HOÀN THÀNH** | CORRECT/REVOKE có capability/no-self/version/reason; append effect, không sửa ledger cũ hoặc phục hồi nguồn đã hủy. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ đóng góp; BỎ QUA ví/quà/leaderboard.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+Contract áp dụng: [verified contributions](verified-contributions-api.md), [6+1 scoring](experience-scoring-contract.md). Điểm là trải nghiệm xác thực, không CLUB_CREDIT tiêu được.
+
+GIỮ submit/revision/private evidence/review/no self/immutable ledger/outbox/correction; role upgrade reject giữ điểm hợp lệ. Low-axis quests hoàn thành qua contribution đã duyệt, không award lần2. Task catalog riêng là hỗ trợ, không cần task publish giá wallet.
+
+**BỎ QUA — NGOÀI PHẠM VI:** walletPoints/per-club spendable wallet, CREDIT/DEBIT mua quà, points/leaderboard, negative balance/redemption lock/paid rewards. Points/me balance cũ không phải API6+1. Bậc/danh hiệu và private experience ledger vẫn GIỮ.
+
+Payload/wallet/reversal endpoint dưới là LỊCH SỬ, không dùng mint trải nghiệm hoặc bắt buộc triển khai ví.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Club tasks, contributions and credited points
 
 Implement Status: Not Yet
@@ -35,3 +73,6 @@ Private task evidence is a distinct attachment scope, not a public-image intent.
 Proposed POST `/api/clubs/{clubId}/task-submissions/{submissionId}/credit-reversals` requires leadership contribution-review capability, excludes the submission author, accepts `{reason,expectedVersion}`, Idempotency-Key. Reason 1..1000; only a credited approved submission can be reversed once. Persist reviewer/reason, immutable reversal source and wallet event/receipt; preserve the original approval/evidence and return correction status plus current wallet version. No arbitrary amount or user supplied by client. If balance was already spent, the correction may make the canonical balance negative; prohibit new redemption until sufficient credits restore it, retain prior legitimate receipts/grants and never rewrite historical entries. This debt policy is a proposed implementation default to confirm with the award policy before live rollout. An asynchronous reversal remains PENDING until its unique ledger receipt, with duplicate delivery/replay protection matching credit awards.
 
 All abbreviated `/tasks`, `/task-submissions`, `/points` and `/badges` paths above are rooted at `/api/clubs/{clubId}`. Responses use shared pagination and versions; mutation operations return the canonical updated resource or a receipt, never a fabricated success counter.
+
+
+</details>

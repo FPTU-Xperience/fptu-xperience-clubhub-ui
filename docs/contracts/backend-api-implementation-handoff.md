@@ -1,3 +1,61 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Handoff BE/FE theo phiếu đăng ký v1.4 — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| Actor tính chính | Hoàn thành | Chưa hoàn thiện | Chưa triển khai | Còn việc |
+| --- | ---: | ---: | ---: | ---: |
+| Sinh viên | 32 | 0 | 0 | 0 |
+| Quản lý CLB | 23 | 1 | 0 | 1 |
+| Người xác minh | 5 | 3 | 0 | 3 |
+| Quản trị hệ thống | 4 | 6 | 0 | 6 |
+| **Tổng 74 operation** | **64** | **10** | **0** | **10** |
+
+**FE có thể tích hợp:** 32 operation Sinh viên, gồm discovery/recommendations, summary/history, contribution/declaration paging và calculation history, radar PERIOD/CUMULATIVE, nhiệm vụ theo trục thấp và join CLB; cùng 23 API Quản lý CLB đã hoàn thành. **Còn việc trong mốc 74:** Quản lý CLB 1, Người xác minh 3, Quản trị hệ thống 6. API-033/SUP-02 còn thiếu đường đọc version cho manager; các phần BỎ QUA và lịch sử giữ nguyên. Hoàn thành BE không đồng nghĩa màn hình FE/deployment đã xong.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; thay thứ tự triển khai cũ.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+## Bắt đầu và căn cứ
+
+Đọc [bảng trạng thái BE ngày 13/10](be-api-status.md) và [hướng dẫn tích hợp thực tế](be-integration-guide.md), rồi [scope](capstone-scope-contract.md), [register](frontend-api-debt-register.md), [scoring](experience-scoring-contract.md) và topic contract. Baseline 12/10 là80818266; lần triển khai Quản lý CLB nằm trong working tree mới. Nhãn BE ở đầu file phản ánh tiến độ hiện tại; checklist phụ thuộc bên dưới là yêu cầu/việc tích hợp, không tự đánh dấu FE hoặc deployment đã hoàn thành.
+
+## Công việc theo phụ thuộc
+
+1. [ ] Tài khoản register/login nội bộ và self profile; admin accounts/roles/club/semesters; capability và phân công verifier. D15/D17, [quyền](internal-accounts-verification-api.md). Dev-login không chứng minh password login hoàn thành.
+2. [ ] CLB công bố/gia nhập/trạng thái/vai trò tối thiểu; profile/basic media, activity publish/close/cancel/eligibility và buổi lặp có ID. D01/D02/D04/D06/D10/D11/D12/D20. Không yêu cầu đủ8 chức vụ, form builder hoặc roster trường.
+3. [ ] QR30s, window/geofence và fallback manual/online; registration/attendance source identity dùng chung. D16, [attendance](activity-attendance-api.md).
+4. [ ] Evidence riêng tư, review assigned/no self, revisions, role upgrades giữ điểm cũ khi bị từ chối; append ledger/unique source/outbox/reversal. D07/D17, [contribution](verified-contributions-api.md).
+5. [ ] Chốt P01–P06 với giảng viên trong tài liệu thiết kế; policy/formula versions, vector tối đa3/7, semester/cumulative snapshots, radar6/+1/ERI, tiers/title/breakdown. D03/D18, [scoring](experience-scoring-contract.md). Cấu hình chưa duyệt chỉ demo.
+6. [ ] Rule recommendations theo trục thấp/đủ điều kiện/giải thích, chọn nhiệm vụ và completion do verified contribution; không mint lần2. D11/D07.
+7. [ ] Kế hoạch mục tiêu kỳ, unique/first-time/role/pillar statistics và PDF snapshot protected; không budget. D19, [plan/report](club-semester-plan-report-api.md).
+8. [ ] Notifications đủ4 nhóm trong phiếu; hardening personal writes/quest target/read-time seeds/category/attachment/paging cho workflow giữ. D14; API→DB→FE, đo tải activity list/check-in, migration/deploy/install docs.
+
+Mỗi task chỉ xong khi có source/migration/tests/Gateway/FE proof. Không dùng mock/localStorage hoặc route declaration làm acceptance.
+
+## Ma trận nghiệm thu hiện hành
+
+- [ ] Bốn actor, cùng/khác CLB, self/other, verifier được/không được giao, revoked/locked/expired; không self-review kể cả admin.
+- [ ] Register→join→activity registration→QR hoặc manual→review→ledger→radar→quest completion→notification→PDF; reload/restart còn dữ liệu.
+- [ ] Chín ví dụ PDF, vector/semester/precision, upgrade reject giữ điểm, unique source/race/replay, correction/history, đổi policy không sửa kết quả cũ âm thầm.
+- [ ] Empty/unconfigured/error, paging trên100, QR/GPS/online, service/outbox failure, private download và không lộ PII.
+- [ ] Đo tải với kịch bản/số liệu rõ; bàn giao API, migration, config, automated tests và hướng dẫn cài lại.
+
+## BỎ QUA trong checklist cũ
+
+Roster/carry-forward trường, timetable/academic blocks/FAP/OJT integration, wallet/redeem/rewards/PNG bundle, finance/settlement/nguồn lực, competitive leaderboard/public directory, ML/schedule matching, radar trường/anomaly automation. Không chờ chốt giá quà/issuer FPT-DEV/nợ ví/O-04 roster để nghiệm thu MVP.
+
+[Page checklist](page-integration-checklist.md) ghi luồng hiện hành. Các wave0–5 và open choices dưới đây là lịch sử, không còn yêu cầu bắt buộc.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Backend API implementation handoff
 
 Implement Status: Not Yet

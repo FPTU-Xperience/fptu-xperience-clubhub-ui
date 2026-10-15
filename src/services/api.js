@@ -34,6 +34,142 @@ class ApiService {
         localStorage.setItem('refreshToken', token);
     }
 
+    mutation(endpoint, method, data, idempotencyKey = crypto.randomUUID()) {
+        return this.request(endpoint, {
+            method,
+            headers: { 'Idempotency-Key': idempotencyKey },
+            ...(data === undefined ? {} : { body: JSON.stringify(data) }),
+        });
+    }
+
+    getActivitySessions(activityId) {
+        return this.request(`/api/activities/${activityId}/sessions`);
+    }
+    createActivitySessions(activityId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/sessions`, 'POST', data, key);
+    }
+    updateActivitySession(activityId, sessionId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/sessions/${sessionId}`, 'PATCH', data, key);
+    }
+    closeActivitySession(activityId, sessionId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/sessions/${sessionId}/close`, 'POST', data, key);
+    }
+    cancelActivitySession(activityId, sessionId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/sessions/${sessionId}/cancel`, 'POST', data, key);
+    }
+    getAttendanceChallenge(activityId, sessionId) {
+        return this.request(`/api/activities/${activityId}/sessions/${sessionId}/attendance-challenge`);
+    }
+    getClubSemesterPlan(clubId, semesterId) {
+        return this.request(`/api/clubs/${clubId}/semester-plans/${encodeURIComponent(semesterId)}`);
+    }
+    saveClubSemesterPlan(clubId, semesterId, data, key) {
+        return this.mutation(`/api/clubs/${clubId}/semester-plans/${encodeURIComponent(semesterId)}`, 'PUT', data, key);
+    }
+    getClubExperienceStatistics(clubId, semesterId) {
+        return this.request(`/api/clubs/${clubId}/experience-statistics?semesterId=${encodeURIComponent(semesterId)}`);
+    }
+    createClubExperienceReport(clubId, data, key) {
+        return this.mutation(`/api/clubs/${clubId}/experience-reports`, 'POST', data, key);
+    }
+    getClubExperienceReport(reportId) {
+        return this.request(`/api/club-experience-reports/${encodeURIComponent(reportId)}`);
+    }
+    downloadClubExperienceReport(clubId, reportId) {
+        return this.request(`/api/clubs/${clubId}/experience-reports/${encodeURIComponent(reportId)}/download`, {
+            responseType: 'blob',
+        });
+    }
+    uploadContributionEvidence(file, key = crypto.randomUUID()) {
+        const form = new FormData();
+        form.append('file', file);
+        return this.request('/api/contributions/evidence', {
+            method: 'POST',
+            body: form,
+            headers: { 'Idempotency-Key': key },
+        });
+    }
+    downloadContributionEvidence(id) {
+        return this.request(`/api/contributions/evidence/${encodeURIComponent(id)}/download`, { responseType: 'blob' });
+    }
+    getMyProfile() {
+        return this.request('/api/users/me/profile');
+    }
+    updateMyProfile(data) {
+        return this.request('/api/users/me/profile', { method: 'PATCH', body: JSON.stringify(data) });
+    }
+    registerInternalAccount(data) {
+        return this.request('/api/auth/internal/register', { method: 'POST', body: JSON.stringify(data) });
+    }
+    async loginInternalAccount(email, password) {
+        const data = await this.request('/api/auth/internal/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
+        this.setToken(data.accessToken);
+        if (data.refreshToken) this.setRefreshToken(data.refreshToken);
+        return data;
+    }
+    getVerificationQueue(params = {}) {
+        return this.request(`/api/verifications/me/queue?${new URLSearchParams(params)}`);
+    }
+    getActivityContributions(activityId, params = {}) {
+        return this.request(`/api/activities/${activityId}/contributions?${new URLSearchParams(params)}`);
+    }
+    submitActivityContribution(activityId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/contributions`, 'POST', data, key);
+    }
+    getContribution(id) {
+        return this.request(`/api/contributions/${encodeURIComponent(id)}`);
+    }
+    reviseContribution(id, data, key) {
+        return this.mutation(`/api/contributions/${encodeURIComponent(id)}`, 'PATCH', data, key);
+    }
+    reviewContribution(id, data, key) {
+        return this.mutation(`/api/contributions/${encodeURIComponent(id)}/reviews`, 'POST', data, key);
+    }
+    requestContributionRoleUpgrade(id, data, key) {
+        return this.mutation(`/api/contributions/${encodeURIComponent(id)}/role-upgrade-requests`, 'POST', data, key);
+    }
+    reviewContributionRoleUpgrade(id, requestId, data, key) {
+        return this.mutation(
+            `/api/contributions/${encodeURIComponent(id)}/role-upgrade-requests/${encodeURIComponent(requestId)}/reviews`,
+            'POST',
+            data,
+            key,
+        );
+    }
+    adjustContribution(id, data, key) {
+        return this.mutation(`/api/contributions/${encodeURIComponent(id)}/adjustments`, 'POST', data, key);
+    }
+    getMyContributions(params = {}) {
+        return this.request(`/api/users/me/contributions?${new URLSearchParams(params)}`);
+    }
+    getMyExperienceLedger(params = {}) {
+        return this.request(`/api/users/me/experience-ledger?${new URLSearchParams(params)}`);
+    }
+    getManualAttendanceRequests(activityId, sessionId, params = {}) {
+        return this.request(
+            `/api/activities/${activityId}/sessions/${sessionId}/manual-attendance-requests?${new URLSearchParams(params)}`,
+        );
+    }
+    submitManualAttendanceRequest(activityId, sessionId, data, key) {
+        return this.mutation(
+            `/api/activities/${activityId}/sessions/${sessionId}/manual-attendance-requests`,
+            'POST',
+            data,
+            key,
+        );
+    }
+    reviewManualAttendanceRequest(activityId, sessionId, requestId, data, key) {
+        return this.mutation(
+            `/api/activities/${activityId}/sessions/${sessionId}/manual-attendance-requests/${encodeURIComponent(requestId)}/review`,
+            'POST',
+            data,
+            key,
+        );
+    }
+
     clearTokens() {
         this.media.reset();
         localStorage.removeItem('accessToken');
@@ -80,9 +216,10 @@ class ApiService {
     async request(endpoint, options = {}) {
         const url = this.buildUrl(endpoint);
         const token = this.getToken();
+        const { responseType, ...fetchOptions } = options;
 
         const headers = {
-            'Content-Type': 'application/json',
+            ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
             ...options.headers,
         };
 
@@ -91,11 +228,18 @@ class ApiService {
         }
 
         const response = await fetch(url, {
-            ...options,
+            ...fetchOptions,
             headers,
         });
 
-        if (endpoint === '/api/auth/google' || endpoint === '/api/auth/dev-login') {
+        if (
+            [
+                '/api/auth/google',
+                '/api/auth/dev-login',
+                '/api/auth/internal/login',
+                '/api/auth/internal/register',
+            ].includes(endpoint)
+        ) {
             if (!response.ok) {
                 const authError = new Error(await this.getErrorMessage(response, { isAuthRequest: true }));
                 authError.status = response.status;
@@ -110,10 +254,13 @@ class ApiService {
                 const newToken = await this.refresh(refreshToken);
                 if (newToken) {
                     headers['Authorization'] = `Bearer ${newToken}`;
-                    const retryResponse = await fetch(url, { ...options, headers });
+                    const retryResponse = await fetch(url, { ...fetchOptions, headers });
                     if (retryResponse.ok) {
-                        return this.parseResponse(retryResponse);
+                        return responseType === 'blob' ? retryResponse.blob() : this.parseResponse(retryResponse);
                     }
+                    const retryError = new Error(await this.getErrorMessage(retryResponse));
+                    retryError.status = retryResponse.status;
+                    throw retryError;
                 }
             }
             // Clear tokens and redirect to login, unless the local UI bypass owns the session.
@@ -130,7 +277,7 @@ class ApiService {
             throw requestError;
         }
 
-        return this.parseResponse(response);
+        return responseType === 'blob' ? response.blob() : this.parseResponse(response);
     }
 
     // Auth endpoints
@@ -298,7 +445,7 @@ class ApiService {
         const ticket = this.media.ticket();
         const updated = await this.request(`/api/activities/${encodeURIComponent(activityId)}/cover-image`, {
             method: 'PUT',
-            body: JSON.stringify({ coverImageUrl }),
+            body: JSON.stringify({ coverImageUrl, expectedVersion }),
         });
         return this.acknowledgeMedia('activity', activityId, { coverImageUrl }, updated, ticket);
     }
@@ -419,7 +566,12 @@ class ApiService {
     async inviteClubMember(clubId, student, semesterId) {
         return this.request(`/api/clubs/${encodeURIComponent(clubId)}/members`, {
             method: 'POST',
-            body: JSON.stringify({ userId: Number(student.userId), fullName: student.fullName, role: 'CLUB_MEMBER', semesterId }),
+            body: JSON.stringify({
+                userId: Number(student.userId),
+                fullName: student.fullName,
+                role: 'CLUB_MEMBER',
+                semesterId,
+            }),
         });
     }
 
@@ -621,7 +773,9 @@ class ApiService {
     }
 
     async downloadReportAttachment(reportId, attachmentId, fileName) {
-        const url = this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`);
+        const url = this.buildUrl(
+            `/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`,
+        );
         const token = this.getToken();
         const response = await fetch(url, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -659,9 +813,12 @@ class ApiService {
     }
 
     async deleteReportAttachment(reportId, attachmentId) {
-        return this.request(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`, {
-            method: 'DELETE',
-        });
+        return this.request(
+            `/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`,
+            {
+                method: 'DELETE',
+            },
+        );
     }
 
     // Activity endpoints
@@ -671,7 +828,9 @@ class ApiService {
         if (hasClubId && (!Number.isSafeInteger(numericClubId) || numericClubId <= 0)) {
             throw new TypeError('Activity clubId must be a positive numeric club ID.');
         }
-        const filters = new URLSearchParams(Object.entries(params).filter(([, value]) => value != null && value !== ''));
+        const filters = new URLSearchParams(
+            Object.entries(params).filter(([, value]) => value != null && value !== ''),
+        );
         if (hasClubId) filters.set('clubId', String(numericClubId));
         const query = filters.size ? `?${filters}` : '';
         return this.readMedia('activity', `/api/activities${query}`);
@@ -742,8 +901,8 @@ class ApiService {
         return this.request(`/api/activities/${encodeURIComponent(activityId)}`, { method: 'DELETE' });
     }
 
-    async checkInActivity(activityId) {
-        return this.request(`/api/activities/${activityId}/check-in`, { method: 'POST' });
+    async checkInActivity(activityId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/check-in`, 'POST', data, key);
     }
 
     async getMyActivityAttendance(activityId, params = { page: 1, pageSize: 20 }) {
@@ -754,14 +913,13 @@ class ApiService {
     async registerParticipant(activityId, userId = null) {
         return this.request(`/api/activities/${activityId}/participants`, {
             method: 'POST',
+            headers: { 'Idempotency-Key': crypto.randomUUID() },
             body: JSON.stringify({ userId, fullName: null }),
         });
     }
 
-    async completeActivity(activityId) {
-        return this.request(`/api/activities/${activityId}/complete`, {
-            method: 'PATCH',
-        });
+    async completeActivity(activityId, data, key) {
+        return this.mutation(`/api/activities/${activityId}/complete`, 'PATCH', data, key);
     }
 
     async getActivityAttendance(clubId, activityId, params = {}) {

@@ -1,3 +1,26 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Chợ phần thưởng và cover cosmetics — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+**⏭ BỎ QUA:** Ví/đổi quà/cosmetic BỎ QUA — NGOÀI PHẠM VI; không mở tích hợp production cho route proposal lịch sử.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: BỎ QUA — NGOÀI PHẠM VI.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+Phiếu mục4 loại chợ quà/tài chính/thanh toán. **BỎ QUA toàn bộ** rewards catalog/admin upload/wallet-me/redemption/inventory/grants/paid color-shape-bundle/FPT-DEV issuer/sample prices120-160-200/200balance/debt/fulfillment acceptance.
+
+Experience/bậc/danh hiệu vẫn GIỮ [scoring](experience-scoring-contract.md), không phải tài sản đổi quà. Free profile/avatar có thể hỗ trợ [profile](self-profile-sync-api.md), không cần inventory. Giữ lịch sử/fixtures/code, không migrate thành điểm/grants thật.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Cover cosmetics and club point redemption
 
 Implement Status: Not Yet
@@ -131,3 +154,6 @@ POST `/api/clubs/{clubId}/rewards/{rewardId}/redeem`, `{expectedRewardVersion,ex
 GET `/rewards/redemptions/me?page=...` returns own receipt history; manager oversight, if needed, is a separately authorized paged read with minimum recipient data. Notifications/outbox never expose another member's wallet. The sample 120/160/200 costs and 200 starting balance are examples only; bind actual issuer and approved prices before production mint/debit.
 
 Acceptance: draft/publish/retire, verified PNG and cross-issuer denial, account ownership reusable across clubs, image mode ownership check, free defaults, combo grants both separate choices, duplicate/parallel redemption, insufficient credit, transaction rollback, stale versions, retired owned asset behavior, canonical profile render parity including 240px/draggable text. Live mock migration requires explicit review and must never mint sampled grants.
+
+
+</details>

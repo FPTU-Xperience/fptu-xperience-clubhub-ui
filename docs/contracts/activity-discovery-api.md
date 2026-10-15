@@ -1,3 +1,34 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Khám phá và nhiệm vụ theo trục thấp — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-005 | `GET /api/v2/activities/feed` | **✅ HOÀN THÀNH** | Feed authenticated, display-safe; campus/member visibility, private-by-default, search/status/semester/SQL paging và buổi kế tiếp. Không roster/contact/minh chứng. |
+| API-006 | `GET /api/v2/activities/{activityId}` | **✅ HOÀN THÀNH** | Deep link đọc trực tiếp, kiểm tra campus/visibility như feed, DTO an toàn; không dùng management detail cho discovery. |
+| API-007 | `GET /api/v2/recommendations/activities` | **✅ HOÀN THÀNH** | LOW_AXIS_RULE từ sáu trục X chưa làm tròn; eligible upcoming candidates qua toàn bộ các trang, thứ tự trục/start/ID, radar/policy snapshot. Outage503, không ghi điểm. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; BỎ QUA ML/ghép lịch.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+GIỮ GET /api/v2/activities/feed và /api/v2/activities/{activityId}, display-safe/paged/search/filter/server-clock/publication/eligibility; không participants/evidence/contacts. Private-by-default migration giữ; management list không là public feed.
+
+GIỮ GET /api/v2/recommendations/activities?limit=6 bằng **quy tắc trục thấp**: published/upcoming/registration available/đủ quyền/trọng số trục mục tiêu>0. Trả recommendationId/rank/reason/targetPillar/ruleVersion/sourceLabel=LOW_AXIS_RULE/activity và radar/policy snapshot căn cứ. Thứ tự đề xuất: X trục thấp trước, start trước rồi ID, versioned tie-break. modelVersion legacy có thể alias ruleVersion, không giả ML engine.
+
+GET chỉ gợi ý; chọn qua quest participation, completion liên kết verified contribution theo [contributions](verified-contributions-api.md), không mint lại. Radar/config unavailable phải rõ; curated subset có nhãn có thể hỗ trợ nhưng không thay nhiệm vụ trục thấp nghiệm thu.
+
+**BỎ QUA** rankingengine/ML/hybrid/academic interests/ghép timetable/feedback telemetry bắt buộc. Low-axis quest vẫn GIỮ; first6 list không là personalized đúng phiếu. Closed/cancelled/expired/full candidates không gợi ý action không làm được.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Privacy-safe activity discovery and recommendations
 
 Implement Status: Not Yet
@@ -31,3 +62,6 @@ If ranking is unavailable, return an explicit availability outcome or an explici
 ## Acceptance
 
 Unaffiliated user sees only explicitly published eligible activities; existing member sees allowed club context; other campus/club denial; 0/50/>50 paging; exact start/end boundaries; no roster fields; cancelled records absent; direct deep links; recommendation outage/isolation; gateway precedence and authorization; card image and allowed action behavior. No duplication of existing activity creation/attendance APIs.
+
+
+</details>

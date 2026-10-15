@@ -1,4 +1,63 @@
-# Frontend API debt register — rechecked 2026-10-13
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Register FE/BE theo phạm vi mới — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| Actor tính chính | Hoàn thành | Chưa hoàn thiện | Chưa triển khai | Còn việc |
+| --- | ---: | ---: | ---: | ---: |
+| Sinh viên | 32 | 0 | 0 | 0 |
+| Quản lý CLB | 23 | 1 | 0 | 1 |
+| Người xác minh | 5 | 3 | 0 | 3 |
+| Quản trị hệ thống | 4 | 6 | 0 | 6 |
+| **Tổng 74 operation** | **64** | **10** | **0** | **10** |
+
+**FE có thể tích hợp:** 32 operation Sinh viên, gồm discovery/recommendations, summary/history, contribution/declaration paging và calculation history, radar PERIOD/CUMULATIVE, nhiệm vụ theo trục thấp và join CLB; cùng 23 API Quản lý CLB đã hoàn thành. **Còn việc trong mốc 74:** Quản lý CLB 1, Người xác minh 3, Quản trị hệ thống 6. API-033/SUP-02 còn thiếu đường đọc version cho manager; các phần BỎ QUA và lịch sử giữ nguyên. Hoàn thành BE không đồng nghĩa màn hình FE/deployment đã xong.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; tái phân loại debt.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+## D01–D14 sau đổi phạm vi
+
+| Debt cũ | Quyết định hiện hành | Phần còn phải làm |
+| --- | --- | --- |
+| D01 Media | GIỮ HỖ TRỢ; BỎ QUA club-shape/reward assets/complex cover | Basic images nếu UI hứa upload phải persisted/ownership; private evidence thuộc D17 |
+| D02 Self profile | GIỮ BẮT BUỘC | GET/PATCH self/privacy; BỎ QUA onboard3 interests/FAP metadata/cosmetic layout như điều kiện nghiệm thu |
+| D03 Experience | GIỮ BẮT BUỘC; thay DTO cũ | Six axes/+1, semester/cumulative, score/tiers/titles/breakdown D18; không wallet |
+| D04 Club profile | GIỮ BẮT BUỘC | Scoped partial update/category; schedule label chỉ hỗ trợ, không thay session D20 |
+| D05 Roster/invites | BỎ QUA roster trường; invite mở rộng CHƯA CẦN | Join/status D10 vẫn giữ; invite cũ nếu dùng resolve account dự án/consent, không school roster |
+| D06 Club roles | GIỮ roles/capability tối thiểu; BỎ QUA đủ8 chức vụ | Manager/owner/member scoped; verifier tách D17; finance treasurer ngoài phạm vi |
+| D07 Contribution/tasks | GIỮ evidence/review/ledger/nhiệm vụ; BỎ QUA wallet/leaderboard | [Verified contribution](verified-contributions-api.md); experience ledger, quest không mint lại |
+| D08 Rewards | BỎ QUA NGOÀI PHẠM VI | Giữ nguyên lịch sử; không là MVP debt |
+| D09 Timetable | BỎ QUA CHƯA CẦN/NGOÀI PHẠM VI integration | Semester configuration vẫn giữ F10/D18, không timetable/calendar mới |
+| D10 My Clubs | GIỮ join/status/management | Rich cards/withdraw/reapply chỉ HỖ TRỢ, không mở school roster dependency |
+| D11 Discovery | GIỮ safe feed/detail/low-axis rules | BỎ QUA ML/hybrid/sở thích/ghép lịch; authorized candidates trước ranking |
+| D12 Event | GIỮ lifecycle/registration/conditions/evidence | BỎ QUA specialist/staff/form-builder; QR/session thuộc D16/D20 |
+| D13 Public roster | BỎ QUA NGOÀI PHẠM VI | Club info công bố vẫn giữ; hồ sơ sinh viên/roster riêng tư |
+| D14 Hardening | GIỮ security/integrity các workflow còn dùng | Personal/quest/seed/attachment/category/paging; finance phát triển mới BỎ QUA |
+
+## Khoảng trống phải bổ sung theo phiếu
+
+| ID | Yêu cầu | Hiện trạng snapshot nguồn | Contract |
+| --- | --- | --- | --- |
+| D15 | Đăng ký/đăng nhập nội bộ | AuthEndpoints chưa map password/public register; Google/dev-login/refresh/logout đã có | [Accounts](internal-accounts-verification-api.md) |
+| D16 | QR30s/window/radius/manual/online | Check-in/attendance route có; chưa chứng minh đủ cơ chế mới, cần test từng điều kiện | [Attendance](activity-attendance-api.md) |
+| D17 | Assignment/revisions/upgrades/private evidence/append ledger | Declaration review có; club verified-ledger workflow còn thiếu; legacy CTSV role không là assignment đủ | [Contribution](verified-contributions-api.md), [quyền](internal-accounts-verification-api.md) |
+| D18 | Vector/policy versions/đúng kỳ/tích lũy/bậc/title/breakdown | Calculators có; radar hiện cộng declarations không lọc kỳ/một category; P01–P06 chờ duyệt | [Scoring](experience-scoring-contract.md) |
+| D19 | Plans/unique/first-time/role/pillar/PDF không budget | Report/export/statistics hạ tầng có; cần rà DTO/definitions/snapshot/FE, chưa kết luận đủ | [Plan/report](club-semester-plan-report-api.md) |
+| D20 | Publication/close/recurring session identity | CRUD/cancel có; scheduleLabel không đủ occurrence/attendance/source | [Activity sessions](activity-attendance-api.md) |
+
+95 wrapper/87direct/2composed/6absent của audit cũ chỉ là kiểm kê facade trước đổi phạm vi, không là tỷ lệ hoàn thành phiếu. Route mới là ĐỀ XUẤT, cần API/DB/FE proof. [Handoff](backend-api-implementation-handoff.md).
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
+# Frontend API debt register — 2026-10-09
 
 Implement Status: Not Yet
 

@@ -1,3 +1,34 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Chỉ mục thay đổi BE cần cho FE — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| Actor tính chính | Hoàn thành | Chưa hoàn thiện | Chưa triển khai | Còn việc |
+| --- | ---: | ---: | ---: | ---: |
+| Sinh viên | 32 | 0 | 0 | 0 |
+| Quản lý CLB | 23 | 1 | 0 | 1 |
+| Người xác minh | 5 | 3 | 0 | 3 |
+| Quản trị hệ thống | 4 | 6 | 0 | 6 |
+| **Tổng 74 operation** | **64** | **10** | **0** | **10** |
+
+**FE có thể tích hợp:** 32 operation Sinh viên, gồm discovery/recommendations, summary/history, contribution/declaration paging và calculation history, radar PERIOD/CUMULATIVE, nhiệm vụ theo trục thấp và join CLB; cùng 23 API Quản lý CLB đã hoàn thành. **Còn việc trong mốc 74:** Quản lý CLB 1, Người xác minh 3, Quản trị hệ thống 6. API-033/SUP-02 còn thiếu đường đọc version cho manager; các phần BỎ QUA và lịch sử giữ nguyên. Hoàn thành BE không đồng nghĩa màn hình FE/deployment đã xong.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — HỖ TRỢ; ưu tiên F01–F12.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+Đọc [register D01–D20](frontend-api-debt-register.md) và [handoff](backend-api-implementation-handoff.md). Contract mới: [accounts/verification](internal-accounts-verification-api.md), [attendance/recurrence](activity-attendance-api.md), [contributions/ledger](verified-contributions-api.md), [6+1 scoring](experience-scoring-contract.md), [semester plan/report](club-semester-plan-report-api.md).
+
+GIỮ self profile/club/join/event/notifications. BỎ QUA finance/rewards/wallet/leaderboard/public student directory/school roster/timetable/ML. Bảng14debt và common styles/club store dưới là lịch sử, không còn yêu cầu phát hành. Source existence không là integration sign-off.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Backend changes needed after frontend integration
 
 Implement Status: Not Yet

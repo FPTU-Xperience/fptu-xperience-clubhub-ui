@@ -1,3 +1,35 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Hồ sơ nội bộ do chính chủ quản lý — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-003 | `GET /api/users/me/profile` | **✅ HOÀN THÀNH** | Trả userId/version/profile/personal/editableFields và provenance PROJECT_ACCOUNT; profile chưa tạo có version GUID rỗng. |
+| API-004 | `PATCH /api/users/me/profile` | **✅ HOÀN THÀNH** | PATCH profile/personal của chính mình, expectedVersion + Idempotency-Key; chưa hỗ trợ avatar/cover qua self profile. |
+| API-051 | `GET /api/clubs/{clubId}/members` | **✅ HOÀN THÀNH** | Hồ sơ hiện hành lấy từ Auth; applicationSnapshot được tách riêng. Thống kê không khả dụng trả available=false và số liệu null. |
+| API-052 | `GET /api/clubs/{clubId}/members/{memberId}` | **✅ HOÀN THÀNH** | Hồ sơ hiện hành, hồ sơ gia nhập lịch sử và lịch sử tham gia phân trang; cùng quyền quản lý CLB. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ cơ bản; BỎ QUA cosmetic/onboarding mở rộng.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+GIỮ canonical GET/PATCH /api/users/me/profile, self/version/privacy/partial update, applicationSnapshot tách history, cross-device persistence. Tối thiểu: userId/version/profile(displayName,about,skills?,interests?,avatarUrl?)/personal(phoneNumber?)/editableFields. DisplayName1..120/about≤2000/phone theo validator dự án; không sửa email/role/lock. Không bắt buộc DOB/address/academic chi tiết.
+
+Academic/studentCode/campus nếu dùng là dữ liệu dự án có provenance, không official roster/CTSV certification. Manager không sửa personal profile khác. [Accounts](internal-accounts-verification-api.md) quyết định internal register/login.
+
+**BỎ QUA — CHƯA CẦN:** coverShape/transform/text240px, cosmetic ownership/bundles, onboard phải chọn3 interests, timetable-sync intent/academic imports như điều kiện MVP. Free avatar/cover có thể hỗ trợ, không kéo theo chợ quà. Preserve legacy fields nếu có; không xóa dữ liệu.
+
+LocalStorage/IndexedDB chỉ tạm, Save thật API/DB; Preview/Cancel không ghi. Experience theo [scoring](experience-scoring-contract.md), không do self profile tự chỉnh.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Self profile and club member projection
 
 Implement Status: Not Yet
@@ -54,3 +86,6 @@ Cover text is `{visible,eyebrow,title,subtitle,color,size,x,y}`: eyebrow <=80, t
 Persist one profile per canonical user with optimistic concurrency, self-only mutation, audit and projection event/outbox. Club member personal projection references this record and separates `applicationSnapshot` (reason, expectations, contributions and historic consent). No club leader can mutate it. Revocation/private profile reads must not leak other users. Local import is explicit reviewed migration, never automatic upload of fixtures.
 
 Round-trip tests additionally cover 240px and text drag offsets, independent image/shape ownership, code/logo projection for CLB đồng hành, onboarding completion across devices, imported read-only academic fields, failed Save retains preview, Cancel sends no writes and member snapshots do not overwrite newer profile.
+
+
+</details>

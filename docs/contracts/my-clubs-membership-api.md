@@ -1,3 +1,34 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Xin gia nhập và trạng thái CLB của mình — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-032 | `POST /api/clubs/{id}/join` | **✅ HOÀN THÀNH** | Join bằng canonical profile Auth, active/unlocked/campus, consent và category info. Identity từ body không ghi đè Auth; transaction/unique/retry, key tùy chọn. Auth outage503. |
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| SUP-04 | `POST /api/clubs/me/membership-applications/{applicationId}/withdraw` | **⏳ CHƯA TRIỂN KHAI** | Chưa có withdrawal; hỗ trợ ngoài tổng 74, FE không giả thành công. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; richer workflow chỉ hỗ trợ.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+GIỮ clubs/me/access, clubs/me/memberships, club detail/self join/manager approve-reject/status/role. Canonical identity server-derived/consent của sinh viên; manager không consent hộ. Không cần school roster để xác minh account dự án.
+
+GIỮ — HỖ TRỢ self withdrawal/reapply/history đề xuất, invitation metadata/rich cards nếu tiếp tục UI; không bắt buộc mọi rich endpoint riêng, composed reads không cần duplicate. Nếu bật withdraw phải self/state/idempotency/history/active uniqueness, chưa bật không fake success.
+
+**BỎ QUA** roster/invitation semester import dependency và finance/reward quyền legacy. Không bỏ self join/status chỉ vì invite expansion bỏ.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Own memberships, applications and self withdrawal
 
 Implement Status: Not Yet

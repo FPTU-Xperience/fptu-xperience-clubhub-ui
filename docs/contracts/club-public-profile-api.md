@@ -1,3 +1,30 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Hồ sơ CLB đã công bố — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-033 | `PATCH /api/clubs/{clubId}/public-profile` | **🟡 CHƯA HOÀN THIỆN** | PATCH text/category/schedule và CAS đã có. GET /api/clubs/{id} của manager trả ClubFullResponse chưa có version (public DTO có version); thiếu đường đọc version cho manager để mở form/lưu lần đầu. FE chờ bổ sung read DTO, không tự tạo expectedVersion. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; schedule label chỉ hỗ trợ.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+GIỮ PATCH /api/clubs/{clubId}/public-profile manager đúng CLB/authorized admin; partial name/category/description/contact/scheduleLabel, expectedVersion; không writable active/deleted/manager. Category catalog hiện có, safe detail, Preview không ghi/Save canonical. Basic images theo [media](public-image-api.md).
+
+GIỮ — HỖ TRỢ structured schedule/slider; **BỎ QUA — CHƯA CẦN** bắt buộc semester schedule editor30-minute/full CONTENT/HR trước MVP. Buổi lặp thật cần [session IDs](activity-attendance-api.md), label/weekly metadata không thay activity/session/attendance.
+
+Public club info không là chia sẻ hồ sơ sinh viên. Không tự nới anonymous/cross-campus policy.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Club public profile editing
 
 Implement Status: Not Yet
@@ -48,3 +75,6 @@ Fetched main 80818266 has `GET/POST /api/clubs/categories` and persisted categor
 PATCH also supports `expectedVersion` and a structured `schedule: {semesterId,weekdays,startTime,endTime,repeatWeekly,timezone}`. Weekdays are unique integers 1..7 (Monday=1), at least one; timezone fixed `Asia/Ho_Chi_Minh`; minutes in 30-minute increments, 00:00 <= start < end <= 24:00. Validate authoritative semester code; one interval applies to every selected day. Explicit null clears schedule. Server serializes the public `scheduleLabel` for display with `Hằng tuần`; this metadata never creates activities or attendance sessions. Reject both structured schedule and legacy scheduleLabel in the same patch. Legacy free-text scheduleLabel remains accepted/preserved until deliberate conversion; do not overwrite old arbitrary text with an invented schedule.
 
 Return version plus updated public DTO, structured schedule and both image URLs. Preserve active/deleted/recruitment and unrelated fields. Capability-authorized owner/vice/CONTENT/HR may edit public profile and corresponding media according to D06; generic manager/admin authorization remains compatibility until role migration. Full club leadership does not bypass platform/CTSV final approval or permit another user's personal-profile writes. [Conventions](api-contract-conventions.md), [handoff](backend-api-implementation-handoff.md).
+
+
+</details>

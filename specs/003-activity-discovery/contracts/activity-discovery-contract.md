@@ -1,3 +1,17 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Activity discovery và low-axis rule — cập nhật 2026-10-12
+
+**Quyết định: GIỮ — BẮT BUỘC; BỎ QUA ML/ghép lịch.**
+
+[Phạm vi v1.4](../../../docs/contracts/capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. API mới vẫn là đề xuất tới khi có migration/Gateway/FE/kiểm thử.
+
+[Discovery API](../../../docs/contracts/activity-discovery-api.md) giữ feed/direct detail/recommendation names, numeric IDs/paging safe. Recommendations target trục thấp/eligibility/ruleVersion/reason; **BỎ QUA** interest/hybrid/ML/schedule engine và yêu cầu external issue/comment trước viết code. Quyền messaging ngoài repo không suy từ dòng lịch sử đó.
+
+Completion chỉ qua verified contribution, không mint lại. modelVersion/phù hợp lĩnh vực quan tâm trong ví dụ cũ là lịch sử, không requirement tối thiểu.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Activity Discovery Contract
 
 Implement Status: Not Yet
@@ -115,3 +129,6 @@ must not be used for client authorization.
 ## API implementation refinement — 2026-10-09
 
 [Discovery API](../../../docs/contracts/activity-discovery-api.md) retains these feed/recommendation route names and adds explicit pagination, numeric server IDs (client may stringify), cover URL, direct safe detail, server-clock LIVE state and private-by-default publication. The string IDs in the original examples above are illustrative, not a requirement to replace existing integer identities. Page size 50 satisfies the original validation case; add UI page handling for larger results. Main 80818266 still lacks this safe feed/ranking boundary. Source contracts/handoff are recorded; no external issue/comment was created by this audit. Ownership/deployment verification remains a future implementation task.
+
+
+</details>

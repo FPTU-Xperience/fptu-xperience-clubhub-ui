@@ -1,3 +1,36 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Hardening API giữ và tương thích — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-031 | `POST /api/v1/quests/{id}/complete` | **✅ HOÀN THÀNH** | Self-only, phải join, expectedVersion participation, verified eligible proof đúng tác giả/kỳ/source/pillar. Kiểm tra live cancellation trước replay, completion history append-only, không mint thêm điểm. note tối đa500. |
+| API-032 | `POST /api/clubs/{id}/join` | **✅ HOÀN THÀNH** | Join bằng canonical profile Auth, active/unlocked/campus, consent và category info. Identity từ body không ghi đè Auth; transaction/unique/retry, key tùy chọn. Auth outage503. |
+| API-053 | `PUT /api/clubs/{clubId}/members/{memberId}` | **✅ HOÀN THÀNH** | Giữ route tương thích và trả 403 `PERSONAL_PROFILE_SELF_ONLY` khi yêu cầu sửa hồ sơ cá nhân người khác. Tự sửa dùng canonical self profile. |
+| API-070 | `GET /api/v1/student-affairs/benchmarks/active` | **🟡 CHƯA HOÀN THIỆN** | active vẫn có thể tự tạo fallback FA26 khi DB trống và không đồng nghĩa APPROVED. FE không dùng response này làm bằng chứng policy đã được duyệt. |
+| API-074 | `POST /api/clubs/{id}/managers` | **🟡 CHƯA HOÀN THIỆN** | Constraint/outbox có sẵn; AssignManager vẫn dùng ManagerUserId/ManagerName từ request, chưa resolve account active/unlocked/current name từ Auth. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ security/integrity; BỎ QUA finance/roster development.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+GIỮ cấm manager personal writes/canonical assign-invite identity/quest no arbitrary target verification/production GET no samples/private attachments/custom categories/paging/direct safe detail/deadlines-me nếu giữ UI.
+
+Theo kiểm tra12/10: ReportAttachmentResponse còn StoragePath nhưng mapper trả string.Empty; schema cần bỏ/redact, **không kết luận path thật đã lộ** từ response đã đọc. Club CRUD create/update có custom category fallback; application mapper còn cần sửa, không gọi toàn category CRUD thiếu.
+
+CompleteQuestAsync không cấp trusted points theo StudentUserId tự do; áp dụng [assignment/no self](internal-accounts-verification-api.md), không bắt buộc CTSV official actor. Invite dùng account dự án, **BỎ QUA** school roster validation.
+
+**BỎ QUA** phát triển finance/settlement/paging như phân hệ nghiệm thu; legacy còn giữ quyền/privacy/compatibility. Không duplicate existing club/account/report/notification/role/audit APIs.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Existing API contracts requiring changes, not duplicate endpoints
 
 Implement Status: Not Yet

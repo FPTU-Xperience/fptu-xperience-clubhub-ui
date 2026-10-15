@@ -56,6 +56,28 @@ export default function ActivitiesTab({ manager = false, readOnly = false, dashb
             'activity.create',
         );
 
+    const saveCover = async (event) => {
+        event.preventDefault();
+        if (!manager || !imageActivity || !coverFile || submitting) return;
+        setSubmitting(true);
+        setSubmitError('');
+        try {
+            const url = await api.uploadPublicImage(coverFile, 'activity-cover', imageActivity.id);
+            await api.updateActivityCoverImage(imageActivity.id, url, imageActivity.version);
+            setImageActivity(null);
+            setCoverFile(null);
+            result.retry();
+        } catch (error) {
+            setSubmitError(
+                error?.status === 404
+                    ? 'Máy chủ chưa hỗ trợ lưu ảnh hoạt động.'
+                    : error?.message || 'Không thể lưu ảnh hoạt động.',
+            );
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <>
             <WorkspaceTabLayout

@@ -1,3 +1,17 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Profile theo phiếu v1.4 — cập nhật 2026-10-12
+
+**Quyết định: GIỮ self/experience; BỎ QUA quà/public sharing.**
+
+[Phạm vi v1.4](../../../docs/contracts/capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. API mới vẫn là đề xuất tới khi có migration/Gateway/FE/kiểm thử.
+
+GIỮ [self GET/PATCH](../../../docs/contracts/self-profile-sync-api.md) persisted/privacy/preview-save, membership cards, [experience6+1](../../../docs/contracts/experience-scoring-contract.md) semester/cumulative/tiers/titles/history. LocalStorage/IndexedDB chỉ hiện trạng, không acceptance.
+
+**BỎ QUA:** rewards/cosmetic ownership/bundles/complex cover240px/academic official sync/public profile sharing. Free avatar hỗ trợ nếu giữ UI. Evidence/radar self/scoped reviewer, không public preview. D08 handoff cũ ngoài phạm vi.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Profile service boundary — refreshed 2026-10-09
 
 Implement Status: Not Yet
@@ -23,3 +37,6 @@ Load/save/retry preserve session isolation and prior data on failure. The inform
 [Media](../../../docs/contracts/public-image-api.md) owns user avatar/background attachments. [Cover rewards](../../../docs/contracts/profile-cover-rewards-api.md) owns server-issued/free entitlements, separate editor color/shape choices and club-store redemption. [Personal experience](../../../docs/contracts/personal-experience-api.md) reuses existing Admin declaration/radar infrastructure and specifies missing self history/summary reads. Local samples are never earned grants or credited points.
 
 Follow the [implementation handoff](../../../docs/contracts/backend-api-implementation-handoff.md), D01/D02/D03/D08. Route the replacement through the existing API facade, deliberately review local imports, preserve Preview/Cancel with no write, and prove cross-account/cross-device privacy. API main 80818266 has no canonical self-profile read/write; production integration remains pending.
+
+
+</details>

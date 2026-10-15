@@ -1,3 +1,15 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Header notification và nguồn sự kiện trong phiếu — cập nhật 2026-10-12
+
+**Quyết định: GIỮ — BẮT BUỘC.**
+
+[Phạm vi v1.4](../../../docs/contracts/capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. API mới vẫn là đề xuất tới khi có migration/Gateway/FE/kiểm thử.
+
+GIỮ GETnotifications self-safe/bounded/errors/no fixtures; full inbox/read mutations tái sử dụng. Membership/activity/review/contribution updates bắt buộc qua outbox đúng recipient. Role/assignment notifications hỗ trợ; **BỎ QUA** redemption/finance/rewards notices như MVP requirement. Deep links kiểm tra quyền, không PII/evidence trong summary.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # UI Contract: Header Notification Summary
 
 Implement Status: Done
@@ -56,3 +68,6 @@ The V2 adapter accepts equivalent existing timestamp field names but exposes onl
 ## API rescan — 2026-10-09
 
 Notification list and read mutations already exist on main 80818266; no replacement notification service is requested. New invitation, role, contribution and redemption notifications should use source outbox events and recipient deduplication under [shared conventions](../../../docs/contracts/api-contract-conventions.md). Preserve this header's bounded safe projection and session isolation; full inbox pagination is a separate existing-API integration task (D14). See [handoff](../../../docs/contracts/backend-api-implementation-handoff.md).
+
+
+</details>

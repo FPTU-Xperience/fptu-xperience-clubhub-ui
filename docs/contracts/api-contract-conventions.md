@@ -1,3 +1,37 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Quy ước API đang áp dụng — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+**🟡 CHƯA HOÀN THIỆN đồng nhất:** mutation key/version và CAS đã có ở luồng mới; paging dùng cả total và totalItems, lỗi có handler chỉ code/message. FE đọc shape theo từng route; không giả định sourceType/status query ở queue đã được hỗ trợ.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — HỖ TRỢ.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+## Quy ước hiện hành
+
+- Browser gọi facade hiện có qua Gateway/VITE_API_BASE_URL; presigned image PUT không gửi application token ra storage. Principal và scope server quyết định quyền.
+- ID cũ integer giữ nguyên; tài nguyên mới có thể GUID. JSON camelCase, version opaque; instants UTC/offset ISO8601, dates YYYY-MM-DD, giờ buổi Asia/Ho_Chi_Minh. Semester.Id/SemesterCode là authority, không hard-code FA26.
+- Paging hiện có: contribution/ledger/manual dùng items/page/pageSize/total/totalPages; member/attendance legacy dùng totalItems, page≥1, pageSize1..100, order ổn định. Route cũ có adapter tương thích; tổng phải từ server, không đếm trang đầu.
+- Error mới: message/code; traceId/errors chưa được tất cả handler chuẩn hóa; 400 input,401 auth,403 quyền,404 unavailable,409 version/state/duplicate,429 rate,503 service/policy. FE giữ code/errors, không chỉ message. Thiếu policy được duyệt dùng SCORE_POLICY_UNAPPROVED, không fake0.
+- PATCH omitted giữ, null clear nullable, unknown/identity/authority fields reject; expectedVersion recheck tại commit. Mutation trả canonical state/receipt.
+- Idempotency-Key cho submit/review/upgrade/correction/check-in/assignment và side effect không lặp; persist actor+route+key+requestHash+response ít nhất24h. Khác payload cùng key→409. Unique nguồn/revision và transaction chống race kể cả khác key.
+- Outbox cùng source transaction; consumer dedupe eventId, failure delivery không dựng fake success/counter. Notification chỉ đúng recipient, metadata riêng tư tối thiểu.
+- Self profile/radar/evidence/history self-only hoặc reviewer được giao. Club manager không sửa hồ sơ cá nhân người khác. Cấm duyệt/điều chỉnh thủ công contribution của mình qua mọi route.
+- Experience raw points/radar/ERI không phải tiền/ví. **BỎ QUA** awards/redemptions/negative-wallet debt/cosmetic entitlement/import roster của bản cũ. Ledger trải nghiệm chỉ ghi thêm, có nguồn/verifier/policy, reversal có lý do.
+- Sample không tự được ghi khi GET hoặc migrate thành verified scores. Empty, unconfigured và service failure có trạng thái khác nhau.
+
+Nghiệm thu: DB/migration/restart, quyền own/other club/self/reviewer revoked, concurrent/replay/rollback, gateway và FE integration. [Scoring](experience-scoring-contract.md), [quyền](internal-accounts-verification-api.md) quyết định policy.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # API debt: shared implementation conventions
 
 Implement Status: Not Yet
@@ -43,3 +77,6 @@ Self-profile and timetable are self-only. Club leadership never edits another me
 ## Required proof per implementation batch
 
 Migrations and upgrade/backfill; endpoint/DTO contracts; principal/campus/club tests; stale-version/concurrent/replay tests; service-failure behavior; outbox/consumer tests where applicable; gateway route precedence and verbs; authenticated FE integration after deployment. Source existence is not a live integration sign-off. Never promote browser fixtures, sample wallets or locally acquired cosmetic ownership into real server grants.
+
+
+</details>

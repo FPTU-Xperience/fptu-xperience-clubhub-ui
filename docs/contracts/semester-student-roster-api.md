@@ -1,3 +1,26 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Roster sinh viên chính thức theo kỳ — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+**⏭ BỎ QUA:** Roster/import/FAP của trường BỎ QUA; account dự án được resolve ở Auth cho assignment, không chứng nhận sinh viên trường.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: BỎ QUA — NGOÀI PHẠM VI.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+Phiếu mục4 loại dữ liệu toàn trường/xác nhận hồ sơ sinh viên chính thức. **BỎ QUA toàn bộ** import/preview/commit/revisions/carry-forward/eligible roster APIs/O-04. Giữ nguyên tài liệu cho sau.
+
+Account/CLB/semester dự án và active/locked checks vẫn GIỮ theo [quyền](internal-accounts-verification-api.md). Không dùng roster làm prerequisite F01/F02/invite legacy. Semester CRUD có sẵn không bị bỏ chỉ vì nằm trong đề xuất roster.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # CTSV semester student roster
 
 Implement Status: Not Yet
@@ -29,3 +52,6 @@ Protected internal Admin/Auth lookup resolves current revision and account eligi
 Errors include `ROSTER_UNAVAILABLE`, `ROSTER_CHANGED`, `IMPORT_EXPIRED`, `IDENTITY_UNMATCHED`, `STUDENT_NOT_ELIGIBLE`, `MEMBERSHIP_EXISTS`. Audit only necessary identifiers/counts; do not log raw import contents. Gateway forwarding already covers semester prefixes but must be tested for new multipart/body limits and authorization.
 
 Acceptance: empty vs missing vs carry-forward; duplicate/unknown identities; cross-campus administration; expired/stale commit and replay; concurrent replacement; lookup pagination; eligibility changes between search/invite/accept/approve; account locks; two-account invite consent approval. Semester rollover point reset and office succession are separately scoped, not hidden in roster import.
+
+
+</details>

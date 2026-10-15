@@ -1,3 +1,17 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Workspace theo actor và tính năng v1.4 — cập nhật 2026-10-12
+
+**Quyết định: GIỮ core; BỎ QUA finance/rewards/specialist expansion.**
+
+[Phạm vi v1.4](../../../docs/contracts/capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. API mới vẫn là đề xuất tới khi có migration/Gateway/FE/kiểm thử.
+
+GIỮ selection/composed reads, member/applications/basic roles, club profile, activity/registration/attendance/recurrence, contribution/evidence/review, plan/statistics/PDF. Server capabilities và verifier assignment độc lập. Adapter không tự drop unknown valid role khi có server capability; preserve roles/capabilities, deny action không cấp.
+
+**BỎ QUA:** finance/settlement/competitive leaderboard/gifts/wallet/redemption/full specialist consoles/school roster. Points đổi nghĩa experience6+1 nếu dùng. [Contribution](../../../docs/contracts/verified-contributions-api.md), [plan/report](../../../docs/contracts/club-semester-plan-report-api.md) quyết định payload. Rich selection hỗ trợ, không duplicate endpoint bắt buộc.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Production Workspace UI Contract
 
 Implement Status: Not Yet

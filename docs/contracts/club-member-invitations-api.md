@@ -1,3 +1,28 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Lời mời thành viên — giữ tương thích — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+**🟡 CHƯA HOÀN THIỆN nếu bật invite:** route mời legacy còn; chưa nâng toàn bộ canonical identity/lookup dự án. Mở rộng roster/invite lookup/chức vụ đã BỎ QUA; không gọi proposal tìm sinh viên trường.
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — HỖ TRỢ; BỎ QUA school roster/invite expansion.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+Phiếu bắt buộc self join/status và manager review theo [My Clubs](my-clubs-membership-api.md). Invite chủ động/eligible-members/invitation-semesters **BỎ QUA — CHƯA CẦN** để hoàn thành phiếu.
+
+**BỎ QUA — NGOÀI PHẠM VI:** school roster/import/carry-forward/O-04/official eligibility và phải có roster khi invite/consent/approve. Semester catalog dự án vẫn GIỮ F10.
+
+Nếu dùng invite legacy: server resolve account dự án active/unlocked/canonical identity/club scope; consent do recipient, manager approval riêng; notification đúng recipient. Account active không là xác nhận sinh viên chính thức. Không auto-enroll/fake delivery. API giữ lại; import/lookup mở rộng dưới không là MVP debt.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Club member invitations and CTSV semester roster
 
 Implement Status: Not Yet
@@ -105,3 +130,6 @@ Implement and test CTSV roster persistence/import and the authorized lookup; ver
 Fresh fetch still resolves to 80818266; no new eligibility/roster route was found. Exact import schema, revision/commit payloads and carry-forward semantics are expanded in [semester-student-roster-api.md](semester-student-roster-api.md). The schema resolves O-04 provisionally for implementation design, not as an already approved CTSV policy. Use [shared conventions](api-contract-conventions.md) and D05 [handoff](backend-api-implementation-handoff.md).
 
 The recipient/source discriminator and self withdrawal are reconciled in [my-clubs-membership-api.md](my-clubs-membership-api.md). If enabling withdrawn reapplication, update eligible-member exclusion to the same active-record uniqueness rule rather than excluding all history forever. HR recruitment authority comes from the D06 server capability catalog, not global manager role. In-app invitation notifications commit through outbox and existing NotificationService; no new notification list/read API is needed.
+
+
+</details>

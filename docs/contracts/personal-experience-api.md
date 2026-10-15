@@ -1,3 +1,37 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Hồ sơ trải nghiệm theo kỳ và tích lũy — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| API-010 | `GET /api/users/me/contributions` | **✅ HOÀN THÀNH** | Hợp nhất canonical + legacy có nhãn, dedup mirror, lọc kỳ/status/pillar, SQL count/paging; calculation hiện trạng. Legacy semester unassigned, không cộng vào điểm verified. |
+| API-011 | `GET /api/contributions/{id}` | **✅ HOÀN THÀNH** | Detail có calculationBreakdown và lịch sử ledger effect/delta/allocation/revision/policy/verification. Snapshot mới bất biến; lịch sử cũ chỉ reconstruct nếu dữ liệu gốc khớp, thiếu căn cứ báo unavailable. |
+| API-014 | `GET /api/users/me/experience-ledger` | **✅ HOÀN THÀNH** | Paged self net ledger với sourceType/sourceId/sourceKey/sourceNamespace, policy/formula/revision/verification; không đưa XP mẫu vào ledger. |
+| API-017 | `GET /api/users/me/experience-summary` | **✅ HOÀN THÀNH** | Summary đọc toàn bộ net ledger, counts riêng với points; nguồn attendance/membership có availability/asOf/version riêng. Nguồn lỗi trả null, không giả0; historical external counters chưa có snapshot được đánh dấu rõ. |
+| API-018 | `GET /api/users/me/activity-history` | **✅ HOÀN THÀNH** | Self-only, cross-activity/session history; SQL filter/count/paging, registration/verified/revoked/legacy tách nhãn, không lộ dữ liệu sinh viên khác. |
+| API-026 | `GET /api/v1/declarations/me/radar` | **✅ HOÀN THÀNH** | VERIFIED_NET_LEDGER theo PERIOD và CUMULATIVE; six radarAxes + plusOne, ERI/D/J/M và leader proof theo trụ cột; approved policy/version/asOf/ledgerRevision. Cumulative cần policy scope riêng, thiếu trả503. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — BẮT BUỘC; thay DTO/nghĩa wallet cũ.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+Tái sử dụng declarations/self radar, nhưng phải theo [scoring](experience-scoring-contract.md): contribution đúng kỳ; vector≤3/7; six axes/+1 riêng; policy/formula/ledger snapshots, tiers/title/breakdown và cumulative không reset. BuildStudentRadarAsync đã dùng canonical net ledger theo kỳ và loại declaration mirror, trả policyVersion/isAuthoritative/ledgerBasis; phần CUMULATIVE và snapshot DTO đầy đủ còn thiếu.
+
+GET /api/users/me/experience-summary?semesterId=... đề xuất: scope/semesterId/recognizedContributionCount/rawExperiencePoints/verifiedAttendanceCount/approvedClubCount/availability/policyVersion/ledgerRevision/asOf/version. Tách count khỏi points; không dùng recognizedContributionTotal mơ hồ. Server tổng hợp; thiếu source null+availability, không fake0.
+
+GET /api/users/me/activity-history giữ self/paged/session/source/verified status. GET /api/users/me/contributions theo [verified contributions](verified-contributions-api.md), typed source/status/revision/verified attributes/calculation/evidence refs có quyền. **BỎ QUA** creditedWalletPoints/redemption comparisons.
+
+Self-only/private, reviewer projection có assignment. **BỎ QUA** public student profile preview/sharing; tự preview trước Save vẫn GIỮ. Public club info khác hồ sơ cá nhân. Hiển thị số cùng radar/so chính mình qua kỳ, không competitive leaderboard.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Personal experience summary, evidence and radar
 
 Implement Status: Not Yet
@@ -35,3 +69,6 @@ Use existing declarations for declaration evidence; add GET `/api/users/me/contr
 Self-only reads regardless of global actor role. Public profile preview excludes private identity, personal evidence, contribution totals, points and contact data; expose only consented display fields. Maintain application/history data after self-profile edits. Aggregation failures preserve independent fields with unavailable metadata, not synthetic sample data. Never calculate final totals client-side from a truncated first page.
 
 Tests: two accounts see only own evidence/history; attendance/cancelled/duplicate cases; consistent totals across pagination and redemption; canonical semester; empty versus unavailable; declaration/radar mapping; public preview privacy. FE owner: `ProfilePage.jsx`, `profile-data.js`; replace seeded evidence and radar only after these reads are deployed. No new profile-summary write endpoint.
+
+
+</details>

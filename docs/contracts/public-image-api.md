@@ -1,3 +1,32 @@
+<!-- CAPSTONE_SCOPE_2026_10_12 -->
+# Ảnh công bố cơ bản và minh chứng riêng tư — cập nhật 2026-10-12
+
+<!-- BE_STATUS_2026_10_14_START -->
+## Trạng thái BE hiện hành — 14/10/2026
+
+Đọc [bảng trạng thái API theo actor](be-api-status.md) và [route/DTO thực tế để làm FE](be-integration-guide.md). Nhãn bên dưới là tiến độ BE; không đánh dấu màn hình FE/deployment đã hoàn thành. Nhận định tiến độ cũ và phần lịch sử bên dưới không thay bảng này.
+
+| ID | API thực tế / đề xuất còn thiếu | Trạng thái BE | FE cần biết |
+| --- | --- | --- | --- |
+| SUP-01 | `POST /api/media/upload-intents` | **✅ HOÀN THÀNH** | Club/activity public image intent; R2 thật cần cấu hình. Kind chỉ club-logo/club-cover/activity-cover, không avatar/cover cá nhân. |
+| SUP-02 | `PUT /api/clubs/{clubId}/public-images` | **🟡 CHƯA HOÀN THIỆN** | Write/issued-object verify đã có; cần expectedVersion nhưng manager detail GET chưa trả version, cùng vướng mắc API-033. Không mở Save trước khi BE bổ sung read DTO. |
+| SUP-03 | `PUT /api/activities/{activityId}/cover-image` | **✅ HOÀN THÀNH** | Cover activity đúng quyền/version; giữ blueprint và lịch sử. |
+
+<!-- BE_STATUS_2026_10_14_END -->
+
+**Quyết định: GIỮ — HỖ TRỢ; BỎ QUA reward assets.**
+
+[Phạm vi v1.4](capstone-scope-contract.md) ưu tiên hơn bản ngày 05–09/10. BỎ QUA là đánh dấu phạm vi, không xóa code/API/dữ liệu hoặc bỏ kiểm tra quyền. Trạng thái BE và route/DTO đã chốt xem cập nhật 14/10 ở đầu file; các phần chưa triển khai vẫn là đề xuất. Tích hợp FE và deployment được kiểm tra riêng.
+
+GIỮ upload intent/club logo-cover/activity cover/basic avatar nếu UI hứa upload: scope đúng club/self, issued-object ownership/type/size, canonical attachment/DB/Gateway; không fake upload success. Giữ lựa chọn R2 hiện có nếu triển khai, không đổi nhà cung cấp.
+
+**BỎ QUA:** club-shape/reward catalog assets, bắt buộc student-cover/complex layering, club-application-logo mới nếu không chọn club application flow (admin create club đủ phiếu). Không cần tất cả kind trong catalog cũ.
+
+Contribution/attendance evidence **private** theo [contribution](verified-contributions-api.md); không public image intents/storagePath/PII URLs. Basic images hỗ trợ, private evidence bắt buộc.
+
+<details>
+<summary>LỊCH SỬ trước 12/10 — giữ nguyên; không dùng phần BỎ QUA để chốt MVP</summary>
+
 # Public image API contract (backend work required)
 
 Implement Status: Not Yet
@@ -87,3 +116,6 @@ Shape publication attaches the verified object through the club reward catalog c
 The existing FE uploads PUT then submits the returned publicUrl. Keep that wire compatibility initially; on attachment the backend verifies intent binding/HEAD and decoded bytes, marks a durable object verified and consumed/attached, and returns the canonical record. An issued URL is not proof that an object was uploaded. Reusing an already attached URL on the same owner preserves it even after the original intent expiry; cross-owner reuse/replay is denied. Replacement may leave an unattached orphan if the record save fails; cleanup must not remove referenced old objects. Add expectedVersion support to independent logo/cover saves to prevent stale full-state PUT from overwriting the other image; FE currently sends both URLs and must be updated together.
 
 Follow [conventions](api-contract-conventions.md), D01 in [handoff](backend-api-implementation-handoff.md). Actual signing credentials stay server-side. Public domain selection does not verify Gateway, object reads, CORS, backend secrets or deployment. Test all of those before calling upload integration live.
+
+
+</details>
