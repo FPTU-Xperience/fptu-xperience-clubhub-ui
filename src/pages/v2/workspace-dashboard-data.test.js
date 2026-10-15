@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import React from 'react';
-import { summarizeWorkspaceDashboard, useWorkspaceDashboard } from './workspace-dashboard-data.js';
+import { isOngoingWorkspaceActivity, summarizeWorkspaceDashboard, useWorkspaceDashboard } from './workspace-dashboard-data.js';
 import { useActivityDetail } from './activity-data.js';
 
 const ok = (value) => ({ status: 'fulfilled', value });
@@ -197,4 +197,24 @@ test('dashboard keeps an empty result distinct from a failed source', () => {
     assert.equal(summary.approvedReportCount, null);
     assert.equal(summary.upcomingActivity, null);
     assert.equal(summary.activityAvailable, true);
+});
+
+test('home activity filter matches the rail badge regardless of start date', () => {
+    const summary = summarizeWorkspaceDashboard([
+        ok({}),
+        ok([
+            { id: 1, status: 'Scheduled', startTimeUtc: '2020-01-01T00:00:00Z' },
+            { id: 2, status: 'Upcoming' },
+            { id: 3, status: 'Live', startTimeUtc: 'invalid' },
+            { id: 4, status: 'Completed' },
+            { id: 5, status: 'Cancelled' },
+            { id: 6, status: 'Draft' },
+        ]),
+        ok([]),
+        ok([]),
+    ], true);
+    const homeActivities = summary.activities.filter(isOngoingWorkspaceActivity);
+    assert.deepEqual(homeActivities.map((activity) => activity.id), [1, 2, 3]);
+    assert.equal(summary.ongoingActivityCount, 3);
+    assert.equal(homeActivities.length, summary.ongoingActivityCount);
 });

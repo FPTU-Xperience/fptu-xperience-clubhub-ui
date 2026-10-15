@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 const succeeded = (result) => result?.status === 'fulfilled';
 
+export const isOngoingWorkspaceActivity = (activity) =>
+    ['SCHEDULED', 'UPCOMING', 'LIVE'].includes(String(activity.status).toUpperCase());
+
 export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) {
     const [club, activities, memberships, reports] = results;
     const clubData = succeeded(club) ? club.value : null;
@@ -50,10 +53,7 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
             : null,
         isRecruiting: typeof clubData?.isRecruiting === 'boolean' ? clubData.isRecruiting : null,
         activityCount: activeActivities?.length ?? null,
-        ongoingActivityCount:
-            activeActivities?.filter((activity) =>
-                ['SCHEDULED', 'UPCOMING', 'LIVE'].includes(String(activity.status).toUpperCase()),
-            ).length ?? null,
+        ongoingActivityCount: activeActivities?.filter(isOngoingWorkspaceActivity).length ?? null,
         activities:
             activeActivities?.map((activity) => ({
                 id: activity.id,

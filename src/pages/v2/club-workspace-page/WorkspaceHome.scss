@@ -1,0 +1,355 @@
+/* Hallmark · genre: modern-minimal · macrostructure: agenda + work queue
+ * Existing ClubHub orange / Inter system. Pre-emit critique: P5 H5 E4 S5 R5 V4. */
+.workspace-home {
+    --home-ink: #10203a;
+    --home-muted: #5b6d85;
+    --home-rule: #dfe7f1;
+    --home-paper: #fff;
+    --home-soft: #f7f9fc;
+    --home-accent: #c2410c;
+    --home-accent-soft: #fff7ed;
+    --home-success: #167044;
+    color: var(--home-ink);
+
+    h1,
+    h2,
+    h3,
+    p {
+        margin: 0;
+    }
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+    a,
+    &__state button,
+    &__inbox button {
+        -webkit-tap-highlight-color: transparent;
+    }
+    a:focus-visible,
+    button:focus-visible {
+        outline: 2px solid var(--home-accent);
+        outline-offset: 4px;
+    }
+    a:active,
+    button:active {
+        opacity: 0.75;
+    }
+    &__state button,
+    &__inbox button {
+        border: 0;
+        background: transparent;
+        color: var(--home-accent);
+        font: inherit;
+        font-weight: 650;
+        cursor: pointer;
+        padding: 8px 0;
+    }
+    &__state button:hover,
+    &__inbox button:hover {
+        text-decoration: underline;
+    }
+    svg {
+        flex-shrink: 0;
+    }
+
+    &__heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding-bottom: 32px;
+    }
+    &__heading > div {
+        min-width: 0;
+    }
+    &__heading .v2-eyebrow {
+        display: block;
+        overflow-wrap: anywhere;
+    }
+    &__heading h1 {
+        font-size: clamp(28px, 3vw, 36px);
+        margin: 8px 0;
+        font-weight: 700;
+    }
+    &__heading p {
+        color: var(--home-muted);
+        font-size: 14px;
+    }
+    &__primary {
+        display: inline-flex;
+        flex-shrink: 0;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 16px;
+        border: 1px solid var(--home-rule);
+        border-radius: 8px;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+    &__primary:hover {
+        background: var(--home-soft);
+    }
+    &__layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.46fr);
+        gap: 40px;
+        border-top: 1px solid var(--home-rule);
+        padding-top: 32px;
+    }
+    &__agenda,
+    &__aside {
+        min-width: 0;
+    }
+    &__section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    &__kicker {
+        color: var(--home-muted);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        font-weight: 750;
+    }
+    h2 {
+        font-size: 20px;
+        margin-top: 8px;
+        overflow-wrap: anywhere;
+    }
+    &__count {
+        color: var(--home-muted);
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    &__events {
+        display: grid;
+        gap: 12px;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 24px;
+    }
+    &__events .v2-event-card--schedule h3 {
+        margin: 7px 0 10px;
+        overflow-wrap: anywhere;
+    }
+    &__all {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 8px;
+        border-top: 1px solid var(--home-rule);
+        font-weight: 650;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    &__all:hover,
+    &__text-link:hover {
+        color: var(--home-accent);
+    }
+    &__aside {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+    &__inbox {
+        padding: 24px;
+        border: 1px solid var(--home-rule);
+        border-radius: 12px;
+    }
+    &__inbox > p,
+    &__inbox > div > p {
+        color: var(--home-muted);
+        margin-top: 16px;
+    }
+    &__inbox &__pending {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-top: 16px;
+        color: var(--home-muted);
+    }
+    &__pending strong {
+        font-size: 36px;
+        color: var(--home-accent);
+        line-height: 1.25;
+        font-weight: 650;
+    }
+    &__pending span {
+        font-size: 12px;
+    }
+    &__applicants {
+        list-style: none;
+        margin: 16px 0 0;
+        padding: 0;
+    }
+    &__applicants li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+    }
+    &__applicants li span {
+        overflow-wrap: anywhere;
+        min-width: 0;
+    }
+    &__applicants svg {
+        color: var(--home-muted);
+    }
+    &__text-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 20px;
+        font-size: 12px;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+    &__clear {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 24px;
+    }
+    &__clear svg {
+        color: var(--home-success);
+        margin-top: 2px;
+    }
+    &__clear p {
+        color: var(--home-muted);
+        font-size: 12px;
+        margin-top: 4px;
+    }
+    &__shortcuts > a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--home-rule);
+    }
+    &__shortcuts > a:hover {
+        color: var(--home-accent);
+    }
+    &__shortcuts a > div {
+        min-width: 0;
+    }
+    &__shortcuts strong {
+        display: block;
+        font-size: 13px;
+    }
+    &__shortcuts a span {
+        color: var(--home-muted);
+        font-size: 12px;
+    }
+    &__shortcuts a div span {
+        display: block;
+        margin-top: 4px;
+    }
+    &__shortcuts &__members {
+        border: 0;
+        justify-content: flex-start;
+        padding-bottom: 0;
+    }
+    &__members > svg:last-child {
+        margin-left: auto;
+    }
+    &__state {
+        display: grid;
+        justify-items: start;
+        gap: 12px;
+        min-height: 240px;
+        align-content: center;
+        padding: 32px 24px;
+        margin-bottom: 24px;
+        border-radius: 8px;
+        background: var(--home-soft);
+    }
+    &__state > svg {
+        color: var(--home-muted);
+        margin-bottom: 4px;
+    }
+    &__state p {
+        color: var(--home-muted);
+    }
+}
+
+@media (max-width: 1200px) {
+    .workspace-home__layout {
+        gap: 24px;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 0.5fr);
+    }
+    .workspace-home__heading {
+        align-items: flex-start;
+    }
+}
+@media (max-width: 960px) {
+    .workspace-home__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .workspace-home__aside {
+        border-top: 1px solid var(--home-rule);
+        padding-top: 24px;
+    }
+    .workspace-home__heading {
+        flex-direction: column;
+    }
+}
+@media (max-width: 540px) {
+    .workspace-home__section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .workspace-home__inbox {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .v2-production-workspace.v2-production-workspace--home {
+        grid-template-columns: minmax(0, 1fr);
+
+        .v2-workspace-left-rail {
+            position: relative;
+            width: 100%;
+            height: auto;
+            padding: 16px;
+            border-right: 0;
+            border-bottom: 1px solid var(--v2-line, #e2e8f0);
+        }
+        .v2-workspace-left-rail-nav {
+            display: flex;
+            overflow-x: auto;
+            padding: 4px;
+            margin: 0;
+        }
+        .v2-workspace-left-rail-nav a {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .v2-workspace-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+        }
+        .v2-workspace-bar > div {
+            min-width: 0;
+            max-width: 100%;
+            flex-wrap: wrap;
+            gap: 8px;
+            overflow-wrap: anywhere;
+        }
+        .v2-workspace-bar > div:last-child {
+            gap: 12px;
+        }
+        .v2-workspace-content {
+            padding: 24px 16px 40px;
+        }
+    }
+}
