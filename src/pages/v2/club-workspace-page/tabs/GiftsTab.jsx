@@ -125,7 +125,8 @@ function GiftPreview({ reward }) {
     );
 }
 
-export default function GiftsTab({ workspace, manager = false, dashboard }) {
+export default function GiftsTab({ workspace, manager: managerInput = false, dashboard, readOnly = false }) {
+    const manager = managerInput && !readOnly;
     const { user } = useAuth();
     const clubId = workspace?.clubId;
     const clubCode = workspace?.clubCode || workspace?.name || workspace?.clubName || '';
@@ -172,6 +173,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
         };
     }, [user, clubId, clubCode]);
     const redeem = (reward) => {
+        if (readOnly) return;
         setError('');
         setNotice('');
         try {
@@ -200,7 +202,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
         return () => window.clearTimeout(timer);
     }, [nextPublication, now]);
     const catalog = allCatalog.filter(
-        (reward) => reward.status !== 'deleted' && (manager || reward.status === 'published'),
+        (reward) => reward.status !== 'deleted' && (manager || readOnly || reward.status === 'published'),
     );
     const detailedReward = catalog.find((reward) => reward.key === detailKey);
     useEffect(() => {
@@ -213,6 +215,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
         expired: 'Đã đóng đổi',
     };
     const changeStatus = (reward, status) => {
+        if (readOnly) return;
         try {
             setRewardLifecycle(clubId, reward.key, status);
             setError('');
@@ -224,7 +227,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
     const normalizedQuery = query.trim().toLocaleLowerCase('vi');
     const visible = catalog.filter(
         (reward) =>
-            (!manager || statusFilter === 'all' || reward.status === statusFilter) &&
+            (!(manager || readOnly) || statusFilter === 'all' || reward.status === statusFilter) &&
             reward.label.toLocaleLowerCase('vi').includes(normalizedQuery),
     );
     if (sort !== 'default') visible.sort((a, b) => (sort === 'ascending' ? a.cost - b.cost : b.cost - a.cost));
@@ -236,7 +239,11 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
     return (
         <WorkspaceTabLayout
             title="Kho quà"
-            description="Biến những đóng góp của bạn thành quà tặng và phong cách riêng."
+            description={
+                readOnly
+                    ? 'Xem danh mục và trạng thái quà của CLB. Chế độ chỉ xem.'
+                    : 'Biến những đóng góp của bạn thành quà tặng và phong cách riêng.'
+            }
             preview
             action={
                 manager && user ? (
@@ -290,10 +297,11 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
                     )}
                     {!manager && detailedReward && (
                         <GiftDetailPanel
+                            readOnly={readOnly}
                             reward={detailedReward}
                             category={categories.find((item) => item.id === categoryOf(detailedReward))?.label}
                             preview={<GiftPreview reward={detailedReward} />}
-                            owned={inventory.owned.includes(detailedReward.key)}
+                            owned={!readOnly && inventory.owned.includes(detailedReward.key)}
                             balance={balance}
                             user={user}
                             clubId={clubId}
@@ -303,26 +311,28 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
                             error={error}
                         />
                     )}
-                    <div className="v2-cover-gifts-balance">
-                        <div className="v2-gift-wallet">
-                            <span className="v2-gift-wallet-icon">
-                                <Coins size={24} />
-                            </span>
-                            <div>
-                                <small>ĐIỂM MẪU CỦA BẠN</small>
-                                <strong>
-                                    {balance.toLocaleString('vi-VN')} <span>điểm</span>
-                                </strong>
+                    {!readOnly && (
+                        <div className="v2-cover-gifts-balance">
+                            <div className="v2-gift-wallet">
+                                <span className="v2-gift-wallet-icon">
+                                    <Coins size={24} />
+                                </span>
+                                <div>
+                                    <small>ĐIỂM MẪU CỦA BẠN</small>
+                                    <strong>
+                                        {balance.toLocaleString('vi-VN')} <span>điểm</span>
+                                    </strong>
+                                </div>
                             </div>
+                            <p>
+                                Bắt đầu với 200 điểm mẫu tại mỗi CLB. Quà và số dư lưu trên thiết bị; chưa sử dụng điểm
+                                thật.
+                            </p>
+                            <Link to="/v2/profile">
+                                Tùy chỉnh cá nhân <ArrowUpRight size={16} />
+                            </Link>
                         </div>
-                        <p>
-                            Bắt đầu với 200 điểm mẫu tại mỗi CLB. Quà và số dư lưu trên thiết bị; chưa sử dụng điểm
-                            thật.
-                        </p>
-                        <Link to="/v2/profile">
-                            Tùy chỉnh cá nhân <ArrowUpRight size={16} />
-                        </Link>
-                    </div>
+                    )}
                     {notice && !detailKey && (
                         <p className="v2-gift-notice" role="status">
                             {notice}
@@ -341,7 +351,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
                             <p>Mở từng mục để xem quà theo loại.</p>
                         </div>
                         <div className="v2-gift-controls">
-                            {manager && (
+                            {(manager || readOnly) && (
                                 <select
                                     aria-label="Trạng thái quà"
                                     value={statusFilter}
@@ -433,8 +443,12 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
                                         )}
                                         <div className="v2-cover-gifts-grid">
                                             {section.items.map((reward) => {
-                                                const activeRules = manager ? readAutoGiftRules(clubId, reward.key).filter((rule) => rule.enabled) : [];
-                                                const owned = inventory.owned.includes(reward.key);
+                                                const activeRules = manager
+                                                    ? readAutoGiftRules(clubId, reward.key).filter(
+                                                          (rule) => rule.enabled,
+                                                      )
+                                                    : [];
+                                                const owned = !readOnly && inventory.owned.includes(reward.key);
                                                 const physical = reward.kind === 'physical';
                                                 const categoryLabel = categories.find(
                                                     (item) => item.id === categoryOf(reward),
@@ -446,7 +460,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
                                                     >
                                                         <div className="v2-gift-preview">
                                                             <GiftPreview reward={reward} />
-                                                            {manager && (
+                                                            {(manager || readOnly) && (
                                                                 <span
                                                                     className={`v2-event-status v2-gift-status is-${reward.status === 'published' ? 'live' : reward.status === 'scheduled' ? 'upcoming' : 'completed'}`}
                                                                 >
@@ -546,6 +560,7 @@ export default function GiftsTab({ workspace, manager = false, dashboard }) {
                                                                     )}
                                                                 </strong>
                                                                 <GiftClaimButton
+                                                                    readOnly={readOnly}
                                                                     reward={reward}
                                                                     owned={owned}
                                                                     balance={balance}

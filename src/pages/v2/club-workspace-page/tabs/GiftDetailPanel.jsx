@@ -16,6 +16,7 @@ export default function GiftDetailPanel({
     onClose,
     notice,
     error,
+    readOnly = false,
 }) {
     return (
         <V2Modal
@@ -29,6 +30,7 @@ export default function GiftDetailPanel({
                         {reward.cost === 0 ? 'Miễn phí' : `${reward.cost.toLocaleString('vi-VN')} điểm mẫu`}
                     </strong>
                     <GiftClaimButton
+                        readOnly={readOnly}
                         reward={reward}
                         owned={owned}
                         balance={balance}
@@ -57,11 +59,13 @@ export default function GiftDetailPanel({
             <section className="v2-gift-detail-info">
                 <h4>Thông tin đổi quà</h4>
                 {reward.clubName && <p>CLB: {reward.clubName}</p>}
-                <p>
-                    {reward.cost === 0
-                        ? 'Nhận miễn phí, không trừ điểm.'
-                        : `Số dư của bạn: ${balance.toLocaleString('vi-VN')} điểm mẫu.`}
-                </p>
+                {!readOnly && (
+                    <p>
+                        {reward.cost === 0
+                            ? 'Nhận miễn phí, không trừ điểm.'
+                            : `Số dư của bạn: ${balance.toLocaleString('vi-VN')} điểm mẫu.`}
+                    </p>
+                )}
                 {reward.kind === 'physical' ? (
                     <>
                         <p>Số lượng: {reward.stock} · Mẫu</p>

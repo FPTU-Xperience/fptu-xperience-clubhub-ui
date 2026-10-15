@@ -1,6 +1,6 @@
-export default function WorkspaceTabLayout({ title, description, action, records = [], preview = false, children }) {
+export default function WorkspaceTabLayout({ title, description, action, records = [], preview = false, className = '', children }) {
     return (
-        <section className="v2-workspace-section">
+        <section className={`v2-workspace-section${className ? ` ${className}` : ''}`}>
             <header>
                 <div>
                     <span className="v2-eyebrow">KHÔNG GIAN CLB{preview ? ' · DỮ LIỆU MINH HỌA' : ''}</span>

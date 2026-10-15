@@ -4,10 +4,12 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Pill } from '../../../components/v2/DiscoveryLayout';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import PageState from '../../../components/v2/PageState';
-import { canJoinClub, useClubDetail } from '../discover-data';
+import { useClubDetail } from '../discover-data';
 import { useProfile } from '../profile-data';
 import { isPendingClubInvitation } from '../../../services/club-invitations';
 import ClubProfileHeader from '../../../components/v2/club-detail/ClubProfileHeader';
+import { isAffairsViewer } from '../affairs-access';
+import ClubHeaderActions from '../../../components/v2/club-detail/ClubHeaderActions';
 import './ClubDetailPage.scss';
 
 const joinProfile = (viewer, profileSnapshot) => ({
@@ -32,6 +34,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     const result = useClubDetail(api, clubCode, viewerAccess, sessionKey);
     const profileResult = useProfile(viewer, sessionKey, api);
     const club = result.data;
+    const affairs = isAffairsViewer(viewer);
     const [joinOpen, setJoinOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
     const [form, setForm] = useState(() => joinProfile(viewer));
@@ -44,7 +47,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     useEffect(() => {
         let active = true;
         setInvitation(null);
-        if (!invitationId || !club?.id) return undefined;
+        if (affairs || !invitationId || !club?.id) return undefined;
         api.getMyMemberships()
             .then((memberships) => {
                 const match = (Array.isArray(memberships) ? memberships : memberships?.items || []).find(
@@ -61,7 +64,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
         return () => {
             active = false;
         };
-    }, [api, club?.id, invitationId, sessionKey]);
+    }, [api, club?.id, invitationId, sessionKey, affairs]);
     const acceptingInvitation =
         invitation && String(invitation.id) === invitationId && invitation.clubId === String(club?.id);
     const updateForm = (event) => {
@@ -84,7 +87,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     const submitJoin = async (event) => {
         event.preventDefault();
         const clubId = Number(club?.id);
-        if (!Number.isSafeInteger(clubId) || clubId <= 0 || submitting) return;
+        if (affairs || !Number.isSafeInteger(clubId) || clubId <= 0 || submitting) return;
         if (!form.fullName || !form.dateOfBirth || !form.email || !form.phoneNumber) {
             setJoinError('Hãy cập nhật ngày sinh và số điện thoại trong Hồ sơ cá nhân trước khi gửi hồ sơ.');
             return;
@@ -126,20 +129,14 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                 {club && (
                     <>
                         <ClubProfileHeader club={club}>
-                            {['MEMBER', 'MANAGER'].includes(club.viewerRelationship) ? (
-                                <Link
-                                    className="v2-button"
-                                    to={`/v2/my-clubs/${encodeURIComponent(club.code || clubCode)}`}
-                                >
-                                    Đến không gian CLB
-                                </Link>
-                            ) : joined ? (
-                                <p role="status">Hồ sơ đã được gửi, CLB sẽ phản hồi sớm.</p>
-                            ) : acceptingInvitation || canJoinClub(club) ? (
-                                <button className="v2-button v2-button--primary" type="button" onClick={openJoin}>
-                                    {acceptingInvitation ? 'Chấp nhận lời mời' : 'Nộp hồ sơ gia nhập'}
-                                </button>
-                            ) : null}
+                            <ClubHeaderActions
+                                club={club}
+                                clubCode={clubCode}
+                                viewer={viewer}
+                                joined={joined}
+                                acceptingInvitation={acceptingInvitation}
+                                onJoin={openJoin}
+                            />
                         </ClubProfileHeader>
                         <div className="v2-detail-columns">
                             <div>

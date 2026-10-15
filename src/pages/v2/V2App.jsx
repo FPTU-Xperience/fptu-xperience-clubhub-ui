@@ -22,6 +22,8 @@ import ProfilePage from './profile-page/ProfilePage';
 import { usePersonalMedia } from '../../components/media/PersonalMediaContext';
 import { EntityMediaProvider } from '../../components/media/EntityMediaContext';
 import V2Access from './V2Access';
+import AffairsPage, { AffairsAccess } from './affairs-page/AffairsPage';
+import AffairsClubWorkspace from './affairs-page/AffairsClubWorkspace';
 import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import './V2App.scss';
 import { PinnedClubsProvider } from './pinned-clubs';
@@ -43,12 +45,13 @@ function AuthenticatedV2App() {
         );
     }
 
-    const workspace = location.pathname.startsWith('/v2/my-clubs/');
+    const workspace = location.pathname.startsWith('/v2/my-clubs/') || /^\/v2\/ctsv\/clubs\/[^/]+\/workspace(?:\/|$)/.test(location.pathname);
+    const directory = ['/v2/clubs', '/v2/activities'].includes(location.pathname.replace(/\/$/, ''));
 
     return (
         <EntityMediaProvider api={api}>
         <PinnedClubsProvider key={sessionKey} api={api} accountKey={sessionKey}>
-            <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}`}>
+            <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}${directory ? ' v2-app--directory' : ''}`}>
                 <a className="v2-skip-link" href="#v2-main">
                     Đến nội dung chính
                 </a>
@@ -57,6 +60,15 @@ function AuthenticatedV2App() {
                 )}
                 <main id="v2-main" className="v2-main">
                     <Routes>
+                        <Route path="ctsv" element={<AffairsAccess user={user} />}>
+                            <Route index element={<Navigate to="/v2/clubs" replace />} />
+                            <Route path="clubs" element={<Navigate to="/v2/clubs" replace />} />
+                            <Route path="clubs/:clubCode/workspace/*" element={<AffairsClubWorkspace api={api} sessionKey={sessionKey} viewer={user} />} />
+                            <Route path="activities" element={<AffairsPage section="activities" />} />
+                            <Route path="rewards" element={<AffairsPage section="rewards" />} />
+                            <Route path="admin" element={<AffairsPage section="admin" />} />
+                            <Route path="*" element={<Navigate to="/v2/clubs" replace />} />
+                        </Route>
                         <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
                         <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
                         <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />

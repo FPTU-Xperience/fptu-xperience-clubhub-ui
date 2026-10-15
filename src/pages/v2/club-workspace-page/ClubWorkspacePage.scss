@@ -30,6 +30,7 @@
 
 .v2-workspace-bar {
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
@@ -38,12 +39,34 @@
     border-bottom: 1px solid #dfe7f1;
     color: #577093;
     font-size: 13px;
+    overflow-x: auto;
 }
 
 .v2-workspace-bar>div {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+
+    > svg { flex-shrink: 0; }
+}
+
+.v2-workspace-bar > div:first-child {
+    flex: 1;
+    min-width: 180px;
+
+    > span,
+    > strong {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    > span:first-child,
+    > strong { flex-shrink: 0; }
+
+    .v2-workspace-breadcrumb-club { min-width: 0; }
 }
 
 .v2-workspace-bar strong {
@@ -52,6 +75,7 @@
 
 .v2-workspace-bar>div:last-child {
     gap: 22px;
+    flex-shrink: 0;
 }
 
 .v2-workspace-role {
@@ -952,4 +976,49 @@
 
 .v2-workspace-finance-transactions {
     margin-top: 20px;
+}
+@media (max-width: 768px) {
+    .v2-production-workspace {
+        grid-template-columns: minmax(0, 1fr);
+
+        .v2-workspace-left-rail {
+            position: relative;
+            width: 100%;
+            height: auto;
+            padding: 16px;
+            border-right: 0;
+            border-bottom: 1px solid var(--v2-line, #e2e8f0);
+        }
+        .v2-workspace-left-rail-nav {
+            display: grid;
+            grid-template-columns: repeat(var(--workspace-nav-visible-count, 4), minmax(0, max-content)) 40px;
+            position: relative;
+            overflow: visible;
+            padding: 4px;
+            margin: 0;
+        }
+        .v2-workspace-left-rail-nav a {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .v2-workspace-bar {
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+        }
+        .v2-workspace-bar > div {
+            min-width: 0;
+            max-width: 100%;
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-wrap: anywhere;
+        }
+        .v2-workspace-bar > div:last-child {
+            gap: 12px;
+        }
+        .v2-workspace-content {
+            padding: 24px 16px 40px;
+        }
+    }
 }

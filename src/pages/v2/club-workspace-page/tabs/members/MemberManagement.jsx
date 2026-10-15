@@ -16,7 +16,7 @@ const dateLabel = (value) => (value ? new Date(value).toLocaleDateString('vi-VN'
 const statusLabel = { Approved: 'Đã duyệt', Pending: 'Chờ duyệt', Rejected: 'Đã từ chối' };
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 
-export default function MemberManagement({ clubId, dashboard }) {
+export default function MemberManagement({ clubId, dashboard, readOnly = false }) {
     const { api, user } = useAuth();
     const { semester } = useWorkspaceSemester();
     useEffect(() => {
@@ -99,7 +99,7 @@ export default function MemberManagement({ clubId, dashboard }) {
         setError('');
     };
     const openDialog = (kind, member, extra = {}) => {
-        if (lock.current) return;
+        if (readOnly || lock.current) return;
         setError('');
         setNotice('');
         setNote('');
@@ -126,7 +126,7 @@ export default function MemberManagement({ clubId, dashboard }) {
         }
     };
     const mutate = async (operation, message) => {
-        if (lock.current) return;
+        if (readOnly || lock.current) return;
         lock.current = true;
         setBusy(true);
         setError('');
@@ -146,6 +146,7 @@ export default function MemberManagement({ clubId, dashboard }) {
     };
     const submit = (event) => {
         event.preventDefault();
+        if (readOnly) return;
         const member = dialog.member;
         if (dialog.kind === 'delete') {
             mutate(() => api.deleteClubMember(clubId, member.id), 'Đã xóa thành viên khỏi CLB.');
@@ -171,24 +172,30 @@ export default function MemberManagement({ clubId, dashboard }) {
     return (
         <WorkspaceTabLayout
             title="Thành viên CLB"
-            description="Quản lý thành viên và xử lý đơn tham gia ngay trong không gian CLB."
+            description={
+                readOnly
+                    ? 'Xem thành viên và hồ sơ tham gia CLB. Chế độ chỉ xem.'
+                    : 'Quản lý thành viên và xử lý đơn tham gia ngay trong không gian CLB.'
+            }
             action={
                 <div className="v2-member-header-actions">
                     <ClubRolesInfo disabled={busy} />
-                    <button
-                        type="button"
-                        className="v2-button v2-button--primary"
-                        disabled={busy}
-                        onClick={() => setInviteOpen(true)}
-                    >
-                        + Thêm thành viên
-                    </button>
+                    {!readOnly && (
+                        <button
+                            type="button"
+                            className="v2-button v2-button--primary"
+                            disabled={busy}
+                            onClick={() => setInviteOpen(true)}
+                        >
+                            + Thêm thành viên
+                        </button>
+                    )}
                 </div>
             }
         >
             {() => (
                 <div className="v2-member-management">
-                    {inviteOpen && (
+                    {!readOnly && inviteOpen && (
                         <InviteMemberModal
                             api={api}
                             clubId={clubId}
@@ -209,7 +216,7 @@ export default function MemberManagement({ clubId, dashboard }) {
                         >
                             Quản lý thành viên
                         </button>
-                        {import.meta.env.DEV && (
+                        {!readOnly && import.meta.env.DEV && (
                             <button
                                 type="button"
                                 className="v2-button"
@@ -228,7 +235,7 @@ export default function MemberManagement({ clubId, dashboard }) {
                             Quản lý đơn <CountBadge count={pending?.length} label="đơn chờ duyệt" />
                         </button>
                     </div>
-                    {tab === 'governance' && import.meta.env.DEV && user?.id && (
+                    {!readOnly && tab === 'governance' && import.meta.env.DEV && user?.id && (
                         <ClubGovernancePreview
                             key={`${user.id}:${clubId}:${semester?.id}`}
                             actorId={user.id}
@@ -333,7 +340,7 @@ export default function MemberManagement({ clubId, dashboard }) {
                                                                     >
                                                                         Hồ sơ
                                                                     </button>
-                                                                    {member.role !== 'CLUB_OWNER' && (
+                                                                    {!readOnly && member.role !== 'CLUB_OWNER' && (
                                                                         <button
                                                                             type="button"
                                                                             className="v2-button"
@@ -404,26 +411,30 @@ export default function MemberManagement({ clubId, dashboard }) {
                                                 >
                                                     Xem đơn
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="v2-button v2-button--primary"
-                                                    disabled={
-                                                        busy ||
-                                                        !member.acceptedClubRules ||
-                                                        !member.committedToParticipate
-                                                    }
-                                                    onClick={() => openDialog('approve', member)}
-                                                >
-                                                    Duyệt
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="v2-button"
-                                                    disabled={busy}
-                                                    onClick={() => openDialog('reject', member)}
-                                                >
-                                                    Từ chối
-                                                </button>
+                                                {!readOnly && (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            className="v2-button v2-button--primary"
+                                                            disabled={
+                                                                busy ||
+                                                                !member.acceptedClubRules ||
+                                                                !member.committedToParticipate
+                                                            }
+                                                            onClick={() => openDialog('approve', member)}
+                                                        >
+                                                            Duyệt
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="v2-button"
+                                                            disabled={busy}
+                                                            onClick={() => openDialog('reject', member)}
+                                                        >
+                                                            Từ chối
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                             {(!member.acceptedClubRules || !member.committedToParticipate) && (
                                                 <p>Chờ người đăng ký xác nhận nội quy và cam kết tham gia.</p>
@@ -433,7 +444,7 @@ export default function MemberManagement({ clubId, dashboard }) {
                                 </section>
                             )
                         ))}
-                    {dialog && (
+                    {dialog && (!readOnly || dialog.kind === 'detail') && (
                         <div className="v2-member-dialog">
                             <V2Modal title={titles[dialog.kind]} onClose={closeDialog} wide={dialog.kind === 'detail'}>
                                 {dialog.kind === 'detail' ? (

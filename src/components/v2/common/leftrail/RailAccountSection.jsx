@@ -81,21 +81,6 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
     return (
         <>
             <div className="v2-left-rail-bottom">
-                <button
-                    className="v2-left-rail-notification-button"
-                    type="button"
-                    aria-label="Mở thông báo"
-                    aria-expanded={notifications.isOpen}
-                    aria-controls="v2-rail-notification-popover"
-                    onClick={notifications.isOpen ? notifications.close : notifications.open}
-                >
-                    <Bell size={18} aria-hidden="true" /> Thông báo
-                    {notifications.unreadCount > 0 && (
-                        <span aria-label={`${notifications.unreadCount} thông báo chưa đọc`}>
-                            {notifications.unreadCount}
-                        </span>
-                    )}
-                </button>
                 <div className="v2-left-rail-account-menu" ref={accountMenuRef}>
                     <div className="v2-left-rail-account">
                         <Link
@@ -115,12 +100,35 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
                             </span>
                         </Link>
                         <button
+                            className="v2-left-rail-notification-button"
+                            type="button"
+                            aria-label="Mở thông báo"
+                            title="Thông báo"
+                            aria-expanded={notifications.isOpen}
+                            aria-controls="v2-rail-notification-popover"
+                            onClick={() => {
+                                setIsAccountMenuOpen(false);
+                                if (notifications.isOpen) notifications.close();
+                                else notifications.open();
+                            }}
+                        >
+                            <Bell size={18} aria-hidden="true" />
+                            {notifications.unreadCount > 0 && (
+                                <span aria-label={`${notifications.unreadCount} thông báo chưa đọc`}>
+                                    {notifications.unreadCount}
+                                </span>
+                            )}
+                        </button>
+                        <button
                             className="v2-left-rail-account-trigger"
                             type="button"
                             aria-label="Mở menu tài khoản"
                             aria-expanded={isAccountMenuOpen}
                             aria-controls="v2-rail-account-menu"
-                            onClick={() => setIsAccountMenuOpen((open) => !open)}
+                            onClick={() => {
+                                notifications.close();
+                                setIsAccountMenuOpen((open) => !open);
+                            }}
                         >
                             <ChevronDown size={15} aria-hidden="true" />
                         </button>

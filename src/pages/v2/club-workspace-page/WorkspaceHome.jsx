@@ -31,7 +31,7 @@ function ResourceState({ loading, unavailable, onRetry, children }) {
     );
 }
 
-export default function WorkspaceHome({ workspace, manager, base, viewer, dashboard }) {
+export default function WorkspaceHome({ workspace, manager, base, viewer, dashboard, observation = false }) {
     const navigate = useNavigate();
     const summary = dashboard.data;
     const loading = dashboard.status === 'loading';
@@ -52,9 +52,11 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                     <h1>Trang chủ</h1>
                     <p>
                         Chào {name}.{' '}
-                        {manager
-                            ? 'Theo dõi lịch CLB và những việc cần xử lý.'
-                            : 'Xem lịch sắp tới và tham gia hoạt động cùng CLB.'}
+                        {observation
+                            ? 'Quan sát lịch hoạt động và thông tin công khai của CLB.'
+                            : manager
+                              ? 'Theo dõi lịch CLB và những việc cần xử lý.'
+                              : 'Xem lịch sắp tới và tham gia hoạt động cùng CLB.'}
                     </p>
                 </div>
                 <Link className="workspace-home__primary" to={`${base}/${manager ? 'club-page' : 'activities'}`}>
@@ -110,7 +112,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
 
                 <aside
                     className="workspace-home__aside"
-                    aria-label={manager ? 'Công việc quản lý CLB' : 'Tham gia CLB'}
+                    aria-label={observation ? 'Thông tin CLB' : manager ? 'Công việc quản lý CLB' : 'Tham gia CLB'}
                 >
                     {manager && (
                         <section className="workspace-home__inbox" aria-labelledby="workspace-inbox-title">
@@ -157,16 +159,20 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                     )}
 
                     <section className="workspace-home__shortcuts" aria-labelledby="workspace-shortcuts-title">
-                        <h2 id="workspace-shortcuts-title">{manager ? 'Không gian làm việc' : 'Dấu ấn của bạn'}</h2>
-                        {(manager
-                            ? [
-                                  ['reports', 'Báo cáo', 'Theo dõi và cập nhật báo cáo CLB'],
-                                  ['finance', 'Tài chính', 'Theo dõi thu chi của CLB'],
-                              ]
-                            : [
-                                  ['quests', 'Nhiệm vụ & đóng góp', 'Tìm việc để tham gia cùng CLB'],
-                                  ['points', 'Điểm & thành tích', 'Theo dõi đóng góp của bạn'],
-                              ]
+                        <h2 id="workspace-shortcuts-title">
+                            {observation ? 'Thông tin CLB' : manager ? 'Không gian làm việc' : 'Dấu ấn của bạn'}
+                        </h2>
+                        {(!observation
+                            ? manager
+                                ? [
+                                      ['reports', 'Báo cáo', 'Theo dõi và cập nhật báo cáo CLB'],
+                                      ['finance', 'Tài chính', 'Theo dõi thu chi của CLB'],
+                                  ]
+                                : [
+                                      ['quests', 'Nhiệm vụ & đóng góp', 'Tìm việc để tham gia cùng CLB'],
+                                      ['points', 'Điểm & thành tích', 'Theo dõi đóng góp của bạn'],
+                                  ]
+                            : []
                         ).map(([path, title, copy]) => (
                             <Link key={path} to={`${base}/${path}`}>
                                 <div>

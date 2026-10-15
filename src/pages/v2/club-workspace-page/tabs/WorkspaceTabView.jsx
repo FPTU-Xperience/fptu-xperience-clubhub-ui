@@ -19,8 +19,16 @@ const views = {
     'Trang CLB': ClubPageTab,
 };
 
-export default function WorkspaceTabView({ label, manager, dashboard, workspace }) {
+export default function WorkspaceTabView({ label, manager, dashboard, workspace, readOnly = false }) {
     const { semester } = useWorkspaceSemester();
     const View = views[label];
-    return View ? <View manager={manager} dashboard={dashboard} workspace={{ ...workspace, semester }} /> : null;
+    if (readOnly && label === 'Trang CLB') return null;
+    return View ? (
+        <View
+            manager={manager && !readOnly}
+            readOnly={readOnly}
+            dashboard={dashboard}
+            workspace={{ ...workspace, semester }}
+        />
+    ) : null;
 }

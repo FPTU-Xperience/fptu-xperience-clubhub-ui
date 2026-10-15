@@ -37,7 +37,8 @@ test('production workspace stays V2-local and does not consume demo state', () =
     assert.match(activities, /V2Modal/);
     assert.match(members, /v2-preview-members/);
     assert.match(members, /approvedMembers/);
-    assert.match(members, /if \(manager\) return <MemberManagement/);
+    assert.match(members, /if \(manager \|\| readOnly\)\s+return <MemberManagement/);
+    assert.match(members, /readOnly={readOnly}/);
     assert.doesNotMatch(members, /react-router-dom|to=|\/clubs\//);
     const management = readFileSync(new URL('./club-workspace-page/tabs/members/MemberManagement.jsx', import.meta.url), 'utf8');
     assert.match(management, /api\.getClubMembers/);

@@ -1,5 +1,6 @@
 import { giftClaimState } from '../../profile-page/gift-presentation';
-export default function GiftClaimButton({ reward, owned, balance, user, clubId, onClaim }) {
+export default function GiftClaimButton({ reward, owned, balance, user, clubId, onClaim, readOnly = false }) {
+    if (readOnly) return null;
     const state = giftClaimState(reward, { owned, balance, authenticated: !!user, clubId });
     return (
         <button

@@ -5,6 +5,7 @@ import {
     Award,
     CalendarDays,
     Check,
+    ChevronDown,
     FileText,
     Flag,
     Gift,
@@ -20,6 +21,7 @@ import { useEntityMedia } from '../../../components/media/EntityMediaContext';
 import { useAuth } from '../../../context/AuthContext';
 import { usePersonalMedia } from '../../../components/media/PersonalMediaContext';
 import RailAccountSection from '../../../components/v2/common/leftrail/RailAccountSection';
+import useRailDropdown from '../../../components/v2/common/leftrail/useRailDropdown';
 
 export const workspaceSections = [
     ['', 'Trang chủ', Home],
@@ -33,8 +35,10 @@ export const workspaceSections = [
     ['club-page', 'Trang CLB', Home, 'manager'],
 ];
 
-export function getWorkspaceSections(manager) {
-    return workspaceSections.filter((section) => !section[3] || manager);
+export function getWorkspaceSections(manager, observation = false) {
+    return workspaceSections.filter((section) =>
+        observation ? section[0] !== 'club-page' : !section[3] || manager,
+    );
 }
 
 function ClubIdentity({ club: input }) {
@@ -53,17 +57,36 @@ function ClubIdentity({ club: input }) {
             <span className="v2-workspace-club-copy">
                 <strong title={club.name}>{club.name}</strong>
                 <small>
-                    {clubMemberRoleLabel(club.displayRole || (club.role === 'MANAGER' ? 'CLUB_OWNER' : 'MEMBER'))}
+                    {club.role === 'OBSERVER'
+                        ? 'CTSV · Chỉ xem'
+                        : clubMemberRoleLabel(club.displayRole || (club.role === 'MANAGER' ? 'CLUB_OWNER' : 'MEMBER'))}
                 </small>
             </span>
         </>
     );
 }
 
-export default function WorkspaceLeftRail({ workspace, selections = [], base, manager, onClubChange }) {
+export default function WorkspaceLeftRail({
+    workspace,
+    selections = [],
+    base,
+    manager,
+    onClubChange,
+    observation = false,
+}) {
     const { user, api, logout } = useAuth();
     const media = usePersonalMedia();
-    const availableSections = getWorkspaceSections(manager);
+    const availableSections = getWorkspaceSections(manager, observation);
+    const [visibleSectionCount, setVisibleSectionCount] = useState(4);
+    useEffect(() => {
+        const compact = window.matchMedia('(max-width: 480px)');
+        const update = () => setVisibleSectionCount(compact.matches ? 2 : 4);
+        update();
+        compact.addEventListener('change', update);
+        return () => compact.removeEventListener('change', update);
+    }, []);
+    const overflowMenu = useRailDropdown();
+    const overflowId = useId();
     const [switchOpen, setSwitchOpen] = useState(false);
     const switchRef = useRef(null);
     const triggerRef = useRef(null);
@@ -96,9 +119,53 @@ export default function WorkspaceLeftRail({ workspace, selections = [], base, ma
                     <small>YOUR CAMPUS, YOUR COMMUNITY</small>
                 </span>
             </Link>
-            <Link className="v2-workspace-left-rail-back" to="/v2/my-clubs">
-                <ArrowLeft size={16} /> CLB của tôi
-            </Link>
+            <nav className="v2-workspace-left-rail-nav" aria-label="Menu CLB" style={{ '--workspace-nav-visible-count': visibleSectionCount }}>
+                {availableSections.slice(0, visibleSectionCount).map(([path, label, Icon]) => (
+                    <NavLink key={path || 'home'} end={!path} to={path ? `${base}/${path}` : base} title={label}>
+                        <Icon size={18} aria-hidden="true" />
+                        <span>{label}</span>
+                        {path === 'activities' && (
+                            <CountBadge count={workspace.ongoingActivityCount} label="hoạt động sắp và đang diễn ra" />
+                        )}
+                        {path === 'members' && manager && (
+                            <CountBadge count={workspace.pendingApplications} label="đơn chờ duyệt" />
+                        )}
+                    </NavLink>
+                ))}
+                <div className="v2-workspace-nav-overflow" ref={overflowMenu.containerRef} onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) overflowMenu.setOpen(false);
+                }}>
+                    <button
+                        type="button"
+                        className="v2-workspace-nav-more"
+                        ref={overflowMenu.triggerRef}
+                        aria-label="Các mục khác trong CLB"
+                        aria-expanded={overflowMenu.open}
+                        aria-controls={overflowId}
+                        onClick={() => overflowMenu.setOpen((open) => !open)}
+                    >
+                        <ChevronDown size={18} aria-hidden="true" />
+                    </button>
+                    <div id={overflowId} className={`v2-workspace-nav-overflow-items${overflowMenu.open ? ' is-open' : ''}`}>
+                        {availableSections.slice(visibleSectionCount).map(([path, label, Icon]) => (
+                            <NavLink key={path} to={`${base}/${path}`} onClick={() => overflowMenu.setOpen(false)}>
+                                <Icon size={18} aria-hidden="true" />
+                                <span>{label}</span>
+                                {path === 'members' && manager && (
+                                    <CountBadge count={workspace.pendingApplications} label="đơn chờ duyệt" />
+                                )}
+                            </NavLink>
+                        ))}
+                    </div>
+                </div>
+            </nav>
+            <RailAccountSection
+                user={user}
+                profile={media?.profileResult.data?.profile}
+                avatarUrl={media?.profileImages.images.avatar}
+                onLogout={logout}
+                api={api}
+            />
             <div
                 className="v2-workspace-club-switcher"
                 ref={switchRef}
@@ -108,18 +175,28 @@ export default function WorkspaceLeftRail({ workspace, selections = [], base, ma
             >
                 <div className="v2-workspace-left-rail-club">
                     <ClubIdentity club={workspace} />
-                    <button
-                        type="button"
-                        className="v2-workspace-club-switch-trigger"
-                        ref={triggerRef}
-                        aria-label="Chuyển câu lạc bộ"
-                        title="Chuyển câu lạc bộ"
-                        aria-expanded={switchOpen}
-                        aria-controls={switchOpen ? listId : undefined}
-                        onClick={() => setSwitchOpen((open) => !open)}
+                    {!observation && (
+                        <button
+                            type="button"
+                            className="v2-workspace-club-switch-trigger"
+                            ref={triggerRef}
+                            aria-label="Chuyển câu lạc bộ"
+                            title="Chuyển câu lạc bộ"
+                            aria-expanded={switchOpen}
+                            aria-controls={switchOpen ? listId : undefined}
+                            onClick={() => setSwitchOpen((open) => !open)}
+                        >
+                            <ArrowRightLeft size={17} aria-hidden="true" />
+                        </button>
+                    )}
+                    <Link
+                        className="v2-workspace-left-rail-back"
+                        to={observation ? '/v2/clubs' : '/v2/my-clubs'}
+                        title={observation ? 'Tất cả câu lạc bộ' : 'CLB của tôi'}
+                        aria-label={observation ? 'Tất cả câu lạc bộ' : 'CLB của tôi'}
                     >
-                        <ArrowRightLeft size={17} aria-hidden="true" />
-                    </button>
+                        <ArrowLeft size={17} aria-hidden="true" />
+                    </Link>
                 </div>
                 {switchOpen && (
                     <div className="v2-workspace-club-dropdown" id={listId}>
@@ -145,27 +222,6 @@ export default function WorkspaceLeftRail({ workspace, selections = [], base, ma
                     </div>
                 )}
             </div>
-            <nav className="v2-workspace-left-rail-nav" aria-label="Menu CLB">
-                {availableSections.map(([path, label, Icon]) => (
-                    <NavLink key={path || 'home'} end={!path} to={path ? `${base}/${path}` : base}>
-                        <Icon size={18} aria-hidden="true" />
-                        <span>{label}</span>
-                        {path === 'activities' && (
-                            <CountBadge count={workspace.ongoingActivityCount} label="hoạt động sắp và đang diễn ra" />
-                        )}
-                        {path === 'members' && manager && (
-                            <CountBadge count={workspace.pendingApplications} label="đơn chờ duyệt" />
-                        )}
-                    </NavLink>
-                ))}
-            </nav>
-            <RailAccountSection
-                user={user}
-                profile={media?.profileResult.data?.profile}
-                avatarUrl={media?.profileImages.images.avatar}
-                onLogout={logout}
-                api={api}
-            />
         </aside>
     );
 }

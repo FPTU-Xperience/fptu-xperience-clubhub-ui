@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import StudentOnboarding from '../../components/v2/student-onboarding/StudentOnboarding';
 import { useAuth } from '../../context/AuthContext';
 import { readOnboarding } from './onboarding';
+import { isAffairsViewer } from './affairs-access';
 
 import './V2Access.scss';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const ADMIN_ROLES = new Set(['ADMIN', 'SYSTEM_ADMIN', 'STUDENT_AFFAIRS_ADMIN']);
 
 function LoadingScreen() {
     return (
@@ -189,15 +189,15 @@ function V2Login() {
 export default function V2Access({ children }) {
     const { user, isAuthenticated, loading } = useAuth();
     const [preferences, setPreferences] = useState(undefined);
-    const needsOnboarding = !user?.roles?.some((role) => ADMIN_ROLES.has(role));
+    const needsOnboarding = !isAffairsViewer(user);
 
     useEffect(() => {
-        setPreferences(isAuthenticated ? readOnboarding(user) : null);
-    }, [isAuthenticated, user]);
+        setPreferences(isAuthenticated && needsOnboarding ? readOnboarding(user) : null);
+    }, [isAuthenticated, user, needsOnboarding]);
 
     if (loading) return <LoadingScreen />;
     if (!isAuthenticated) return <V2Login />;
-    if (preferences === undefined) return <LoadingScreen />;
+    if (needsOnboarding && preferences === undefined) return <LoadingScreen />;
     if (needsOnboarding && !preferences) return <StudentOnboarding key={user?.id || user?.email} user={user} onComplete={setPreferences} />;
     return children;
 }

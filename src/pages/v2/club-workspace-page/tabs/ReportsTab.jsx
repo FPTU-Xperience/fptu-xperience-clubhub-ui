@@ -1,53 +1,121 @@
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { workspaceSemesterQuery, workspaceSemesterKey } from '../workspace-semester-data';
-import { useCallback } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import useWorkspaceResource from './useWorkspaceResource';
+const ReportsReadOnlyDialog = lazy(() => import('./ReportsReadOnlyDialog'));
 
-const statusLabel = (status) => ({
-    Draft: 'Bản nháp', Submitted: 'Đã nộp', 'Awaiting Finance': 'Chờ tài chính',
-    'Under Review': 'Đang duyệt', Approved: 'Đã duyệt', Rejected: 'Cần chỉnh sửa',
-})[status] || status;
+const statusLabel = (status) =>
+    ({
+        Draft: 'Bản nháp',
+        Submitted: 'Đã nộp',
+        'Awaiting Finance': 'Chờ tài chính',
+        'Under Review': 'Đang duyệt',
+        Approved: 'Đã duyệt',
+        Rejected: 'Cần chỉnh sửa',
+    })[status] || status;
 
-export default function ReportsTab({ workspace }) {
+export default function ReportsTab({ workspace, readOnly = false }) {
+    const [selectedReport, setSelectedReport] = useState(null);
     const clubId = workspace?.clubId;
     const { api } = useAuth();
     const { semester } = useWorkspaceSemester();
-    const load = useCallback((id) => api.getReports({ ...workspaceSemesterQuery(semester, 'reports'), clubId: id, page: 1, pageSize: 100 }), [api, semester]);
+    const load = useCallback(
+        (id) => api.getReports({ ...workspaceSemesterQuery(semester, 'reports'), clubId: id, page: 1, pageSize: 100 }),
+        [api, semester],
+    );
     const result = useWorkspaceResource(clubId, load, workspaceSemesterKey(semester));
     const reports = result.data?.items || [];
     return (
         <WorkspaceTabLayout
             title="Báo cáo"
-            description={semester?.reportPeriod ? `Báo cáo trong ${semester.label}.` : 'Báo cáo toàn CLB theo quyền truy cập.'}
-            action={<Link className="v2-button v2-button--primary" to="/reports/create">Tạo báo cáo</Link>}
+            description={
+                semester?.reportPeriod ? `Báo cáo trong ${semester.label}.` : 'Báo cáo toàn CLB theo quyền truy cập.'
+            }
+            action={
+                !readOnly && (
+                    <Link className="v2-button v2-button--primary" to="/reports/create">
+                        Tạo báo cáo
+                    </Link>
+                )
+            }
             records={reports}
         >
             {(records) => (
                 <>
-                    {result.status === 'loading' && <p className="v2-workspace-data-note" role="status">Đang tải báo cáo…</p>}
-                    {result.status !== 'loading' && result.status !== 'ready' && <p className="v2-workspace-data-note" role="alert">Không tải được báo cáo. <button type="button" onClick={result.retry}>Thử lại</button></p>}
-                    {result.status === 'ready' && records.length === 0 && <p className="v2-workspace-data-note">CLB chưa có báo cáo nào bạn có thể xem.</p>}
+                    {result.status === 'loading' && (
+                        <p className="v2-workspace-data-note" role="status">
+                            Đang tải báo cáo…
+                        </p>
+                    )}
+                    {result.status !== 'loading' && result.status !== 'ready' && (
+                        <p className="v2-workspace-data-note" role="alert">
+                            Không tải được báo cáo.{' '}
+                            <button type="button" onClick={result.retry}>
+                                Thử lại
+                            </button>
+                        </p>
+                    )}
+                    {result.status === 'ready' && records.length === 0 && (
+                        <p className="v2-workspace-data-note">CLB chưa có báo cáo nào bạn có thể xem.</p>
+                    )}
                     {records.length > 0 && (
                         <section className="v2-preview-operation">
-                            <header><span>BÁO CÁO</span><span>TRẠNG THÁI</span><span>HẠN NỘP</span></header>
+                            <header>
+                                <span>BÁO CÁO</span>
+                                <span>TRẠNG THÁI</span>
+                                <span>HẠN NỘP</span>
+                            </header>
                             {records.map((report) => (
                                 <article key={report.id}>
                                     <div>
                                         <strong>{report.tag || report.period || `Báo cáo #${report.id}`}</strong>
-                                        <small>{report.period} · {report.reportType}</small>
+                                        <small>
+                                            {report.period} · {report.reportType}
+                                        </small>
                                     </div>
                                     <span>{statusLabel(report.status)}</span>
-                                    <em>{report.dueDate ? new Date(report.dueDate).toLocaleDateString('vi-VN') : '—'}</em>
-                                    <Link to={`/reports/${report.id}`} aria-label={`Xem báo cáo ${report.id}`}><ArrowUpRight size={18} /></Link>
+                                    <em>
+                                        {report.dueDate ? new Date(report.dueDate).toLocaleDateString('vi-VN') : '—'}
+                                    </em>
+                                    {readOnly ? (
+                                        <button
+                                            type="button"
+                                            className="v2-button"
+                                            onClick={() => setSelectedReport(report.id)}
+                                            aria-label={`Xem báo cáo ${report.id}`}
+                                        >
+                                            <ArrowUpRight size={18} />
+                                        </button>
+                                    ) : (
+                                        <Link to={`/reports/${report.id}`} aria-label={`Xem báo cáo ${report.id}`}>
+                                            <ArrowUpRight size={18} />
+                                        </Link>
+                                    )}
                                 </article>
                             ))}
                         </section>
                     )}
-                    {result.data?.total > records.length && <p className="v2-workspace-data-note">Đang hiển thị {records.length}/{result.data.total} báo cáo. <Link to="/reports">Xem tất cả</Link></p>}
+                    {result.data?.total > records.length && (
+                        <p className="v2-workspace-data-note">
+                            Đang hiển thị {records.length}/{result.data.total} báo cáo.{' '}
+                            {!readOnly && <Link to="/reports">Xem tất cả</Link>}
+                        </p>
+                    )}
+                    {readOnly && selectedReport != null && (
+                        <Suspense fallback={<p role="status">Đang mở báo cáo…</p>}>
+                            <ReportsReadOnlyDialog
+                                key={`${clubId}:${selectedReport}`}
+                                api={api}
+                                clubId={clubId}
+                                reportId={selectedReport}
+                                onClose={() => setSelectedReport(null)}
+                            />
+                        </Suspense>
+                    )}
                 </>
             )}
         </WorkspaceTabLayout>

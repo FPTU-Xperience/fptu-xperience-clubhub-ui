@@ -6,6 +6,8 @@
 
 .v2-club-card {
     display: flex;
+    width: 100%;
+    min-width: 0;
     height: 100%;
     flex-direction: column;
     overflow: hidden;
@@ -30,6 +32,7 @@
 }
 
 .v2-club-card-body {
+    min-width: 0;
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -126,5 +129,11 @@
 @media (max-width: 1190px) {
     .v2-club-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .v2-club-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

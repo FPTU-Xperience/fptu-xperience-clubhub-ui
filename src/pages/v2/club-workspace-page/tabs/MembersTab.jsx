@@ -12,13 +12,14 @@ const initials = (name = '') =>
         .toUpperCase();
 const roleLabel = (role = '') => (String(role).toUpperCase().includes('TREASURER') ? 'Thủ quỹ' : 'Thành viên');
 
-export default function MembersTab({ manager = false, dashboard, workspace }) {
+export default function MembersTab({ manager = false, dashboard, workspace, readOnly = false }) {
     const clubId = workspace?.clubId;
     const summary = dashboard.data;
     const count = summary?.memberCount;
     const members = manager ? summary?.approvedMembers : summary?.publicLeaders;
     const visibleMemberCount = members?.length ?? 0;
-    if (manager) return <MemberManagement key={clubId} clubId={clubId} dashboard={dashboard} />;
+    if (manager || readOnly)
+        return <MemberManagement key={clubId} clubId={clubId} dashboard={dashboard} readOnly={readOnly} />;
     return (
         <WorkspaceTabLayout
             title="Thành viên CLB"

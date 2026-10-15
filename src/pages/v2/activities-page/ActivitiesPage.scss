@@ -1,3 +1,8 @@
+.v2-activities-page,
+.v2-workspace-activities {
+    container: activity-directory / inline-size;
+}
+
 .v2-activities-page h1 {
     margin: 4px 0 10px;
     font-size: clamp(26px, 2.5vw, 36px);
@@ -52,16 +57,40 @@
         outline-offset: 3px;
     }
 }
-@media (max-width: 600px) {
+// The sidebar reduces available space even while the viewport is desktop-sized.
+@container activity-directory (max-width: 680px) {
+    .v2-event-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .v2-event-filter-bar {
+        align-items: stretch;
+    }
+
     .v2-event-filter-bar .v2-tabs {
-        overflow-x: auto;
+        min-width: 0;
+        flex-wrap: wrap;
         max-width: 100%;
-        padding-bottom: 3px;
     }
     .v2-event-filter-bar .v2-discovery-search {
-        flex: 1;
+        flex: 1 0 100%;
+        width: 100%;
+        min-width: 0;
+
+        > svg {
+            flex-shrink: 0;
+        }
     }
     .v2-event-filter-bar .v2-discovery-search input {
-        width: 100%;
+        flex: 1;
+        width: 0;
+        min-width: 0;
+    }
+}
+
+@container activity-directory (max-width: 480px) {
+    .v2-workspace-activities > header {
+        flex-wrap: wrap;
+        gap: 12px;
     }
 }

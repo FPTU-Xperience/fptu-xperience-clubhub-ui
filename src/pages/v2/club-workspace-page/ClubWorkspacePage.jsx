@@ -15,10 +15,15 @@ import WorkspaceHome from './WorkspaceHome';
 import './ClubWorkspacePage.scss';
 export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     const { clubCode: routeClubCode } = useParams();
+    const result = useClubWorkspace(api, sessionKey, routeClubCode);
+    return <ClubWorkspaceView api={api} sessionKey={sessionKey} viewer={viewer} result={result} />;
+}
+
+export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation = false }) {
+    const { clubCode: routeClubCode } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const result = useClubWorkspace(api, sessionKey, routeClubCode);
-    const manager = result.workspace?.role === 'MANAGER';
+    const manager = !observation && result.workspace?.role === 'MANAGER';
     const semesterSelection = useWorkspaceSemesterSelection(sessionKey, result.clubId, result.workspace?.semesters);
     // Refresh shared summaries when entering activities or the member roster.
     const dashboardRefreshKey = /\/(activities|members)\/?$/.test(location.pathname) ? location.key : null;
@@ -30,7 +35,8 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
         semesterSelection.semester,
         dashboardRefreshKey,
     );
-    const base = `/v2/my-clubs/${encodeURIComponent(result.workspace?.clubCode || routeClubCode || '')}`;
+    const encodedCode = encodeURIComponent(result.workspace?.clubCode || routeClubCode || '');
+    const base = observation ? `/v2/ctsv/clubs/${encodedCode}/workspace` : `/v2/my-clubs/${encodedCode}`;
     if (result.status !== 'populated')
         return (
             <div className="v2-public-content v2-workspace-state">
@@ -47,21 +53,25 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
                     {null}
                 </PageState>
                 {result.status === 'not-found' && (
-                    <Link className="v2-button" to="/v2/my-clubs">
-                        Về CLB của tôi
+                    <Link className="v2-button" to={observation ? '/v2/clubs' : '/v2/my-clubs'}>
+                        {observation ? 'Về danh sách CLB' : 'Về CLB của tôi'}
                     </Link>
                 )}
             </div>
         );
-    const availableSections = getWorkspaceSections(manager);
+    const availableSections = getWorkspaceSections(manager, observation);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
+    if (observation && relativePath === 'club-page') return <Navigate to={base} replace />;
     if (relativePath === 'attendance') return <Navigate to={`${base}/activities`} replace />;
     const activeSection = availableSections.find(([path]) => path === relativePath);
-    const activityDetailId = location.pathname.slice(base.length).match(/^\/activities\/([^/]+)\/?$/)?.[1];
+    const activityDetailId =
+        !observation && location.pathname.slice(base.length).match(/^\/activities\/([^/]+)\/?$/)?.[1];
     const sectionLabel = activeSection?.[1] || 'Trang không khả dụng';
     return (
         <WorkspaceSemesterProvider value={semesterSelection}>
-            <div className={`v2-production-workspace${activeSection && !relativePath ? ' v2-production-workspace--home' : ''}`}>
+            <div
+                className={`v2-production-workspace${activeSection && !relativePath ? ' v2-production-workspace--home' : ''}`}
+            >
                 <WorkspaceLeftRail
                     workspace={{
                         ...result.workspace,
@@ -71,17 +81,20 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
                     selections={result.data}
                     base={base}
                     manager={manager}
+                    observation={observation}
                     onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
                 />
                 <main className="v2-workspace-main">
                     <header className="v2-workspace-bar">
                         <div>
-                            CLB của tôi <ChevronRight size={14} /> {result.workspace.name} <ChevronRight size={14} />{' '}
-                            <strong>{sectionLabel}</strong>
+                            <span>{observation ? 'Câu lạc bộ' : 'CLB của tôi'}</span>
+                            <ChevronRight size={14} />
+                            <span className="v2-workspace-breadcrumb-club" title={result.workspace.name}>{result.workspace.name}</span>
+                            <ChevronRight size={14} /> <strong title={sectionLabel}>{sectionLabel}</strong>
                         </div>
                         <div>
                             <span className={`v2-workspace-role ${manager ? 'is-manager' : ''}`}>
-                                {manager ? 'Chủ nhiệm' : 'Thành viên'}
+                                {observation ? 'CTSV · Chỉ xem' : manager ? 'Chủ nhiệm' : 'Thành viên'}
                             </span>
                             <WorkspaceSemesterSelect />
                         </div>
@@ -104,11 +117,13 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
                                 base={base}
                                 viewer={viewer}
                                 dashboard={dashboard}
+                                observation={observation}
                             />
                         ) : (
                             <WorkspaceTabView
                                 label={sectionLabel}
                                 manager={manager}
+                                readOnly={observation}
                                 dashboard={dashboard}
                                 workspace={result.workspace}
                             />

@@ -81,6 +81,7 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
     return (
         <>
             <WorkspaceTabLayout
+                className="v2-workspace-activities"
                 title="Hoạt động của CLB"
                 description={
                     semester?.startUtc && semester?.endUtc
