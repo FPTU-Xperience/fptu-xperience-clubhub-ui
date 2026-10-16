@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,23 +8,18 @@ import '../../../../components/v2/directory-filter/DirectoryFilters.scss';
 import '../../activities-page/ActivitiesPage.scss';
 import { useAuth } from '../../../../context/AuthContext';
 import PageState from '../../../../components/v2/PageState';
-import V2Modal from '../../../../components/v2/common/modal/V2Modal';
+import { reportTemplateUrl } from '../../report-detail-page/report-templates';
+import { applicationPermission } from '../../activity-application/activity-application-data';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import { sortActivitiesNewestFirst } from '../../activity-data';
 
-export default function ActivitiesTab({ manager = false, dashboard, workspace }) {
+export default function ActivitiesTab({ manager = false, readOnly = false, dashboard, workspace }) {
     const clubId = workspace?.clubId;
-    const { api } = useAuth();
+    const { clubAccess } = useAuth();
     const { semester } = useWorkspaceSemester();
     const navigate = useNavigate();
-    const [creating, setCreating] = useState(false);
-    const [submitError, setSubmitError] = useState('');
-    const [submitting, setSubmitting] = useState(false);
     const [query, setQuery] = useState('');
     const [status, setStatus] = useState('ALL');
-    useEffect(() => {
-        setCreating(false);
-    }, [semester?.id]);
     const activities = dashboard.data?.activities || [];
     const visibleActivities = useMemo(
         () =>
@@ -54,29 +49,12 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
         retry: dashboard.retry,
     };
 
-    const createActivity = async (event) => {
-        event.preventDefault();
-        const values = Object.fromEntries(new FormData(event.currentTarget));
-        setSubmitting(true);
-        setSubmitError('');
-        try {
-            await api.createActivity({
-                clubId: Number(clubId),
-                clubName: workspace.name,
-                title: values.title.trim(),
-                description: values.description.trim(),
-                startTimeUtc: new Date(values.startTime).toISOString(),
-                endTimeUtc: new Date(values.endTime).toISOString(),
-                location: values.location.trim(),
-            });
-            setCreating(false);
-            result.retry();
-        } catch (error) {
-            setSubmitError(error?.message || 'Không thể tạo hoạt động. Vui lòng thử lại.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
+    const canCreate =
+        !readOnly &&
+        applicationPermission(
+            clubAccess.find((item) => String(item.clubId) === String(clubId)),
+            'activity.create',
+        );
 
     return (
         <>
@@ -89,11 +67,21 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
                         : 'Theo dõi hoạt động toàn CLB.'
                 }
                 action={
-                    manager ? (
+                    canCreate ? (
                         <button
                             className="v2-button v2-button--primary"
                             type="button"
-                            onClick={() => setCreating(true)}
+                            onClick={() =>
+                                navigate(
+                                    reportTemplateUrl(
+                                        'create-activity',
+                                        clubId,
+                                        semester,
+                                        null,
+                                        `/v2/my-clubs/${encodeURIComponent(workspace.clubCode)}/reports`,
+                                    ),
+                                )
+                            }
                         >
                             <Plus size={16} /> Tạo hoạt động
                         </button>
@@ -169,61 +157,6 @@ export default function ActivitiesTab({ manager = false, dashboard, workspace })
                     )
                 }
             </WorkspaceTabLayout>
-            {creating && (
-                <V2Modal title="Tạo hoạt động nội bộ" onClose={() => !submitting && setCreating(false)}>
-                    <form className="v2-workspace-activity-form" onSubmit={createActivity}>
-                        <label>
-                            Tên hoạt động
-                            <input
-                                name="title"
-                                required
-                                maxLength="120"
-                                placeholder="Ví dụ: Workshop thiết kế sản phẩm"
-                            />
-                        </label>
-                        <label>
-                            Thời gian bắt đầu
-                            <input name="startTime" type="datetime-local" required />
-                        </label>
-                        <label>
-                            Thời gian kết thúc
-                            <input name="endTime" type="datetime-local" required />
-                        </label>
-                        <label>
-                            Địa điểm
-                            <input name="location" required placeholder="Ví dụ: Innovation Hub" />
-                        </label>
-                        <label>
-                            Mô tả
-                            <textarea
-                                name="description"
-                                rows="4"
-                                required
-                                maxLength="1000"
-                                placeholder="Mục tiêu, nội dung và lưu ý cho người tham gia"
-                            />
-                        </label>
-                        {submitError && (
-                            <p className="v2-workspace-form-error" role="alert">
-                                {submitError}
-                            </p>
-                        )}
-                        <div>
-                            <button
-                                className="v2-button"
-                                type="button"
-                                disabled={submitting}
-                                onClick={() => setCreating(false)}
-                            >
-                                Hủy
-                            </button>
-                            <button className="v2-button v2-button--primary" disabled={submitting}>
-                                {submitting ? 'Đang tạo…' : 'Tạo hoạt động'}
-                            </button>
-                        </div>
-                    </form>
-                </V2Modal>
-            )}
         </>
     );
 }

@@ -681,6 +681,35 @@ class ApiService {
         return this.readMedia('activity', `/api/activities/${id}`);
     }
 
+    // Proposed action/XP application contract; never fall back to direct activity creation.
+    async getActivityApplication(id) {
+        return this.request(`/api/activity-applications/${encodeURIComponent(id)}`);
+    }
+
+    async createActivityApplication(data, idempotencyKey) {
+        return this.request('/api/activity-applications', {
+            method: 'POST',
+            headers: { 'Idempotency-Key': idempotencyKey },
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateActivityApplication(id, data, idempotencyKey) {
+        return this.request(`/api/activity-applications/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: { 'Idempotency-Key': idempotencyKey },
+            body: JSON.stringify(data),
+        });
+    }
+
+    async submitActivityApplication(id, data, idempotencyKey) {
+        return this.request(`/api/activity-applications/${encodeURIComponent(id)}/submit`, {
+            method: 'POST',
+            headers: { 'Idempotency-Key': idempotencyKey },
+            body: JSON.stringify(data),
+        });
+    }
+
     async createActivity(data) {
         const ticket = this.media.ticket();
         const created = await this.request('/api/activities', {

@@ -4,7 +4,10 @@ import test from 'node:test';
 import { decodeWorkspaceClubCode, resolveWorkspace } from './workspace-data.js';
 
 test('workspace resolver accepts only the current selection route identifier', () => {
-    const selection = { status: 'populated', data: [{ clubId: 7, clubCode: 'F-CODE', name: 'F-Code', role: 'MEMBER' }] };
+    const selection = {
+        status: 'populated',
+        data: [{ clubId: 7, clubCode: 'F-CODE', name: 'F-Code', role: 'MEMBER' }],
+    };
     assert.equal(resolveWorkspace(selection, 'f-code').workspace.name, 'F-Code');
     assert.equal(resolveWorkspace(selection, 'f-code').clubId, 7);
     assert.equal(resolveWorkspace(selection, 'other').status, 'not-found');
@@ -33,14 +36,24 @@ test('production workspace stays V2-local and does not consume demo state', () =
     assert.doesNotMatch(tabView, /SettingsTab/);
     assert.match(activities, /components\/v2\/activity-card\/ActivityCard/);
     assert.match(activities, /dashboard\.data\?\.activities/);
-    assert.match(activities, /api\.createActivity/);
-    assert.match(activities, /V2Modal/);
+    assert.match(activities, /reportTemplateUrl\(/);
+    assert.doesNotMatch(activities, /api\.createActivity/);
+    const application = readFileSync(
+        new URL('./activity-application/ActivityApplicationPage.jsx', import.meta.url),
+        'utf8',
+    );
+    assert.match(application, /api\.createActivityApplication/);
+    assert.match(application, /api\.submitActivityApplication/);
+    assert.doesNotMatch(application, /api\.createActivity\(|api\.createReport\(|localStorage/);
     assert.match(members, /v2-preview-members/);
     assert.match(members, /approvedMembers/);
     assert.match(members, /if \(manager \|\| readOnly\)\s+return <MemberManagement/);
     assert.match(members, /readOnly={readOnly}/);
     assert.doesNotMatch(members, /react-router-dom|to=|\/clubs\//);
-    const management = readFileSync(new URL('./club-workspace-page/tabs/members/MemberManagement.jsx', import.meta.url), 'utf8');
+    const management = readFileSync(
+        new URL('./club-workspace-page/tabs/members/MemberManagement.jsx', import.meta.url),
+        'utf8',
+    );
     assert.match(management, /api\.getClubMembers/);
     assert.match(management, /api\.getClubMemberships/);
     assert.match(management, /api\.approveClubMembership/);

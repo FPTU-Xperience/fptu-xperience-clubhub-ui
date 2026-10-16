@@ -8,6 +8,7 @@ import { REPORT_TEMPLATES, reportActivityDetail, reportTemplateContext, reportTe
 import ReportTemplateModal from './ReportTemplateModal';
 import { reportDate, reportFileSize } from './report-detail-data';
 import './ReportEditorPage.scss';
+import ActivityApplicationPage from '../activity-application/ActivityApplicationPage';
 
 const blankDetail = () => ({
     id: crypto.randomUUID(),
@@ -115,7 +116,7 @@ function Field({
     );
 }
 
-export default function ReportEditorPage({ api, workspace, base, semester, sessionKey, reportId: editId, readOnly = false }) {
+function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId: editId, readOnly = false }) {
     const { reportId: routeId } = useParams();
     const location = useLocation();
     const editing = Boolean(editId || routeId);
@@ -753,4 +754,14 @@ export default function ReportEditorPage({ api, workspace, base, semester, sessi
             )}
         </div>
     );
+}
+
+export default function ReportEditorPage(props) {
+    const location = useLocation();
+    const { reportId } = useParams();
+    const context = reportTemplateContext(location.search);
+    if (!props.reportId && !reportId && context?.template.id === 'create-activity') {
+        return <ActivityApplicationPage {...props} context={context} />;
+    }
+    return <ReportEditorForm {...props} />;
 }

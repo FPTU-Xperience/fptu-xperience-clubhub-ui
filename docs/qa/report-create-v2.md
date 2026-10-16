@@ -2,6 +2,8 @@
 
 Date: 2026-10-16.
 
+Update: new **Báo cáo Tạo hoạt động** creation now uses the dedicated [action/XP application flow](activity-application-v2.md). The shared report editor and existing ReportService mapping below continue to apply to the other templates and existing legacy FUTURE_EVENT records. Verification counts below describe the earlier report-editor migration; the linked document records current application checks.
+
 ## Delivered flow
 
 The workspace **Tạo báo cáo** button opens a V2 modal containing exactly:
@@ -15,7 +17,7 @@ The first template opens a second modal with an activity dropdown. It loads acti
 
 All templates continue to `/v2/my-clubs/:clubCode/reports/create?...` inside the same workspace. The template, club, selected report period and activity ID are carried in query parameters and survive reload. The shared editor also supports `/v2/reports/create` and `/v2/reports/:reportId/edit`. Old `/reports/create` and `/reports/:id/edit` paths redirect at the root router before any legacy layout renders.
 
-The V2 editor contains:
+For ordinary reports and existing report edits, the V2 editor contains:
 
 - General metadata with template and club scope, current period and deadline where supplied by the API.
 - Activities with names, Vietnam-local dates, location, description, participation counts, outcomes, evidence links and money fields already supported by the existing report DTO. Money is labelled VNĐ; it is not an XP budget implementation.
@@ -33,13 +35,13 @@ Manager access is checked per club. Observation and ordinary-member access canno
 | Template | reportType | tag |
 | --- | --- | --- |
 | Activity | CLUB_ACTIVITY | CLUB_ACTIVITY:{selectedActivityId} |
-| Create activity | FUTURE_EVENT | FUTURE_EVENT |
+| Create activity (existing records only) | FUTURE_EVENT | FUTURE_EVENT |
 | Term start | CLUB_TERM_START | CLUB_TERM_START |
 | Term end | CLUB_TERM_END | CLUB_TERM_END |
 
 Current ReportService create/update DTOs accept reportType/tag strings and narrative/detail fields. The type/tag pair distinguishes templates, including start/end in one period and separate activity reports under the existing club/period/tag uniqueness rule. These are frontend conventions using existing fields, not a new template-catalog endpoint.
 
-The current create DTO has no `sourceActivityId` field. The selected activity ID is carried in the activity-report tag for traceability and its data is copied into report details. This is **not** a backend-enforced foreign-key relationship or automatic end-of-activity approval/XP settlement. A future authoritative source-link contract must explicitly add and validate that relationship. Existing FUTURE_EVENT records use the finance workflow; this migration does not implement the proposed activity action/XP system.
+The current create DTO has no `sourceActivityId` field. The selected activity ID is carried in the activity-report tag for traceability and its data is copied into report details. This is **not** a backend-enforced foreign-key relationship or automatic end-of-activity approval/XP settlement. A future authoritative source-link contract must explicitly add and validate that relationship. Existing FUTURE_EVENT records retain the finance workflow. New create-activity applications use the separate contract in the linked application document; ReportService DTOs do not persist action/XP plans.
 
 ## Verification
 
