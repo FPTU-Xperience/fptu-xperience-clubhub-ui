@@ -1,0 +1,106 @@
+.v2-report-template-modal {
+    color: #172033;
+    .v2-report-template-intro {
+        margin: 0 0 22px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+    .v2-report-template-list {
+        display: grid;
+        gap: 12px;
+    }
+    .v2-report-template-choice {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        padding: 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #172033;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
+    }
+    .v2-report-template-choice:hover {
+        border-color: #fb923c;
+        background: #fffaf5;
+    }
+    .v2-report-template-choice:focus-visible {
+        outline: 2px solid #ea580c;
+        outline-offset: 3px;
+    }
+    .v2-report-template-choice > span:nth-child(2) {
+        flex: 1;
+        min-width: 0;
+    }
+    .v2-report-template-choice strong {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .v2-report-template-choice small {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+    .v2-report-template-choice svg {
+        flex-shrink: 0;
+    }
+    .v2-report-template-icon {
+        display: grid;
+        flex: 0 0 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 8px;
+        color: #ea580c;
+        background: #fff2e8;
+    }
+    .v2-report-template-field {
+        display: grid;
+        gap: 9px;
+        font-size: 13px;
+        font-weight: 550;
+    }
+    .v2-report-template-field select {
+        min-width: 0;
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 36px 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        background: #fff;
+        color: #172033;
+        font: inherit;
+    }
+    .v2-report-template-field select:focus-visible {
+        outline: 2px solid #fed7aa;
+        border-color: #ea580c;
+    }
+    .v2-report-template-error {
+        color: #9f1239;
+    }
+    .v2-report-template-footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 26px;
+        padding-top: 18px;
+        border-top: 1px solid #e2e8f0;
+    }
+}
+@media (max-width: 480px) {
+    .v2-report-template-modal .v2-report-template-choice {
+        padding: 14px 12px;
+        gap: 10px;
+    }
+    .v2-report-template-modal .v2-report-template-icon {
+        flex-basis: 34px;
+        height: 36px;
+    }
+}

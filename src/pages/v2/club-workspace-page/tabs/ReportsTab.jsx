@@ -1,12 +1,13 @@
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { workspaceSemesterQuery, workspaceSemesterKey } from '../workspace-semester-data';
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import useWorkspaceResource from './useWorkspaceResource';
-const ReportsReadOnlyDialog = lazy(() => import('./ReportsReadOnlyDialog'));
+import ReportTemplateModal from '../../report-detail-page/ReportTemplateModal';
+import { reportTemplateLabel } from '../../report-detail-page/report-templates';
 
 const statusLabel = (status) =>
     ({
@@ -19,15 +20,22 @@ const statusLabel = (status) =>
     })[status] || status;
 
 export default function ReportsTab({ workspace, readOnly = false }) {
-    const [selectedReport, setSelectedReport] = useState(null);
+    const [page, setPage] = useState(1);
+    const [choosingTemplate, setChoosingTemplate] = useState(false);
+    const location = useLocation();
     const clubId = workspace?.clubId;
-    const { api } = useAuth();
+    const { api, clubAccess } = useAuth();
+    const canCreate = clubAccess.some((access) => String(access.clubId) === String(clubId) && access.isManager);
     const { semester } = useWorkspaceSemester();
+    useEffect(() => {
+        setPage(1);
+        setChoosingTemplate(false);
+    }, [clubId, semester]);
     const load = useCallback(
-        (id) => api.getReports({ ...workspaceSemesterQuery(semester, 'reports'), clubId: id, page: 1, pageSize: 100 }),
-        [api, semester],
+        (id) => api.getReports({ ...workspaceSemesterQuery(semester, 'reports'), clubId: id, page, pageSize: 100 }),
+        [api, semester, page],
     );
-    const result = useWorkspaceResource(clubId, load, workspaceSemesterKey(semester));
+    const result = useWorkspaceResource(clubId, load, `${workspaceSemesterKey(semester)}:${page}`);
     const reports = result.data?.items || [];
     return (
         <WorkspaceTabLayout
@@ -36,10 +44,15 @@ export default function ReportsTab({ workspace, readOnly = false }) {
                 semester?.reportPeriod ? `Báo cáo trong ${semester.label}.` : 'Báo cáo toàn CLB theo quyền truy cập.'
             }
             action={
+                canCreate &&
                 !readOnly && (
-                    <Link className="v2-button v2-button--primary" to="/reports/create">
+                    <button
+                        type="button"
+                        className="v2-button v2-button--primary"
+                        onClick={() => setChoosingTemplate(true)}
+                    >
                         Tạo báo cáo
-                    </Link>
+                    </button>
                 )
             }
             records={reports}
@@ -72,49 +85,60 @@ export default function ReportsTab({ workspace, readOnly = false }) {
                             {records.map((report) => (
                                 <article key={report.id}>
                                     <div>
-                                        <strong>{report.tag || report.period || `Báo cáo #${report.id}`}</strong>
+                                        <strong>
+                                            {reportTemplateLabel(report) ||
+                                                report.tag ||
+                                                report.period ||
+                                                `Báo cáo #${report.id}`}
+                                        </strong>
                                         <small>
-                                            {report.period} · {report.reportType}
+                                            {report.period} · {reportTemplateLabel(report) || report.reportType}
                                         </small>
                                     </div>
                                     <span>{statusLabel(report.status)}</span>
                                     <em>
                                         {report.dueDate ? new Date(report.dueDate).toLocaleDateString('vi-VN') : '—'}
                                     </em>
-                                    {readOnly ? (
-                                        <button
-                                            type="button"
-                                            className="v2-button"
-                                            onClick={() => setSelectedReport(report.id)}
-                                            aria-label={`Xem báo cáo ${report.id}`}
-                                        >
-                                            <ArrowUpRight size={18} />
-                                        </button>
-                                    ) : (
-                                        <Link to={`/reports/${report.id}`} aria-label={`Xem báo cáo ${report.id}`}>
-                                            <ArrowUpRight size={18} />
-                                        </Link>
-                                    )}
+                                    <Link
+                                        to={`${location.pathname.replace(/\/$/, '')}/${encodeURIComponent(report.id)}`}
+                                        aria-label={`Xem báo cáo ${report.id}`}
+                                    >
+                                        <ArrowUpRight size={18} />
+                                    </Link>
                                 </article>
                             ))}
                         </section>
                     )}
-                    {result.data?.total > records.length && (
-                        <p className="v2-workspace-data-note">
-                            Đang hiển thị {records.length}/{result.data.total} báo cáo.{' '}
-                            {!readOnly && <Link to="/reports">Xem tất cả</Link>}
-                        </p>
+                    {(page > 1 || result.data?.total > records.length) && (
+                        <div className="v2-report-actions">
+                            <button
+                                className="v2-button"
+                                type="button"
+                                disabled={page === 1 || result.status === 'loading'}
+                                onClick={() => setPage((value) => value - 1)}
+                            >
+                                Trang trước
+                            </button>
+                            <span>Trang {page}</span>
+                            <button
+                                className="v2-button"
+                                type="button"
+                                disabled={result.status !== 'ready' || page * 100 >= (result.data?.total || 0)}
+                                onClick={() => setPage((value) => value + 1)}
+                            >
+                                Trang sau
+                            </button>
+                        </div>
                     )}
-                    {readOnly && selectedReport != null && (
-                        <Suspense fallback={<p role="status">Đang mở báo cáo…</p>}>
-                            <ReportsReadOnlyDialog
-                                key={`${clubId}:${selectedReport}`}
-                                api={api}
-                                clubId={clubId}
-                                reportId={selectedReport}
-                                onClose={() => setSelectedReport(null)}
-                            />
-                        </Suspense>
+                    {choosingTemplate && canCreate && !readOnly && (
+                        <ReportTemplateModal
+                            key={`${clubId}:${workspaceSemesterKey(semester)}`}
+                            api={api}
+                            workspace={workspace}
+                            semester={semester}
+                            basePath={location.pathname.replace(/\/$/, '')}
+                            onClose={() => setChoosingTemplate(false)}
+                        />
                     )}
                 </>
             )}

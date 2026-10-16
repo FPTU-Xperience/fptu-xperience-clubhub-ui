@@ -12,6 +12,8 @@ import WorkspaceTabView from './tabs/WorkspaceTabView';
 import WorkspaceLeftRail, { getWorkspaceSections } from './WorkspaceLeftRail';
 import ActivityManagementPage from './tabs/activities/ActivityManagementPage';
 import WorkspaceHome from './WorkspaceHome';
+import ReportDetailPage from '../report-detail-page/ReportDetailPage';
+import ReportEditorPage from '../report-detail-page/ReportEditorPage';
 import './ClubWorkspacePage.scss';
 export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     const { clubCode: routeClubCode } = useParams();
@@ -66,11 +68,14 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
     const activeSection = availableSections.find(([path]) => path === relativePath);
     const activityDetailId =
         !observation && location.pathname.slice(base.length).match(/^\/activities\/([^/]+)\/?$/)?.[1];
+    const reportDetailId = location.pathname.slice(base.length).match(/^\/reports\/([^/]+)\/?$/)?.[1];
+    const reportCreate = location.pathname.slice(base.length).replace(/\/$/, '') === '/reports/create';
+    const reportEditId = location.pathname.slice(base.length).match(/^\/reports\/([^/]+)\/edit\/?$/)?.[1];
     const sectionLabel = activeSection?.[1] || 'Trang không khả dụng';
     return (
         <WorkspaceSemesterProvider value={semesterSelection}>
             <div
-                className={`v2-production-workspace${activeSection && !relativePath ? ' v2-production-workspace--home' : ''}`}
+                className={`v2-production-workspace${activeSection && !relativePath ? ' v2-production-workspace--home' : ''}${reportDetailId || reportEditId ? ' v2-production-workspace--report' : ''}`}
             >
                 <WorkspaceLeftRail
                     workspace={{
@@ -89,7 +94,9 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                         <div>
                             <span>{observation ? 'Câu lạc bộ' : 'CLB của tôi'}</span>
                             <ChevronRight size={14} />
-                            <span className="v2-workspace-breadcrumb-club" title={result.workspace.name}>{result.workspace.name}</span>
+                            <span className="v2-workspace-breadcrumb-club" title={result.workspace.name}>
+                                {result.workspace.name}
+                            </span>
                             <ChevronRight size={14} /> <strong title={sectionLabel}>{sectionLabel}</strong>
                         </div>
                         <div>
@@ -100,7 +107,19 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                         </div>
                     </header>
                     <div className="v2-workspace-content">
-                        {activityDetailId ? (
+                        {reportCreate || reportEditId ? (
+                            <ReportEditorPage key={`${sessionKey}:${result.clubId}:${reportEditId || 'create'}:${location.search}`} api={api} sessionKey={sessionKey} workspace={result.workspace} base={base} semester={semesterSelection.semester} reportId={reportEditId} readOnly={observation} />
+                        ) : reportDetailId ? (
+                            <ReportDetailPage
+                                key={`${sessionKey}:${result.clubId}:${reportDetailId}`}
+                                api={api}
+                                sessionKey={sessionKey}
+                                reportId={reportDetailId}
+                                workspace={result.workspace}
+                                base={base}
+                                readOnly={observation}
+                            />
+                        ) : activityDetailId ? (
                             <ActivityManagementPage
                                 key={`${sessionKey}:${result.clubId}:${activityDetailId}`}
                                 api={api}

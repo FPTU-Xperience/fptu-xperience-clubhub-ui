@@ -2,6 +2,8 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
+import LegacyReportEditorRedirect from './pages/CreateReportPage';
+import LegacyReportDetailRedirect from './pages/ReportDetailPage';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ToastProvider } from './context/ToastContext';
@@ -37,6 +39,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             >
                 <Routes>
                     <Route path="/v2/*" element={<V2App />} />
+                    <Route path="/reports/create" element={<LegacyReportEditorRedirect />} />
+                    <Route path="/reports/:id/edit" element={<LegacyReportEditorRedirect />} />
+                    <Route path="/reports/:id" element={<LegacyReportDetailRedirect />} />
                     <Route path="/*" element={<ExistingApplication />} />
                 </Routes>
             </Suspense>
