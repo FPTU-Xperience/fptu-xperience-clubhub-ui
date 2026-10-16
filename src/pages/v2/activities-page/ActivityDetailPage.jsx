@@ -11,11 +11,14 @@ import { publicActivityResources } from '../../../components/v2/activity-detail/
 import '../../../components/v2/activity-card/ActivityCard.scss';
 import './ActivityDetailPage.scss';
 import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLinks';
+import ActivityStaffingPanel from '../../../components/v2/activity-detail/ActivityStaffingPanel';
 
 const tabs = [
     ['overview', 'Tổng quan'],
     ['documents', 'Tài liệu'],
     ['media', 'Media'],
+    ['assignments', 'Phân công'],
+    ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh của tôi'],
 ];
 function PublicActivityProfile({ activity, clubCode, sessionKey }) {
@@ -27,6 +30,7 @@ function PublicActivityProfile({ activity, clubCode, sessionKey }) {
             {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
             {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
+            {['assignments', 'recruitment'].includes(tab) && <ActivityStaffingPanel activityId={activity.id} mode={tab} />}
             {tab === 'attendance' && (
                 <div className="v2-activity-profile-panel">
                     <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager={false} />

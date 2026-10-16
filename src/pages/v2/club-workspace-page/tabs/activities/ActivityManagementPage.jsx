@@ -13,12 +13,15 @@ import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
 import { saveActivityResource } from '../../../../../services/activity-resources';
 import ActivityPublicationControl from './ActivityPublicationControl';
+import ActivityStaffingPanel from '../../../../../components/v2/activity-detail/ActivityStaffingPanel';
 import './ActivityEditing.scss';
 
 const tabs = [
     ['overview', 'Tổng quan'],
     ['documents', 'Tài liệu'],
     ['media', 'Media'],
+    ['assignments', 'Phân công'],
+    ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh'],
 ];
 const localDateTime = (value) => {
@@ -339,6 +342,14 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                 onSave={saveResources}
                                 canSave={canSaveResources}
                                 busy={busy}
+                            />
+                        )}
+                        {['assignments', 'recruitment'].includes(tab) && (
+                            <ActivityStaffingPanel
+                                activityId={activity.id}
+                                mode={tab}
+                                manager
+                                onChanged={result.retry}
                             />
                         )}
                         {tab === 'attendance' && (
