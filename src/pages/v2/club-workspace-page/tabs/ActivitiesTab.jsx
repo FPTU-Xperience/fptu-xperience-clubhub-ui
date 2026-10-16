@@ -122,6 +122,7 @@ export default function ActivitiesTab({ manager = false, readOnly = false, dashb
                                         <ActivityCard
                                             key={record.id}
                                             activity={{ ...record, clubName: workspace.name }}
+                                            publicationLabel={manager ? record.isPublished === true ? 'Đã công khai' : record.isPublished === false || record.sourceApplicationId ? 'Chưa công khai' : 'Chưa đồng bộ xuất bản' : undefined}
                                             onOpen={(activity) =>
                                                 navigate(
                                                     manager

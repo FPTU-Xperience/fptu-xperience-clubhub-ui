@@ -729,6 +729,15 @@ class ApiService {
         return this.acknowledgeMedia('activity', activityId, data, updated, ticket);
     }
 
+    // Provisional publication contract. Approval must create the workspace record unpublished.
+    async setActivityPublication(activityId, data, idempotencyKey) {
+        return this.request(`/api/activities/${encodeURIComponent(activityId)}/publication`, {
+            method: 'PATCH',
+            headers: { 'Idempotency-Key': idempotencyKey },
+            body: JSON.stringify(data),
+        });
+    }
+
     async cancelActivity(activityId) {
         return this.request(`/api/activities/${encodeURIComponent(activityId)}`, { method: 'DELETE' });
     }

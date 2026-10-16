@@ -75,7 +75,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
     return (
         <WorkspaceSemesterProvider value={semesterSelection}>
             <div
-                className={`v2-production-workspace${activeSection && !relativePath ? ' v2-production-workspace--home' : ''}${reportDetailId || reportEditId ? ' v2-production-workspace--report' : ''}`}
+                className={`v2-production-workspace${activeSection && !relativePath ? ' v2-production-workspace--home' : ''}${reportDetailId || reportEditId ? ' v2-production-workspace--report' : ''}${activityDetailId ? ' v2-production-workspace--activity-detail' : ''}`}
             >
                 <WorkspaceLeftRail
                     workspace={{

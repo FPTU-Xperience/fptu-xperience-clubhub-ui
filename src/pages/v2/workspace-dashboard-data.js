@@ -1,6 +1,7 @@
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 import { workspaceSemesterQuery, workspaceSemesterKey } from './club-workspace-page/workspace-semester-data.js';
 import { useEffect, useState } from 'react';
+import { activityPublication, isActivityPublic } from './activity-publication.js';
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 const succeeded = (result) => result?.status === 'fulfilled';
@@ -21,7 +22,10 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
           ? clubData.members.filter((member) => String(member.status).toUpperCase() === 'APPROVED').length
           : null;
     const activeActivities =
-        activityRows?.filter((activity) => String(activity.status).toUpperCase() !== 'CANCELLED') || null;
+        activityRows?.filter(
+            (activity) =>
+                String(activity.status).toUpperCase() !== 'CANCELLED' && (manager || isActivityPublic(activity)),
+        ) || null;
     const upcomingActivities = activeActivities
         ?.filter(
             (activity) =>
@@ -56,6 +60,7 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
         ongoingActivityCount: activeActivities?.filter(isOngoingWorkspaceActivity).length ?? null,
         activities:
             activeActivities?.map((activity) => ({
+                ...activityPublication(activity),
                 id: activity.id,
                 clubId: activity.clubId,
                 title: activity.title,

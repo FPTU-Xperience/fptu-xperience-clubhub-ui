@@ -13,7 +13,7 @@ const statuses = {
     CANCELLED: ['cancelled', 'Đã hủy'],
 };
 
-export default function ActivityCard({ activity: input, onOpen, variant = 'poster' }) {
+export default function ActivityCard({ activity: input, onOpen, variant = 'poster', publicationLabel }) {
     const activity = useEntityMedia('activity', input);
     const [failedImage, setFailedImage] = useState(null);
     const date = new Date(activity.startTime || '');
@@ -55,6 +55,7 @@ export default function ActivityCard({ activity: input, onOpen, variant = 'poste
                         {schedule && <span className={`v2-event-status is-${tone}`}>{label}</span>}
                     </div>
                     <h3>{activity.title}</h3>
+                    {publicationLabel && <span className="v2-event-publication">{publicationLabel}</span>}
                     <div className="v2-event-facts">
                         {schedule && (
                             <span>

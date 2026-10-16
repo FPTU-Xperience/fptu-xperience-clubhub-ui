@@ -156,6 +156,12 @@
         margin-top: 20px;
     }
 }
+.v2-activity-contact-point {
+    margin-top: 24px; padding-top: 18px; border-top: 1px solid #e2e8f0;
+    p { font-size: 12px; color: #64748b; line-height: 1.7; margin: 6px 0; }
+    .v2-activity-contact-name { font-weight: 600; color: #15365b; font-size: 14px; }
+    a { display: block; width: fit-content; overflow-wrap: anywhere; margin-top: 8px; color: #c2410c; font-size: 13px; }
+}
 .v2-activity-section-kicker {
     color: #e66514;
     letter-spacing: 0.12em;

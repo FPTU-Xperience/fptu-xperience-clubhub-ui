@@ -11,8 +11,9 @@ import ActivityAttendance from '../../../../../components/v2/activity-detail/Act
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
-import ClubNavigationLinks from '../../../../../components/v2/common/ClubNavigationLinks';
 import { saveActivityResource } from '../../../../../services/activity-resources';
+import ActivityPublicationControl from './ActivityPublicationControl';
+import './ActivityEditing.scss';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -23,16 +24,34 @@ const tabs = [
 const localDateTime = (value) => {
     const date = new Date(value || '');
     return Number.isFinite(date.getTime())
-        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+        ? new Intl.DateTimeFormat('sv-SE', {
+              timeZone: 'Asia/Ho_Chi_Minh',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+          })
+              .format(date)
+              .replace(' ', 'T')
         : '';
 };
+const coreFields = (activity) => ({
+    title: activity.title,
+    description: activity.description,
+    location: activity.location,
+    startTime: localDateTime(activity.startTime),
+    endTime: localDateTime(activity.endTime),
+});
 
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
-    const { user } = useAuth();
+    const { user, clubAccess } = useAuth();
     const result = useActivityDetail(api, sessionKey, manager ? activityId : null);
     const activity = result.data;
     const [tab, setTab] = useState('overview');
-    const [editing, setEditing] = useState(false);
+    const [coreDraft, setCoreDraft] = useState(null);
+    const [editorDraft, setEditorDraft] = useState(null);
+    const editing = editorDraft !== null;
     const [coverOpen, setCoverOpen] = useState(false);
     const [coverFile, setCoverFile] = useState(null);
     const [coverUrl, setCoverUrl] = useState('');
@@ -84,12 +103,33 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 return false;
             }),
         );
+    const previewCore = (event) => {
+        event.preventDefault();
+        if (!editorDraft || busy) return;
+        if (![editorDraft.title, editorDraft.description, editorDraft.location].every((value) => value.trim())) {
+            setError('Vui lòng nhập tên, địa điểm và mô tả hoạt động.');
+            return;
+        }
+        if (!(new Date(`${editorDraft.endTime}:00+07:00`) > new Date(`${editorDraft.startTime}:00+07:00`))) {
+            setError('Thời gian kết thúc phải sau thời gian bắt đầu.');
+            return;
+        }
+        setCoreDraft({ ...editorDraft });
+        setEditorDraft(null);
+        setTab('overview');
+        setError('');
+        setNotice('');
+    };
     const saveCore = async (event) => {
         event.preventDefault();
-        if (busy) return;
-        const values = Object.fromEntries(new FormData(event.currentTarget));
-        const start = new Date(values.startTime);
-        const end = new Date(values.endTime);
+        if (busy || !coreDraft) return;
+        const values = coreDraft;
+        if (![values.title, values.description, values.location].every((value) => value.trim())) {
+            setError('Vui lòng nhập tên, địa điểm và mô tả hoạt động.');
+            return;
+        }
+        const start = new Date(`${values.startTime}:00+07:00`);
+        const end = new Date(`${values.endTime}:00+07:00`);
         if (!(end > start)) {
             setError('Thời gian kết thúc phải sau thời gian bắt đầu.');
             return;
@@ -106,7 +146,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 location: values.location.trim(),
             });
             if (alive.current) {
-                setEditing(false);
+                setCoreDraft(null);
                 setNotice('Đã lưu thông tin hoạt động.');
                 result.retry();
             }
@@ -185,7 +225,19 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 title={result.status === 'not-found' ? 'Không tìm thấy hoạt động' : undefined}
             />
         );
-    const displayed = { ...activity, clubName: workspace.name, coverImageUrl: coverUrl || activity.coverImageUrl };
+    const displayed = {
+        ...activity,
+        ...(coreDraft || {}),
+        clubName: workspace.name,
+        coverImageUrl: coverUrl || activity.coverImageUrl,
+        startTime: coreDraft ? (coreDraft.startTime ? `${coreDraft.startTime}:00+07:00` : '') : activity.startTime,
+        endTime: coreDraft ? (coreDraft.endTime ? `${coreDraft.endTime}:00+07:00` : '') : activity.endTime,
+    };
+    const changeCore = (key, value) => {
+        setEditorDraft((current) => ({ ...current, [key]: value }));
+        setError('');
+    };
+
     const canSaveResources =
         activity.resourceCapabilities.canManage &&
         (!drafts.some((row) => row.file && (tab === 'documents' ? row.kind === 'DOCUMENT' : row.kind !== 'DOCUMENT')) ||
@@ -213,136 +265,214 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                     </button>
                 </p>
             )}
-            <ActivityProfileLayout
-                activity={displayed}
-                preview={Boolean(coverUrl)}
-                tabs={tabs}
-                tab={tab}
-                onTabChange={setTab}
-                actions={
-                    <>
-                        <Link
-                            className="v2-button"
-                            to={`/v2/activities/${activity.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <Eye size={15} />
-                            Xem trang công khai
-                        </Link>
-                        <button
-                            className="v2-button v2-button--primary"
-                            type="button"
-                            onClick={() => {
-                                setError('');
-                                setEditing(true);
-                            }}
-                            disabled={busy}
-                        >
-                            <Pencil size={15} />
-                            Chỉnh sửa
-                        </button>
-                    </>
-                }
-                coverAction={
-                    <button
-                        className="v2-button"
-                        type="button"
-                        onClick={() => {
-                            setError('');
-                            setCoverOpen(true);
-                        }}
-                        disabled={busy}
-                    >
-                        <Camera size={15} />
-                        Đổi ảnh bìa
-                    </button>
-                }
-            >
-                {tab === 'overview' && (
-                    <ActivityOverview
-                        activity={activity}
-                        clubLink={<ClubNavigationLinks clubCode={workspace.clubCode} />}
-                    />
-                )}
-                {['documents', 'media'].includes(tab) && (
-                    <ActivityResourceEditor
-                        key={tab}
-                        kind={tab === 'documents' ? 'DOCUMENT' : 'MEDIA'}
-                        resources={activity.resources}
-                        drafts={drafts}
-                        onAdd={addDrafts}
-                        onRemove={removeDraft}
-                        onSave={saveResources}
-                        canSave={canSaveResources}
-                        busy={busy}
-                    />
-                )}
-                {tab === 'attendance' && (
-                    <div className="v2-activity-profile-panel">
-                        <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager />
-                    </div>
-                )}
-            </ActivityProfileLayout>
-            {editing && (
-                <V2Modal title="Chỉnh sửa hoạt động" onClose={() => !busy && setEditing(false)} wide>
-                    <form className="v2-activity-edit-form" onSubmit={saveCore}>
-                        <label>
-                            Tên hoạt động
-                            <input name="title" defaultValue={activity.title} required maxLength={120} />
-                        </label>
-                        <div className="v2-activity-edit-pair">
-                            <label>
-                                Bắt đầu
-                                <input
-                                    name="startTime"
-                                    type="datetime-local"
-                                    defaultValue={localDateTime(activity.startTime)}
-                                    required
-                                />
-                            </label>
-                            <label>
-                                Kết thúc
-                                <input
-                                    name="endTime"
-                                    type="datetime-local"
-                                    defaultValue={localDateTime(activity.endTime)}
-                                    required
-                                />
-                            </label>
-                        </div>
-                        <label>
-                            Địa điểm
-                            <input name="location" defaultValue={activity.location} required maxLength={255} />
-                        </label>
-                        <label>
-                            Mô tả
-                            <textarea
-                                name="description"
-                                defaultValue={activity.description}
-                                required
-                                rows={5}
-                                maxLength={1000}
+            <div className="v2-activity-edit-layout">
+                <div className="v2-activity-live-preview">
+                    <ActivityProfileLayout
+                        activity={displayed}
+                        preview={Boolean(coverUrl || coreDraft)}
+                        tabs={tabs}
+                        tab={tab}
+                        onTabChange={setTab}
+                        actions={
+                            <>
+                                {activity.isPublished === true && (
+                                    <Link
+                                        className="v2-button"
+                                        to={`/v2/activities/${activity.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <Eye size={15} />
+                                        Xem trang công khai
+                                    </Link>
+                                )}
+                                <button
+                                    className="v2-button v2-button--primary"
+                                    type="button"
+                                    onClick={() => {
+                                        setError('');
+                                        setNotice('');
+                                        setEditorDraft({ ...(coreDraft || coreFields(activity)) });
+                                        setTab('overview');
+                                    }}
+                                    disabled={busy}
+                                >
+                                    <Pencil size={15} />
+                                    Chỉnh sửa
+                                </button>
+                            </>
+                        }
+                        beforeTabs={
+                            <ActivityPublicationControl
+                                api={api}
+                                activity={activity}
+                                access={clubAccess.find((item) => String(item.clubId) === String(activity.clubId))}
+                                busy={busy}
+                                hasUnsavedContent={Boolean(coreDraft || editorDraft || coverFile || drafts.length)}
+                                onSaved={() => result.retry()}
                             />
-                        </label>
-                        {error && (
-                            <p className="v2-activity-profile-error" role="alert">
-                                {error}
-                            </p>
-                        )}
-                        <footer>
+                        }
+                        coverAction={
                             <button
                                 className="v2-button"
                                 type="button"
-                                onClick={() => setEditing(false)}
+                                onClick={() => {
+                                    setError('');
+                                    setCoverOpen(true);
+                                }}
                                 disabled={busy}
                             >
-                                Hủy
+                                <Camera size={15} />
+                                Đổi ảnh bìa
                             </button>
-                            <button className="v2-button v2-button--primary" disabled={busy}>
-                                {busy ? 'Đang lưu…' : 'Lưu thay đổi'}
-                            </button>
-                        </footer>
+                        }
+                    >
+                        {tab === 'overview' && <ActivityOverview activity={displayed} />}
+                        {['documents', 'media'].includes(tab) && (
+                            <ActivityResourceEditor
+                                key={tab}
+                                kind={tab === 'documents' ? 'DOCUMENT' : 'MEDIA'}
+                                resources={activity.resources}
+                                drafts={drafts}
+                                onAdd={addDrafts}
+                                onRemove={removeDraft}
+                                onSave={saveResources}
+                                canSave={canSaveResources}
+                                busy={busy}
+                            />
+                        )}
+                        {tab === 'attendance' && (
+                            <div className="v2-activity-profile-panel">
+                                <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager />
+                            </div>
+                        )}
+                    </ActivityProfileLayout>
+                    {coreDraft && (
+                        <div className="v2-activity-preview-pending" aria-busy={busy}>
+                            <div role="status">
+                                <strong>Bản xem trước chưa lưu</strong>
+                                <p>Kiểm tra nội dung bên trên trước khi lưu thay đổi.</p>
+                            </div>
+                            <div className="v2-activity-preview-pending-actions">
+                                <button
+                                    className="v2-button"
+                                    type="button"
+                                    disabled={busy}
+                                    onClick={() => {
+                                        setCoreDraft(null);
+                                        setError('');
+                                        setNotice('');
+                                    }}
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    className="v2-button v2-button--primary"
+                                    type="button"
+                                    disabled={busy}
+                                    onClick={saveCore}
+                                >
+                                    {busy ? 'Đang lưu…' : 'Lưu thay đổi'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {editing && (
+                <V2Modal
+                    title="Chỉnh sửa hoạt động"
+                    wide
+                    onClose={() => {
+                        if (!busy) {
+                            setEditorDraft(null);
+                            setError('');
+                        }
+                    }}
+                >
+                    <form className="v2-activity-edit-form" onSubmit={previewCore}>
+                        <fieldset disabled={busy}>
+                            <div className="v2-activity-edit-field">
+                                <label htmlFor="activity-edit-title">Tên hoạt động</label>
+                                <input
+                                    id="activity-edit-title"
+                                    name="title"
+                                    value={editorDraft.title}
+                                    onChange={(event) => changeCore('title', event.target.value)}
+                                    required
+                                    maxLength={120}
+                                />
+                            </div>
+                            <div className="v2-activity-edit-pair">
+                                <div className="v2-activity-edit-field">
+                                    <label htmlFor="activity-edit-startTime">Bắt đầu (giờ Việt Nam)</label>
+                                    <input
+                                        id="activity-edit-startTime"
+                                        name="startTime"
+                                        type="datetime-local"
+                                        value={editorDraft.startTime}
+                                        onChange={(event) => changeCore('startTime', event.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="v2-activity-edit-field">
+                                    <label htmlFor="activity-edit-endTime">Kết thúc (giờ Việt Nam)</label>
+                                    <input
+                                        id="activity-edit-endTime"
+                                        name="endTime"
+                                        type="datetime-local"
+                                        value={editorDraft.endTime}
+                                        onChange={(event) => changeCore('endTime', event.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="v2-activity-edit-field">
+                                <label htmlFor="activity-edit-location">Địa điểm</label>
+                                <input
+                                    id="activity-edit-location"
+                                    name="location"
+                                    value={editorDraft.location}
+                                    onChange={(event) => changeCore('location', event.target.value)}
+                                    required
+                                    maxLength={255}
+                                />
+                            </div>
+                            <div className="v2-activity-edit-field">
+                                <label htmlFor="activity-edit-description">Mô tả</label>
+                                <textarea
+                                    id="activity-edit-description"
+                                    name="description"
+                                    value={editorDraft.description}
+                                    onChange={(event) => changeCore('description', event.target.value)}
+                                    required
+                                    rows={5}
+                                    maxLength={1000}
+                                />
+                            </div>
+                            {error && (
+                                <p className="v2-activity-profile-error" role="alert">
+                                    {error}
+                                </p>
+                            )}
+                            <footer>
+                                <button
+                                    className="v2-button"
+                                    type="button"
+                                    onClick={() => {
+                                        setEditorDraft(null);
+                                        setError('');
+                                        setNotice('');
+                                    }}
+                                    disabled={busy}
+                                >
+                                    Hủy
+                                </button>
+                                <button className="v2-button v2-button--primary" disabled={busy}>
+                                    Xem trước
+                                </button>
+                            </footer>
+                        </fieldset>
                     </form>
                 </V2Modal>
             )}

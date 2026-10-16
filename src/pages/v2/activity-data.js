@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { mapActivityResources } from '../../components/v2/activity-detail/activity-resources-data.js';
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
+import { activityPublication, isActivityPublic } from './activity-publication.js';
+import { resolveActivityContactPoint } from './activity-contact-point.js';
 
 export function classifyActivityError(error) {
     if (error?.status === 403) return 'forbidden';
@@ -13,12 +15,14 @@ export function mapActivityDetailItem(raw = {}) {
     const status = legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
     if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(status)) return null;
     return {
+        ...activityPublication(raw),
         id: String(raw.id),
         clubId: String(raw.clubId || ''),
         clubCode: String(raw.clubCode || raw.code || ''),
         clubName: String(raw.clubName || 'CLB'),
         title: String(raw.title || 'Hoạt động'),
         description: String(raw.description || ''),
+        contactPoint: resolveActivityContactPoint(raw),
         coverImageUrl: String(raw.coverImageUrl || ''),
         startTime: raw.startTime || raw.startTimeUtc || '',
         endTime: raw.endTime || raw.endTimeUtc || '',
@@ -35,7 +39,7 @@ export function mapActivityDetailItem(raw = {}) {
 
 export function mapActivityFeedItem(raw = {}) {
     const item = mapActivityDetailItem(raw);
-    return item && ['UPCOMING', 'LIVE'].includes(item.status) ? item : null;
+    return item && isActivityPublic(item) && ['UPCOMING', 'LIVE'].includes(item.status) ? item : null;
 }
 
 export function useActivityDetail(api, sessionKey, activityId) {

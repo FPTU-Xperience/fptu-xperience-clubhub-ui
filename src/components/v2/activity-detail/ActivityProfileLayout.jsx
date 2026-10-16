@@ -11,7 +11,17 @@ const statuses = {
     COMPLETED: ['completed', 'Đã hoàn thành'],
     CANCELLED: ['cancelled', 'Đã hủy'],
 };
-export default function ActivityProfileLayout({ activity: input, tabs, tab, onTabChange, actions, coverAction, children, preview = false }) {
+export default function ActivityProfileLayout({
+    activity: input,
+    tabs,
+    tab,
+    onTabChange,
+    actions,
+    coverAction,
+    beforeTabs,
+    children,
+    preview = false,
+}) {
     const activity = useEntityMedia('activity', input, { preview });
     const [tone, label] = statuses[activity.status] || ['unknown', 'Đang cập nhật'];
     const date = new Date(activity.startTime || '');
@@ -22,7 +32,12 @@ export default function ActivityProfileLayout({ activity: input, tabs, tab, onTa
                 {activity.coverImageUrl ? (
                     <img src={activity.coverImageUrl} alt={`Ảnh bìa ${activity.title}`} />
                 ) : (
-                    <GraphicBanner size={ACTIVITY_BANNER_SIZE} preserveAspectRatio="xMinYMid slice" design={defaultGraphicBanner('activity')} label={`Banner ${activity.title}`} />
+                    <GraphicBanner
+                        size={ACTIVITY_BANNER_SIZE}
+                        preserveAspectRatio="xMinYMid slice"
+                        design={defaultGraphicBanner('activity')}
+                        label={`Banner ${activity.title}`}
+                    />
                 )}
                 {coverAction && <div className="v2-activity-profile-cover-action">{coverAction}</div>}
             </div>
@@ -57,6 +72,7 @@ export default function ActivityProfileLayout({ activity: input, tabs, tab, onTa
                     {activity.location || 'Địa điểm đang cập nhật'}
                 </span>
             </div>
+            {beforeTabs}
             <nav className="v2-activity-profile-tabs" aria-label="Nội dung hoạt động">
                 {tabs.map(([id, text]) => (
                     <button
@@ -99,6 +115,37 @@ export function ActivityOverview({ activity, clubLink }) {
                     <dt>Đơn vị tổ chức</dt>
                     <dd>{activity.clubName}</dd>
                 </dl>
+                <section className="v2-activity-contact-point" aria-label="Đầu mối liên hệ">
+                    <h2>Đầu mối liên hệ</h2>
+                    {activity.contactPoint ? (
+                        <>
+                            <p className="v2-activity-contact-name">
+                                {activity.contactPoint.displayName || 'Chưa cập nhật thông tin liên hệ'}
+                            </p>
+                            <p className="v2-activity-contact-source">
+                                {activity.contactPoint.source === 'FIRST_HOST'
+                                    ? 'Host được chỉ định đầu tiên'
+                                    : 'Chủ tịch CLB · chưa chỉ định host'}
+                            </p>
+                            {activity.contactPoint.email && (
+                                <a href={`mailto:${activity.contactPoint.email}`}>{activity.contactPoint.email}</a>
+                            )}
+                            {activity.contactPoint.phone && (
+                                <a href={`tel:${activity.contactPoint.phone.replace(/[^\d+]/g, '')}`}>
+                                    {activity.contactPoint.phone}
+                                </a>
+                            )}
+                            {!activity.contactPoint.email && !activity.contactPoint.phone && (
+                                <p>Chưa có email hoặc số điện thoại liên hệ.</p>
+                            )}
+                        </>
+                    ) : (
+                        <p>
+                            Chưa đồng bộ đầu mối liên hệ. Hệ thống sẽ chọn host được chỉ định đầu tiên; khi chưa có host
+                            sẽ dùng chủ tịch CLB.
+                        </p>
+                    )}
+                </section>
                 {clubLink}
             </aside>
         </div>

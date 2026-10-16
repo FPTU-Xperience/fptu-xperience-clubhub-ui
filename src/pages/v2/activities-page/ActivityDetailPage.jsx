@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useActivityDetail } from '../activity-data';
+import { isActivityPublic } from '../activity-publication';
 import { useClubDirectory } from '../discover-data';
 import PageState from '../../../components/v2/PageState';
 import ActivityProfileLayout, { ActivityOverview } from '../../../components/v2/activity-detail/ActivityProfileLayout';
@@ -47,7 +48,13 @@ export default function ActivityDetailPage({ api, sessionKey }) {
             <Link className="v2-text-link" to="/v2/activities">
                 ← Quay lại hoạt động
             </Link>
-            {result.status === 'populated' ? (
+            {result.status === 'populated' && !isActivityPublic(activity) ? (
+                <PageState
+                    status="not-found"
+                    title="Hoạt động chưa công khai"
+                    description="Hoạt động này chưa được xuất bản hoặc đã được ẩn."
+                />
+            ) : result.status === 'populated' ? (
                 <PublicActivityProfile
                     key={`${sessionKey}:${activity.id}`}
                     activity={activity}
