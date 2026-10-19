@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Canonical self-profile GET/PATCH/media/experience/owned-cosmetics contracts remain missing from Auth/Club source. Account-local browser state and membership imports are not durable self-profile integration.
+Source Evidence: Five canonical text/phone fields, own summary/radar/contribution/ledger/activity history and basic private member projection exist. Academic/media/cosmetic extensions and target credited-wallet policies remain partial.
+
+## Current reconciliation — 2026-10-19
+
+Five canonical text/phone fields, own summary/radar/contribution/ledger/activity history and basic private member projection exist. Academic/media/cosmetic extensions and target credited-wallet policies remain partial.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 ## Current temporary implementation
 
@@ -18,8 +25,8 @@ Load/save/retry preserve session isolation and prior data on failure. The inform
 
 ## Canonical backend replacement
 
-[Self-profile contract](../../../docs/contracts/self-profile-sync-api.md) owns GET/PATCH `/api/users/me/profile`, nested partial payloads, editable-field metadata, cover transforms/text, optimistic concurrency and private club projection. Its dated canonical fields supersede the original narrow mock patch/data-model for API implementation. Do not create a second fullName-only PUT or student-profile alias.
+[Self-profile contract](../../../docs/contracts/self-profile-extensions-api.md) owns GET/PATCH `/api/users/me/profile`, nested partial payloads, editable-field metadata, cover transforms/text, optimistic concurrency and private club projection. Its dated canonical fields supersede the original narrow mock patch/data-model for API implementation. Do not create a second fullName-only PUT or student-profile alias.
 
-[Media](../../../docs/contracts/public-image-api.md) owns user avatar/background attachments. [Cover rewards](../../../docs/contracts/profile-cover-rewards-api.md) owns server-issued/free entitlements, separate editor color/shape choices and club-store redemption. [Personal experience](../../../docs/contracts/personal-experience-api.md) reuses existing Admin declaration/radar infrastructure and specifies missing self history/summary reads. Local samples are never earned grants or credited points.
+[Media](../../../docs/contracts/public-image-api.md) owns user avatar/background attachments. [Cover rewards](../../../docs/contracts/profile-cover-rewards-api.md) owns server-issued/free entitlements, separate editor color/shape choices and club-store redemption. [Personal experience](../../../docs/contracts/implemented/student-experience-reads-api.md) reuses existing Admin declaration/radar infrastructure and specifies missing self history/summary reads. Local samples are never earned grants or credited points.
 
-Follow the [implementation handoff](../../../docs/contracts/backend-api-implementation-handoff.md), D01/D02/D03/D08. Route the replacement through the existing API facade, deliberately review local imports, preserve Preview/Cancel with no write, and prove cross-account/cross-device privacy. API main 80818266 has no canonical self-profile read/write; production integration remains pending.
+Follow the [implementation handoff](../../../docs/contracts/README.md), D01/D02/D03/D08. Route the replacement through the existing API facade, deliberately review local imports, preserve Preview/Cancel with no write, and prove cross-account/cross-device privacy. API main 80818266 has no canonical self-profile read/write; production integration remains pending.

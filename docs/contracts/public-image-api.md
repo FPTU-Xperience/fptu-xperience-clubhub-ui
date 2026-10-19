@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation and storage integration
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Club.LogoUrl is readable; public detail mapper returns null cover. No media upload intent, public-images PUT, activity cover PUT or user-image persistence; yarp.json has no /api/media route.
+Source Evidence: PublicMediaEndpoints and verified club/activity image attachment routes now exist and FE sends GUID expectedVersion. Only club-logo/club-cover/activity-cover with existing owner are supported. Application logos/student media/club shapes and live R2 verification remain open.
+
+## Current reconciliation — 2026-10-19
+
+PublicMediaEndpoints and verified club/activity image attachment routes now exist and FE sends GUID expectedVersion. Only club-logo/club-cover/activity-cover with existing owner are supported. Application logos/student media/club shapes and live R2 verification remain open.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 Status: proposed contract for `fptu-xperience-clubhub-api`, rechecked on 2026-10-09 against fetched main `80818266`. The three currently called media/club/activity routes remain absent; self image attachment uses the canonical profile contract below. The first three have frontend callers in `src/services/api.js`; self avatar/background and club shape upload need facade integration when the backend contract exists.
 
@@ -68,7 +75,7 @@ Allow `null` to clear. Return `200 OK` with updated activity DTO. Add `CoverImag
 
 ## 4. Canonical self images and club shape assets
 
-Student avatar/background attachment uses PATCH `/api/users/me/profile` with `profile.avatarUrl` / `profile.coverImageUrl` and expectedVersion, per [self-profile contract](self-profile-sync-api.md). This supersedes the earlier standalone proposed PUT `/api/users/me/avatar`; do not implement duplicate profile writes unless a compatibility alias is deliberately required. GET profile returns canonical URLs; `/api/users/me` may additionally expose avatar for account chrome under the same privacy policy.
+Student avatar/background attachment uses PATCH `/api/users/me/profile` with `profile.avatarUrl` / `profile.coverImageUrl` and expectedVersion, per [self-profile contract](self-profile-extensions-api.md). This supersedes the earlier standalone proposed PUT `/api/users/me/avatar`; do not implement duplicate profile writes unless a compatibility alias is deliberately required. GET profile returns canonical URLs; `/api/users/me` may additionally expose avatar for account chrome under the same privacy policy.
 
 `student-avatar` and `student-cover` intents derive user identity from principal. `club-shape` is a separately managed club-owned transparent PNG asset, requiring catalog publication capability and the actual issuing club ID. PNG only, <=1 MiB, <=4096x4096, decoded transparency check; regular background/avatar/logo allow JPEG/PNG/WebP <=5 MiB with bounded decoded dimensions (proposed <=8192 per side). Reject malformed payload, wrong declared MIME and dimension decompression abuse. User SVG is not accepted; authored starter SVG assets remain controlled application assets.
 
@@ -86,4 +93,4 @@ Shape publication attaches the verified object through the club reward catalog c
 
 The existing FE uploads PUT then submits the returned publicUrl. Keep that wire compatibility initially; on attachment the backend verifies intent binding/HEAD and decoded bytes, marks a durable object verified and consumed/attached, and returns the canonical record. An issued URL is not proof that an object was uploaded. Reusing an already attached URL on the same owner preserves it even after the original intent expiry; cross-owner reuse/replay is denied. Replacement may leave an unattached orphan if the record save fails; cleanup must not remove referenced old objects. Add expectedVersion support to independent logo/cover saves to prevent stale full-state PUT from overwriting the other image; FE currently sends both URLs and must be updated together.
 
-Follow [conventions](api-contract-conventions.md), D01 in [handoff](backend-api-implementation-handoff.md). Actual signing credentials stay server-side. Public domain selection does not verify Gateway, object reads, CORS, backend secrets or deployment. Test all of those before calling upload integration live.
+Follow [conventions](api-contract-conventions.md), D01 in [handoff](README.md). Actual signing credentials stay server-side. Public domain selection does not verify Gateway, object reads, CORS, backend secrets or deployment. Test all of those before calling upload integration live.

@@ -4,11 +4,18 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: ActivityEndpoints.cs and ActivityWriteEndpoints.cs provide core CRUD/attendance, but ActivityContracts.cs has no resource gallery/capabilities or cover field; resource upload/commit routes and public activity projection are absent.
+Source Evidence: Activity cover persistence and owner-verified media exist. Resource galleries, upload-intents/commit resources and resourceCapabilities projection remain absent.
 
-This extends [event operations](club-event-operations-api.md), [discovery](activity-discovery-api.md) and the media-intent boundary in [backend handoff](backend-api-implementation-handoff.md). It does not replace registrations, attendance or governance authorization. Source audit: sibling API HEAD `80818266f617bd5144ab1b1a6cd0e74983983a4d`. Existing activity GET/PUT and attendance are declared; activity cover attachment, resource gallery, document/video upload and embedded-link persistence are absent. No BE source/migration was changed.
+## Current reconciliation — 2026-10-19
+
+Activity cover persistence and owner-verified media exist. Resource galleries, upload-intents/commit resources and resourceCapabilities projection remain absent.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
+
+This extends [event operations](event-registration-extensions-api.md), [discovery](implemented/student-experience-reads-api.md) and the media-intent boundary in [backend handoff](README.md). It does not replace registrations, attendance or governance authorization. Source audit: sibling API HEAD `80818266f617bd5144ab1b1a6cd0e74983983a4d`. Existing activity GET/PUT and attendance are declared; activity cover attachment, resource gallery, document/video upload and embedded-link persistence are absent. No BE source/migration was changed.
 
 ## Pages and access
 

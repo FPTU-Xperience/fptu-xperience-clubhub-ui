@@ -61,7 +61,7 @@ test('direct activity detail rejects a late old ID response and loads completed 
     const requests = [];
     let resolveOld;
     const api = {
-        getActivity(id) {
+        getStudentActivity(id) {
             requests.push(id);
             return id === 1
                 ? new Promise((resolve) => {

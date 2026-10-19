@@ -1,6 +1,6 @@
 # Lịch học theo tuần — context để triển khai BE
 
-Trạng thái ghi nhận: 2026-10-07. Đây là quyết định sản phẩm và handoff triển khai, không phải xác nhận API đã hoạt động. Contract chi tiết nằm ở [study-schedule-api.md](contracts/study-schedule-api.md); trạng thái từng page nằm ở [page-integration-checklist.md](contracts/page-integration-checklist.md).
+Trạng thái ghi nhận: 2026-10-07. Đây là quyết định sản phẩm và handoff triển khai, không phải xác nhận API đã hoạt động. Contract chi tiết nằm ở [study-schedule-api.md](contracts/study-schedule-api.md); trạng thái từng page nằm ở [page-integration-checklist.md](contracts/contract-lifecycle-audit.md).
 
 ## Quyết định đã chốt
 

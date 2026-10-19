@@ -32,4 +32,4 @@ Expected results:
 6. Sign out while the notification popover is open, then sign in as a different account; confirm the previous identity and notifications do not reappear.
 7. At 1060px width, repeat the navigation and notification interaction; confirm no horizontal clipping or scrolling is needed for header controls.
 
-See [data-model.md](./data-model.md) for expected UI states and [notification-summary.md](./contracts/notification-summary.md) for server-response behavior.
+See [data-model.md](./data-model.md) for expected UI states and [notification-summary.md](../../docs/contracts/implemented/notification-summary.md) for server-response behavior.

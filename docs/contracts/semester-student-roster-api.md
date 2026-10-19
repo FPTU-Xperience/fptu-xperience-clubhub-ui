@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: AdminDbContext persists Semesters and migration AddSemesters exists, but no semester student roster revision/import/carry-forward entities/routes in Admin/Auth contexts. General accounts and club roster reads are not the school roster.
+Source Evidence: Admin semester CRUD and calendar validation exist. Semester roster revisions/import/preview/carry-forward and inactive-student/leadership rollover are absent.
+
+## Current reconciliation — 2026-10-19
+
+Admin semester CRUD and calendar validation exist. Semester roster revisions/import/preview/carry-forward and inactive-student/leadership rollover are absent.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 D05; proposed contract, audited 2026-10-09 against main `80818266`. Complements [invitations](club-member-invitations-api.md); reuse existing AdminService semesters, never create another semester catalog. Shared [conventions](api-contract-conventions.md) apply.
 

@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation of retained product decisions
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: This remains useful product context for the canonical governance contract. Existing TransferEndpoints.cs/treasurer rules are foundations, not multi-group assignments or report/history implementation; do not retire the agreed decisions.
+Source Evidence: Retained product decisions remain useful; full governance/office/group history is still missing. Existing verified-experience assignments do not implement these decisions.
+
+## Current reconciliation — 2026-10-19
+
+Retained product decisions remain useful; full governance/office/group history is still missing. Existing verified-experience assignments do not implement these decisions.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 Ngày nghiên cứu/cập nhật: 2026-10-12. Trạng thái: **đã có bản chạy thử UI development**, backend chưa triển khai. [Contract API cho đợt BE](club-governance-groups-api.md) sở hữu endpoint/DTO; tài liệu này giữ quyết định nghiệp vụ và hướng UI. [Audit vòng đời contract](contract-lifecycle-audit.md) ghi nhận contract thay thế.
 
@@ -151,6 +158,6 @@ Response lỗi theo [api-contract-conventions.md](api-contract-conventions.md): 
 ## 9. Nguồn và phạm vi áp dụng
 
 - [Governance groups contract](club-governance-groups-api.md): thay contract primary role đã bỏ; giữ rule profile cá nhân/chuyển giao chủ nhiệm và nghiệp vụ finance, bổ sung nhiều group và lịch sử trong kỳ.
-- [Backend implementation handoff](backend-api-implementation-handoff.md), mục expanded role/capability: nền tảng tích hợp; chưa đánh dấu hoàn thành.
+- [Backend implementation handoff](README.md), mục expanded role/capability: nền tảng tích hợp; chưa đánh dấu hoàn thành.
 - [NIST RBAC FAQ](https://csrc.nist.gov/Projects/Role-Based-Access-Control/faqs): tham khảo mô hình gán quyền qua role và ràng buộc duty. Cấu trúc group/kỳ/revision cụ thể là đề xuất cho ClubHub.
 - [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html): quyền tối thiểu, mặc định từ chối, kiểm tra từng request và xét quan hệ/thuộc tính resource. Không coi RBAC thuần theo nhãn là đủ cho phạm vi CLB và thời hạn học kỳ.

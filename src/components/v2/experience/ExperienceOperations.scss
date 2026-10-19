@@ -1,0 +1,93 @@
+.v2-experience-operations {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+
+    form,
+    fieldset {
+        min-width: 0;
+        display: grid;
+        gap: 14px;
+    }
+    fieldset {
+        border: 1px solid var(--v2-border, #dfe3dd);
+        border-radius: 12px;
+        padding: 16px;
+    }
+    legend {
+        padding: 0 6px;
+        font-weight: 600;
+    }
+    label {
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+        min-width: 0;
+    }
+    input:not([type='checkbox']),
+    select,
+    textarea {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        border: 1px solid var(--v2-border, #cdd3cb);
+        border-radius: 8px;
+        background: var(--v2-surface, #fff);
+        color: inherit;
+        padding: 10px 12px;
+        font: inherit;
+    }
+    textarea {
+        min-height: 90px;
+        resize: vertical;
+    }
+    input[type='checkbox'] {
+        width: auto;
+        justify-self: start;
+    }
+    article {
+        display: grid;
+        gap: 10px;
+        border-top: 1px solid var(--v2-border, #e0e4de);
+        padding: 14px 0;
+        min-width: 0;
+    }
+    dl {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+    }
+    dl > div {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    dd {
+        margin: 0;
+        font-weight: 600;
+    }
+    nav,
+    .v2-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+    .v2-button {
+        max-width: 100%;
+        white-space: normal;
+        justify-self: start;
+    }
+    small {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+    summary {
+        cursor: pointer;
+        padding: 10px 0;
+        font-weight: 600;
+    }
+}

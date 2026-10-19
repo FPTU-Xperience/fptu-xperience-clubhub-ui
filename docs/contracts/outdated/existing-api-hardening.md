@@ -1,14 +1,16 @@
 # Existing API contracts requiring changes, not duplicate endpoints
 
-Implement Status: Not Yet
+Archived on 2026-10-19. See [current lifecycle and remaining obligations](../contract-lifecycle-audit.md). The original text below records its dated scope; newer source evidence takes precedence.
 
-Status Scope: Backend/consumer hardening
+Implement Status: Cancel
+
+Status Scope: Historical specification or source snapshot, superseded by the 2026-10-19 lifecycle audit; never a current implementation claim.
 
 Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
 Source Evidence: MemberManagementEndpoints.cs still permits managed personal snapshot writes; ManagerEndpoints.cs trusts client ManagerName; QuestEndpoints.cs accepts target StudentUserId; ReportContracts.cs exposes StoragePath. Existing routes are not proof of the required fixes.
 
-D14; source audit 2026-10-09, main 80818266. Follow [conventions](api-contract-conventions.md). The following are explicit backend or FE integration tasks rather than evidence that every route is absent.
+D14; source audit 2026-10-09, main 80818266. Follow [conventions](../api-contract-conventions.md). The following are explicit backend or FE integration tasks rather than evidence that every route is absent.
 
 | Finding and source | Required change | Acceptance |
 | --- | --- | --- |

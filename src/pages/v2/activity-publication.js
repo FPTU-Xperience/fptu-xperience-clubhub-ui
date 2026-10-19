@@ -1,7 +1,9 @@
 // Approval allows execution; publication independently controls discovery visibility.
 export function activityPublication(raw = {}) {
     return {
-        isPublished: typeof raw.isPublished === 'boolean' ? raw.isPublished : null,
+        ...(raw.publicationStatus ? { publicationStatus: raw.publicationStatus, version: raw.version } : {}),
+        isPublished: typeof raw.isPublished === 'boolean' ? raw.isPublished
+            : raw.publicationStatus ? ['PUBLISHED', 'CLOSED', 'LEGACY'].includes(raw.publicationStatus) : null,
         publicationVersion:
             Number.isSafeInteger(raw.publicationVersion) && raw.publicationVersion > 0 ? raw.publicationVersion : null,
         sourceApplicationId: raw.sourceApplicationId || null,
@@ -9,6 +11,8 @@ export function activityPublication(raw = {}) {
     };
 }
 export function isActivityPublic(activity = {}) {
+    if (activity.publicationStatus && activity.publicationStatus !== 'LEGACY')
+        return ['PUBLISHED', 'CLOSED'].includes(activity.publicationStatus);
     if (typeof activity.isPublished === 'boolean') return activity.isPublished;
     // Legacy records keep their existing visibility. New application activities fail closed.
     return !activity.sourceApplicationId;

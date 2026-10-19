@@ -1,8 +1,10 @@
 # Personal experience summary, evidence and radar
 
-Implement Status: Not Yet
+Archived on 2026-10-19. See [current lifecycle and remaining obligations](../contract-lifecycle-audit.md). The original text below records its dated scope; newer source evidence takes precedence.
 
-Status Scope: Backend implementation: partial Admin foundations
+Implement Status: Cancel
+
+Status Scope: Historical specification or source snapshot, superseded by the 2026-10-19 lifecycle audit; never a current implementation claim.
 
 Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 

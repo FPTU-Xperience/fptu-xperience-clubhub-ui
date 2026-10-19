@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Admin quest/XP models exist; no server cosmetic catalog/inventory, club wallet, redemption receipt or verified shape publication entities/endpoints. FE cosmetic ownership remains local sample state.
+Source Evidence: Canonical profile text, private experience reads and club/activity media now exist. Server cosmetics/catalog/inventory/redemption/equip and spendable club wallet remain absent.
+
+## Current reconciliation — 2026-10-19
+
+Canonical profile text, private experience reads and club/activity media now exist. Server cosmetics/catalog/inventory/redemption/equip and spendable club wallet remain absent.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 Frontend scope: independent cover background, stamp shape, text and temporary club rewards. ProfileCoverArt uses a 1200x300 canvas. Shapes occupy their own 240x240 local viewport at 100% scale, preserve the source aspect ratio and rotate/scale about their own center. Common vector stamps use the selected palette secondary/accent colors; their position, rotation and scale remain independent of the background. Uploaded stamps retain source colors and use independent HSL adjustments. Uploaded assets remain original PNG/SVG images, with HSL adjustments applied only to the stamp.
 
@@ -118,7 +125,7 @@ CLB upload accepts PNG or SVG, max 5 MB and 4096x4096; transparency is optional.
 
 ## Catalog, ownership and redemption completion — 2026-10-09
 
-D08 [handoff](backend-api-implementation-handoff.md); [conventions](api-contract-conventions.md) apply. Latest main has Admin quest/XP entities, but no club spendable wallet/inventory/redemption. Reuse one wallet/ledger from D07; `/wallet/me` and `/points/me` are projections of that same ledger, never two balances.
+D08 [handoff](README.md); [conventions](api-contract-conventions.md) apply. Latest main has Admin quest/XP entities, but no club spendable wallet/inventory/redemption. Reuse one wallet/ledger from D07; `/wallet/me` and `/points/me` are projections of that same ledger, never two balances.
 
 POST `/api/clubs/{clubId}/rewards` and PATCH `/rewards/{rewardId}` with expectedVersion require `club.rewards.manage`. Body `{label,kind:"COLOR"|"SHAPE"|"BUNDLE",price,grants,assetId?,availability}`. Label 1..80, price integer 0..100000 (zero means a free claim) under server pricing policy. Grants reference immutable catalog color/shape IDs; bundle grants both. A color definition contains background/secondary/accent/ink validated paints (solid hex, basic gradient preset or club-authored gradient definition). Shape references a verified club-shape PNG or controlled authored starter asset. Issuer derived from club scope, no cross-club publication. Common styles and `none` shape remain free and cannot be republished as paid geometry. Authored FPT Dev starters are not falsely attributed to a club upload.
 

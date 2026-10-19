@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation: partial directory/detail foundations
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: ClubEndpoints.cs supplies active directory/public detail and ClubCategories persistence. ClubDirectoryResponse still includes manager identities and contacts; strictly minimal directory projection and server-authorized personalized recommendation behavior are not fully implemented.
+Source Evidence: Directory/public detail/access foundations exist; student activity feed/detail/recommendations are now integrated separately. Full minimal-directory privacy and the original club recommendation projection remain partial.
+
+## Current reconciliation — 2026-10-19
+
+Directory/public detail/access foundations exist; student activity feed/detail/recommendations are now integrated separately. Full minimal-directory privacy and the original club recommendation projection remain partial.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 This is the interface contract consumed by the ClubHub UI. It documents required behavior; it does
 not assert that every field exists in the current backend response.
@@ -68,4 +75,4 @@ authorization checks.
 
 ## Backend rescan — 2026-10-09
 
-Main 80818266 has active club directory/detail and a persisted dynamic category catalog. Preserve server category codes and fix static normalization in application flows instead of creating another category source. Joining is now handled by the production detail UI through existing routes, beyond this original read-only feature scope. Public-page writes/media remain D04/D01. Activity recommendations require the distinct [discovery API contract](../../../docs/contracts/activity-discovery-api.md); a curated club subset is not personalized ranking. See [handoff](../../../docs/contracts/backend-api-implementation-handoff.md).
+Main 80818266 has active club directory/detail and a persisted dynamic category catalog. Preserve server category codes and fix static normalization in application flows instead of creating another category source. Joining is now handled by the production detail UI through existing routes, beyond this original read-only feature scope. Public-page writes/media remain D04/D01. Activity recommendations require the distinct [discovery API contract](../../../docs/contracts/implemented/student-experience-reads-api.md); a curated club subset is not personalized ranking. See [handoff](../../../docs/contracts/README.md).

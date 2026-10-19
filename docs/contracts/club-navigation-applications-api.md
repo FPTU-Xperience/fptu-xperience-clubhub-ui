@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation: session addendum
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Existing code/logo/access/review fields support part of the UI. Self withdrawal, source/action/version metadata and persistent account pins are absent; exact source files and acceptance tasks are detailed below.
+Source Evidence: Own access/membership composition remains valid. GUID membership version and review timestamps exist; self withdrawal, WITHDRAWN lifecycle, explicit source/action metadata and server account pins remain incomplete.
+
+## Current reconciliation — 2026-10-19
+
+Own access/membership composition remains valid. GUID membership version and review timestamps exist; self withdrawal, WITHDRAWN lifecycle, explicit source/action metadata and server account pins remain incomplete.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 This is the session addendum to D10 [own memberships](my-clubs-membership-api.md), D06 [governance](club-governance-groups-api.md) and [shared conventions](api-contract-conventions.md). It adds persistent pin preferences and the inbox display rule; it does not create a second membership, role or withdrawal authority.
 

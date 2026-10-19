@@ -2,7 +2,7 @@
 
 **Input**: Design documents from `/specs/002-header-production/`
 
-**Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [notification-summary.md](./contracts/notification-summary.md), [quickstart.md](./quickstart.md)
+**Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [notification-summary.md](../../docs/contracts/implemented/notification-summary.md), [quickstart.md](./quickstart.md)
 
 **Tests**: Focused tests are included because this migration changes shared production UI, session-scoped data handling, routing, and availability states under Constitution Principle V.
 

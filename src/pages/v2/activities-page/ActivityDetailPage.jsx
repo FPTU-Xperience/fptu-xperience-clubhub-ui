@@ -12,6 +12,8 @@ import '../../../components/v2/activity-card/ActivityCard.scss';
 import './ActivityDetailPage.scss';
 import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLinks';
 import ActivityStaffingPanel from '../../../components/v2/activity-detail/ActivityStaffingPanel';
+import StudentActivityActions from '../../../components/v2/activity-detail/StudentActivityActions';
+import ActivitySessionsPanel from '../../../components/v2/activity-detail/ActivitySessionsPanel';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -20,14 +22,18 @@ const tabs = [
     ['assignments', 'Phân công'],
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh của tôi'],
+    ['sessions', 'Buổi & đóng góp'],
 ];
-function PublicActivityProfile({ activity, clubCode, sessionKey }) {
+function PublicActivityProfile({ activity, clubCode, sessionKey, api, onChanged }) {
     const [tab, setTab] = useState('overview');
     const resources = publicActivityResources(activity.resources);
     const clubLink = <ClubNavigationLinks clubCode={clubCode} />;
     return (
         <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink}>
-            {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
+            {tab === 'overview' && <>
+                <ActivityOverview activity={activity} clubLink={clubLink} />
+                <StudentActivityActions api={api} activity={activity} onChanged={onChanged} />
+            </>}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
             {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
             {['assignments', 'recruitment'].includes(tab) && <ActivityStaffingPanel activityId={activity.id} mode={tab} />}
@@ -36,6 +42,7 @@ function PublicActivityProfile({ activity, clubCode, sessionKey }) {
                     <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager={false} />
                 </div>
             )}
+            {tab === 'sessions' && <ActivitySessionsPanel key={`${sessionKey}:${activity.id}`} api={api} activity={activity} student readOnly onChanged={onChanged} />}
         </ActivityProfileLayout>
     );
 }
@@ -64,6 +71,8 @@ export default function ActivityDetailPage({ api, sessionKey }) {
                     activity={activity}
                     clubCode={clubCode}
                     sessionKey={sessionKey}
+                    api={api}
+                    onChanged={result.retry}
                 />
             ) : (
                 <PageState

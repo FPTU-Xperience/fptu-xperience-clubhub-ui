@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Admin SemesterEndpoints.cs requires BackofficeUser. No club-safe /semesters projection with configured activity bounds/report aliases, finance attribution or term-indexed schedules; shared FE selection is not server authority.
+Source Evidence: Admin semester list remains BackofficeUser-scoped. Club period plans/statistics/PDF now exist; manager-safe catalog/policy metadata and full period attribution still require a contract.
+
+## Current reconciliation — 2026-10-19
+
+Admin semester list remains BackofficeUser-scoped. Club period plans/statistics/PDF now exist; manager-safe catalog/policy metadata and full period attribution still require a contract.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 The workspace header is the single selector. Previously it was a static span; governance, invitations and club schedule editing used independent choices. `WorkspaceSemesterContext` now owns shared selection, keyed by authenticated account + club; tab navigation preserves it, switching club/account does not reuse another scope's selection. Every WorkspaceTabView receives selected metadata. No term/year selector belongs inside a tab or its modal.
 

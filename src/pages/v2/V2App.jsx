@@ -28,6 +28,7 @@ import ClubGovernancePreview from './club-workspace-page/tabs/members/governance
 import ReportDetailPage from './report-detail-page/ReportDetailPage';
 import ReportEditorPage from './report-detail-page/ReportEditorPage';
 import './V2App.scss';
+import '../../components/v2/experience/ExperienceOperations.scss';
 import { PinnedClubsProvider } from './pinned-clubs';
 const DemoApp = lazy(() => import('./DemoApp'));
 

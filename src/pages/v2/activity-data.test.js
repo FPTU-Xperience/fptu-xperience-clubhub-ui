@@ -1,8 +1,17 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyActivityError, filterActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations } from './activity-data.js';
+import { classifyActivityError, filterActivityFeed, loadStudentActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations } from './activity-data.js';
 
 const activity = { id: 'a', clubId: 'c', clubName: 'F-Code', title: 'Workshop', description: 'React', location: 'Lab', status: 'UPCOMING' };
+
+test('student feed reads every server page and refuses to combine changed visibility scopes', async () => {
+    const calls = [];
+    const api = { getStudentActivities: async (query) => { calls.push(query); return { items: [{ id: query.page }], totalPages: 2, scopeVersion: 's1' }; } };
+    assert.deepEqual((await loadStudentActivityFeed(api, 7)).map((item) => item.id), [1, 2]);
+    assert.deepEqual(calls.map((query) => [query.clubId, query.page, query.pageSize]), [[7, 1, 100], [7, 2, 100]]);
+    await assert.rejects(loadStudentActivityFeed({ getStudentActivities: async ({ page }) => ({ items: [], totalPages: 2, scopeVersion: String(page) }) }), /Quyền xem/);
+    await assert.rejects(loadStudentActivityFeed({ getStudentActivities: async () => ({ items: [] }) }), /không hợp lệ/);
+});
 
 test('activity details retain completed/cancelled activities without exposing attendance or broadening the discovery feed', () => {
     for (const status of ['COMPLETED', 'CANCELLED']) {

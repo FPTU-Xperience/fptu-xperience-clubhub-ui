@@ -50,7 +50,7 @@ class ApiService {
     }
 
     async getErrorMessage(response, { isAuthRequest = false } = {}) {
-        const payload = await this.parseResponse(response).catch(() => null);
+        const payload = await this.parseResponse(response.clone()).catch(() => null);
         if (payload?.message) {
             return formatErrorMessage(payload.message, vi.errors.server);
         }
@@ -82,7 +82,7 @@ class ApiService {
         const token = this.getToken();
 
         const headers = {
-            'Content-Type': 'application/json',
+            ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
             ...options.headers,
         };
 
@@ -127,6 +127,10 @@ class ApiService {
         if (!response.ok) {
             const requestError = new Error(await this.getErrorMessage(response));
             requestError.status = response.status;
+            const payload = await this.parseResponse(response).catch(() => null);
+            requestError.code = payload?.code;
+            requestError.errors = payload?.errors;
+            requestError.traceId = payload?.traceId;
             throw requestError;
         }
 
@@ -205,6 +209,78 @@ class ApiService {
 
     async getCurrentUser() {
         return this.request('/api/users/me');
+    }
+
+    async getMyProfile() {
+        return this.request('/api/users/me/profile');
+    }
+
+    async updateMyProfile(data) {
+        return this.request('/api/users/me/profile', { method: 'PATCH', body: JSON.stringify(data) });
+    }
+
+    async getMyExperienceSummary(params = {}) {
+        return this.request(`/api/users/me/experience-summary?${new URLSearchParams(params)}`);
+    }
+
+    async getMyRadar(params = {}) {
+        const { semesterId, ...query } = params;
+        if (semesterId) query.semester = semesterId;
+        return this.request(`/api/v1/declarations/me/radar?${new URLSearchParams(query)}`);
+    }
+
+    async getMyContributions(params = {}) {
+        return this.request(`/api/users/me/contributions?${new URLSearchParams(params)}`);
+    }
+
+    async uploadPrivateEvidence(file, key) {
+        if (!file || !['application/pdf', 'image/png', 'image/jpeg'].includes(file.type) || file.size <= 0 || file.size > 10 * 1024 * 1024)
+            throw new Error('Minh chứng phải là PDF, PNG hoặc JPG, tối đa 10 MB.');
+        const form = new FormData(); form.append('file', file);
+        return this.request('/api/contributions/evidence', { method: 'POST', headers: { 'Idempotency-Key': key }, body: form });
+    }
+
+    async downloadPrivateEvidence(id) {
+        const response = await fetch(this.buildUrl(`/api/contributions/evidence/${encodeURIComponent(id)}/download`), {
+            headers: { Authorization: `Bearer ${this.getToken()}` },
+        });
+        if (!response.ok) throw new Error(await this.getErrorMessage(response));
+        const blob = await response.blob(), url = URL.createObjectURL(blob);
+        const extension = { 'application/pdf': 'pdf', 'image/png': 'png', 'image/jpeg': 'jpg' }[blob.type] || 'bin';
+        const anchor = document.createElement('a'); anchor.href = url; anchor.download = `evidence-${id}.${extension}`;
+        document.body.appendChild(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async getMyExperienceLedger(params = {}) {
+        return this.request(`/api/users/me/experience-ledger?${new URLSearchParams(params)}`);
+    }
+
+    async getMyActivityHistory(params = {}) {
+        return this.request(`/api/users/me/activity-history?${new URLSearchParams(params)}`);
+    }
+
+    async getStudentActivities(params = {}) {
+        return this.readMedia('activity', `/api/v2/activities/feed?${new URLSearchParams(params)}`);
+    }
+
+    async getStudentActivity(id) {
+        return this.readMedia('activity', `/api/v2/activities/${encodeURIComponent(id)}`);
+    }
+
+    async getRecommendedActivities() {
+        return this.request('/api/v2/recommendations/activities?limit=6');
+    }
+
+    async downloadClubExperienceReport(id) {
+        const response = await fetch(this.buildUrl(`/api/club-experience-reports/${encodeURIComponent(id)}/download`), {
+            headers: { Authorization: `Bearer ${this.getToken()}` },
+        });
+        if (!response.ok) throw new Error(await this.getErrorMessage(response));
+        const url = URL.createObjectURL(await response.blob());
+        const anchor = document.createElement('a');
+        anchor.href = url; anchor.download = `experience-${id}.pdf`;
+        document.body.appendChild(anchor); anchor.click(); anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     async createUser(data) {
@@ -286,7 +362,7 @@ class ApiService {
         return this.acknowledgeMedia('club', clubId, images, updated, ticket);
     }
 
-    // Provisional manager-scoped contract; the current admin PUT /clubs/{id} cannot be used here.
+    // Manager public profile uses the version returned by GET /clubs/{id}.
     async updateClubPublicProfile(clubId, fields) {
         return this.request(`/api/clubs/${encodeURIComponent(clubId)}/public-profile`, {
             method: 'PATCH',
@@ -294,11 +370,11 @@ class ApiService {
         });
     }
 
-    async updateActivityCoverImage(activityId, coverImageUrl) {
+    async updateActivityCoverImage(activityId, coverImageUrl, expectedVersion) {
         const ticket = this.media.ticket();
         const updated = await this.request(`/api/activities/${encodeURIComponent(activityId)}/cover-image`, {
             method: 'PUT',
-            body: JSON.stringify({ coverImageUrl }),
+            body: JSON.stringify({ coverImageUrl, expectedVersion }),
         });
         return this.acknowledgeMedia('activity', activityId, { coverImageUrl }, updated, ticket);
     }
@@ -720,10 +796,11 @@ class ApiService {
         return created;
     }
 
-    async updateActivity(activityId, data) {
+    async updateActivity(activityId, data, idempotencyKey) {
         const ticket = this.media.ticket();
         const updated = await this.request(`/api/activities/${activityId}`, {
             method: 'PUT',
+            ...(idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {}),
             body: JSON.stringify(data),
         });
         return this.acknowledgeMedia('activity', activityId, data, updated, ticket);

@@ -6,7 +6,7 @@ import CountBadge from '../../../../../components/v2/common/CountBadge';
 import { formatAttendanceStatus } from '../../../../../locales/vi';
 import WorkspaceTabLayout from '../WorkspaceTabLayout';
 import InviteMemberModal from './InviteMemberModal';
-import { projectOwnMemberProfile, useProfile } from '../../../profile-data';
+import { mapMemberProfileDetail, projectOwnMemberProfile, useProfile } from '../../../profile-data';
 import ClubRolesInfo from './ClubRolesInfo';
 import ClubGovernancePreview from './governance/ClubGovernancePreview';
 import { CLUB_MEMBER_ROLES, clubMemberRoleLabel as roleLabel } from './club-member-roles';
@@ -115,7 +115,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
             if (alive.current && request === detailVersion.current)
                 setDialog({
                     kind: 'detail',
-                    member: projectOwnMemberProfile(detail.member, user, ownProfile.data),
+                    member: projectOwnMemberProfile(mapMemberProfileDetail(detail), user, ownProfile.data),
                     detail,
                 });
         } catch (issue) {
@@ -454,14 +454,16 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                                         <>
                                             <h3>{dialog.member.fullName}</h3>
                                             <p>
-                                                {dialog.member.profileSource === 'local-self'
+                                                {dialog.member.profileSource === 'user-profile'
+                                                    ? 'Thông tin hiện tại từ hồ sơ tài khoản. Câu trả lời đăng ký được giữ riêng bên dưới.'
+                                                    : dialog.member.profileSource === 'local-self'
                                                     ? 'Hồ sơ cá nhân của bạn dùng cùng dữ liệu tạm với trang profile trên thiết bị này.'
                                                     : 'Thông tin được lưu tại thời điểm đăng ký CLB; chưa đồng bộ với hồ sơ cá nhân hiện tại.'}
                                             </p>
                                             {[
                                                 {
                                                     title:
-                                                        dialog.member.profileSource === 'local-self'
+                                                        ['user-profile', 'local-self'].includes(dialog.member.profileSource)
                                                             ? 'Hồ sơ cá nhân'
                                                             : 'Thông tin tại thời điểm đăng ký',
                                                     fields: [
@@ -470,7 +472,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                                                         ['Địa chỉ', dialog.member.address],
                                                         ['Sở thích', dialog.member.hobbies],
                                                         ['Kỹ năng', dialog.member.skills],
-                                                        ...(dialog.member.profileSource === 'local-self'
+                                                        ...(['user-profile', 'local-self'].includes(dialog.member.profileSource)
                                                             ? [['Giới thiệu', dialog.member.profileAbout]]
                                                             : []),
                                                     ],
@@ -509,6 +511,10 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                                                     </dl>
                                                 </section>
                                             ))}
+                                            {dialog.detail.applicationSnapshot && <details>
+                                                <summary>Câu trả lời tại thời điểm đăng ký</summary>
+                                                <dl className="v2-member-detail">{Object.entries({ fullName: 'Tên đăng ký', reason: 'Lý do tham gia', goals: 'Mục tiêu', expectations: 'Kỳ vọng', contributions: 'Đóng góp dự kiến' }).map(([field, label]) => <div key={field}><dt>{label}</dt><dd>{dialog.detail.applicationSnapshot[field] || '—'}</dd></div>)}</dl>
+                                            </details>}
                                             <h3>Lịch sử hoạt động</h3>
                                             {dialog.detail.activityHistory?.length ? (
                                                 <ul className="v2-member-history">

@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-    Award,
-    BookOpen,
     Camera,
     Eye,
-    FolderOpen,
     GraduationCap,
     Image as ImageIcon,
     LockKeyhole,
@@ -17,6 +14,7 @@ import {
 } from 'lucide-react';
 import PageState from '../../../components/v2/PageState';
 import ProfileAvatar from './ProfileAvatar';
+import ExperiencePanel from './ExperiencePanel';
 import ProfileAvatarModal from './ProfileAvatarModal';
 import { previewProfile, toSharedProfile, useProfileMemberships } from '../profile-data';
 import { campusLabel } from '../profile-options';
@@ -25,67 +23,6 @@ import ProfileCoverModal from './ProfileCoverModal';
 import ProfileCoverArt from './ProfileCoverArt';
 import ProfileClubLogo from './ProfileClubLogo';
 import './ProfilePage.scss';
-
-const pillarLabels = ['Học tập', 'Nghiên cứu', 'Quốc tế', 'Thể thao & văn hóa', 'Cộng đồng', 'Khởi nghiệp'];
-
-function Radar({ pillars }) {
-    const values = pillars?.current || Array(6).fill(0);
-    const previous = pillars?.previous || Array(6).fill(0);
-    const point = (index, radius) => [
-        160 + Math.sin((index * Math.PI) / 3) * radius,
-        137 - Math.cos((index * Math.PI) / 3) * radius,
-    ];
-    const polygon = (items) => items.map((value, index) => point(index, value).join(',')).join(' ');
-    const description = pillarLabels.map((label, index) => `${label}: ${values[index] || 0}/100`).join(', ');
-    return (
-        <div className="v2-profile-radar">
-            <svg viewBox="0 0 320 285" role="img" aria-label={`Radar sáu trụ cột trải nghiệm. ${description}`}>
-                {[25, 50, 75, 100].map((radius) => (
-                    <polygon key={radius} points={polygon(Array(6).fill(radius))} fill="none" stroke="currentColor" />
-                ))}
-                {pillarLabels.map((label, index) => {
-                    const [x, y] = point(index, 100);
-                    const [textX, textY] = point(index, 123);
-                    return (
-                        <g key={label}>
-                            <line x1="160" y1="137" x2={x} y2={y} />
-                            <text x={textX} y={textY} textAnchor="middle" dominantBaseline="middle">
-                                {label}
-                            </text>
-                        </g>
-                    );
-                })}
-                <polygon points={polygon(previous)} className="v2-profile-radar-previous" />
-                <polygon points={polygon(values)} className="v2-profile-radar-current" />
-                {values.map((value, index) => {
-                    const [x, y] = point(index, value);
-                    return <circle key={pillarLabels[index]} cx={x} cy={y} r="3" className="v2-profile-radar-dot" />;
-                })}
-            </svg>
-            <div className="v2-profile-radar-legend" aria-hidden="true">
-                <span>
-                    <i />
-                    Kỳ này
-                </span>
-                <span>
-                    <i />
-                    Kỳ trước
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function Stat({ icon: Icon, label, value, note, hidden }) {
-    return (
-        <section className="v2-profile-stat">
-            <Icon size={21} aria-hidden="true" />
-            <span>{label}</span>
-            <strong>{hidden ? '—' : value}</strong>
-            <small>{note}</small>
-        </section>
-    );
-}
 
 export default function ProfilePage({ user, sessionKey, api, profileImages, profileResult: result }) {
     const { images, error: imageError, saveImage } = profileImages;
@@ -120,7 +57,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
             await result.save(profileDraft);
             if (sessionRef.current !== session) return;
             setProfileDraft(null);
-            setNotice('Đã lưu hồ sơ trên thiết bị này.');
+            setNotice('Đã lưu hồ sơ. Tên, giới thiệu, kỹ năng, sở thích và điện thoại được đồng bộ; trang trí và thông tin bổ sung lưu trên thiết bị.');
         } catch (issue) {
             if (sessionRef.current === session) setSaveError(issue.message || 'Không thể lưu hồ sơ.');
         } finally {
@@ -332,51 +269,8 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                             </button>
                         </div>
                     </div>
-                    {tab === 'overview' ? (
-                        <>
-                            <div className="v2-profile-stats">
-                                <Stat
-                                    icon={Award}
-                                    label="Điểm đóng góp ghi nhận"
-                                    value="—"
-                                    hidden={shared}
-                                    note="Chưa có API tổng hợp cá nhân"
-                                />
-                                <Stat
-                                    icon={BookOpen}
-                                    label="Hoạt động đã tham dự"
-                                    value="—"
-                                    note="Chưa có API lịch sử cá nhân"
-                                />
-                                <Stat
-                                    icon={FolderOpen}
-                                    label="Câu lạc bộ tham gia"
-                                    value={memberships.status === 'ready' ? participations.length : '—'}
-                                    note="Danh sách đã duyệt từ hệ thống"
-                                />
-                            </div>
-                            <section className="v2-profile-panel v2-profile-experience">
-                                <div>
-                                    <h2>Hành trình của bạn không chỉ được đo bằng điểm số.</h2>
-                                    <p>Biểu đồ mẫu; số liệu trải nghiệm cá nhân chưa được kết nối.</p>
-                                </div>
-                                <Radar pillars={data.summary.experiencePillars} />
-                            </section>
-                        </>
-                    ) : (
-                        <section className="v2-profile-panel">
-                            <div className="v2-profile-section-heading">
-                                <div>
-                                    <span>MINH CHỨNG</span>
-                                    <h2>Lịch sử đóng góp & hoạt động</h2>
-                                </div>
-                            </div>
-                            <p className="v2-profile-empty">
-                                {shared
-                                    ? 'Lịch sử riêng tư được ẩn trong bản chia sẻ.'
-                                    : 'Lịch sử minh chứng cá nhân chưa có API để hiển thị.'}
-                            </p>
-                        </section>
+                    {shared ? <p>Lịch sử riêng tư được ẩn trong bản chia sẻ.</p> : (
+                        <ExperiencePanel key={`${sessionKey}:${tab}`} api={api} sessionKey={sessionKey} history={tab !== 'overview'} />
                     )}
                 </div>
             </div>

@@ -111,7 +111,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
                 clubId,
             );
             if (version !== requestVersion.current) return;
-            const images = { [field]: url };
+            const images = { [field]: url, expectedVersion: club.version };
             const updated = await api.updateClubPublicImages(clubId, images);
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...images, ...(updated || {}) }));
@@ -152,7 +152,8 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setError('');
         setNotice('');
         try {
-            const updated = await api.updateClubPublicProfile(clubId, fields);
+            const changed = Object.fromEntries(Object.entries(fields).filter(([key, value]) => value !== (club[key] ?? '')));
+            const updated = await api.updateClubPublicProfile(clubId, { ...changed, expectedVersion: club.version });
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...fields, ...(updated || {}) }));
             setProfileDraft(null);

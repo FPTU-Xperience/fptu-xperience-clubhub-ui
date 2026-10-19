@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: ClubDbContext/ClubContracts and shared access retain memberships, active owner assignments and boolean treasurer access; no governance terms/groups/revisions/change sets/board snapshots/vice nomination entities or endpoints.
+Source Evidence: Club ownership/membership and scoped verification assignments exist. Governance groups/terms/change sets/report snapshots/office rollover remain absent; a verification grant is not a governance group.
+
+## Current reconciliation — 2026-10-19
+
+Club ownership/membership and scoped verification assignments exist. Governance groups/terms/change sets/report snapshots/office rollover remain absent; a verification grant is not a governance group.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 Canonical D06 contract, 2026-10-12. **Proposed: no governance group/report/history/vice nomination routes exist in API main `80818266`.** Remote main and local HEAD were checked and matched on this date. This replaces the retired `club-member-roles-api.md` single-primary-role proposal. [Product decisions](club-governance-groups-proposal.md), [conventions](api-contract-conventions.md), [current audit](contract-lifecycle-audit.md).
 
@@ -28,7 +35,7 @@ Current FE rehearsal is development-only: `/v2/preview/club-governance` and the 
 
 - ClubService `ClubMembership`, `ClubMemberRoleRules`: MEMBER/TREASURER; owner derives from active `ClubManagerAssignment`; at most two treasurers; owner cannot also be treasurer.
 - `TransferEndpoints.cs`: existing owner transfer submit/read/CTSV approve/reject. Reuse this workflow for owner; no generic group mutation or role PATCH may transfer ownership.
-- `MemberManagementEndpoints.cs`: manager member queries/invitations, existing user-profile snapshot projection. Membership details remain self-owned personal data; see [self-profile-sync](self-profile-sync-api.md). Group management never permits cross-user profile edit.
+- `MemberManagementEndpoints.cs`: manager member queries/invitations, existing user-profile snapshot projection. Membership details remain self-owned personal data; see [self-profile-sync](self-profile-extensions-api.md). Group management never permits cross-user profile edit.
 - Shared `ClubAccessSnapshot`, FinanceService `FinanceExtensions`, ReportService `ReportExtensions`: currently boolean manager/finance policies. Update their capability checks and treasurer recipients together with governance changes.
 - AdminService `Semester`: GUID/code/start/end, no duplicate semester table. Current semester routes require BackofficeUser; implement a club-safe projection, not a browser call to backoffice/internal APIs.
 

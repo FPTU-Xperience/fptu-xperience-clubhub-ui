@@ -16,6 +16,12 @@ export function mapActivityDetailItem(raw = {}) {
     if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(status)) return null;
     return {
         ...activityPublication(raw),
+        version: raw.version,
+        nextSessionId: raw.nextSessionId,
+        sessionVersion: raw.sessionVersion,
+        canRegister: raw.canRegister === true,
+        semesterId: raw.semesterId,
+        policyVersion: raw.policyVersion,
         id: String(raw.id),
         clubId: String(raw.clubId || ''),
         clubCode: String(raw.clubCode || raw.code || ''),
@@ -42,9 +48,9 @@ export function mapActivityFeedItem(raw = {}) {
     return item && isActivityPublic(item) && ['UPCOMING', 'LIVE'].includes(item.status) ? item : null;
 }
 
-export function useActivityDetail(api, sessionKey, activityId) {
+export function useActivityDetail(api, sessionKey, activityId, management = false) {
     const mediaRevision = usePublicMediaRevision('activity');
-    const identity = `${sessionKey}:${activityId}`;
+    const identity = `${sessionKey}:${activityId}:${management}`;
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ identity, status: 'loading', data: null });
     useEffect(() => {
@@ -56,7 +62,7 @@ export function useActivityDetail(api, sessionKey, activityId) {
         }
         setResult({ identity, status: 'loading', data: null });
         Promise.resolve()
-            .then(() => api.getActivity(id))
+            .then(() => management ? api.getActivity(id) : api.getStudentActivity(id))
             .then(
                 (raw) => {
                     const activity = mapActivityDetailItem(raw);
@@ -79,7 +85,7 @@ export function useActivityDetail(api, sessionKey, activityId) {
         return () => {
             active = false;
         };
-    }, [api, activityId, sessionKey, version, mediaRevision]);
+    }, [api, activityId, management, sessionKey, version, mediaRevision]);
     const current = result.identity === identity ? result : { status: 'loading', data: null };
     return { ...current, retry: () => setVersion((value) => value + 1) };
 }
@@ -160,23 +166,28 @@ function useActivityRequest(loader, mapper, sessionKey) {
     return { ...result, retry: () => setVersion((value) => value + 1) };
 }
 
+export async function loadStudentActivityFeed(api, clubId) {
+    const items = [];
+    let scopeVersion;
+    for (let page = 1; ; page++) {
+        const response = await api.getStudentActivities({ ...(clubId ? { clubId } : {}), page, pageSize: 100 });
+        if (!Array.isArray(response?.items) || !Number.isSafeInteger(response.totalPages) || response.totalPages < 0)
+            throw new Error('Máy chủ trả về trang hoạt động không hợp lệ.');
+        if (scopeVersion !== undefined && response.scopeVersion !== scopeVersion)
+            throw new Error('Quyền xem hoạt động đã thay đổi. Vui lòng tải lại.');
+        scopeVersion = response.scopeVersion;
+        items.push(...response.items);
+        if (page >= response.totalPages) return items;
+    }
+}
+
 export function useActivityFeed(api, sessionKey, clubId) {
-    const loader = useCallback(() => api.getActivities(clubId), [api, clubId]);
+    const loader = useCallback(() => loadStudentActivityFeed(api, clubId), [api, clubId]);
     const mapper = useCallback(mapActivityFeed, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }
 export function useRecommendedActivities(api, sessionKey) {
-    const loader = useCallback(() => api.getActivities(), [api]);
-    const mapper = useCallback(
-        (value) =>
-            mapActivityFeed(value)
-                .slice(0, 6)
-                .map((activity, index) => ({
-                    recommendationId: `temporary-${activity.id}`,
-                    rank: index + 1,
-                    activity,
-                })),
-        [],
-    );
+    const loader = useCallback(() => api.getRecommendedActivities(), [api]);
+    const mapper = useCallback(mapRecommendations, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }

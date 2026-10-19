@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend/integration scope: partial authorized workspace
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Current route resolves server clubCode from existing own-access/directory composition and role-gates the workspace; richer selection is optional and absent. Governance, profile/media, semester, credit/rewards and withdrawal dependencies remain open.
+Source Evidence: Authorized shell, current access composition, activity/session operations, personal experience and club plans/statistics/PDF now have consumers. Governance, wallet, safe semester catalog and action/staffing backend remain missing.
+
+## Current reconciliation — 2026-10-19
+
+Authorized shell, current access composition, activity/session operations, personal experience and club plans/statistics/PDF now have consumers. Governance, wallet, safe semester catalog and action/staffing backend remain missing.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 ## Optional proposed rich server projection
 
@@ -55,4 +62,4 @@ Activities/attendance, management roster/applications, reports and finance now u
 
 Attendance navigation follow-up (2026-10-12): removed the standalone attendance tab; attendance reads live inside the activity detail modal and full detail page. Legacy workspace `/attendance` redirects to `/activities`. Detail reloads use the authorized single-activity route and retain completed/cancelled records; discovery still excludes those statuses. Manager mode is club-scoped, member mode reads self only. This move retains existing read capability; it does not add check-in or attendance-update writes.
 
-The [debt register](../../../docs/contracts/frontend-api-debt-register.md) owns those classifications. Exact [My Clubs](../../../docs/contracts/my-clubs-membership-api.md), [club profile](../../../docs/contracts/club-public-profile-api.md), [governance groups](../../../docs/contracts/club-governance-groups-api.md), [invitations](../../../docs/contracts/club-member-invitations-api.md), [contributions](../../../docs/contracts/club-contributions-points-api.md), [event operations](../../../docs/contracts/club-event-operations-api.md) and [rewards](../../../docs/contracts/profile-cover-rewards-api.md) contracts supersede the broad future-work list for the next API session. Governance supports multiple groups, intra-term personal history and independent board reports; only protected leadership needs CTSV approval. DEV-only rehearsal does not grant live access. Organizational capabilities must be server-scoped; full leadership never grants another user's personal-profile edit.
+The [debt register](../../../docs/contracts/contract-lifecycle-audit.md) owns those classifications. Exact [My Clubs](../../../docs/contracts/my-clubs-membership-api.md), [club profile](../../../docs/contracts/implemented/club-public-profile-api.md), [governance groups](../../../docs/contracts/club-governance-groups-api.md), [invitations](../../../docs/contracts/club-member-invitations-api.md), [contributions](../../../docs/contracts/club-contributions-points-api.md), [event operations](../../../docs/contracts/event-registration-extensions-api.md) and [rewards](../../../docs/contracts/profile-cover-rewards-api.md) contracts supersede the broad future-work list for the next API session. Governance supports multiple groups, intra-term personal history and independent board reports; only protected leadership needs CTSV approval. DEV-only rehearsal does not grant live access. Organizational capabilities must be server-scoped; full leadership never grants another user's personal-profile edit.

@@ -8,6 +8,7 @@ import WorkspaceTabLayout from './WorkspaceTabLayout';
 import useWorkspaceResource from './useWorkspaceResource';
 import ReportTemplateModal from '../../report-detail-page/ReportTemplateModal';
 import { reportTemplateLabel } from '../../report-detail-page/report-templates';
+import ClubExperiencePanel from './ClubExperiencePanel';
 
 const statusLabel = (status) =>
     ({
@@ -59,6 +60,7 @@ export default function ReportsTab({ workspace, readOnly = false }) {
         >
             {(records) => (
                 <>
+                    {canCreate && <ClubExperiencePanel key={`${clubId}:${semester?.id}`} clubId={clubId} semester={semester} readOnly={readOnly} />}
                     {result.status === 'loading' && (
                         <p className="v2-workspace-data-note" role="status">
                             Đang tải báo cáo…

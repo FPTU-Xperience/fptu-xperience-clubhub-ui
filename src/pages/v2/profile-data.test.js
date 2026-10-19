@@ -14,7 +14,20 @@ import {
     previewProfile,
     readProfileFromMemberships,
     projectOwnMemberProfile,
+    mapMemberProfileDetail,
 } from './profile-data.js';
+
+test('member detail keeps canonical profile separate from historical application answers', () => {
+    const snapshot = { reason: 'Original reason', hobbies: 'Old hobby' };
+    const detail = { member: { userId: 7, fullName: 'Current', address: '' }, profileSource: 'user-profile', applicationSnapshot: snapshot,
+        currentProfile: { profile: { about: 'Current about', skills: ['React'], interests: ['Sport'] } } };
+    const member = mapMemberProfileDetail(detail);
+    assert.equal(member.hobbies, 'Sport');
+    assert.equal(member.skills, 'React');
+    assert.equal(member.profileSource, 'user-profile');
+    assert.equal(projectOwnMemberProfile(member, { id: 7 }, { personal: { address: 'device-only' } }).address, '');
+    assert.equal(detail.applicationSnapshot.hobbies, 'Old hobby');
+});
 
 function memoryStorage() {
     const data = new Map();

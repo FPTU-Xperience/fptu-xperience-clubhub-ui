@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: AdminDbContext declares Quests, QuestParticipants and XpLedgerEntries, but ClubDbContext has no club task evidence/review, wallet or credit-ledger entities/routes. Admin raw XP is not this spendable credit lifecycle.
+Source Evidence: VerifiedContributionEndpoints, private evidence, reviewer assignments and append-only raw effects/allocations now exist. They do not implement a spendable club wallet, action task catalog, raw activity budget or final-report award gate.
+
+## Current reconciliation — 2026-10-19
+
+VerifiedContributionEndpoints, private evidence, reviewer assignments and append-only raw effects/allocations now exist. They do not implement a spendable club wallet, action task catalog, raw activity budget or final-report award gate.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 D07; proposed, main 80818266 audited 2026-10-09. `QuestsTab` and `PointsTab` currently show unavailable states. AdminService quest catalog/participants and declaration raw scoring exist; they do not implement this club-scoped evidence/review/wallet lifecycle. Shared [conventions](api-contract-conventions.md) apply.
 

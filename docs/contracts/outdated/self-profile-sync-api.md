@@ -1,8 +1,10 @@
 # Self profile and club member projection
 
-Implement Status: Not Yet
+Archived on 2026-10-19. See [current lifecycle and remaining obligations](../contract-lifecycle-audit.md). The original text below records its dated scope; newer source evidence takes precedence.
 
-Status Scope: Backend implementation
+Implement Status: Cancel
+
+Status Scope: Historical specification or source snapshot, superseded by the 2026-10-19 lifecycle audit; never a current implementation claim.
 
 Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
@@ -41,9 +43,9 @@ Suggested errors: 401 unauthenticated, 403 forbidden field/action, 400 invalid d
 
 ## Canonical implementation update — 2026-10-09
 
-Follow [shared conventions](api-contract-conventions.md) and D02 in [the handoff](backend-api-implementation-handoff.md). This GET/PATCH pair supersedes older proposed `PUT /api/users/me/profile` and `GET /api/users/me/student-profile`; do not build three competing profile stores. Legacy admin display-name editor must use the same self-service PATCH without changing account identity.
+Follow [shared conventions](../api-contract-conventions.md) and D02 in [the handoff](backend-api-implementation-handoff.md). This GET/PATCH pair supersedes older proposed `PUT /api/users/me/profile` and `GET /api/users/me/student-profile`; do not build three competing profile stores. Legacy admin display-name editor must use the same self-service PATCH without changing account identity.
 
-GET returns `{userId,version,profile,personal,academic,onboarding,editableFields}`. Profile includes `displayName`, `headline`, `about`, `skills`, `interests`, `avatarUrl`, `coverImageUrl`, `coverPreset`, `coverBackgroundColor`, `coverShape`, `coverShapeTransform`, `coverText`. `coverPreset` is a free/owned color ID or `custom`; the latter uses the separate background image while retaining `coverBackgroundColor`. Shape/text remain above either background. Definitions/limits are in [cover rewards](profile-cover-rewards-api.md). GET must return explicit defaults for legacy records.
+GET returns `{userId,version,profile,personal,academic,onboarding,editableFields}`. Profile includes `displayName`, `headline`, `about`, `skills`, `interests`, `avatarUrl`, `coverImageUrl`, `coverPreset`, `coverBackgroundColor`, `coverShape`, `coverShapeTransform`, `coverText`. `coverPreset` is a free/owned color ID or `custom`; the latter uses the separate background image while retaining `coverBackgroundColor`. Shape/text remain above either background. Definitions/limits are in [cover rewards](../profile-cover-rewards-api.md). GET must return explicit defaults for legacy records.
 
 PATCH is a partial `{profile?:{...},personal?:{...},academic?:{...},onboarding?:{...},expectedVersion}` and returns the full canonical snapshot. Preserve the server shape above; the FE temporary flat `saveProfile` patch needs an adapter, not a second persistence model. Reject identity/email/global roles, unknown fields and fields not authorized by `editableFields`. Limits: displayName 1..120, headline <=160, about <=2000, skills/interests <=12 unique entries of <=80 chars each; birthday real nonfuture date, phone optional `+` plus 9..15 digits, address <=500. Private contacts remain private. Academic campus/studentCode and imported identity are CTSV-owned; return editable metadata for self major/year only where policy permits. Browser inference is a suggestion, never authoritative import.
 

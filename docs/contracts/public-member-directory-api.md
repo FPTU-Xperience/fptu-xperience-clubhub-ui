@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Optional/deferred backend capability, not cancelled
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: MemberManagementEndpoints.cs provides private management reads, but no opt-in member public route or per-club consent persistence. Public leaders/count do not satisfy a consent-based directory; deferral does not mean cancellation.
+Source Evidence: Private member list/detail uses canonical profile projections and separate applicationSnapshot. No opt-in public member route/consent store exists; this optional contract remains active.
+
+## Current reconciliation — 2026-10-19
+
+Private member list/detail uses canonical profile projections and separate applicationSnapshot. No opt-in public member route/consent store exists; this optional contract remains active.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 D13; proposed/deferred. Current non-manager workspace shows public leaders and member count; it does not require exposing the full roster. Backend source main 80818266 has manager members/detail reads, not this privacy projection.
 

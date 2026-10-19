@@ -192,6 +192,7 @@ export default function EditProfileModal({ snapshot, onClose, onPreview }) {
                     </p>
                 )}
                 <footer>
+                    <p>Tên, giới thiệu, kỹ năng, sở thích và điện thoại được đồng bộ lên tài khoản. Các mục bổ sung lưu trên thiết bị này.</p>
                     <button type="button" className="v2-button" onClick={onClose}>
                         Hủy
                     </button>

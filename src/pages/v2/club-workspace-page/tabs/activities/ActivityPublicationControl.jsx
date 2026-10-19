@@ -51,6 +51,25 @@ export default function ActivityPublicationControl({ api, activity, access, busy
             if (alive.current) setPending(false);
         }
     };
+    if (confirmed.publicationStatus && confirmed.publicationStatus !== 'LEGACY') {
+        const operation = confirmed.publicationStatus === 'DRAFT' ? 'PUBLISH' : confirmed.publicationStatus === 'PUBLISHED' ? 'CLOSE' : null;
+        const allowed = access?.isManager === true && (!Array.isArray(access.permissions) || access.permissions.includes('activity.publish'));
+        return <section className="v2-activity-publication"><div><h2>Xuất bản & đăng ký</h2>
+            <p>{confirmed.publicationStatus === 'DRAFT' ? 'Bản nháp cần học kỳ, chính sách được duyệt và thời gian đăng ký hợp lệ trước khi công khai.' : confirmed.publicationStatus === 'CLOSED' ? 'Đã đóng đăng ký. Hoạt động vẫn hiển thị cho người có quyền xem.' : 'Đang công khai. Đóng đăng ký sẽ giữ nội dung hoạt động hiển thị.'}</p>
+            {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
+        </div>{operation && <button type="button" className="v2-button" disabled={!allowed || pending || busy || hasUnsavedContent} onClick={async () => {
+            if (lock.current) return; lock.current = true; setPending(true); setError('');
+            const fingerprint = `${confirmed.id}:${confirmed.version}:${operation}`;
+            if (requestKey.current?.fingerprint !== fingerprint) requestKey.current = { fingerprint, key: crypto.randomUUID() };
+            try {
+                const saved = await api.updateActivity(confirmed.id, { operation, expectedVersion: confirmed.version }, requestKey.current.key);
+                if (String(saved?.id) !== String(confirmed.id) || saved.publicationStatus !== (operation === 'PUBLISH' ? 'PUBLISHED' : 'CLOSED') || !saved.version || saved.version === confirmed.version)
+                    throw new Error('Máy chủ chưa xác nhận chuyển trạng thái. Tải lại hoạt động.');
+                if (alive.current) { setConfirmed({ ...confirmed, ...saved }); setNotice(operation === 'PUBLISH' ? 'Đã công khai hoạt động.' : 'Đã đóng đăng ký.'); publishPublicMediaSaved('activity', activity.id); onSaved(); }
+            } catch (issue) { if (alive.current) setError(issue.message); }
+            finally { lock.current = false; if (alive.current) setPending(false); }
+        }}>{operation === 'PUBLISH' ? 'Công khai bản nháp' : 'Đóng đăng ký'}</button>}</section>;
+    }
     return (
         <section className="v2-activity-publication" aria-labelledby="activity-publication-title">
             <div>

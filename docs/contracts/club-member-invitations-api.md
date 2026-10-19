@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation: partial existing invite/consent workflow
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: MemberManagementEndpoints.cs InviteClubMember exists; MembershipEndpoints.cs requires personal consent before approval. SemesterEndpoints.cs is backoffice-scoped; school roster/eligible lookup, canonical invite identity/semester validation and invitation delivery events are missing.
+Source Evidence: Existing invitation and personal-consent flows remain. School-semester roster/eligible lookup and validated invite semester are still missing. Canonical self-profile and private member projections now exist separately.
+
+## Current reconciliation — 2026-10-19
+
+Existing invitation and personal-consent flows remain. School-semester roster/eligible lookup and validated invite semester are still missing. Canonical self-profile and private member projections now exist separately.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 Status (2026-10-09): **partially supported on latest API main**. Semester persistence, invitation creation, personal consent and manager approval exist. CTSV semester roster persistence/import, manager-scoped eligibility search and invite-time student eligibility verification remain missing. Frontend integration with those missing routes is provisional.
 
@@ -102,6 +109,6 @@ Implement and test CTSV roster persistence/import and the authorized lookup; ver
 
 ## Rescan handoff — 2026-10-09
 
-Fresh fetch still resolves to 80818266; no new eligibility/roster route was found. Exact import schema, revision/commit payloads and carry-forward semantics are expanded in [semester-student-roster-api.md](semester-student-roster-api.md). The schema resolves O-04 provisionally for implementation design, not as an already approved CTSV policy. Use [shared conventions](api-contract-conventions.md) and D05 [handoff](backend-api-implementation-handoff.md).
+Fresh fetch still resolves to 80818266; no new eligibility/roster route was found. Exact import schema, revision/commit payloads and carry-forward semantics are expanded in [semester-student-roster-api.md](semester-student-roster-api.md). The schema resolves O-04 provisionally for implementation design, not as an already approved CTSV policy. Use [shared conventions](api-contract-conventions.md) and D05 [handoff](README.md).
 
 The recipient/source discriminator and self withdrawal are reconciled in [my-clubs-membership-api.md](my-clubs-membership-api.md). If enabling withdrawn reapplication, update eligible-member exclusion to the same active-record uniqueness rule rather than excluding all history forever. HR recruitment authority comes from the D06 server capability catalog, not global manager role. In-app invitation notifications commit through outbox and existing NotificationService; no new notification list/read API is needed.

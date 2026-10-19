@@ -4,11 +4,18 @@ Implement Status: Not Yet
 
 Status Scope: Backend adoption of proposed conventions
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Shared auth/error/outbox infrastructure exists, but proposed endpoints do not yet implement this package-wide version, principal, idempotency and migration contract. ClubMembershipResponse lacks version/capability/source; no own withdrawal/pin resources.
+Source Evidence: Newer ApiOperations-based workflows already implement GUID concurrency and transactional idempotency. Package-wide adoption and all proposed endpoints remain incomplete; do not rebuild those existing foundations.
 
-Audit date: 2026-10-09. These conventions apply to the **proposed** endpoints in this package; existing production routes retain their compatibility until an explicit migration. See [implementation handoff](backend-api-implementation-handoff.md).
+## Current reconciliation — 2026-10-19
+
+Newer ApiOperations-based workflows already implement GUID concurrency and transactional idempotency. Package-wide adoption and all proposed endpoints remain incomplete; do not rebuild those existing foundations.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
+
+Audit date: 2026-10-09. These conventions apply to the **proposed** endpoints in this package; existing production routes retain their compatibility until an explicit migration. See [implementation handoff](README.md).
 
 ## Authority and transport
 

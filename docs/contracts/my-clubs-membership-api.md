@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation: existing composed reads only
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: ClubEndpoints.cs exposes own access/memberships and review timestamps; MembershipEndpoints.cs has no self withdrawal route. ClubWorkflowStatuses.cs lacks WITHDRAWN, and ClubMembershipResponse lacks source/capability/version/code/logo.
+Source Evidence: The existing own access/membership/directory composition is integrated. No self-withdrawal route or WITHDRAWN state was found; dedicated selection reads remain optional rather than mandatory duplicates.
+
+## Current reconciliation — 2026-10-19
+
+The existing own access/membership/directory composition is integrated. No self-withdrawal route or WITHDRAWN state was found; dedicated selection reads remain optional rather than mandatory duplicates.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 D10; 2026-10-09, main 80818266. Existing GET `/api/clubs/me/access`, GET `/api/clubs/me/memberships`, public club detail, join and manager approve/reject are usable. Do not duplicate them unless replacing composed reads with the richer projections below.
 

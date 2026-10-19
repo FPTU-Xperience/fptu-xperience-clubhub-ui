@@ -1,99 +1,80 @@
-# Contract lifecycle / current BE source audit — 2026-10-13
+# Contract lifecycle audit — 2026-10-19
 
 Implement Status: Done
 
-Status Scope: Documentation audit; does not mean the proposed backend features are complete.
+Status Scope: Completed source/documentation classification and move ledger only; listed missing implementations and live verification are not complete.
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Reviewed backend: b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf; fetched current remote branch and origin/main equal local HEAD. FE audit baseline: 82e5e63ca9061cae5f287cb93d8d03f34f96ad5b plus preserved local edits and this integration batch.
 
-Source Evidence: Existing handlers/DTOs/models/DbContexts/migrations, Gateway configuration and regenerated facade declarations were inspected. No backend source was modified.
+See [current index](README.md), [workspace flow/FR matrix](../../../fptu-xperience-doc/docs/fe-be-audit-2026-10-19.md), [facade inventory](api-declaration-inventory.md), and [all parsed endpoints/consumers](../qa/workspace-source-inventory.md). Match routes, DTOs, capabilities, versions and business effects separately. Existing BE source does not close a larger product contract automatically.
 
-## Status semantics
+## Move ledger
 
-Every retained Markdown file in docs/contracts and specs/*/contracts has exactly one `Implement Status: Done`, `Implement Status: Not Yet` or `Implement Status: Cancel` line.
+The migration preserves obsolete Markdown under outdated, refreshes implemented contract text, rebases local links, and never deletes a feature obligation. `outdated` means superseded source snapshot/proposal, not cancellation of the underlying product requirement. `implemented` means the stated source subset exists, not live acceptance. Original statuses inside archived text are historical; the archive header and current replacement govern.
 
-- **Done**: complete for the explicitly stated scope in that file. For documentation/audit files this means the report was refreshed, not its listed backend gaps implemented. Existing notification reads are Done at the inspected source level, without live sign-off.
-- **Not Yet**: at least one required backend/persistence/policy/integration obligation remains. Existing foundations and partially present routes do not make the complete contract Done. Optional/deferred work stays Not Yet unless explicitly cancelled.
-- **Cancel**: retired/replaced scope. Outdated files were deleted as requested, so Cancel decisions remain in the retirement ledger rather than as dead contract files.
-
-Current retained files: **31**, comprising **3 Done** and **28 Not Yet**. Two outdated reports are retired in this batch. No active feature is cancelled merely because it has not been built.
-
-## Verified baseline and method
-
-API local HEAD and fetched origin/main both match **80818266f617bd5144ab1b1a6cd0e74983983a4d**, with no ahead/behind divergence and a clean backend worktree. FE session commit is **b9832cd**; later branding and a user-owned ClubDetailPage change are present in the working tree. This audit changes documentation and inventory tooling only.
-
-Reproduced `node scripts/audit-api-contracts.mjs ../fptu-xperience-clubhub-api 2026-10-13`: **95 wrappers = 87 declared direct operations + 2 composed reads + 6 absent**, zero unresolved facade wrappers. [Current declaration inventory](api-declaration-inventory.md) lists exact files/lines. Parent Report/Activity/Finance groups are resolved explicitly; 17 helper/root declarations remain listed for manual review and are not the matched facade paths. Admin semester/quest/declaration/radar resources were also read directly; their existence is not inferred solely from this limited facade inventory.
-
-Both composed reads now include the active club directory: selection uses own access + directory; inbox uses self memberships + directory. Existing code/logo/access/review fields support navigation and seven-day display. Backend still lacks self withdrawal and source/capability/version metadata, persisted pins, media/profile, governance/roster and other proposed resources.
-
-GitNexus runner/index is unavailable in this checkout; no graph query/impact claim is made. The previous CLI fallback could not produce a graph. Backend was read only. No backend tests, migration, database, authenticated running Gateway, deployment, R2 signing/delivery or browser E2E was run; Done here must never be presented as production success.
-
-## Session BE changes
-
-New [club navigation/applications](club-navigation-applications-api.md): implement D10 own withdrawal and capabilities/source; enrich own rows with canonical code/logo and version; reuse reviewedAtUtc for the seven-day result rule; optionally replace browser-local pins with self-only durable pin resources. No new APIs for logo fallback rendering, icon placement, font or badge colors. The existing [D10 contract](my-clubs-membership-api.md) remains the sole withdrawal workflow owner.
-
-## Every retained contract and supporting file
-
-| File | Implement Status | Scope | Current source evidence / remaining gap |
-| --- | --- | --- | --- |
-| [docs/contracts/activity-discovery-api.md](activity-discovery-api.md) | Not Yet | Backend implementation | ActivityService activity list/detail remain access-scoped management reads; no /api/v2 feed, published-visibility model or recommendation Gateway route. Inspect ActivityEndpoints.cs, ActivityContracts.cs and Gateway/ApiGateway/yarp.json. |
-| [docs/contracts/activity-profile-resources-api.md](activity-profile-resources-api.md) | Not Yet | Backend implementation | ActivityEndpoints.cs and ActivityWriteEndpoints.cs provide core CRUD/attendance, but ActivityContracts.cs has no resource gallery/capabilities or cover field; resource upload/commit routes and public activity projection are absent. |
-| [docs/contracts/api-contract-conventions.md](api-contract-conventions.md) | Not Yet | Backend adoption of proposed conventions | Shared auth/error/outbox infrastructure exists, but proposed endpoints do not yet implement this package-wide version, principal, idempotency and migration contract. ClubMembershipResponse lacks version/capability/source; no own withdrawal/pin resources. |
-| [docs/contracts/api-declaration-inventory.md](api-declaration-inventory.md) | Done | Documentation: regenerated declaration inventory, not backend feature completion | scripts/audit-api-contracts.mjs was executed against current source: 95 wrappers, 87 declared, 2 composed, 6 absent, 0 unresolved wrappers. Unresolved helper groups remain listed explicitly; no handler/deployment sign-off. |
-| [docs/contracts/backend-api-implementation-handoff.md](backend-api-implementation-handoff.md) | Not Yet | Backend work tracked by this handoff | The dependency waves remain open: own withdrawal, media/profile, governance, semester roster, credit/rewards, discovery and timetable persistence are absent or incomplete in the source contexts/endpoints. |
-| [docs/contracts/backend-changes-for-frontend.md](backend-changes-for-frontend.md) | Not Yet | Backend work indexed here | All D01-D14 obligations remain active; source foundations are available but missing capabilities are documented in each topic contract and the current lifecycle matrix. |
-| [docs/contracts/club-contributions-points-api.md](club-contributions-points-api.md) | Not Yet | Backend implementation | AdminDbContext declares Quests, QuestParticipants and XpLedgerEntries, but ClubDbContext has no club task evidence/review, wallet or credit-ledger entities/routes. Admin raw XP is not this spendable credit lifecycle. |
-| [docs/contracts/club-event-operations-api.md](club-event-operations-api.md) | Not Yet | Backend implementation | ActivityWriteEndpoints.cs contains CRUD, participants, check-in and attendance; specialist content PATCH, staff assignment, versioned registration forms and reviewed registration application resources are absent. |
-| [docs/contracts/club-governance-groups-api.md](club-governance-groups-api.md) | Not Yet | Backend implementation | ClubDbContext/ClubContracts and shared access retain memberships, active owner assignments and boolean treasurer access; no governance terms/groups/revisions/change sets/board snapshots/vice nomination entities or endpoints. |
-| [docs/contracts/club-governance-groups-proposal.md](club-governance-groups-proposal.md) | Not Yet | Backend implementation of retained product decisions | This remains useful product context for the canonical governance contract. Existing TransferEndpoints.cs/treasurer rules are foundations, not multi-group assignments or report/history implementation; do not retire the agreed decisions. |
-| [docs/contracts/club-member-invitations-api.md](club-member-invitations-api.md) | Not Yet | Backend implementation: partial existing invite/consent workflow | MemberManagementEndpoints.cs InviteClubMember exists; MembershipEndpoints.cs requires personal consent before approval. SemesterEndpoints.cs is backoffice-scoped; school roster/eligible lookup, canonical invite identity/semester validation and invitation delivery events are missing. |
-| [docs/contracts/club-navigation-applications-api.md](club-navigation-applications-api.md) | Not Yet | Backend implementation: session addendum | Existing code/logo/access/review fields support part of the UI. Self withdrawal, source/action/version metadata and persistent account pins are absent; exact source files and acceptance tasks are detailed below. |
-| [docs/contracts/club-public-profile-api.md](club-public-profile-api.md) | Not Yet | Backend implementation | ClubEndpoints.cs has admin PUT and public reads but no manager public-profile PATCH. Club model has ScheduleLabel only; no structured term schedule or persisted cover; category persistence alone does not satisfy this contract. |
-| [docs/contracts/contract-lifecycle-audit.md](contract-lifecycle-audit.md) | Done | Documentation: current contract/source audit, not integration completion | Fetched API origin/main matches local HEAD; every retained docs/contracts and specs/*/contracts file has one status and evidence. See matrix, retirement ledger and verification limits below. |
-| [docs/contracts/existing-api-hardening.md](existing-api-hardening.md) | Not Yet | Backend/consumer hardening | MemberManagementEndpoints.cs still permits managed personal snapshot writes; ManagerEndpoints.cs trusts client ManagerName; QuestEndpoints.cs accepts target StudentUserId; ReportContracts.cs exposes StoragePath. Existing routes are not proof of the required fixes. |
-| [docs/contracts/frontend-api-debt-register.md](frontend-api-debt-register.md) | Not Yet | Backend/integration debt tracked here | Regenerated facade inventory retains six absent operations and two composed reads. Topic resource/policy/persistence gaps remain; D10 now also references durable pin preferences and seven-day inbox behavior. |
-| [docs/contracts/my-clubs-membership-api.md](my-clubs-membership-api.md) | Not Yet | Backend implementation: existing composed reads only | ClubEndpoints.cs exposes own access/memberships and review timestamps; MembershipEndpoints.cs has no self withdrawal route. ClubWorkflowStatuses.cs lacks WITHDRAWN, and ClubMembershipResponse lacks source/capability/version/code/logo. |
-| [docs/contracts/page-integration-checklist.md](page-integration-checklist.md) | Not Yet | Complete FE/BE integration and live acceptance | Several pages use existing live-shaped reads, but source declarations do not complete media/profile/governance/credit/timetable/withdrawal contracts or authenticated deployment checks. See current audit and per-page unchecked tasks. |
-| [docs/contracts/personal-experience-api.md](personal-experience-api.md) | Not Yet | Backend implementation: partial Admin foundations | Admin DeclarationEndpoints/StudentRadar projections and XP data exist; Auth UserEndpoints.cs lacks own experience-summary, activity-history and club-contribution aggregate projections. Per-club activity statistics are not a student-wide aggregate. |
-| [docs/contracts/profile-cover-rewards-api.md](profile-cover-rewards-api.md) | Not Yet | Backend implementation | Admin quest/XP models exist; no server cosmetic catalog/inventory, club wallet, redemption receipt or verified shape publication entities/endpoints. FE cosmetic ownership remains local sample state. |
-| [docs/contracts/public-image-api.md](public-image-api.md) | Not Yet | Backend implementation and storage integration | Club.LogoUrl is readable; public detail mapper returns null cover. No media upload intent, public-images PUT, activity cover PUT or user-image persistence; yarp.json has no /api/media route. |
-| [docs/contracts/public-member-directory-api.md](public-member-directory-api.md) | Not Yet | Optional/deferred backend capability, not cancelled | MemberManagementEndpoints.cs provides private management reads, but no opt-in member public route or per-club consent persistence. Public leaders/count do not satisfy a consent-based directory; deferral does not mean cancellation. |
-| [docs/contracts/self-profile-sync-api.md](self-profile-sync-api.md) | Not Yet | Backend implementation | AuthDbContext has Users/Roles/RefreshTokens, no canonical profile store. UserEndpoints.cs exposes users/me identity and admin updates but no self profile GET/PATCH; club personal data remains membership snapshots. |
-| [docs/contracts/semester-student-roster-api.md](semester-student-roster-api.md) | Not Yet | Backend implementation | AdminDbContext persists Semesters and migration AddSemesters exists, but no semester student roster revision/import/carry-forward entities/routes in Admin/Auth contexts. General accounts and club roster reads are not the school roster. |
-| [docs/contracts/study-schedule-api.md](study-schedule-api.md) | Not Yet | Backend implementation | Semester catalog persistence exists, but AuthDbContext/AdminDbContext have no private weekly timetable or academic block-date resources, import/cell routes or academic-calendar Gateway prefix. |
-| [docs/contracts/workspace-semester-context-api.md](workspace-semester-context-api.md) | Not Yet | Backend implementation | Admin SemesterEndpoints.cs requires BackofficeUser. No club-safe /semesters projection with configured activity bounds/report aliases, finance attribution or term-indexed schedules; shared FE selection is not server authority. |
-| [specs/001-discover-production/contracts/discover-ui-contract.md](../../specs/001-discover-production/contracts/discover-ui-contract.md) | Not Yet | Backend implementation: partial directory/detail foundations | ClubEndpoints.cs supplies active directory/public detail and ClubCategories persistence. ClubDirectoryResponse still includes manager identities and contacts; strictly minimal directory projection and server-authorized personalized recommendation behavior are not fully implemented. |
-| [specs/002-header-production/contracts/notification-summary.md](../../specs/002-header-production/contracts/notification-summary.md) | Done | Backend source implementation of existing notification read contract | NotificationEndpoints.cs GetNotificationsAsync uses authenticated actor and scoped recipients; NotificationExtensions.cs applies access filtering and safe DTO mapping; notification persistence and Gateway route exist. Bounded six-item presentation is FE-only; no live or newly executed service-test claim. |
-| [specs/003-activity-discovery/contracts/activity-discovery-contract.md](../../specs/003-activity-discovery/contracts/activity-discovery-contract.md) | Not Yet | Backend implementation | Canonical /api/v2 activity feed/detail/recommendations are absent from service endpoints and Gateway; existing management activity reads do not meet this display-safe discovery contract. |
-| [specs/004-club-workspace/contracts/workspace-ui-contract.md](../../specs/004-club-workspace/contracts/workspace-ui-contract.md) | Not Yet | Backend/integration scope: partial authorized workspace | Current route resolves server clubCode from existing own-access/directory composition and role-gates the workspace; richer selection is optional and absent. Governance, profile/media, semester, credit/rewards and withdrawal dependencies remain open. |
-| [specs/005-profile-production/contracts/profile-service.md](../../specs/005-profile-production/contracts/profile-service.md) | Not Yet | Backend implementation | Canonical self-profile GET/PATCH/media/experience/owned-cosmetics contracts remain missing from Auth/Club source. Account-local browser state and membership imports are not durable self-profile integration. |
-
-## Documentation validation
-
-`node scripts/check-contract-docs.mjs` passes across all 31 retained contracts plus existing QA documents: exactly one allowed status and an explicit scope per contract, pinned source commit present, local link targets exist, and JSON examples parse. The checker retains the original QA-link/JSON checks and now covers all five spec-contract directories. `git diff --check` passes. No application code or backend service was changed by this documentation task.
-
-## Retirement ledger
-
-| Removed file | Implement Status | Replacement and preserved scope |
+| Moved contract | Destination | Current owner / evidence |
 | --- | --- | --- |
-| `frontend-api-audit.md` | Cancel | Dated duplicate audit with stale composed-read/canWithdraw details. Current declaration table is in api-declaration-inventory.md; source status and compatibility are here and in [existing hardening](existing-api-hardening.md); exact workflows remain in topic contracts. |
-| `api-debt-source-inventory.md` | Cancel | Obsolete 2026-10-09 line-marker snapshot. Replaced by regenerated facade source evidence and this per-contract source matrix; old file/line counts are not current coverage. |
-| `club-member-roles-api.md` (removed before this batch) | Cancel | Canonical [governance groups](club-governance-groups-api.md) replaces single-primary-role PATCH. Self-profile and ownership/treasurer constraints remain in active owners. |
+| backend-api-implementation-handoff.md | [outdated](outdated/backend-api-implementation-handoff.md) | Old dependency waves falsely called profile/media/student reads absent; current README and workspace audit replace it |
+| backend-changes-for-frontend.md | [outdated](outdated/backend-changes-for-frontend.md) | D01–D14 blanket pending snapshot; each remaining gap has its own active owner |
+| frontend-api-debt-register.md | [outdated](outdated/frontend-api-debt-register.md) | Old wrapper counts and source absence assertions; regenerated inventory + current flow matrix |
+| page-integration-checklist.md | [outdated](outdated/page-integration-checklist.md) | Old page-level snapshot; current FE consumers and validation are in workspace audit/QA |
+| activity-discovery-api.md | [outdated](outdated/activity-discovery-api.md) | Actual student endpoints and DTOs are recorded in implemented/student-experience-reads-api.md; exact old draft shape is not claimed implemented |
+| personal-experience-api.md | [outdated](outdated/personal-experience-api.md) | Proposed credited totals differ from actual raw summary/ledger; current implemented read contract plus active wallet gap replace it |
+| self-profile-sync-api.md | [outdated](outdated/self-profile-sync-api.md) | Five text/phone fields now implemented; broad academic/media/projection obligations move to self-profile-extensions-api.md |
+| club-event-operations-api.md | [outdated](outdated/club-event-operations-api.md) | New action/staffing UI has another shared aggregate contract; custom form/content obligations retained in event-registration-extensions-api.md |
+| existing-api-hardening.md | [outdated](outdated/existing-api-hardening.md) | Mixed dated findings include fixed detail/profile issues; current unresolved hardening findings are below, not treated as reverified vulnerabilities |
+| club-public-profile-api.md | [implemented](implemented/club-public-profile-api.md) | ClubPublicProfileEndpoints, ScheduleJson, GUID concurrency; FE sends expectedVersion |
+| specs/002-header-production/contracts/notification-summary.md | [implemented](implemented/notification-summary.md) | Authenticated recipient-filtered notification reads and existing FE header consumer; no new delivery/live claim |
 
-References to the two newly removed reports were rewritten. Retained governance proposal is product context, not an outdated competing API; its canonical DTO owner is governance-groups-api. No other missing/partial contract was removed, and deferred public-directory work is not cancelled.
+Archive moves are explicitly listed by `scripts/archive-contracts-2026-10-19.py`, a one-time migration that refuses to overwrite an existing archive. Do not rerun it as a future status classifier. Source changes require a fresh audit.
 
-## Preserved compatibility / owners
+## Retained active contracts, every file
 
-[Shared conventions](api-contract-conventions.md) own transport/errors/version/idempotency. [Hardening](existing-api-hardening.md) retains old audit findings that still apply. Generic admin club PUT is not manager public-profile PATCH; manager DELETE membership is not self withdrawal; raw XP, credited wallet points and financial money remain different units. Self-profile GET/PATCH supersedes old PUT/student-profile aliases. Current activity CRUD/attendance, notification reads, semester/category persistence and owner transfer are existing foundations to reuse.
+| Contract | Status and current remaining obligation |
+| --- | --- |
+| [Conventions](api-contract-conventions.md) | Not Yet: package-wide adoption/migration and all proposed endpoints; existing ApiOperations already provides transactional idempotency on newer workflows |
+| [Activity resources](activity-profile-resources-api.md) | Not Yet: resources/gallery/upload-intents/commit and specialist capability projection absent; cover persistence now exists separately |
+| [Club points](club-contributions-points-api.md) | Not Yet: verified contribution/effect foundations now exist, but no spendable club wallet/raw-budget consumption/task award lifecycle |
+| [Governance groups](club-governance-groups-api.md) | Not Yet: multi-groups, terms/change sets/office/report snapshot absent; verification assignments are not club governance |
+| [Governance proposal](club-governance-groups-proposal.md) | Not Yet: retained product decisions, not a competing implemented API; keep until canonical groups/history obligations are fulfilled |
+| [Member invitations](club-member-invitations-api.md) | Not Yet: invite/consent foundations exist; eligible school roster, authoritative invitation semester and delivery remaining |
+| [Navigation/applications](club-navigation-applications-api.md) | Not Yet: withdrawal/source capabilities/version/pins remaining; canonical directory code/logo and review time foundations exist |
+| [My Clubs membership](my-clubs-membership-api.md) | Not Yet: composed reads exist; own withdrawal/WITHDRAWN/reapply and account pin authority not found |
+| [Rewards/cosmetics](profile-cover-rewards-api.md) | Not Yet: no authoritative cosmetic catalog/inventory/redemption/equip persistence; browser sample state is not ownership |
+| [Public images](public-image-api.md) | Not Yet: club/activity signing/verification/attachment source now exists; profile/shape kinds, full contract compatibility and live R2 still open |
+| [Public member directory](public-member-directory-api.md) | Not Yet: optional/deferred opt-in directory and consent persistence absent; private roster does not satisfy it |
+| [Semester roster](semester-student-roster-api.md) | Not Yet: semester CRUD exists; roster revisions/import/preview/carry-forward/history absent |
+| [Study schedule](study-schedule-api.md) | Not Yet: private timetable and academic calendar persistence absent; FE repository remains device-local |
+| [Workspace semester](workspace-semester-context-api.md) | Not Yet: Admin semester catalog is backoffice-scoped; manager-safe metadata and unified attribution remain absent |
+| [Action/staffing](activity-action-staffing-api.md) | Not Yet: new exact FE application/recruitment/assignment/completion/publication contract; do not substitute current T-tier contribution pipeline |
+| [Profile extensions](self-profile-extensions-api.md) | Not Yet: academic/media/additional personal fields; basic canonical member projection and separate applicationSnapshot now exist |
+| [Source projections](experience-source-projections-api.md) | Not Yet: student-safe session/source, manager-safe catalog and unsupported media owners |
+| [Event extensions](event-registration-extensions-api.md) | Not Yet: versioned registration forms/reviewed registration resources and specialist content boundaries |
+| [Index](README.md) | Not Yet: tracks outstanding obligations; not itself a backend endpoint contract |
 
-## Current UI / integration split
+## Other retained specifications and generated files
 
-| Surface | Implemented in this batch | Still required for live integration |
-| --- | --- | --- |
-| Manager members tab | DEV-only Ban quản lý with local synthetic data; existing live member/invite flows retained | Real catalog, term/approved-member query, capabilities and group mutations |
-| Group editor | Name/preset/checkboxes, create/edit, member add/transfer/remove, dissolution, local union/finance constraints | Server authority, transaction/concurrency, duty constraints, immediate revocation across services |
-| History | Local persistent personal timeline, group change events, before/after grants, preserved demotion history | Persisted immutable BE events/intervals, stable paging, system expiry and appointment events |
-| Reporting | Immutable local submitted snapshot, reportNeedsUpdate after configuration changes, previous-semester read-only example | Semester/report window policy, server snapshot/idempotency, cross-device reads |
-| Leadership | Pending sample nomination; protected owner card; no approval/grant simulation | CTSV vice workflow + existing owner transfer integration; activation/expiry/access projection |
+| File | Decision |
+| --- | --- |
+| api-declaration-inventory.md | Done for generated method/path declarations only. Helper readMedia is excluded from business wrappers; media-backed facade methods are resolved. Nested groups and aliases are resolved explicitly; no runtime/DTO proof inferred |
+| contract-lifecycle-audit.md | Done for this classification/move ledger only |
+| specs/001-discover-production/contracts/discover-ui-contract.md | Not Yet: directory foundations present; minimal privacy/personalization obligations remain; student activity reads are now separately integrated |
+| specs/003-activity-discovery/contracts/activity-discovery-contract.md | Not Yet: original full UI specification is not exactly the current BE DTO/policy; new reads available, residual publication/resources/action behavior remains |
+| specs/004-club-workspace/contracts/workspace-ui-contract.md | Not Yet: authorized shell exists; governance/wallet/semester and specialist operations remain |
+| specs/005-profile-production/contracts/profile-service.md | Not Yet: text/phone and experience reads now available; full media/academic/cosmetic/projection contract remains incomplete |
+| implemented/canonical-self-profile-api.md | Done for canonical text/phone subset and consumer integration |
+| implemented/verified-experience-operations-api.md | Done for current evidence/contribution/reviewer/policy/session/club-report source integrations; live acceptance unverified |
+| implemented/student-experience-reads-api.md | Done for current student read subset and consumers, not the target credited-wallet model |
 
-UI verification evidence and reproducible steps are in [governance UI QA](../qa/club-governance-ui.md). Prototype success cannot be carried forward as BE or deployed integration proof.
+## Unresolved compatibility / hardening follow-ups
+
+- Current API publication lifecycle is GUID DRAFT/PUBLISHED/CLOSED. The FE action publication toggle is integer/bool and requests a missing PATCH. Closing registration must never be described as hiding a published activity.
+- Current verified contribution source allocation is raw points, not credited spendable wallet. Final report approval in the action proposal is another gate; do not silently award at completion verification.
+- Admin canonical declaration queue responses differ from legacy title/student/capability/score shapes. The FE mapper and review version/attributes were updated; full private evidence/detail/reviewer assignment workflows remain separately tracked in the workspace audit.
+- Source extraction lists aliases and dynamic-call limitations; no exact literal consumer is a review candidate, not proof of unused/dead endpoints.
+- Historical hardening findings about manager-provided names, target quest completion, membership personal writes, seeded anomaly reads, report storage paths, category validation and first-page truncation need dedicated handler/security regression evidence before closing. This audit does not re-label all old findings as confirmed current vulnerabilities.
+- Current product policy conflicts (including +1 linear cap versus source saturation) remain O-01–O-14 decisions; no calculator/policy approval was performed.
+
+## Verification boundary
+
+Read [audit QA](../qa/fe-be-audit-2026-10-19.md) for executed commands/results. Contract checks validate status/scope/hash, local links and JSON examples. They do not verify backend tests, SQL migrations, configured auth, running Gateway/CORS, media storage, outbox, deployment or browser E2E. GitNexus runner/index is unavailable; no graph claim or BE logic change was made.

@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Semester catalog persistence exists, but AuthDbContext/AdminDbContext have no private weekly timetable or academic block-date resources, import/cell routes or academic-calendar Gateway prefix.
+Source Evidence: Student activity sessions/history and semester persistence now exist. A private academic timetable/calendar/import store is still missing; browser storage is not server persistence.
+
+## Current reconciliation — 2026-10-19
+
+Student activity sessions/history and semester persistence now exist. A private academic timetable/calendar/import store is still missing; browser storage is not server persistence.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 Status: **proposed for backend implementation**, updated 2026-10-07. `/v2/study-schedule` currently uses an account-scoped browser mock repository. These endpoints do not exist in the backend yet. Keep `dev-login` unchanged.
 
@@ -160,4 +167,4 @@ Link calendar configuration to `Semester.Id`, campus scope and configured year/t
 
 Add opaque calendar/version and expectedVersion to writes, and per-cell/block version checks to prevent bulk import racing manual edits. Block template import validates all rows and commits atomically; stale configuration/period ->409. Empty calendar dates mean a known semester with missing block configuration, not a nonexistent semester. Semester deactivation prevents new writes without erasing prior personal schedules; authorized historic self reads remain available. The weekly CLB page schedule is presentation metadata and remains separate from the student's 10W/3W timetable.
 
-Acceptance adds authoritative semester alias and cross-campus administration tests, inactive semester, manual-vs-bulk conflict and preservation when calendar dates change. See [conventions](api-contract-conventions.md), D09 [handoff](backend-api-implementation-handoff.md).
+Acceptance adds authoritative semester alias and cross-campus administration tests, inactive semester, manual-vs-bulk conflict and preservation when calendar dates change. See [conventions](api-contract-conventions.md), D09 [handoff](README.md).

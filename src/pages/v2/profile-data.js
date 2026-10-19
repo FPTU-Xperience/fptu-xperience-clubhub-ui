@@ -7,6 +7,7 @@ import { getCoverColors, getCoverShapes, canUseCoverItem, readCoverInventory } f
 
 import { normalizeCoverTransform, normalizeCoverText, normalizeShapeHsl } from './profile-page/cover-design.js';
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
+import { canonicalProfilePatch, mergeCanonicalProfile } from '../../services/canonical-profile.js';
 
 export const PROFILE_STORAGE_VERSION = 1;
 const MAX_DISPLAY_NAME = 120;
@@ -339,7 +340,11 @@ export function readProfileFromMemberships(user, memberships, storage = globalTh
 }
 
 export function projectOwnMemberProfile(member, user, snapshot) {
+    if (member.profileSource === 'user-profile') return member;
     if (!snapshot || !user?.id || String(member.userId) !== String(user.id)) return member;
+    if (snapshot.serverVersion) return { ...member, fullName: snapshot.profile.displayName,
+        phoneNumber: snapshot.personal.phoneNumber, hobbies: snapshot.profile.interests.join(', '),
+        skills: snapshot.profile.skills.join(', '), profileAbout: snapshot.profile.about, profileSource: 'user-profile' };
     return {
         ...member,
         fullName: snapshot.profile.displayName,
@@ -351,6 +356,17 @@ export function projectOwnMemberProfile(member, user, snapshot) {
         profileAbout: snapshot.profile.about,
         profileSource: 'local-self',
     };
+}
+
+export function mapMemberProfileDetail(detail) {
+    const member = { ...detail.member, profileSource: detail.profileSource || 'application-snapshot' };
+    const current = detail.currentProfile?.profile;
+    if (member.profileSource === 'user-profile' && current) {
+        member.hobbies = (current.interests || []).join(', ');
+        member.skills = (current.skills || []).join(', ');
+        member.profileAbout = current.about || '';
+    }
+    return member;
 }
 
 export function toSharedProfile(snapshot) {
@@ -447,14 +463,7 @@ export function useProfile(user, sessionKey, api) {
         setResult({ status: 'loading', data: null, error: null });
         Promise.resolve()
             .then(async () => {
-                const current = readProfile(user);
-                if (!api?.getMyMemberships || savedProfileRecord(user, globalThis.localStorage)) return current;
-                try {
-                    return readProfileFromMemberships(user, await api.getMyMemberships());
-                } catch (issue) {
-                    if (issue?.status === 401 || issue?.status === 403) throw issue;
-                    return current;
-                }
+                return mergeCanonicalProfile(readProfile(user), await api.getMyProfile(), user.id);
             })
             .then((data) => {
                 if (gate.current.isCurrent(request, sessionKey)) setResult({ status: 'populated', data, error: null });
@@ -473,8 +482,7 @@ export function useProfile(user, sessionKey, api) {
                 key &&
                 (event.key === key || event.detail?.key === key || (event.type === 'storage' && event.key === null))
             ) {
-                gate.current.invalidate();
-                setResult({ status: 'populated', data: readProfile(user), error: null });
+                setVersion((value) => value + 1);
             }
         };
         window.addEventListener('storage', updated);
@@ -488,17 +496,28 @@ export function useProfile(user, sessionKey, api) {
     const retry = useCallback(() => setVersion((value) => value + 1), []);
     const save = useCallback(
         async (patch) => {
-            gate.current.invalidate();
+            const request = gate.current.next(sessionKey);
             const snapshot = previewProfile(result.data || readProfile(user), patch);
-            const data = saveProfile(user, {
+            const changed = ['displayName', 'about', 'skills', 'interests'].some(
+                (field) => JSON.stringify(snapshot.profile[field]) !== JSON.stringify(result.data?.profile[field]),
+            ) || snapshot.personal.phoneNumber !== result.data?.personal.phoneNumber;
+            const canonical = changed
+                ? await api.updateMyProfile(canonicalProfilePatch(snapshot))
+                : { userId: user.id, version: snapshot.serverVersion, profile: {
+                    displayName: snapshot.profile.displayName, about: snapshot.profile.about,
+                    skills: snapshot.profile.skills, interests: snapshot.profile.interests,
+                }, personal: { phoneNumber: snapshot.personal.phoneNumber }, profileSource: snapshot.profileSource };
+            if (!gate.current.isCurrent(request, sessionKey)) return null;
+            const local = saveProfile(user, {
                 ...snapshot.profile,
                 personal: snapshot.personal,
                 academic: snapshot.academic,
             });
+            const data = mergeCanonicalProfile(local, canonical, user.id);
             setResult({ status: 'populated', data, error: null });
             return data;
         },
-        [user, result.data],
+        [user, result.data, api, sessionKey],
     );
     return { ...result, retry, save };
 }

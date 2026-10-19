@@ -8,6 +8,7 @@ import ActivityProfileLayout, {
     ActivityOverview,
 } from '../../../../../components/v2/activity-detail/ActivityProfileLayout';
 import ActivityAttendance from '../../../../../components/v2/activity-detail/ActivityAttendance';
+import ActivitySessionsPanel from '../../../../../components/v2/activity-detail/ActivitySessionsPanel';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
@@ -23,6 +24,7 @@ const tabs = [
     ['assignments', 'Phân công'],
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh'],
+    ['sessions', 'Buổi hoạt động'],
 ];
 const localDateTime = (value) => {
     const date = new Date(value || '');
@@ -49,7 +51,7 @@ const coreFields = (activity) => ({
 
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
     const { user, clubAccess } = useAuth();
-    const result = useActivityDetail(api, sessionKey, manager ? activityId : null);
+    const result = useActivityDetail(api, sessionKey, manager ? activityId : null, true);
     const activity = result.data;
     const [tab, setTab] = useState('overview');
     const [coreDraft, setCoreDraft] = useState(null);
@@ -142,6 +144,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         setNotice('');
         try {
             await api.updateActivity(activity.id, {
+                expectedVersion: activity.version,
                 title: values.title.trim(),
                 description: values.description.trim(),
                 startTimeUtc: start.toISOString(),
@@ -168,7 +171,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         setNotice('');
         try {
             const url = await api.uploadPublicImage(selectedFile, 'activity-cover', activity.id);
-            await api.updateActivityCoverImage(activity.id, url);
+            await api.updateActivityCoverImage(activity.id, url, activity.version);
             if (alive.current) {
                 setCoverOpen(false);
                 setCoverFile(null);
@@ -357,6 +360,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                 <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager />
                             </div>
                         )}
+                        {tab === 'sessions' && <ActivitySessionsPanel key={`${sessionKey}:${activity.id}`} api={api} activity={activity} readOnly={!manager} onChanged={result.retry} />}
                     </ActivityProfileLayout>
                     {coreDraft && (
                         <div className="v2-activity-preview-pending" aria-busy={busy}>

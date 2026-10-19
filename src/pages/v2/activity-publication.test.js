@@ -31,6 +31,14 @@ test('new approved application activities stay private and legacy visibility rem
         publicationCapabilities: { canManage: false },
     });
 });
+
+test('GUID lifecycle publication hides drafts from member feeds and keeps closed registration visible', () => {
+    assert.equal(isActivityPublic({ publicationStatus: 'DRAFT' }), false);
+    assert.equal(isActivityPublic({ publicationStatus: 'PUBLISHED' }), true);
+    assert.equal(isActivityPublic({ publicationStatus: 'CLOSED' }), true);
+    assert.equal(activityPublication({ publicationStatus: 'DRAFT', version: 'guid' }).isPublished, false);
+    assert.deepEqual(mapActivityFeed([{ id: 7, status: 'UPCOMING', publicationStatus: 'DRAFT' }]), []);
+});
 test('workspace detail retains private activity while discovery/recommendations exclude it', () => {
     assert.equal(mapActivityDetailItem(raw).isPublished, false);
     assert.equal(mapActivityDetailItem(raw).publicationVersion, 1);

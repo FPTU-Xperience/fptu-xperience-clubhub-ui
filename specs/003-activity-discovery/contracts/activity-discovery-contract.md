@@ -4,9 +4,16 @@ Implement Status: Not Yet
 
 Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Source Review: 2026-10-19; backend b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf, fetched current branch and origin/main equal HEAD. Source audit only; live acceptance and service tests unverified.
 
-Source Evidence: Canonical /api/v2 activity feed/detail/recommendations are absent from service endpoints and Gateway; existing management activity reads do not meet this display-safe discovery contract.
+Source Evidence: Student feed/detail/recommendation source and FE consumers now exist. The older full display DTO/action/publication/resource specification is not fully equivalent; retain remaining obligations rather than declaring all proposed fields implemented.
+
+## Current reconciliation — 2026-10-19
+
+Student feed/detail/recommendation source and FE consumers now exist. The older full display DTO/action/publication/resource specification is not fully equivalent; retain remaining obligations rather than declaring all proposed fields implemented.
+
+The specification below preserves its original proposed scope. Older dated route-absence and local-only statements are historical where superseded above; use the current lifecycle/index before implementation. Remaining obligations keep this contract Not Yet.
+
 
 **Status**: Proposed dependency for implementation. This document specifies the display-safe
 boundary required by the UI; it does not claim the endpoints already exist.
@@ -114,4 +121,4 @@ must not be used for client authorization.
 
 ## API implementation refinement — 2026-10-09
 
-[Discovery API](../../../docs/contracts/activity-discovery-api.md) retains these feed/recommendation route names and adds explicit pagination, numeric server IDs (client may stringify), cover URL, direct safe detail, server-clock LIVE state and private-by-default publication. The string IDs in the original examples above are illustrative, not a requirement to replace existing integer identities. Page size 50 satisfies the original validation case; add UI page handling for larger results. Main 80818266 still lacks this safe feed/ranking boundary. Source contracts/handoff are recorded; no external issue/comment was created by this audit. Ownership/deployment verification remains a future implementation task.
+[Discovery API](../../../docs/contracts/implemented/student-experience-reads-api.md) retains these feed/recommendation route names and adds explicit pagination, numeric server IDs (client may stringify), cover URL, direct safe detail, server-clock LIVE state and private-by-default publication. The string IDs in the original examples above are illustrative, not a requirement to replace existing integer identities. Page size 50 satisfies the original validation case; add UI page handling for larger results. Main 80818266 still lacks this safe feed/ranking boundary. Source contracts/handoff are recorded; no external issue/comment was created by this audit. Ownership/deployment verification remains a future implementation task.

@@ -4,4 +4,4 @@ The [final-product requirements](PRODUCT_REQUIREMENTS.md) describe the intended 
 
 The [study schedule implementation context](docs/study-schedule-implementation-context.md) records the Admin-owned academic calendar decision, current FE mock, and backend handoff.
 
-The [backend API implementation handoff](docs/contracts/backend-api-implementation-handoff.md) is the entry point for pending frontend API work, with the [2026-10-09 debt register](docs/contracts/frontend-api-debt-register.md), source evidence and dependency-ordered contract tasks.
+The [current contract index](docs/contracts/README.md) and [2026-10-19 lifecycle audit](docs/contracts/contract-lifecycle-audit.md) are the entry points for current FE–BE work. Historical snapshots are retained under contracts/outdated; implemented source subsets are under contracts/implemented. See the cross-repository flow and FR audit linked from the index.
