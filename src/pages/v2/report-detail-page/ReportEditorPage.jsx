@@ -9,6 +9,14 @@ import ReportTemplateModal from './ReportTemplateModal';
 import { reportDate, reportFileSize } from './report-detail-data';
 import './ReportEditorPage.scss';
 import ActivityApplicationPage from '../activity-application/ActivityApplicationPage';
+import ReportXpStep, { ReportXpPreview } from './ReportXpStep';
+import {
+    REPORT_EDITOR_STAGES,
+    reportXpPayload,
+    reportXpScope,
+    validateSavedReportXp,
+    xpReportApplicable,
+} from './report-xp';
 
 const blankDetail = () => ({
     id: crypto.randomUUID(),
@@ -26,7 +34,7 @@ const blankDetail = () => ({
     budgetSpent: 0,
     evidenceUrl: '',
 });
-const stages = ['Thông tin chung', 'Hoạt động', 'Đánh giá', 'Xem trước & nộp'];
+const stages = REPORT_EDITOR_STAGES;
 const initialDraft = (context, workspace, semester) => ({
     clubId: workspace?.clubId || context?.clubId || '',
     period:
@@ -121,7 +129,7 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
     const location = useLocation();
     const editing = Boolean(editId || routeId);
     const reportId = editId || routeId;
-    const { clubAccess } = useAuth();
+    const { clubAccess, user } = useAuth();
     const context = useMemo(
         () => (editing ? null : reportTemplateContext(location.search)),
         [editing, location.search],
@@ -144,6 +152,20 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
     const [saved, setSaved] = useState(false);
     const [deadlines, setDeadlines] = useState([]);
     const [original, setOriginal] = useState(null);
+    const [xpSnapshot, setXpSnapshot] = useState(null);
+    const xpScope = reportXpScope(draft, reportId || savedId);
+    const xpScopeKey = JSON.stringify([
+        xpScope.clubId,
+        xpScope.period,
+        xpScope.reportType,
+        xpScope.activityId,
+        sessionKey,
+        user?.id,
+        reportId,
+    ]);
+    useEffect(() => {
+        setXpSnapshot(null);
+    }, [xpScopeKey]);
     const managerClubs = clubAccess.filter((item) => item.isManager);
     const manager = managerClubs.some((item) => String(item.clubId) === String(draft.clubId));
     const reportBase = base ? `${base}/reports` : '/v2/reports';
@@ -305,6 +327,20 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
             if (!alive.current) return;
             setSavedId(id);
             setSaved(true);
+            if (xpSnapshot && (xpSnapshot.dirty || String(xpSnapshot.reportId) !== String(id))) {
+                if (typeof api.saveReportXpDraft !== 'function')
+                    throw new Error('Máy chủ chưa hỗ trợ lưu bảng Xperience Point. Báo cáo nội dung đã được lưu nháp, chưa nộp.');
+                const stored = validateSavedReportXp(
+                    await api.saveReportXpDraft(id, {
+                        ...reportXpPayload(xpSnapshot),
+                        scope: { ...xpScope, reportId: Number(id) },
+                    }),
+                    xpSnapshot,
+                    { ...xpScope, reportId: Number(id) },
+                );
+                if (!alive.current) return;
+                setXpSnapshot({ ...stored, dirty: false, baseChangeCount: stored.changes.length });
+            }
             if (submit) await api.submitReport(id);
             if (alive.current) setDestination(`${reportBase}/${encodeURIComponent(id)}`);
         } catch (issue) {
@@ -644,6 +680,17 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
                                 </section>
                             )}
                             {stage === 3 && (
+                                <ReportXpStep
+                                    key={xpScopeKey}
+                                    api={api}
+                                    scope={xpScope}
+                                    snapshot={xpSnapshot}
+                                    onChange={setXpSnapshot}
+                                    actor={user?.fullName || user?.email || String(user?.id || '')}
+                                    disabled={busy || readOnly}
+                                />
+                            )}
+                            {stage === stages.length - 1 && (
                                 <section className="v2-report-editor-card">
                                     <h2>Xem trước & nộp</h2>
                                     <dl className="v2-report-editor-summary">
@@ -668,6 +715,10 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
                                             <dd>{totals.budget.toLocaleString('vi-VN')} VNĐ</dd>
                                         </div>
                                     </dl>
+                                    <ReportXpPreview
+                                        snapshot={xpSnapshot}
+                                        applicable={xpReportApplicable(draft.reportType)}
+                                    />
                                     {draft.details
                                         .filter((item) => item.activityName.trim())
                                         .map((item) => (
@@ -711,7 +762,7 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
                             )}
                         </div>
                         <div>
-                            {mode === 'FORM' && stage < 3 ? (
+                            {mode === 'FORM' && stage < stages.length - 1 ? (
                                 <button
                                     className="v2-button v2-button--primary"
                                     type="button"

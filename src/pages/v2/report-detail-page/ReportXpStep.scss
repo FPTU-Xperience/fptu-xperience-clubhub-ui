@@ -1,0 +1,121 @@
+.v2-report-xp {
+    .v2-report-xp-notice {
+        padding: 16px;
+        margin: 0 0 22px;
+        border: 1px solid #fed7aa;
+        border-radius: 8px;
+        background: #fff7ed;
+        color: #9a3412;
+        line-height: 1.7;
+    }
+    .v2-report-editor-summary {
+        margin-top: 22px;
+    }
+    .v2-report-xp-filters {
+        margin: 22px 0 18px;
+    }
+    .v2-report-xp-views {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 18px 0;
+    }
+    .v2-report-xp-views button[aria-pressed='true'] {
+        background: #fff7ed;
+        color: #c2410c;
+        border-color: #fdba74;
+    }
+    .v2-report-xp-empty {
+        padding: 32px 16px;
+        margin-top: 20px;
+        text-align: center;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #64748b;
+    }
+    .v2-report-xp-scroll {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        margin-top: 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+    table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 13px;
+    }
+    th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    th,
+    td {
+        padding: 14px 16px;
+        vertical-align: top;
+        border-bottom: 1px solid #e2e8f0;
+        overflow-wrap: anywhere;
+    }
+    td {
+        max-width: 260px;
+        line-height: 1.65;
+    }
+    small {
+        display: block;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 11px;
+    }
+    td button {
+        white-space: nowrap;
+    }
+}
+.v2-report-xp-edit {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    color: #172033;
+    font-size: 14px;
+    p {
+        margin: 0;
+        line-height: 1.7;
+    }
+    label {
+        display: grid;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 550;
+    }
+    input,
+    textarea {
+        width: 100%;
+        min-width: 0;
+        padding: 11px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        font: inherit;
+        background: white;
+    }
+    textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    input:focus-visible,
+    textarea:focus-visible {
+        outline: 2px solid #fed7aa;
+        border-color: #f97316;
+    }
+    .v2-report-xp-views {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    [role='alert'] {
+        color: #9f1239;
+    }
+}

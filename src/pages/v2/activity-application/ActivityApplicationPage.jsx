@@ -18,7 +18,7 @@ import {
 import '../report-detail-page/ReportEditorPage.scss';
 import './ActivityApplicationPage.scss';
 
-const steps = ['Thông tin hoạt động', 'Action & dự toán XP', 'Tuyển nhân sự', 'Kiểm tra & gửi duyệt'];
+const steps = ['Thông tin hoạt động', 'Action & dự toán Xperience Point', 'Tuyển nhân sự', 'Kiểm tra & gửi duyệt'];
 function Field({ label, value, onChange, options, multiline, ...props }) {
     const id = useId();
     return (
@@ -231,7 +231,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     : await api.createActivityApplication(payload, createKey.current);
                 if (!validReceipt(value) || !['DRAFT', 'REVISION_REQUESTED'].includes(value.status))
                     throw new Error(
-                        'Server chưa trả về hồ sơ action và dự toán XP hợp lệ. Vui lòng kiểm tra hỗ trợ backend.',
+                        'Server chưa trả về hồ sơ action và dự toán Xperience Point hợp lệ. Vui lòng kiểm tra hỗ trợ backend.',
                     );
                 if (!mounted.current) return;
                 setReceipt(value);
@@ -256,8 +256,8 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 setError(
                     [404, 405, 501].includes(issue.status)
                         ? persistedId
-                            ? `Hồ sơ #${persistedId} đã lưu, nhưng máy chủ chưa hỗ trợ bước gửi duyệt XP. Hồ sơ chưa được gửi CTSV.`
-                            : 'Máy chủ chưa hỗ trợ hồ sơ hoạt động có action và duyệt XP. Dữ liệu đang ở biểu mẫu; chưa được lưu hoặc gửi CTSV. Bạn có thể xuất hồ sơ để giữ lại.'
+                            ? `Hồ sơ #${persistedId} đã lưu, nhưng máy chủ chưa hỗ trợ bước gửi duyệt Xperience Point. Hồ sơ chưa được gửi CTSV.`
+                            : 'Máy chủ chưa hỗ trợ hồ sơ hoạt động có action và duyệt Xperience Point. Dữ liệu đang ở biểu mẫu; chưa được lưu hoặc gửi CTSV. Bạn có thể xuất hồ sơ để giữ lại.'
                         : issue.message || 'Không thể lưu hồ sơ. Vui lòng thử lại.',
                 );
         } finally {
@@ -287,13 +287,13 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 <div>
                     <span className="v2-report-editor-eyebrow">HỒ SƠ ĐỀ XUẤT HOẠT ĐỘNG</span>
                     <h1>Tạo hoạt động</h1>
-                    <p>{workspace?.name || access?.clubName} · Duyệt kế hoạch và ngân sách XP trước khi triển khai</p>
+                    <p>{workspace?.name || access?.clubName} · Duyệt kế hoạch và ngân sách Xperience Point trước khi triển khai</p>
                 </div>
                 <span className="v2-application-badge">{submitted ? 'Chờ CTSV duyệt lần 1' : 'Bản nháp kế hoạch'}</span>
             </header>
             <div className="v2-application-approval-path" aria-label="Hai bước duyệt">
                 <span>
-                    <strong>1. CTSV duyệt kế hoạch</strong>Action, nhân sự và hạn mức XP
+                    <strong>1. CTSV duyệt kế hoạch</strong>Action, nhân sự và hạn mức Xperience Point
                 </span>
                 <ArrowRight size={18} />
                 <span>
@@ -301,7 +301,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 </span>
                 <ArrowRight size={18} />
                 <span>
-                    <strong>2. CTSV duyệt tổng kết</strong>Sau đó mới ghi nhận XP chính thức
+                    <strong>2. CTSV duyệt tổng kết</strong>Sau đó mới ghi nhận Xperience Point chính thức
                 </span>
             </div>
             {submitted ? (
@@ -309,7 +309,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     <CheckCircle2 size={32} />
                     <h2>Đã gửi hồ sơ #{receipt.id}</h2>
                     <p>
-                        XP đề xuất theo server: <strong>{formatXp(receipt.expectedRawXp)} raw XP</strong>. Hoạt động và
+                        Xperience Point đề xuất theo server: <strong>{formatXp(receipt.expectedRawXp)} raw Xperience Point</strong>. Hoạt động và
                         tuyển nhân sự chỉ được triển khai sau khi CTSV duyệt kế hoạch.
                     </p>
                     <p>
@@ -352,7 +352,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     {receipt && (
                         <p className="v2-report-editor-notice" role="status">
                             Hồ sơ #{receipt.id} · phiên bản {receipt.version} đã lưu. Dự toán server:{' '}
-                            {formatXp(receipt.expectedRawXp)} raw XP.{' '}
+                            {formatXp(receipt.expectedRawXp)} raw Xperience Point.{' '}
                             <Link to={`${location.pathname}?${resumeQuery}`}>Mở lại bản đã lưu</Link>
                         </p>
                     )}
@@ -423,7 +423,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                         </section>
                         <section hidden={stage !== 1} data-step="1" className="v2-report-editor-card">
                             <div className="v2-report-editor-card-heading">
-                                <h2>Action & dự toán XP</h2>
+                                <h2>Action & dự toán Xperience Point</h2>
                                 <button
                                     type="button"
                                     className="v2-button"
@@ -433,7 +433,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 </button>
                             </div>
                             <p>
-                                Mỗi lượt = Điểm nền × min(Hệ số vai trò × Hệ số quy mô, 8). Dự toán = XP mỗi lượt × Số
+                                Mỗi lượt = Điểm nền × min(Hệ số vai trò × Hệ số quy mô, 8). Dự toán = Xperience Point mỗi lượt × Số
                                 người × Số lượt/người.
                             </p>
                             <p className="v2-report-editor-hint">
@@ -532,9 +532,9 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                             />
                                         </div>
                                         <p className="v2-application-action-total">
-                                            {formatXp(estimate.perOccurrence)} XP/lượt × {action.expectedPeople || 0}{' '}
+                                            {formatXp(estimate.perOccurrence)} Xperience Point/lượt × {action.expectedPeople || 0}{' '}
                                             người × {action.expectedOccurrencesPerPerson || 0} lượt ={' '}
-                                            <strong>{formatXp(estimate.rawXp)} raw XP</strong>
+                                            <strong>{formatXp(estimate.rawXp)} raw Xperience Point</strong>
                                         </p>
                                         <small>
                                             Chỉ đề nghị cấp khi hoàn thành và có xác minh; chờ CTSV duyệt báo cáo kết
@@ -629,7 +629,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 </>
                             )}
                             <p className="v2-report-editor-hint">
-                                Tham gia vị trí tạo phân công staff, chưa được tính là hoàn thành và chưa nhận XP. Vai
+                                Tham gia vị trí tạo phân công staff, chưa được tính là hoàn thành và chưa nhận Xperience Point. Vai
                                 trò hoạt động không cấp quyền quản trị CLB.
                             </p>
                         </section>
@@ -661,10 +661,10 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                     <thead>
                                         <tr>
                                             <th>Action</th>
-                                            <th>XP/lượt</th>
+                                            <th>Xperience Point/lượt</th>
                                             <th>Người</th>
                                             <th>Lượt/người</th>
-                                            <th>Dự kiến XP</th>
+                                            <th>Dự kiến Xperience Point</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -684,11 +684,11 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 </table>
                             </div>
                             <p>
-                                CTSV duyệt kế hoạch và hạn mức XP trước khi hoạt động chạy. Báo cáo kết thúc sẽ lấy dữ
-                                liệu thực hiện để tính XP thực tế; người lập chỉ chỉnh phần thông tin.
+                                CTSV duyệt kế hoạch và hạn mức Xperience Point trước khi hoạt động chạy. Báo cáo kết thúc sẽ lấy dữ
+                                liệu thực hiện để tính Xperience Point thực tế; người lập chỉ chỉnh phần thông tin.
                             </p>
                             <p className="v2-report-editor-hint">
-                                Dự toán dưới đây là preview trên biểu mẫu. Server tính lại và trả về tổng khi lưu; XP
+                                Dự toán dưới đây là preview trên biểu mẫu. Server tính lại và trả về tổng khi lưu; Xperience Point
                                 chính thức chỉ phát sinh sau lần duyệt tổng kết.
                             </p>
                             {!draft.independentActionsConfirmed && (
@@ -700,12 +700,12 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     </fieldset>
                     <aside className="v2-application-total" aria-live="polite">
                         <div>
-                            <span>XP đề xuất · dự toán trên biểu mẫu</span>
+                            <span>Xperience Point đề xuất · dự toán trên biểu mẫu</span>
                             <strong>
-                                {Number.isFinite(total.rawXp) ? formatXp(total.rawXp) : '—'} <small>raw XP</small>
+                                {Number.isFinite(total.rawXp) ? formatXp(total.rawXp) : '—'} <small>raw Xperience Point</small>
                             </strong>
                         </div>
-                        <p>{draft.actions.length} action · XP được duyệt và XP chính thức sẽ có sau quyết định CTSV.</p>
+                        <p>{draft.actions.length} action · Xperience Point được duyệt và Xperience Point chính thức sẽ có sau quyết định CTSV.</p>
                     </aside>
                     <footer className="v2-report-editor-footer">
                         <div>

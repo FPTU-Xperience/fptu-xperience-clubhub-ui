@@ -2,7 +2,9 @@
 
 Date: 2026-10-16.
 
-Update: new **Báo cáo Tạo hoạt động** creation now uses the dedicated [action/XP application flow](activity-application-v2.md). The shared report editor and existing ReportService mapping below continue to apply to the other templates and existing legacy FUTURE_EVENT records. Verification counts below describe the earlier report-editor migration; the linked document records current application checks.
+Update 2026-10-21: the structured shared editor now has five steps, adding **Báo cáo Xperience Point** before **Xem trước & nộp**. See [current UI verification](report-xp-v2.md) and [required Xperience Point source/save adapter](../contracts/report-xp-workflow.md). Production Xperience Point autofill/save remains unavailable until that backend contract exists; ordinary report payloads retain their existing fields.
+
+Update: new **Báo cáo Tạo hoạt động** creation now uses the dedicated [action/Xperience Point application flow](activity-application-v2.md). The shared report editor and existing ReportService mapping below continue to apply to the other templates and existing legacy FUTURE_EVENT records. Verification counts below describe the earlier report-editor migration; the linked document records current application checks.
 
 ## Delivered flow
 
@@ -20,7 +22,7 @@ All templates continue to `/v2/my-clubs/:clubCode/reports/create?...` inside the
 For ordinary reports and existing report edits, the V2 editor contains:
 
 - General metadata with template and club scope, current period and deadline where supplied by the API.
-- Activities with names, Vietnam-local dates, location, description, participation counts, outcomes, evidence links and money fields already supported by the existing report DTO. Money is labelled VNĐ; it is not an XP budget implementation.
+- Activities with names, Vietnam-local dates, location, description, participation counts, outcomes, evidence links and money fields already supported by the existing report DTO. Money is labelled VNĐ; it is not an Xperience Point budget implementation.
 - Narrative evaluation and plans.
 - Preview, save draft and save/submit through existing API methods.
 - PDF/DOCX/XLSX upload up to 20 MB, with file-type/size validation.
@@ -41,7 +43,7 @@ Manager access is checked per club. Observation and ordinary-member access canno
 
 Current ReportService create/update DTOs accept reportType/tag strings and narrative/detail fields. The type/tag pair distinguishes templates, including start/end in one period and separate activity reports under the existing club/period/tag uniqueness rule. These are frontend conventions using existing fields, not a new template-catalog endpoint.
 
-The current create DTO has no `sourceActivityId` field. The selected activity ID is carried in the activity-report tag for traceability and its data is copied into report details. This is **not** a backend-enforced foreign-key relationship or automatic end-of-activity approval/XP settlement. A future authoritative source-link contract must explicitly add and validate that relationship. Existing FUTURE_EVENT records retain the finance workflow. New create-activity applications use the separate contract in the linked application document; ReportService DTOs do not persist action/XP plans.
+The current create DTO has no `sourceActivityId` field. The selected activity ID is carried in the activity-report tag for traceability and its data is copied into report details. This is **not** a backend-enforced foreign-key relationship or automatic end-of-activity approval/Xperience Point settlement. A future authoritative source-link contract must explicitly add and validate that relationship. Existing FUTURE_EVENT records retain the finance workflow. New create-activity applications use the separate contract in the linked application document; ReportService DTOs do not persist action/Xperience Point plans.
 
 ## Verification
 

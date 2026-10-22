@@ -113,9 +113,9 @@ export function validateApplication(draft, now = Date.now(), throughStage = 3) {
         !Number.isFinite(applicationEstimate(draft).rawXp) ||
         applicationEstimate(draft).rawXp > Number.MAX_SAFE_INTEGER
     )
-        return 'Tổng XP vượt giới hạn tính toán. Vui lòng giảm số lượng hoặc điểm nền.';
+        return 'Tổng Xperience Point vượt giới hạn tính toán. Vui lòng giảm số lượng hoặc điểm nền.';
     if (!draft.independentActionsConfirmed)
-        return 'Xác nhận các action đại diện phần việc độc lập để tránh cộng trùng XP.';
+        return 'Xác nhận các action đại diện phần việc độc lập để tránh cộng trùng Xperience Point.';
     if (throughStage === 1) return '';
     if (draft.recruitment.enabled) {
         if (

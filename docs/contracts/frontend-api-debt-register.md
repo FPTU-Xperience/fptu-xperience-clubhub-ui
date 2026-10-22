@@ -1,5 +1,7 @@
 # Frontend API debt register — rechecked 2026-10-13
 
+Update 2026-10-21: the report editor adds a dedicated XP step, with [pending authoritative XP draft/save/version/settlement contracts](report-xp-workflow.md). Production shows an unavailable state; QA adapters only verify frontend interactions. This is not another declared API operation or official XP integration.
+
 Implement Status: Not Yet
 
 Status Scope: Backend/integration debt tracked here

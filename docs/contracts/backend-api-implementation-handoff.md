@@ -1,5 +1,7 @@
 # Backend API implementation handoff
 
+Update 2026-10-21: [ClubHub report XP step](report-xp-workflow.md) adds the five-step frontend and guarded source/save integration. Implement the authoritative scoped XP draft, before/after audit, version-bound submission and settlement contracts before enabling its production adapter. The existing ReportService DTO does not persist XP rows.
+
 Implement Status: Not Yet
 
 Status Scope: Backend work tracked by this handoff

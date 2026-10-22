@@ -117,7 +117,7 @@ test('recruitment links real action IDs and private visibility enforces club eli
     data.recruitment.actionIds = ['deleted'];
     assert.notEqual(validateApplication(data, now), '');
 });
-test('payload retains policy facts, uses Vietnam dates and omits client XP authority', () => {
+test('payload retains policy facts, uses Vietnam dates and omits client Xperience Point authority', () => {
     const data = draft();
     data.title = '  Workshop  ';
     data.actions[0].expectedRawXp = 999999;

@@ -179,7 +179,7 @@ function RecruitmentEditor({ data, busy, error, onClose, onSave }) {
                     ))}
                     <p>
                         Nhiệm vụ này dùng chung với tab Nhiệm vụ & đóng góp của CLB. Nhận vị trí chưa đồng nghĩa hoàn
-                        thành hoặc nhận XP.
+                        thành hoặc nhận Xperience Point.
                     </p>
                     {error && <p role="alert">{error}</p>}
                     <footer>
@@ -330,7 +330,7 @@ export default function ActivityStaffingPanel({
                 </p>
             )}
             <p className="v2-staffing-notice">
-                Nhận việc chưa có XP chính thức. Các lượt thực hiện cần xác minh và CTSV duyệt báo cáo kết thúc trước
+                Nhận việc chưa có Xperience Point chính thức. Các lượt thực hiện cần xác minh và CTSV duyệt báo cáo kết thúc trước
                 khi cộng điểm.
             </p>
             {error && !editing && !assigning && <p role="alert">{error}</p>}
@@ -373,7 +373,7 @@ export default function ActivityStaffingPanel({
                                     <div className="v2-staffing-metrics">
                                         <span>{assignment.verifiedOccurrences ?? 0} lượt đã xác minh</span>
                                         {Number.isFinite(assignment.pendingRawXp) && (
-                                            <span>{xp(assignment.pendingRawXp)} raw XP chờ duyệt</span>
+                                            <span>{xp(assignment.pendingRawXp)} raw Xperience Point chờ duyệt</span>
                                         )}
                                     </div>
                                     {assignment.completions?.length > 0 && (
@@ -402,7 +402,7 @@ export default function ActivityStaffingPanel({
                                                                             expectedVersion: data.version,
                                                                             completionVersion: completion.version,
                                                                         },
-                                                                        'Đã xác minh lượt thực hiện; XP vẫn chờ duyệt tổng kết.',
+                                                                        'Đã xác minh lượt thực hiện; Xperience Point vẫn chờ duyệt tổng kết.',
                                                                     )
                                                                 }
                                                             >
@@ -478,7 +478,7 @@ export default function ActivityStaffingPanel({
                                     {position.filledCount}/{position.capacity} vị trí đã nhận
                                 </p>
                                 {Number.isFinite(position.rawXpPerOccurrence) && (
-                                    <p>{xp(position.rawXpPerOccurrence)} raw XP/lượt dự kiến</p>
+                                    <p>{xp(position.rawXpPerOccurrence)} raw Xperience Point/lượt dự kiến</p>
                                 )}
                                 {position.myAssignmentId ? (
                                     <p className="v2-staffing-notice">Bạn đã nhận vị trí này.</p>
@@ -498,7 +498,7 @@ export default function ActivityStaffingPanel({
                                                 mutate(
                                                     `recruitment/positions/${encodeURIComponent(position.id)}/join`,
                                                     { expectedVersion: data.version },
-                                                    'Đã nhận vị trí và tạo phân công; chưa có XP chính thức.',
+                                                    'Đã nhận vị trí và tạo phân công; chưa có Xperience Point chính thức.',
                                                 )
                                             }
                                         >

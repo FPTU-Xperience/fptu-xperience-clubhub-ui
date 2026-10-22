@@ -681,7 +681,7 @@ class ApiService {
         return this.readMedia('activity', `/api/activities/${id}`);
     }
 
-    // Proposed action/XP application contract; never fall back to direct activity creation.
+    // Proposed action/Xperience Point application contract; never fall back to direct activity creation.
     async getActivityApplication(id) {
         return this.request(`/api/activity-applications/${encodeURIComponent(id)}`);
     }
