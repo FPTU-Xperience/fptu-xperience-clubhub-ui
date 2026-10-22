@@ -50,7 +50,7 @@ try {
         for (const label of ['Hoạt động cấp trường', 'Phần thưởng cấp trường', 'Trang quản trị']) {
             assert.equal(rail.includes(label), staff);
         }
-        globalThis.__affairsAuth = { user, isAuthenticated: true, loading: false };
+        globalThis.__affairsAuth = { user, clubAccess: [], isAuthenticated: true, loading: false };
         const gate = render(React.createElement(Gate, null, React.createElement('p', null, 'AUTHENTICATED_CONTENT')));
         assert.equal(
             gate.includes('AUTHENTICATED_CONTENT'),
@@ -89,7 +89,7 @@ try {
         }
     }
     const observer = { id: 'staff', name: 'Staff', roles: ['STUDENT_AFFAIRS_ADMIN'] };
-    globalThis.__affairsAuth = { user: observer, isAuthenticated: true, loading: false };
+    globalThis.__affairsAuth = { user: observer, clubAccess: [], isAuthenticated: true, loading: false };
     assert.deepEqual(
         getWorkspaceSections(true, true).map(([path]) => path),
         ['', 'activities', 'quests', 'members', 'points', 'gifts', 'reports', 'finance'],

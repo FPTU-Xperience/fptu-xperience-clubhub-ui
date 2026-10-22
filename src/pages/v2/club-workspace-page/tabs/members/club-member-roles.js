@@ -9,6 +9,7 @@ export const CLUB_ROLE_PERMISSION_COLUMNS = [
     { id: 'recruitment', label: 'Tuyển thành viên' },
     { id: 'reports', label: 'Biên bản & báo cáo' },
     { id: 'finance', label: 'Tài chính CLB' },
+    { id: 'declarationProcess', label: 'Xử lý trải nghiệm tự khai trong CLB' },
 ];
 
 const ROLE_PERMISSION_SCOPE = {

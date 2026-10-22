@@ -1,0 +1,227 @@
+.club-student-declarations {
+    min-width: 0;
+    .club-student-declaration-filters {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 16px;
+        margin: 22px 0 12px;
+    }
+    label {
+        display: grid;
+        min-width: 0;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 550;
+        color: #334155;
+    }
+    input,
+    select {
+        min-width: 0;
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        background: white;
+        color: #172033;
+        font: inherit;
+        font-weight: 400;
+    }
+    input:focus-visible,
+    select:focus-visible {
+        outline: 2px solid #fed7aa;
+        border-color: #f97316;
+    }
+    .club-student-declaration-scope {
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.7;
+        margin: 12px 0 20px;
+    }
+    .club-student-declaration-table-scroll {
+        max-width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+    }
+    table {
+        width: 100%;
+        min-width: 820px;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 13px;
+    }
+    th {
+        padding: 13px 16px;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 500;
+        color: #64748b;
+    }
+    td {
+        padding: 18px 16px;
+        border-top: 1px solid #e2e8f0;
+        vertical-align: top;
+        max-width: 270px;
+        overflow-wrap: anywhere;
+    }
+    small {
+        display: block;
+        margin-top: 6px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+    .club-student-declaration-empty {
+        display: grid;
+        justify-items: center;
+        padding: 44px 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 9px;
+        text-align: center;
+        gap: 12px;
+    }
+    .club-student-declaration-empty svg {
+        color: #ea580c;
+    }
+    .club-student-declaration-empty h2 {
+        font-size: 18px;
+    }
+    .club-student-declaration-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: #fff7ed;
+        color: #9a3412;
+        font-size: 12px;
+    }
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+.club-student-declaration-notice {
+    padding: 16px;
+    margin: 0 0 20px;
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.75;
+}
+.club-student-declaration-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+.club-student-declaration-detail {
+    color: #172033;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    min-width: 0;
+    header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    h3 {
+        margin: 18px 0 12px;
+        font-size: 17px;
+    }
+    dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin: 22px 0;
+    }
+    dt,
+    small {
+        color: #64748b;
+        font-size: 12px;
+    }
+    dd {
+        margin: 4px 0 0;
+        overflow-wrap: anywhere;
+    }
+    p {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+    ol {
+        padding-left: 20px;
+    }
+    [role='alert'] {
+        color: #9f1239;
+    }
+}
+@media (max-width: 800px) {
+    .club-student-declarations .club-student-declaration-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .club-student-declaration-detail dl {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.club-declaration-permissions,
+.club-declaration-review {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    p {
+        margin: 0;
+    }
+}
+.club-declaration-permission-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 620px;
+    }
+    th,
+    td {
+        border-bottom: 1px solid var(--v2-border, #e5e7eb);
+        padding: 14px;
+        text-align: center;
+    }
+    th:first-child {
+        text-align: left;
+    }
+    small {
+        display: block;
+        font-weight: 400;
+        color: #64748b;
+        margin-top: 4px;
+    }
+    input {
+        width: 18px;
+        height: 18px;
+        accent-color: #f97316;
+    }
+}
+.club-declaration-review {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 20px;
+    label {
+        display: grid;
+        gap: 8px;
+        font-weight: 600;
+    }
+    textarea {
+        width: 100%;
+        box-sizing: border-box;
+        resize: vertical;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px;
+        font: inherit;
+    }
+}

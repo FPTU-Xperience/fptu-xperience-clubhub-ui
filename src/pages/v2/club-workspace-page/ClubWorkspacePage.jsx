@@ -14,6 +14,7 @@ import ActivityManagementPage from './tabs/activities/ActivityManagementPage';
 import WorkspaceHome from './WorkspaceHome';
 import ReportDetailPage from '../report-detail-page/ReportDetailPage';
 import ReportEditorPage from '../report-detail-page/ReportEditorPage';
+import { canViewClubDeclarations } from './tabs/student-declarations/club-declarations-data';
 import './ClubWorkspacePage.scss';
 export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     const { clubCode: routeClubCode } = useParams();
@@ -61,7 +62,8 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                 )}
             </div>
         );
-    const availableSections = getWorkspaceSections(manager, observation);
+    const canViewDeclarations = canViewClubDeclarations(manager, result.workspace, observation);
+    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
     if (observation && relativePath === 'club-page') return <Navigate to={base} replace />;
     if (relativePath === 'attendance') return <Navigate to={`${base}/activities`} replace />;
@@ -87,6 +89,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     base={base}
                     manager={manager}
                     observation={observation}
+                    canViewDeclarations={canViewDeclarations}
                     onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
                 />
                 <main className="v2-workspace-main">
@@ -107,7 +110,9 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                         </div>
                     </header>
                     <div className="v2-workspace-content">
-                        {reportCreate || reportEditId ? (
+                        {relativePath === 'student-declarations' && !canViewDeclarations ? (
+                            <PageState status="forbidden" description="Chỉ BQL được cấp quyền trong CLB mới có thể mở trải nghiệm của sinh viên." />
+                        ) : reportCreate || reportEditId ? (
                             <ReportEditorPage key={`${sessionKey}:${result.clubId}:${reportEditId || 'create'}:${location.search}`} api={api} sessionKey={sessionKey} workspace={result.workspace} base={base} semester={semesterSelection.semester} reportId={reportEditId} readOnly={observation} />
                         ) : reportDetailId ? (
                             <ReportDetailPage

@@ -7,6 +7,7 @@ import MembersTab from './MembersTab';
 import PointsTab from './PointsTab';
 import QuestsTab from './QuestsTab';
 import ReportsTab from './ReportsTab';
+import StudentDeclarationsTab from './student-declarations/StudentDeclarationsTab';
 
 const views = {
     'Hoạt động': ActivitiesTab,
@@ -15,6 +16,7 @@ const views = {
     'Điểm & thành tích': PointsTab,
     'Kho quà': GiftsTab,
     'Báo cáo': ReportsTab,
+    'Trải nghiệm tự khai': StudentDeclarationsTab,
     'Tài chính': FinanceTab,
     'Trang CLB': ClubPageTab,
 };

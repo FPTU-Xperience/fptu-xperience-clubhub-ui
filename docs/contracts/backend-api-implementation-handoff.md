@@ -1,5 +1,11 @@
 # Backend API implementation handoff
 
+Contract tổng hợp 2026-10-22: [Báo cáo Xperience Point và trải nghiệm tự khai](../../../fptu-xperience-doc/docs/contracts/xperience-report-and-self-declaration-contract.md) — phạm vi Admin/ClubHub, một quyền xử lý CLB, mismatch 403 và backend acceptance.
+
+Update 2026-10-22: [club workspace student declarations](../qa/club-student-declarations-v2.md) now provides the BQL list/detail/evidence UI using assigned declaration reads. Follow up with server club/semester/search filters, safe student identity and unified `club.declarations.process` projection (president/vice automatic, other roles one checkbox); the external referral/endorsement contract remains separate and pending. Permission policy persistence, club review and forwarding adapters also remain unavailable; see the personal-experience contract.
+
+Update 2026-10-21 (personal experience): [Trải nghiệm cá nhân](personal-experience-api.md) now wires own summary/contributions, private evidence and direct external declaration into ClubHub. Optional affiliated-club endorsement and a student-facing semester catalog remain backend work. `ClubId` on the existing canonical external bridge cannot be reused as an endorsement reference.
+
 Update 2026-10-21: [ClubHub report XP step](report-xp-workflow.md) adds the five-step frontend and guarded source/save integration. Implement the authoritative scoped XP draft, before/after audit, version-bound submission and settlement contracts before enabling its production adapter. The existing ReportService DTO does not persist XP rows.
 
 Implement Status: Not Yet

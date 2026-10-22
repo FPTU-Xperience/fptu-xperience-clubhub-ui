@@ -1,5 +1,7 @@
 # Frontend API debt register — rechecked 2026-10-13
 
+Personal experience update 2026-10-21: own report/list/detail and direct external submission with mandatory evidence now use declared source routes. The [current personal-experience contract](personal-experience-api.md) supersedes older D03 endpoint-absence claims where explicitly noted; affiliated-club endorsement and a student semester catalog remain pending. UI displays Xperience Point while retaining API field names.
+
 Update 2026-10-21: the report editor adds a dedicated XP step, with [pending authoritative XP draft/save/version/settlement contracts](report-xp-workflow.md). Production shows an unavailable state; QA adapters only verify frontend interactions. This is not another declared API operation or official XP integration.
 
 Implement Status: Not Yet

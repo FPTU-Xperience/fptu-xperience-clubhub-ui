@@ -10,6 +10,14 @@ Source Evidence: ClubDbContext/ClubContracts and shared access retain membership
 
 Canonical D06 contract, 2026-10-12. **Proposed: no governance group/report/history/vice nomination routes exist in API main `80818266`.** Remote main and local HEAD were checked and matched on this date. This replaces the retired `club-member-roles-api.md` single-primary-role proposal. [Product decisions](club-governance-groups-proposal.md), [conventions](api-contract-conventions.md), [current audit](contract-lifecycle-audit.md).
 
+## Unified declaration processing — 2026-10-22
+
+One permission: **Xử lý trải nghiệm tự khai trong CLB**, ID `club.declarations.process`, covers reading records/private evidence, club review/requesting changes and forwarding an endorsed record to CTSV. President/vice president in the current club receive it automatically. Every other role requires the explicit unified grant in `studentDeclarationPermissions`; obsolete `canViewStudentDeclarations` and split read/review/submit grants do not grant processing. Leadership administers grants, with two checked/locked rows and one checkbox for each other role. Processing rights do not grant unrelated management permissions. Observation mode stays blocked; server authorization remains authoritative.
+
+Production has no permission policy persistence, club review or forwarding API. The UI exposes this boundary and keeps real writes disabled. Temporary checkbox choices never grant actual rights. Club endorsement is separate from final CTSV approval and never posts official Xperience Point. Existing declaration reads and private evidence downloads retain server scope checks.
+
+See [personal experience contract](personal-experience-api.md) for pending adapter shapes and the final CTSV decision boundary.
+
 ## Binding decisions and UI boundary
 
 Workspace period comes exclusively from the [shared header context](workspace-semester-context-api.md); group/report/history panels do not own a second selector. Bind actual Admin GUID/code projection before live rollout.

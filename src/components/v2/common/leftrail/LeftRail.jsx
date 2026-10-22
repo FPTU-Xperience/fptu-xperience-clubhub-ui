@@ -15,6 +15,7 @@ const personalNavigation = [
     ['/v2/my-clubs', 'Câu lạc bộ'],
     ['/v2/my-schedule', 'Lịch trình'],
     ['/v2/study-schedule', 'Lịch học'],
+    ['/v2/personal-experience', 'Trải nghiệm cá nhân'],
 ];
 
 export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
@@ -23,9 +24,7 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
     const affairs = isAffairsViewer(user);
     const adminUrl = getAdminAppUrl({ override: import.meta.env.VITE_ADMIN_APP_URL, development: import.meta.env.DEV });
     const affairsMenu = useRailDropdown(true);
-    const personalMenu = useRailDropdown(() =>
-        personalNavigation.some(([path]) => location.pathname === path),
-    );
+    const personalMenu = useRailDropdown(() => personalNavigation.some(([path]) => location.pathname === path));
     return (
         <aside className="v2-left-rail" aria-label="Điều hướng ClubHub">
             <Link to="/v2" className="v2-left-rail-brand">
@@ -45,9 +44,17 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
                     </NavLink>
                 ))}
                 {affairs ? (
-                    <div className="v2-left-rail-nav-group" ref={affairsMenu.containerRef} onBlur={(event) => {
-                        if (!event.currentTarget.contains(event.relatedTarget) && window.matchMedia('(max-width: 768px)').matches) affairsMenu.setOpen(false);
-                    }}>
+                    <div
+                        className="v2-left-rail-nav-group"
+                        ref={affairsMenu.containerRef}
+                        onBlur={(event) => {
+                            if (
+                                !event.currentTarget.contains(event.relatedTarget) &&
+                                window.matchMedia('(max-width: 768px)').matches
+                            )
+                                affairsMenu.setOpen(false);
+                        }}
+                    >
                         <button
                             className="v2-left-rail-nav-row v2-left-rail-nav-group-trigger"
                             type="button"
@@ -63,9 +70,16 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
                             <div id="v2-left-rail-affairs-nav" className="v2-left-rail-nav-group-items">
                                 {affairsNavigation.map(([to, label]) =>
                                     to === '/v2/ctsv/admin' && adminUrl ? (
-                                        <a key={to} href={adminUrl} target="_blank" rel="noopener noreferrer" onClick={() => {
-                                            if (window.matchMedia('(max-width: 768px)').matches) affairsMenu.setOpen(false);
-                                        }}>
+                                        <a
+                                            key={to}
+                                            href={adminUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => {
+                                                if (window.matchMedia('(max-width: 768px)').matches)
+                                                    affairsMenu.setOpen(false);
+                                            }}
+                                        >
                                             {label} <ArrowUpRight size={14} aria-hidden="true" />
                                         </a>
                                     ) : (
@@ -78,9 +92,17 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
                         )}
                     </div>
                 ) : (
-                    <div className="v2-left-rail-nav-group" ref={personalMenu.containerRef} onBlur={(event) => {
-                        if (!event.currentTarget.contains(event.relatedTarget) && window.matchMedia('(max-width: 768px)').matches) personalMenu.setOpen(false);
-                    }}>
+                    <div
+                        className="v2-left-rail-nav-group"
+                        ref={personalMenu.containerRef}
+                        onBlur={(event) => {
+                            if (
+                                !event.currentTarget.contains(event.relatedTarget) &&
+                                window.matchMedia('(max-width: 768px)').matches
+                            )
+                                personalMenu.setOpen(false);
+                        }}
+                    >
                         <button
                             className="v2-left-rail-nav-row v2-left-rail-nav-group-trigger"
                             type="button"

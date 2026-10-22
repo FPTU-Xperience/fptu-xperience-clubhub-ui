@@ -419,7 +419,12 @@ class ApiService {
     async inviteClubMember(clubId, student, semesterId) {
         return this.request(`/api/clubs/${encodeURIComponent(clubId)}/members`, {
             method: 'POST',
-            body: JSON.stringify({ userId: Number(student.userId), fullName: student.fullName, role: 'CLUB_MEMBER', semesterId }),
+            body: JSON.stringify({
+                userId: Number(student.userId),
+                fullName: student.fullName,
+                role: 'CLUB_MEMBER',
+                semesterId,
+            }),
         });
     }
 
@@ -621,7 +626,9 @@ class ApiService {
     }
 
     async downloadReportAttachment(reportId, attachmentId, fileName) {
-        const url = this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`);
+        const url = this.buildUrl(
+            `/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`,
+        );
         const token = this.getToken();
         const response = await fetch(url, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -658,10 +665,46 @@ class ApiService {
         return this.parseResponse(response);
     }
 
-    async deleteReportAttachment(reportId, attachmentId) {
-        return this.request(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`, {
-            method: 'DELETE',
+    async uploadContributionEvidence(file, key) {
+        const form = new FormData();
+        form.append('file', file);
+        const token = this.getToken();
+        const response = await fetch(this.buildUrl('/api/contributions/evidence'), {
+            method: 'POST',
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'Idempotency-Key': key },
+            body: form,
         });
+        if (!response.ok) {
+            const issue = new Error(await this.getErrorMessage(response));
+            issue.status = response.status;
+            throw issue;
+        }
+        return this.parseResponse(response);
+    }
+
+    async downloadContributionEvidence(id, name = 'minh-chung') {
+        const token = this.getToken();
+        const response = await fetch(this.buildUrl(`/api/contributions/evidence/${encodeURIComponent(id)}/download`), {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!response.ok) throw new Error(await this.getErrorMessage(response));
+        const url = URL.createObjectURL(await response.blob());
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    async deleteReportAttachment(reportId, attachmentId) {
+        return this.request(
+            `/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`,
+            {
+                method: 'DELETE',
+            },
+        );
     }
 
     // Activity endpoints
@@ -671,7 +714,9 @@ class ApiService {
         if (hasClubId && (!Number.isSafeInteger(numericClubId) || numericClubId <= 0)) {
             throw new TypeError('Activity clubId must be a positive numeric club ID.');
         }
-        const filters = new URLSearchParams(Object.entries(params).filter(([, value]) => value != null && value !== ''));
+        const filters = new URLSearchParams(
+            Object.entries(params).filter(([, value]) => value != null && value !== ''),
+        );
         if (hasClubId) filters.set('clubId', String(numericClubId));
         const query = filters.size ? `?${filters}` : '';
         return this.readMedia('activity', `/api/activities${query}`);

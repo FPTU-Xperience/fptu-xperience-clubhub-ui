@@ -50,6 +50,8 @@ export function mapMyClubSelection(value) {
                 coverImageUrl: text(raw.coverImageUrl || raw.coverUrl),
                 role,
                 displayRole: text(raw.displayRole, role === 'MANAGER' ? 'CLUB_OWNER' : 'MEMBER'),
+                ...(Array.isArray(raw.studentDeclarationPermissions) ? { studentDeclarationPermissions: raw.studentDeclarationPermissions.filter((id)=>['club.declarations.process'].includes(id)) } : {}),
+                ...(typeof raw.canViewStudentDeclarations === 'boolean' ? { canViewStudentDeclarations: raw.canViewStudentDeclarations } : {}),
                 workspacePath: `/v2/my-clubs/${encodeURIComponent(clubCode)}`,
                 upcomingActivity: activity?.title && activity?.startTime
                     ? { title: text(activity.title), startTime: text(activity.startTime), location: text(activity.location) }

@@ -27,6 +27,7 @@ import AffairsClubWorkspace from './affairs-page/AffairsClubWorkspace';
 import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import ReportDetailPage from './report-detail-page/ReportDetailPage';
 import ReportEditorPage from './report-detail-page/ReportEditorPage';
+import PersonalExperiencePage from './personal-experience/PersonalExperiencePage';
 import './V2App.scss';
 import { PinnedClubsProvider } from './pinned-clubs';
 const DemoApp = lazy(() => import('./DemoApp'));
@@ -79,6 +80,7 @@ function AuthenticatedV2App() {
                             element={<ActivityDetailPage api={api} sessionKey={sessionKey} />}
                         />
                         <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
+                        <Route path="personal-experience" element={<PersonalExperiencePage key={sessionKey} api={api} user={user} clubAccess={clubAccess} />} />
                         <Route path="reports/:reportId" element={<div className="v2-public-content"><ReportDetailPage key={`${sessionKey}:${location.pathname}`} api={api} sessionKey={sessionKey} /></div>} />
                         <Route path="reports/create" element={<div className="v2-public-content"><ReportEditorPage key={`${sessionKey}:${location.pathname}:${location.search}`} api={api} sessionKey={sessionKey} /></div>} />
                         <Route path="reports/:reportId/edit" element={<div className="v2-public-content"><ReportEditorPage key={`${sessionKey}:${location.pathname}`} api={api} sessionKey={sessionKey} /></div>} />
