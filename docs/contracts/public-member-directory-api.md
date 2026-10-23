@@ -1,3 +1,24 @@
+# Danh bạ thành viên công khai — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: Optional/deferred capability; retained, not cancelled
+
+Backend Progress: SKIPPED_OPTIONAL_NEEDS_SPEC
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Giữ public leaders/count và private member APIs hiện có; không công khai danh sách thành viên từ nguồn private.
+
+**Chưa hoàn thành / giới hạn:** Opt-in public directory chưa làm, BỎ QUA/optional theo scope hiện tại; không xóa yêu cầu, không tính là API bắt buộc đã hoàn thành.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Danh bạ thành viên công khai — cập nhật 2026-10-12
 
@@ -23,13 +44,13 @@ Club directory/profile công bố và manager roster riêng tư vẫn GIỮ vớ
 
 # Optional opt-in public club member directory
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Optional/deferred backend capability, not cancelled
+Historical Status Scope: Optional/deferred backend capability, not cancelled
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: MemberManagementEndpoints.cs provides private management reads, but no opt-in member public route or per-club consent persistence. Public leaders/count do not satisfy a consent-based directory; deferral does not mean cancellation.
+Historical Source Evidence: MemberManagementEndpoints.cs provides private management reads, but no opt-in member public route or per-club consent persistence. Public leaders/count do not satisfy a consent-based directory; deferral does not mean cancellation.
 
 D13; proposed/deferred. Current non-manager workspace shows public leaders and member count; it does not require exposing the full roster. Backend source main 80818266 has manager members/detail reads, not this privacy projection.
 
@@ -39,5 +60,7 @@ Opt-in belongs to the authenticated student's canonical profile/privacy settings
 
 Tests: no consent yields no item, opt-in displays safe fields, revoke removes cache/read, pending/removed members excluded, pagination reveals no hidden identity, other user cannot alter consent. No current-control unblock depends on this optional endpoint; keep it out of the required first backend batch.
 
+
+</details>
 
 </details>

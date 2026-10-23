@@ -1,3 +1,24 @@
+# Handoff BE/FE theo phiếu đăng ký v1.4 — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE implementation tracked by handoff; whole contract is incomplete
+
+Backend Progress: PARTIAL
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#overview).
+
+**Đã có BE:** Các handler trong nhóm 16 consumer thiếu route ban đầu đã có; hoạt động vận hành, roster/invite, lịch học, self fields/media cơ bản và EMBED có persistence.
+
+**Chưa hoàn thành / giới hạn:** Không đồng nghĩa toàn bộ contract Done: điểm hoãn, governance, file resources/cosmetics và live acceptance còn mở.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Handoff BE/FE theo phiếu đăng ký v1.4 — cập nhật 2026-10-12
 
@@ -58,13 +79,13 @@ Roster/carry-forward trường, timetable/academic blocks/FAP/OJT integration, w
 
 # Backend API implementation handoff
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend work tracked by this handoff
+Historical Status Scope: Backend work tracked by this handoff
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: The dependency waves remain open: own withdrawal, media/profile, governance, semester roster, credit/rewards, discovery and timetable persistence are absent or incomplete in the source contexts/endpoints.
+Historical Source Evidence: The dependency waves remain open: own withdrawal, media/profile, governance, semester roster, credit/rewards, discovery and timetable persistence are absent or incomplete in the source contexts/endpoints.
 
 Updated 2026-10-13 for the next BE batch. Start with [contract lifecycle audit](contract-lifecycle-audit.md), [debt register](frontend-api-debt-register.md), [declaration inventory](api-declaration-inventory.md), and [shared conventions](api-contract-conventions.md). API baseline: remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-13. Frontend session commit b9832cd and later uncommitted branding updates were inspected; no backend source was changed. Recheck main before implementation and reconcile any new routes, migrations and permissions.
 
@@ -161,3 +182,5 @@ Scope includes the complete latest FE commit `b9832cd33f7d8e17c09982e68a5acca0fc
 - [ ] Follow [club navigation/applications](club-navigation-applications-api.md) for source/capability metadata, canonical code/logo and the seven-day display rule. Use existing reviewedAtUtc; hiding results must never delete approved memberships.
 - [ ] Implement optional durable pins when cross-device preference sync is selected, with self-only reads/writes, unique user+club and current access revalidation. Browser pins currently remain temporary.
 - [ ] Keep pin/role presentation independent of authorization; verify self withdrawal through the actual deployed route before enabling it.
+
+</details>

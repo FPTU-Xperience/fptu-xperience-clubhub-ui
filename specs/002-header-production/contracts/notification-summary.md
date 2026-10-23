@@ -1,3 +1,24 @@
+# Header notification và nguồn sự kiện trong phiếu — cập nhật 2026-10-12
+
+Implement Status: Done
+
+Status Scope: BE source: existing self-safe notification reads and committed invite/import outbox; not live delivery
+
+Backend Progress: SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](../../../docs/contracts/be-api-status.md); [wire details](../../../docs/contracts/backend-current-integration.md#roster).
+
+**Đã có BE:** Notification self-safe/read hiện có; invitation/import đã thêm outbox đúng người nhận.
+
+**Chưa hoàn thành / giới hạn:** Chưa nghiệm thu delivery live; không hứa tất cả loại event mới, rewards hoặc governance notices đã có.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Header notification và nguồn sự kiện trong phiếu — cập nhật 2026-10-12
 
@@ -12,13 +33,13 @@ GIỮ GETnotifications self-safe/bounded/errors/no fixtures; full inbox/read mut
 
 # UI Contract: Header Notification Summary
 
-Implement Status: Done
+Historical Implement Status: Done
 
-Status Scope: Backend source implementation of existing notification read contract
+Historical Status Scope: Backend source implementation of existing notification read contract
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: NotificationEndpoints.cs GetNotificationsAsync uses authenticated actor and scoped recipients; NotificationExtensions.cs applies access filtering and safe DTO mapping; notification persistence and Gateway route exist. Bounded six-item presentation is FE-only; no live or newly executed service-test claim.
+Historical Source Evidence: NotificationEndpoints.cs GetNotificationsAsync uses authenticated actor and scoped recipients; NotificationExtensions.cs applies access filtering and safe DTO mapping; notification persistence and Gateway route exist. Bounded six-item presentation is FE-only; no live or newly executed service-test claim.
 
 ## Scope
 
@@ -69,5 +90,7 @@ The V2 adapter accepts equivalent existing timestamp field names but exposes onl
 
 Notification list and read mutations already exist on main 80818266; no replacement notification service is requested. New invitation, role, contribution and redemption notifications should use source outbox events and recipient deduplication under [shared conventions](../../../docs/contracts/api-contract-conventions.md). Preserve this header's bounded safe projection and session isolation; full inbox pagination is a separate existing-API integration task (D14). See [handoff](../../../docs/contracts/backend-api-implementation-handoff.md).
 
+
+</details>
 
 </details>

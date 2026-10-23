@@ -1,5 +1,26 @@
 # Contract kế hoạch kỳ, thống kê và báo cáo CLB — 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: BE existing plan/statistics/export source; new action final-report scoring not included
+
+Backend Progress: PARTIAL_EXISTING_SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Semester plans/statistics và tạo/xuất báo cáo quản lý hiện có giữ trạng thái source implemented trong phạm vi cũ.
+
+**Chưa hoàn thành / giới hạn:** Không dùng báo cáo hiện có như final authority trao điểm action/budget hoặc báo cáo governance; các luồng đó chưa hoàn thành/đang hoãn.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Contract kế hoạch kỳ, thống kê và báo cáo CLB — 2026-10-12
+
 <!-- BE_STATUS_2026_10_14_START -->
 ## Trạng thái BE hiện hành — 14/10/2026
 
@@ -54,3 +75,5 @@ Tái sử dụng ReportService list/detail/protected download/export infrastruct
 ## Nghiệm thu
 
 Một người5 buổi→unique1; hai club không tự lẫn; người đã tham gia kỳ trước không tính firstTime; ngoài CLB trước đó được xử lý theo definitionsVersion; đăng ký/chưa verified không tính; canceled/revoked không tăng thực tế; upgrade không đếm đôi; >100 bản ghi; target0; stale plan/ledger snapshot; PDF đúng snapshot/quyền/download/không lộ dữ liệu riêng; restart giữ plan/report/export status.
+
+</details>

@@ -1,3 +1,24 @@
+# Đóng góp, nhiệm vụ và điểm trải nghiệm — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE new task/credit/point lifecycle; existing evidence/ledger routes are separate
+
+Backend Progress: DEFERRED_BY_PRODUCT_OWNER
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Contribution/evidence/review/ledger legacy hiện có; action completion/verification mới chỉ xác nhận công việc, không phát điểm.
+
+**Chưa hoàn thành / giới hạn:** Task credit, ví CLUB_CREDIT, đổi thưởng, cap/rollover/reversal/final report awards chưa triển khai hoặc chưa chốt; không thay bằng Admin quest hay tiền Finance.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Đóng góp, nhiệm vụ và điểm trải nghiệm — cập nhật 2026-10-12
 
@@ -38,13 +59,13 @@ Payload/wallet/reversal endpoint dưới là LỊCH SỬ, không dùng mint tr�
 
 # Club tasks, contributions and credited points
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: AdminDbContext declares Quests, QuestParticipants and XpLedgerEntries, but ClubDbContext has no club task evidence/review, wallet or credit-ledger entities/routes. Admin raw XP is not this spendable credit lifecycle.
+Historical Source Evidence: AdminDbContext declares Quests, QuestParticipants and XpLedgerEntries, but ClubDbContext has no club task evidence/review, wallet or credit-ledger entities/routes. Admin raw XP is not this spendable credit lifecycle.
 
 D07; proposed, main 80818266 audited 2026-10-09. `QuestsTab` and `PointsTab` currently show unavailable states. AdminService quest catalog/participants and declaration raw scoring exist; they do not implement this club-scoped evidence/review/wallet lifecycle. Shared [conventions](api-contract-conventions.md) apply.
 
@@ -74,5 +95,7 @@ Proposed POST `/api/clubs/{clubId}/task-submissions/{submissionId}/credit-revers
 
 All abbreviated `/tasks`, `/task-submissions`, `/points` and `/badges` paths above are rooted at `/api/clubs/{clubId}`. Responses use shared pagination and versions; mutation operations return the canonical updated resource or a receipt, never a fabricated success counter.
 
+
+</details>
 
 </details>

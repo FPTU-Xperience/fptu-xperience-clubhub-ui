@@ -1,12 +1,96 @@
-# Contract lifecycle / current BE source audit — 2026-10-13
+# Contract lifecycle và trạng thái BE hiện hành — 23/10/2026
 
 Implement Status: Done
 
-Status Scope: Documentation audit; does not mean the proposed backend features are complete.
+Status Scope: Documentation: current pinned source/status audit; not complete backend or FE/live acceptance
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Backend Progress: PARTIAL_PROJECT
 
-Source Evidence: Existing handlers/DTOs/models/DbContexts/migrations, Gateway configuration and regenerated facade declarations were inspected. No backend source was modified.
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62`, branch `feat/backend-contract-completion`; reviewed FE requirement pin `3ffd00ed03a5b8db942ed3ac3b7b6dee098d9f42`. FE worktree remains `update-contract`; no runtime code merge.
+
+Source Evidence: [BE manifest](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/contracts/be-operation-manifest.json); existing BE suite 914 passed / 0 failed / 0 skipped, source/local SQL proof only. This sync runs documentation validation, not a new BE suite or FE/live acceptance.
+
+
+## Nguồn và quy tắc
+
+BE đang đối chiếu là nhánh `feat/backend-contract-completion` tại `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62`, **không phải origin/main**. FE đang ở `update-contract`, commit nền `7faf84cb867e8f3b8af89c39f327d410b2f1a10c`; baseline yêu cầu chính đã dùng ở BE là FE main `3ffd00ed03a5b8db942ed3ac3b7b6dee098d9f42`. Chỉ đồng bộ Markdown/JSON; không merge runtime từ main. Hai file action-staffing và self-profile-extensions còn thiếu được lấy từ pin đó rồi gắn trạng thái hiện hành.
+
+Nhãn `Implement Status` giữ quy ước Done / Not Yet / Cancel của checker hiện có. **Backend Progress** tách rõ partial/deferred/optional khỏi Done trong phạm vi hẹp. Done của index/audit/hướng dẫn là hoàn tất tài liệu; Done của source operation không đồng nghĩa FE hoặc server đã chạy. Không cancel actor/tính năng chỉ vì chưa triển khai.
+
+Hiện có **43** Markdown contract được phân loại: **12 Done**, **31 Not Yet**, **0 Cancel**. Đây là số tài liệu theo scope, không phải số API đã hoàn thành.
+
+14/10 từng dùng 74 operation, 64 complete/10 partial; 13/10 từng dùng 95 facade wrappers. Hai kiểm kê đó là lịch sử, không phải tổng hiện hành và không được cộng vào 40 operation mới. Manifest BE hiện tại là nguồn method/route và giới hạn; chưa tái chạy inventory facade. Nhóm 16 thiếu route ở audit 21/10 đã có handler nhưng toàn kế hoạch còn partial.
+
+Proof BE đã có: **914/914 passed**, 0 failed/skipped, SQL migration/CAS, Gateway routing, coverage, build -warnaserror và 15 style/model checks. Không chạy lại BE suite trong lượt chỉ sửa docs này. Không dùng nhãn Done thay cho FE integration/R2/delivery/deploy/migration shared acceptance. Lịch sử dưới đây được giữ để truy vết, không thay trạng thái ở bảng hiện tại.
+
+## Từng contract hiện hành
+
+| Contract | Implement Status | Backend Progress | Phạm vi đã có / phần còn lại |
+| --- | --- | --- | --- |
+| [README.md](README.md) | Done | PARTIAL_PROJECT | Chỉ mục hiện hành, source pin và trạng thái theo nhóm. Các yêu cầu chưa làm được giữ, không tự hoàn thành. |
+| [activity-action-staffing-api.md](activity-action-staffing-api.md) | Not Yet | PARTIAL_OPERATIONAL_SOURCE_IMPLEMENTED | 7 application và các route publication/staffing/assignment/recruitment/completion/verify đã có persistence, audit, CAS và quyền hiện tại. expectedRawXp=null/canAwardPoints=false; adapter FE numeric phải đổi. Final report/awards/budgets/caps/+1/rollover chưa chốt. |
+| [activity-attendance-api.md](activity-attendance-api.md) | Not Yet | PARTIAL | Buổi lặp, registration, QR/self attendance hiện có; thêm attendance-claims và verify cho action ATTENDANCE, có quyền độc lập. Claim không phải QR check-in, không tạo ActivityAttendance hoặc điểm qua legacy; điểm action/final report đang tạm hoãn. |
+| [activity-discovery-api.md](activity-discovery-api.md) | Done | SOURCE_IMPLEMENTED | GET /api/v2/activities/feed, /api/v2/activities/{activityId}, recommendation rule hiện có; thêm GET /api/v2/activities/{activityId}/sessions cho sinh viên đã đăng ký, đúng campus/visibility. Không phải public anonymous; FE phải dùng nguồn v2 thay management sessions. Công thức điểm mới không được chốt bởi nhãn Done này. |
+| [activity-profile-resources-api.md](activity-profile-resources-api.md) | Not Yet | PARTIAL_EMBED_GALLERY_ONLY | 5 API gallery/tạo/sửa/gỡ/history EMBED đã có; activity detail có resources, resourceAvailability, resourceCapabilities. Cover PUT đã có. canUpload=false, supportedKinds=[EMBED]. DOCUMENT/MEDIA và upload-intents trả 501 sau kiểm tra quyền; private delivery/scanner/cleanup và GET /api/public/activities/{id} chưa làm. |
+| [api-contract-conventions.md](api-contract-conventions.md) | Not Yet | PARTIAL | Luồng mới dùng principal hiện tại, CAS, transaction/receipt, chống gửi trùng và paging; kiểm tra quyền trước replay. Không đồng nhất mọi version thành GUID: application/action là int ID, application/staffing/publication dùng int version; legacy/profile/calendar/resource dùng GUID. Shape lỗi/paging theo từng route. |
+| [api-declaration-inventory.md](api-declaration-inventory.md) | Done | HISTORICAL_INVENTORY | Giữ nguyên inventory facade cũ làm bằng chứng lịch sử; trạng thái BE mới dùng bảng hiện hành và manifest 40 operation. Không dùng số 95 wrappers/6 absent trong bản cũ như số liệu BE hiện tại; chưa chạy lại generator trên FE main. |
+| [backend-api-implementation-handoff.md](backend-api-implementation-handoff.md) | Not Yet | PARTIAL | Các handler trong nhóm 16 consumer thiếu route ban đầu đã có; hoạt động vận hành, roster/invite, lịch học, self fields/media cơ bản và EMBED có persistence. Không đồng nghĩa toàn bộ contract Done: điểm hoãn, governance, file resources/cosmetics và live acceptance còn mở. |
+| [backend-changes-for-frontend.md](backend-changes-for-frontend.md) | Not Yet | PARTIAL | F01/F02/F03/F05/F06 đã có bản sửa/luồng nguồn ở BE; đọc bảng current và hướng dẫn wire trước khi nối adapter. F04/cơ chế điểm action-final-report đang tạm hoãn; adapter expectedRawXp numeric chưa tương thích null. FE/deployment không được đánh Done. |
+| [backend-current-integration.md](backend-current-integration.md) | Done | PARTIAL_PROJECT | Wire source hiện hành và giới hạn đã đồng bộ. Không xác nhận FE/deploy hay toàn bộ backend Done. |
+| [be-api-status.md](be-api-status.md) | Done | PARTIAL_PROJECT | Đồng bộ 40 operation mới và 13 operation có extension/fix; đầy đủ các nhãn source/partial/deferred. Chưa hoàn thành toàn bộ contract, chưa xác nhận FE hay deploy; số 74 operation cũ chỉ là checkpoint lịch sử. |
+| [be-integration-guide.md](be-integration-guide.md) | Done | DOCUMENTATION_SYNCED | Hướng dẫn hiện hành cho các API mới/đổi ở backend-current-integration.md; có đúng loại ID/version, null/omission và trạng thái chưa hỗ trợ. Phần 14/10 được giữ dưới lịch sử, không dùng nó để bỏ qua extension mới hoặc nhận mọi version là GUID. |
+| [capstone-scope-contract.md](capstone-scope-contract.md) | Done | DOCUMENTATION_SYNCED | Chủ dự án đã yêu cầu roster theo email trường/tài khoản sẵn có và đã cho triển khai lịch học cá nhân; ghi nhận BE hiện có, không sửa phiếu đăng ký gốc. Tích hợp hệ thống trường/FAP, nguồn ngành/năm học chính thức vẫn chưa có. Điểm mới tạm hoãn. Mục không cần giữ BỎ QUA, không xóa. |
+| [club-contributions-points-api.md](club-contributions-points-api.md) | Not Yet | DEFERRED_BY_PRODUCT_OWNER | Contribution/evidence/review/ledger legacy hiện có; action completion/verification mới chỉ xác nhận công việc, không phát điểm. Task credit, ví CLUB_CREDIT, đổi thưởng, cap/rollover/reversal/final report awards chưa triển khai hoặc chưa chốt; không thay bằng Admin quest hay tiền Finance. |
+| [club-event-operations-api.md](club-event-operations-api.md) | Not Yet | PARTIAL_OPERATIONAL_SOURCE_IMPLEMENTED | Application draft/submit/review/history, publication bool, staffing/assignment/completion/verify và tuyển người đã có; recurrence/attendance cũ giữ nguyên. CONTENT/event specialist cần governance thật; custom forms/reviewed registrations còn chưa làm/cần đặc tả. Điểm action đang hoãn. |
+| [club-governance-groups-api.md](club-governance-groups-api.md) | Not Yet | NOT_IMPLEMENTED | Tái sử dụng membership/owner assignment/transfer và quyền thủ quỹ hiện có làm nền; workspace semester read đã có riêng. Terms/groups/union/revocation/expiry/revisions/report snapshots/vice nomination và policy liên service chưa hoàn thành. Chờ quyết định chuyển thủ quỹ legacy sang kỳ; không tự kế thừa/cấp quyền. |
+| [club-governance-groups-proposal.md](club-governance-groups-proposal.md) | Not Yet | NOT_IMPLEMENTED | Giữ quyết định nghiệp vụ đa nhóm và bản UI rehearsal; không xóa đề xuất hoặc biến báo cáo BQL thành cấp quyền. Cùng backlog/câu hỏi migration với club-governance-groups-api.md; local group labels không làm canManage=true. |
+| [club-member-invitations-api.md](club-member-invitations-api.md) | Not Yet | PARTIAL_CORE_SOURCE_IMPLEMENTED | invitation-semesters, eligible-members, import roster và kiểm tra lại identity/revision ở mời/consent/duyệt đã có; consent vẫn Pending đến khi quản lý duyệt; outbox đúng recipient. POST members cần semesterId; lời mời legacy thiếu nguồn trả reconciliation 409. HR/group capability và delivery live chưa hoàn thành. Không còn coi roster lookup là chưa có. |
+| [club-navigation-applications-api.md](club-navigation-applications-api.md) | Not Yet | PARTIAL_WITH_OPTIONAL_PINS | Own application history, withdraw/reapply có audit, source/capability/version/code/logo metadata đã có; dữ liệu legacy giữ UNKNOWN. Durable pins vẫn chưa triển khai/optional; không chặn việc tích hợp inbox và rút đơn đã có BE. Không suy quyền từ navigation. |
+| [club-public-profile-api.md](club-public-profile-api.md) | Not Yet | PARTIAL_CORE_SOURCE_IMPLEMENTED | GET manager/managed trả version/coverImageUrl/schedule; PATCH public-profile và PUT public-images có source, CAS, owner verification; F01/F02 đã sửa. Ảnh bỏ qua giữ nguyên, null xóa riêng. Specialist cần governance; kiểm chứng R2/delivery và FE save-reload live chưa làm. |
+| [club-semester-plan-report-api.md](club-semester-plan-report-api.md) | Not Yet | PARTIAL_EXISTING_SOURCE_IMPLEMENTED | Semester plans/statistics và tạo/xuất báo cáo quản lý hiện có giữ trạng thái source implemented trong phạm vi cũ. Không dùng báo cáo hiện có như final authority trao điểm action/budget hoặc báo cáo governance; các luồng đó chưa hoàn thành/đang hoãn. |
+| [contract-lifecycle-audit.md](contract-lifecycle-audit.md) | Done | PARTIAL_PROJECT | Nhãn/matrix hiện hành dựa source BE và proof được pin. Không rerun facade inventory, FE E2E hoặc production acceptance. |
+| [existing-api-hardening.md](existing-api-hardening.md) | Not Yet | PARTIAL | F01 manager DTO, F02 ảnh omitted/null, F03 roster invitation, F05 nguồn session cho sinh viên, F06 lịch sử/source/capability đã được sửa; suite BE hiện tại 914 test đạt. Công thức/final action awards F04 hoãn. FE adapter numeric expectedRawXp và nghiệm thu live còn mở; có route không tự là tích hợp hoàn tất. |
+| [experience-scoring-contract.md](experience-scoring-contract.md) | Not Yet | DEFERRED_BY_PRODUCT_OWNER | Giữ source/ledger/calculator legacy đã có làm bằng chứng; completion mới không cộng điểm. Chủ dự án chưa chốt ai duyệt cuối, công thức/caps/+1/rollover/reversal. expectedRawXp=null, scoringStatus=DEFERRED_BY_PRODUCT_OWNER, canAwardPoints=false; không thay bằng 0. |
+| [frontend-api-debt-register.md](frontend-api-debt-register.md) | Not Yet | PARTIAL | Nhóm 16 consumer operation thiếu route tại audit 21/10 đã có handler ở BE; manifest hiện 40 operation mới so với baseline b066f96. 16/16 là phạm vi route cũ, không phải mọi chức năng Done. Chuyển consumer lịch học/self media/EMBED và xử lý scoring deferred vẫn là việc FE. |
+| [internal-accounts-verification-api.md](internal-accounts-verification-api.md) | Not Yet | PARTIAL_EXISTING_SOURCE_IMPLEMENTED | Internal register/login, canonical profile và verification assignment/capability hiện có; action verifier kiểm tra quyền độc lập và không tự duyệt. Nguồn học vụ chính thức và quyền governance xuyên service chưa hoàn thành. Import roster chỉ ghép email trường, không tạo account. |
+| [my-clubs-membership-api.md](my-clubs-membership-api.md) | Done | SOURCE_IMPLEMENTED | GET /api/clubs/me/membership-applications và POST own pending APPLICATION withdraw đã có; reapply tạo ID mới/giữ lịch sử, metadata source/version/capability/code/logo hiện có. UNKNOWN/invitation không tự rút; không dùng manager DELETE thay withdraw. Pins và màn hình FE/live không thuộc nhãn Done này. |
+| [page-integration-checklist.md](page-integration-checklist.md) | Not Yet | FE_INTEGRATION_NOT_VERIFIED | Cập nhật phần BE sẵn có theo manifest và các hướng dẫn current; không đánh checkbox UI/browser/deployment từ 914 test BE. Lịch học còn consumer local, adapter scoring null cần đổi, file upload phải giữ tắt; live delivery/R2 chưa nghiệm thu. |
+| [personal-experience-api.md](personal-experience-api.md) | Not Yet | PARTIAL_EXISTING_READS_NEW_SCORING_DEFERRED | Self summary/activity-history/contributions/ledger/radar và rule recommendation hiện có; nguồn v2 sessions kiểm tra đăng ký/visibility. Không chốt công thức mới/+1/tích lũy/rollover bằng nhãn source-read; không biến raw XP thành ví spendable hoặc null nguồn thành số 0. |
+| [profile-cover-rewards-api.md](profile-cover-rewards-api.md) | Not Yet | DEFERRED_OR_NOT_IMPLEMENTED | Self avatar/cover cơ bản đã có qua upload-intent + canonical profile; tách khỏi quyền sở hữu cosmetic. Catalog/inventory/equip/layout/club-shape chưa hoàn thành; credit/wallet/redemption/awards chờ chính sách điểm, format asset Q04 chưa chốt. Không import grant mẫu. |
+| [public-image-api.md](public-image-api.md) | Not Yet | PARTIAL_BASIC_IMAGES_IMPLEMENTED | POST /api/media/upload-intents và attach club-logo/club-cover/activity-cover/student-avatar/student-cover đã có; ảnh verified bất biến, PNG/JPEG/WebP <=5 MiB. Application-logo/club-shape chưa hoàn thành; không tự cấp quyền cho kind mới. R2/CORS/signing origin/delivery/cleanup live chưa nghiệm thu. |
+| [public-member-directory-api.md](public-member-directory-api.md) | Not Yet | SKIPPED_OPTIONAL_NEEDS_SPEC | Giữ public leaders/count và private member APIs hiện có; không công khai danh sách thành viên từ nguồn private. Opt-in public directory chưa làm, BỎ QUA/optional theo scope hiện tại; không xóa yêu cầu, không tính là API bắt buộc đã hoàn thành. |
+| [self-profile-extensions-api.md](self-profile-extensions-api.md) | Not Yet | PARTIAL_WITH_IMPLEMENTED_SELF_FIELDS | Headline, dateOfBirth, address, avatar/cover và academic.studentCode từ roster đã có qua self GET/PATCH. Ngành/năm học chính thức vẫn null NO_AUTHORITATIVE_SOURCE; cosmetics/layout và live R2/FE acceptance chưa hoàn thành. |
+| [self-profile-sync-api.md](self-profile-sync-api.md) | Not Yet | PARTIAL_WITH_CANONICAL_CORE_IMPLEMENTED | GET/PATCH /api/users/me/profile có store/version/editableFields; headline/DOB/address và owner-verified avatar/cover đã có. studentCode từ roster chỉ đọc. major/year null NO_AUTHORITATIVE_SOURCE, không tự sửa academic; cosmetics/layout còn thiếu. Nguồn học vụ lỗi trả availability, không giả dữ liệu. |
+| [semester-student-roster-api.md](semester-student-roster-api.md) | Done | SOURCE_IMPLEMENTED_EXISTING_ACCOUNTS_ONLY | Preview/commit/student-roster và eligible/invitation-semesters đã có; email trường của account sẵn có, CSV/JSON schema1, revision/campus/version/expiry, outbox và carry-forward có nguồn. Ghi chú BỎ QUA của bản cũ được thay cho phạm vi import này bằng quyết định trực tiếp của chủ dự án. Không có FAP sync/tạo account/chứng nhận ngành-năm học. FE/live chưa nghiệm thu. |
+| [specs/001-discover-production/contracts/discover-ui-contract.md](../../specs/001-discover-production/contracts/discover-ui-contract.md) | Not Yet | FE_INTEGRATION_NOT_VERIFIED | Directory/detail/join và feed/recommendation source hiện có. Không tự đánh FE browser/adapter Done; quyết định recommendation mở rộng vẫn theo scope, nguồn quyền từ BE. |
+| [specs/002-header-production/contracts/notification-summary.md](../../specs/002-header-production/contracts/notification-summary.md) | Done | SOURCE_IMPLEMENTED | Notification self-safe/read hiện có; invitation/import đã thêm outbox đúng người nhận. Chưa nghiệm thu delivery live; không hứa tất cả loại event mới, rewards hoặc governance notices đã có. |
+| [specs/003-activity-discovery/contracts/activity-discovery-contract.md](../../specs/003-activity-discovery/contracts/activity-discovery-contract.md) | Not Yet | PARTIAL | BE feed/detail/rule và safe sessions source đã có. FE adoption/E2E chưa xác nhận; scoring mới deferred; ML/schedule matching vẫn bỏ qua. |
+| [specs/004-club-workspace/contracts/workspace-ui-contract.md](../../specs/004-club-workspace/contracts/workspace-ui-contract.md) | Not Yet | PARTIAL | Profile, semester catalogs, application/staffing, invitation/roster và EMBED source đã có. Governance/capabilities xuyên service, file pipeline, credit/reward và FE live còn thiếu; label Host/Staff không cấp quyền. |
+| [specs/005-profile-production/contracts/profile-service.md](../../specs/005-profile-production/contracts/profile-service.md) | Not Yet | PARTIAL | Canonical self profile + basic avatar/cover/roster studentCode source đã có. FE vẫn phải tích hợp; cosmetics/layout và major/year chưa có nguồn; không dùng local ownership/XP giả. |
+| [study-schedule-api.md](study-schedule-api.md) | Done | SOURCE_IMPLEMENTED | GET/PUT academic-calendar và GET/PUT/DELETE/bulk-import lịch riêng đã có; Semester alias/campus, 10W/3W, GUID CAS, idempotency và SQL persistence. BỎ QUA cũ không còn áp dụng cho 6 API đã cho triển khai; FAP/OJT/auto schedule matching vẫn chưa làm. FE consumer còn local, không tự import localStorage. |
+| [verified-contributions-api.md](verified-contributions-api.md) | Not Yet | PARTIAL_EXISTING_SOURCE_IMPLEMENTED | Private evidence/contribution/declaration/review/upgrade/ledger hiện có; thêm action completion/attendance claim/verify có source/capability và audit. Completion VERIFIED không có nghĩa đã trao điểm; final action award/budget/reversal mới đang tạm hoãn, không dùng legacy endpoint đi vòng. |
+| [workspace-semester-context-api.md](workspace-semester-context-api.md) | Not Yet | PARTIAL_CATALOG_SOURCE_IMPLEMENTED | GET /api/clubs/{clubId}/workspace-semesters và invitation-semesters đã có, dựa Admin Semester thật, alias year/term/reportPeriod tường minh, availability/current/permissions. Không suy kỳ từ tháng/code, nhiều kỳ active báo AMBIGUOUS. Read catalog không cấp quyền governance, không tự thêm semester cho Finance hay reset membership/điểm. |
+
+## Quyết định thay đổi phạm vi sau mốc lịch sử
+
+- Chủ dự án xác nhận school email và không tự tạo account khi import. Roster import/eligible/invite và lịch học đã được triển khai trong BE; không để nhãn BỎ QUA cũ phủ nhận phần source đã có. Tích hợp FAP/nguồn học vụ chính thức không được suy ra từ đó.
+- Điểm mới tạm hoãn vì chưa chốt; giữ spec/cơ chế legacy, không tạo formula/cap/credit giả.
+- Governance migration thủ quỹ cũ đang chờ quyết định; không grant từ báo cáo hay nhãn BQL trên FE.
+- EMBED gallery có source; upload DOCUMENT/MEDIA/private delivery/public activity anonymous chưa xong, không bật canUpload.
+- Optional directory/pins/forms/fulfillment/contest/succession tiếp tục giữ phạm vi riêng và yêu cầu gốc.
+
+<details>
+<summary>Audit và retirement ledger 13/10 — giữ lịch sử, không phải trạng thái hiện hành</summary>
+
+# Contract lifecycle / current BE source audit — 2026-10-13
+
+Historical Implement Status: Done
+
+Historical Status Scope: Documentation audit; does not mean the proposed backend features are complete.
+
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Historical Source Evidence: Existing handlers/DTOs/models/DbContexts/migrations, Gateway configuration and regenerated facade declarations were inspected. No backend source was modified.
 
 ## Status semantics
 
@@ -97,3 +181,5 @@ References to the two newly removed reports were rewritten. Retained governance 
 | Leadership | Pending sample nomination; protected owner card; no approval/grant simulation | CTSV vice workflow + existing owner transfer integration; activation/expiry/access projection |
 
 UI verification evidence and reproducible steps are in [governance UI QA](../qa/club-governance-ui.md). Prototype success cannot be carried forward as BE or deployed integration proof.
+
+</details>

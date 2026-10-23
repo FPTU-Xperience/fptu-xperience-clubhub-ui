@@ -1,3 +1,24 @@
+# Khám phá và nhiệm vụ theo trục thấp — cập nhật 2026-10-12
+
+Implement Status: Done
+
+Status Scope: BE source: existing authenticated feed/detail and low-axis rule; not new scoring or FE acceptance
+
+Backend Progress: SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#existing).
+
+**Đã có BE:** GET /api/v2/activities/feed, /api/v2/activities/{activityId}, recommendation rule hiện có; thêm GET /api/v2/activities/{activityId}/sessions cho sinh viên đã đăng ký, đúng campus/visibility.
+
+**Chưa hoàn thành / giới hạn:** Không phải public anonymous; FE phải dùng nguồn v2 thay management sessions. Công thức điểm mới không được chốt bởi nhãn Done này.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Khám phá và nhiệm vụ theo trục thấp — cập nhật 2026-10-12
 
@@ -31,13 +52,13 @@ GET chỉ gợi ý; chọn qua quest participation, completion liên kết verif
 
 # Privacy-safe activity discovery and recommendations
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: ActivityService activity list/detail remain access-scoped management reads; no /api/v2 feed, published-visibility model or recommendation Gateway route. Inspect ActivityEndpoints.cs, ActivityContracts.cs and Gateway/ApiGateway/yarp.json.
+Historical Source Evidence: ActivityService activity list/detail remain access-scoped management reads; no /api/v2 feed, published-visibility model or recommendation Gateway route. Inspect ActivityEndpoints.cs, ActivityContracts.cs and Gateway/ApiGateway/yarp.json.
 
 D11; 2026-10-09 main 80818266. Refines the existing [activity feature contract](../../specs/003-activity-discovery/contracts/activity-discovery-contract.md). Canonical route names below retain its `/api/v2` prefix. New Gateway routing is required; `/v2` browser routes do not imply `/api/v2` already exists.
 
@@ -63,5 +84,7 @@ If ranking is unavailable, return an explicit availability outcome or an explici
 
 Unaffiliated user sees only explicitly published eligible activities; existing member sees allowed club context; other campus/club denial; 0/50/>50 paging; exact start/end boundaries; no roster fields; cancelled records absent; direct deep links; recommendation outage/isolation; gateway precedence and authorization; card image and allowed action behavior. No duplication of existing activity creation/attendance APIs.
 
+
+</details>
 
 </details>

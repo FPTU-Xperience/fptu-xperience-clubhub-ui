@@ -1,3 +1,24 @@
+# Checklist FE ↔ BE theo phiếu v1.4 — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: FE/BE integration and browser/live acceptance
+
+Backend Progress: FE_INTEGRATION_NOT_VERIFIED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#overview).
+
+**Đã có BE:** Cập nhật phần BE sẵn có theo manifest và các hướng dẫn current; không đánh checkbox UI/browser/deployment từ 914 test BE.
+
+**Chưa hoàn thành / giới hạn:** Lịch học còn consumer local, adapter scoring null cần đổi, file upload phải giữ tắt; live delivery/R2 chưa nghiệm thu.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Checklist FE ↔ BE theo phiếu v1.4 — cập nhật 2026-10-12
 
@@ -46,13 +67,13 @@ Privacy/auth legacy vẫn áp dụng nếu endpoint còn tồn tại. Checklist/
 
 # ClubHub FE ↔ BE integration checklist by page
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Complete FE/BE integration and live acceptance
+Historical Status Scope: Complete FE/BE integration and live acceptance
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Several pages use existing live-shaped reads, but source declarations do not complete media/profile/governance/credit/timetable/withdrawal contracts or authenticated deployment checks. See current audit and per-page unchecked tasks.
+Historical Source Evidence: Several pages use existing live-shaped reads, but source declarations do not complete media/profile/governance/credit/timetable/withdrawal contracts or authenticated deployment checks. See current audit and per-page unchecked tasks.
 
 Source declarations/contracts rechecked **2026-10-12**: API remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**; FE includes the new governance rehearsal. Existing page/DTO findings below are the 2026-10-09 audit of that same BE commit. Scope includes production pages/facade/workspace and shared flows; `/v2/demo/*` and the DEV-only `/v2/preview/club-governance` are not live integration. Start with [lifecycle audit](contract-lifecycle-audit.md), [implementation handoff](backend-api-implementation-handoff.md) and [debt register](frontend-api-debt-register.md).
 
@@ -168,5 +189,7 @@ Workspace access is resolved from the current user's club selection by code in [
 
 Existing legacy-page checks below/above remain applicable where their workflows are retained. The current authoritative gap list and exact proposed payloads are in the debt register and topic contracts, not older fullName-only profile proposals.
 
+
+</details>
 
 </details>

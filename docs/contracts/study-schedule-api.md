@@ -1,3 +1,24 @@
+# Lịch học và academic blocks — cập nhật 2026-10-12
+
+Implement Status: Done
+
+Status Scope: BE source: 6 calendar/private schedule operations; not FE integration or FAP synchronization
+
+Backend Progress: SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_LICH_HOC_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#schedule).
+
+**Đã có BE:** GET/PUT academic-calendar và GET/PUT/DELETE/bulk-import lịch riêng đã có; Semester alias/campus, 10W/3W, GUID CAS, idempotency và SQL persistence.
+
+**Chưa hoàn thành / giới hạn:** BỎ QUA cũ không còn áp dụng cho 6 API đã cho triển khai; FAP/OJT/auto schedule matching vẫn chưa làm. FE consumer còn local, không tự import localStorage.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Lịch học và academic blocks — cập nhật 2026-10-12
 
@@ -23,13 +44,13 @@ GIỮ semester configuration cho radar/plan trong [scoring](experience-scoring-c
 
 # Student study schedule API contract
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Semester catalog persistence exists, but AuthDbContext/AdminDbContext have no private weekly timetable or academic block-date resources, import/cell routes or academic-calendar Gateway prefix.
+Historical Source Evidence: Semester catalog persistence exists, but AuthDbContext/AdminDbContext have no private weekly timetable or academic block-date resources, import/cell routes or academic-calendar Gateway prefix.
 
 Status: **proposed for backend implementation**, updated 2026-10-07. `/v2/study-schedule` currently uses an account-scoped browser mock repository. These endpoints do not exist in the backend yet. Keep `dev-login` unchanged.
 
@@ -185,5 +206,7 @@ Add opaque calendar/version and expectedVersion to writes, and per-cell/block ve
 
 Acceptance adds authoritative semester alias and cross-campus administration tests, inactive semester, manual-vs-bulk conflict and preservation when calendar dates change. See [conventions](api-contract-conventions.md), D09 [handoff](backend-api-implementation-handoff.md).
 
+
+</details>
 
 </details>

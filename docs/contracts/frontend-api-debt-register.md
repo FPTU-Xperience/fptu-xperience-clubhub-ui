@@ -1,3 +1,24 @@
+# Register FE/BE theo phạm vi mới — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: FE integration/debt, separated from BE source readiness
+
+Backend Progress: PARTIAL
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#overview).
+
+**Đã có BE:** Nhóm 16 consumer operation thiếu route tại audit 21/10 đã có handler ở BE; manifest hiện 40 operation mới so với baseline b066f96.
+
+**Chưa hoàn thành / giới hạn:** 16/16 là phạm vi route cũ, không phải mọi chức năng Done. Chuyển consumer lịch học/self media/EMBED và xử lý scoring deferred vẫn là việc FE.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Register FE/BE theo phạm vi mới — cập nhật 2026-10-12
 
@@ -59,13 +80,13 @@
 
 # Frontend API debt register — 2026-10-09
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend/integration debt tracked here
+Historical Status Scope: Backend/integration debt tracked here
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Regenerated facade inventory retains six absent operations and two composed reads. Topic resource/policy/persistence gaps remain; D10 now also references durable pin preferences and seven-day inbox behavior.
+Historical Source Evidence: Regenerated facade inventory retains six absent operations and two composed reads. Topic resource/policy/persistence gaps remain; D10 now also references durable pin preferences and seven-day inbox behavior.
 
 Current declaration recheck and contract cleanup: [lifecycle audit](contract-lifecycle-audit.md), [per-wrapper inventory](api-declaration-inventory.md). API remote main and local HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**, checked 2026-10-13 without modifying BE. The earlier detailed audit was 2026-10-09; its source-marker counts below are dated evidence, not current file/import counts.
 
@@ -118,3 +139,5 @@ Invitation POST `/members` exists but ignores semester eligibility and trusts su
 ## Session follow-up — 2026-10-13
 
 D10 also covers the [navigation/application addendum](club-navigation-applications-api.md): authoritative self-withdraw capability/source, canonical clubCode/logo for all inbox rows, existing reviewedAtUtc for the seven-day result rule, and optional durable account pin synchronization. Quick switching and branding/badge styling do not need new backend endpoints. Current local pins are not persisted server preferences.
+
+</details>

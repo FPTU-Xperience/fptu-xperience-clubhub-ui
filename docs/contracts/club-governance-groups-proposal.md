@@ -2,11 +2,32 @@
 
 Implement Status: Not Yet
 
-Status Scope: Backend implementation of retained product decisions
+Status Scope: Retained governance decisions; not server authority
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Backend Progress: NOT_IMPLEMENTED
 
-Source Evidence: This remains useful product context for the canonical governance contract. Existing TransferEndpoints.cs/treasurer rules are foundations, not multi-group assignments or report/history implementation; do not retire the agreed decisions.
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Giữ quyết định nghiệp vụ đa nhóm và bản UI rehearsal; không xóa đề xuất hoặc biến báo cáo BQL thành cấp quyền.
+
+**Chưa hoàn thành / giới hạn:** Cùng backlog/câu hỏi migration với club-governance-groups-api.md; local group labels không làm canManage=true.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Đề xuất BQL CLB theo học kỳ và phân quyền theo group
+
+Historical Implement Status: Not Yet
+
+Historical Status Scope: Backend implementation of retained product decisions
+
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Historical Source Evidence: This remains useful product context for the canonical governance contract. Existing TransferEndpoints.cs/treasurer rules are foundations, not multi-group assignments or report/history implementation; do not retire the agreed decisions.
 
 Ngày nghiên cứu/cập nhật: 2026-10-12. Trạng thái: **đã có bản chạy thử UI development**, backend chưa triển khai. [Contract API cho đợt BE](club-governance-groups-api.md) sở hữu endpoint/DTO; tài liệu này giữ quyết định nghiệp vụ và hướng UI. [Audit vòng đời contract](contract-lifecycle-audit.md) ghi nhận contract thay thế.
 
@@ -154,3 +175,5 @@ Response lỗi theo [api-contract-conventions.md](api-contract-conventions.md): 
 - [Backend implementation handoff](backend-api-implementation-handoff.md), mục expanded role/capability: nền tảng tích hợp; chưa đánh dấu hoàn thành.
 - [NIST RBAC FAQ](https://csrc.nist.gov/Projects/Role-Based-Access-Control/faqs): tham khảo mô hình gán quyền qua role và ràng buộc duty. Cấu trúc group/kỳ/revision cụ thể là đề xuất cho ClubHub.
 - [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html): quyền tối thiểu, mặc định từ chối, kiểm tra từng request và xét quan hệ/thuộc tính resource. Không coi RBAC thuần theo nhãn là đủ cho phạm vi CLB và thời hạn học kỳ.
+
+</details>

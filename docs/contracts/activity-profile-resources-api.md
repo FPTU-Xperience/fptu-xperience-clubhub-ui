@@ -2,11 +2,32 @@
 
 Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Status Scope: BE resources; EMBED source implemented, file pipeline and anonymous transport incomplete
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Backend Progress: PARTIAL_EMBED_GALLERY_ONLY
 
-Source Evidence: ActivityEndpoints.cs and ActivityWriteEndpoints.cs provide core CRUD/attendance, but ActivityContracts.cs has no resource gallery/capabilities or cover field; resource upload/commit routes and public activity projection are absent.
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TAI_NGUYEN_HOAT_DONG_BE_2026-10-23.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#resources).
+
+**Đã có BE:** 5 API gallery/tạo/sửa/gỡ/history EMBED đã có; activity detail có resources, resourceAvailability, resourceCapabilities. Cover PUT đã có.
+
+**Chưa hoàn thành / giới hạn:** canUpload=false, supportedKinds=[EMBED]. DOCUMENT/MEDIA và upload-intents trả 501 sau kiểm tra quyền; private delivery/scanner/cleanup và GET /api/public/activities/{id} chưa làm.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Activity profile / resources — proposed BE contract, 2026-10-12
+
+Historical Implement Status: Not Yet
+
+Historical Status Scope: Backend implementation
+
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Historical Source Evidence: ActivityEndpoints.cs and ActivityWriteEndpoints.cs provide core CRUD/attendance, but ActivityContracts.cs has no resource gallery/capabilities or cover field; resource upload/commit routes and public activity projection are absent.
 
 This extends [event operations](club-event-operations-api.md), [discovery](activity-discovery-api.md) and the media-intent boundary in [backend handoff](backend-api-implementation-handoff.md). It does not replace registrations, attendance or governance authorization. Source audit: sibling API HEAD `80818266f617bd5144ab1b1a6cd0e74983983a4d`. Existing activity GET/PUT and attendance are declared; activity cover attachment, resource gallery, document/video upload and embedded-link persistence are absent. No BE source/migration was changed.
 
@@ -64,3 +85,5 @@ Store an HTTPS URL plus title/visibility/provider, not iframe HTML. Reject scrip
 - Public transport never includes CLUB URLs, participant/attendance collections or private author fields. Self attendance is a separate authenticated read; public page never loads manager roster.
 - Successful resource GET across reload/accounts; published image/browser delivery; authenticated private downloads; scanner failures; object mismatch; MIME/size/extension ambiguity; expired/replayed intent; idempotent retries and orphan cleanup.
 - UI stages/validates multiple files atomically, keeps remaining drafts after a partial error, revokes local preview URLs and never reports unsaved resources as persisted. Test tab switching, cancel, cross-activity navigation and disabled Save on current absent endpoints.
+
+</details>

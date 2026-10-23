@@ -1,3 +1,24 @@
+# Chỉ mục thay đổi BE cần cho FE — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE capability index and FE adoption
+
+Backend Progress: PARTIAL
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#overview).
+
+**Đã có BE:** F01/F02/F03/F05/F06 đã có bản sửa/luồng nguồn ở BE; đọc bảng current và hướng dẫn wire trước khi nối adapter.
+
+**Chưa hoàn thành / giới hạn:** F04/cơ chế điểm action-final-report đang tạm hoãn; adapter expectedRawXp numeric chưa tương thích null. FE/deployment không được đánh Done.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Chỉ mục thay đổi BE cần cho FE — cập nhật 2026-10-12
 
@@ -31,13 +52,13 @@ GIỮ self profile/club/join/event/notifications. BỎ QUA finance/rewards/walle
 
 # Backend changes needed after frontend integration
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend work indexed here
+Historical Status Scope: Backend work indexed here
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: All D01-D14 obligations remain active; source foundations are available but missing capabilities are documented in each topic contract and the current lifecycle matrix.
+Historical Source Evidence: All D01-D14 obligations remain active; source foundations are available but missing capabilities are documented in each topic contract and the current lifecycle matrix.
 
 Rechecked 2026-10-13: remote main and local API HEAD both **80818266f617bd5144ab1b1a6cd0e74983983a4d**. [Contract lifecycle audit](contract-lifecycle-audit.md) records retained/retired contracts and [declaration inventory](api-declaration-inventory.md) covers all current facade wrappers. Source existence and verified deployment are separate; no live gateway/database/R2 behavior was tested.
 
@@ -75,3 +96,5 @@ No backend source was modified during this scan. Proposed APIs remain contracts 
 ## Navigation and applications — 2026-10-13
 
 [Session addendum](club-navigation-applications-api.md) extends D10 with own withdrawal capability/source metadata, canonical code/logo for inbox cards, seven-day reviewedAtUtc filtering and optional persistent account pins. Existing logo/access/review-date reads are reused; no BE changes are needed for branding, icon alignment or badge colors.
+
+</details>

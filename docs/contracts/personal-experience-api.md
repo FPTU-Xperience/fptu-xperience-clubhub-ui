@@ -1,3 +1,24 @@
+# Hồ sơ trải nghiệm theo kỳ và tích lũy — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: Existing experience reads versus unapproved new scoring semantics
+
+Backend Progress: PARTIAL_EXISTING_READS_NEW_SCORING_DEFERRED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Self summary/activity-history/contributions/ledger/radar và rule recommendation hiện có; nguồn v2 sessions kiểm tra đăng ký/visibility.
+
+**Chưa hoàn thành / giới hạn:** Không chốt công thức mới/+1/tích lũy/rollover bằng nhãn source-read; không biến raw XP thành ví spendable hoặc null nguồn thành số 0.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Hồ sơ trải nghiệm theo kỳ và tích lũy — cập nhật 2026-10-12
 
@@ -34,13 +55,13 @@ Self-only/private, reviewer projection có assignment. **BỎ QUA** public stude
 
 # Personal experience summary, evidence and radar
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation: partial Admin foundations
+Historical Status Scope: Backend implementation: partial Admin foundations
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Admin DeclarationEndpoints/StudentRadar projections and XP data exist; Auth UserEndpoints.cs lacks own experience-summary, activity-history and club-contribution aggregate projections. Per-club activity statistics are not a student-wide aggregate.
+Historical Source Evidence: Admin DeclarationEndpoints/StudentRadar projections and XP data exist; Auth UserEndpoints.cs lacks own experience-summary, activity-history and club-contribution aggregate projections. Per-club activity statistics are not a student-wide aggregate.
 
 D03; baseline main 80818266, 2026-10-09. Owner: Auth/profile aggregation with Activity/Club and existing Admin experience reads. This is **partially supported**, not a request to recreate experience scoring.
 
@@ -70,5 +91,7 @@ Self-only reads regardless of global actor role. Public profile preview excludes
 
 Tests: two accounts see only own evidence/history; attendance/cancelled/duplicate cases; consistent totals across pagination and redemption; canonical semester; empty versus unavailable; declaration/radar mapping; public preview privacy. FE owner: `ProfilePage.jsx`, `profile-data.js`; replace seeded evidence and radar only after these reads are deployed. No new profile-summary write endpoint.
 
+
+</details>
 
 </details>

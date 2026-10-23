@@ -2,11 +2,32 @@
 
 Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Status Scope: BE multi-group semester governance and cross-service authorization
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Backend Progress: NOT_IMPLEMENTED
 
-Source Evidence: ClubDbContext/ClubContracts and shared access retain memberships, active owner assignments and boolean treasurer access; no governance terms/groups/revisions/change sets/board snapshots/vice nomination entities or endpoints.
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Tái sử dụng membership/owner assignment/transfer và quyền thủ quỹ hiện có làm nền; workspace semester read đã có riêng.
+
+**Chưa hoàn thành / giới hạn:** Terms/groups/union/revocation/expiry/revisions/report snapshots/vice nomination và policy liên service chưa hoàn thành. Chờ quyết định chuyển thủ quỹ legacy sang kỳ; không tự kế thừa/cấp quyền.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Club governance groups API — BE implementation contract
+
+Historical Implement Status: Not Yet
+
+Historical Status Scope: Backend implementation
+
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Historical Source Evidence: ClubDbContext/ClubContracts and shared access retain memberships, active owner assignments and boolean treasurer access; no governance terms/groups/revisions/change sets/board snapshots/vice nomination entities or endpoints.
 
 Canonical D06 contract, 2026-10-12. **Proposed: no governance group/report/history/vice nomination routes exist in API main `80818266`.** Remote main and local HEAD were checked and matched on this date. This replaces the retired `club-member-roles-api.md` single-primary-role proposal. [Product decisions](club-governance-groups-proposal.md), [conventions](api-contract-conventions.md), [current audit](contract-lifecycle-audit.md).
 
@@ -190,3 +211,5 @@ FE rollout: add adapters to **existing** `src/services/api.js`, structured code/
 Use convention HTTP codes/message/code/traceId/errors. Stable codes: VERSION_CONFLICT, REPORT_SOURCE_CHANGED, GROUP_ALREADY_ASSIGNED, PROTECTED_LEADERSHIP, PERMISSION_NOT_DELEGABLE, MEMBERSHIP_INELIGIBLE, TREASURER_LIMIT, OWNER_TREASURER_CONFLICT, TERM_ARCHIVED, SEMESTER_UNCONFIGURED, LEADERSHIP_PENDING. Avoid leaking inaccessible membership/nomination existence.
 
 Required BE tests: migration/backfill, club/campus isolation, self-promotion rejection, custom/combined group leadership bypass denied, live union/revocation, two-treasurer race across custom groups, atomic transfer rollback, immutable member/group history, report snapshot version conflict, idempotent replay, nomination pending/no grants, future effective appointment, expiry without worker/cache delay, report submission no rights side effect, privacy-safe pagination, shared Finance/Report/Activity policies/recipients and Gateway verbs. Then authenticated FE checks across accounts/devices; source declaration/preview tests alone are not integration sign-off.
+
+</details>

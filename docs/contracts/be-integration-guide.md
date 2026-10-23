@@ -1,5 +1,26 @@
 # Route và DTO BE hiện hành cho người làm FE — 14/10/2026
 
+Implement Status: Done
+
+Status Scope: Documentation: current wire deltas; not completed FE integration
+
+Backend Progress: DOCUMENTATION_SYNCED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#conventions).
+
+**Đã có BE:** Hướng dẫn hiện hành cho các API mới/đổi ở backend-current-integration.md; có đúng loại ID/version, null/omission và trạng thái chưa hỗ trợ.
+
+**Chưa hoàn thành / giới hạn:** Phần 14/10 được giữ dưới lịch sử, không dùng nó để bỏ qua extension mới hoặc nhận mọi version là GUID.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Route và DTO BE hiện hành cho người làm FE — 14/10/2026
+
 Đọc [trạng thái từng API](be-api-status.md) trước khi tích hợp. Đây là shape đã triển khai trong BE; DTO/route đề xuất trong phần lịch sử không được tự coi đã tồn tại. Không cần sửa giao diện để đọc tài liệu này.
 
 Sinh viên đã hoàn thành 32/32 operation; trong mốc 74 operation có 64 COMPLETE và 10 PARTIAL. Contract cập nhật nhãn BE, không đánh dấu màn hình FE đã hoàn thành. [Bàn giao BE Sinh viên](../../../fptu-xperience-clubhub-api/docs/audit/HOAN_THIEN_API_SINH_VIEN_2026-10-13.md) ghi migration, cấu hình policy và kết quả 740/740 test.
@@ -201,3 +222,5 @@ Name/email/phone trong body không được ghi đè danh tính Auth. FullName/E
 Nhập reason, category-specific additionalInfo và consent. DOB/Gender/Address là thông tin đơn nếu cần, không ép nộp lại để tạo điểm.
 Tài khoản inactive/locked hoặc khác campus bị chặn; Auth chưa cấu hình/lỗi trả503.
 Idempotency-Key tùy chọn; pending/approved hiện có không tạo thêm record. Rejected/deleted có quy trình gửi lại.
+
+</details>

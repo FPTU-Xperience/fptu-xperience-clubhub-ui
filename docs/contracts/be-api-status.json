@@ -1,1054 +1,1436 @@
 {
-  "auditedAt": "2026-10-14",
-  "basis": "working tree feat/student-api-completion; baseline 80818266; BE only",
+  "schemaVersion": 2,
+  "auditedAt": "2026-10-23",
+  "basis": "BE source and existing local proof; not total project completion, FE acceptance or deployment",
+  "backend": {
+    "repository": "FPTU-Xperience/fptu-xperience-clubhub-api",
+    "branch": "feat/backend-contract-completion",
+    "commit": "b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62",
+    "baselineCommit": "b066f96b9fd0ea304e7c498f6ddcc569b2c21ebf",
+    "manifestUrl": "https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/contracts/be-operation-manifest.json",
+    "manifestSha256": "939f0ca20c7e5059749b88a905adf44c2b080939c0c2f6139d64a2ec50e356ea",
+    "manifestHashScope": "committed Git blob bytes at backend.commit"
+  },
+  "frontend": {
+    "branch": "update-contract",
+    "baseCommit": "7faf84cb867e8f3b8af89c39f327d410b2f1a10c",
+    "reviewedRequirementPin": "3ffd00ed03a5b8db942ed3ac3b7b6dee098d9f42",
+    "runtimeCodeChanged": false
+  },
+  "overallPlanDone": false,
+  "countingUnit": "40 new external method/route operations relative to BE b066f96; not every project API and not 40 complete contract groups",
+  "newPublicOperationCount": 40,
+  "newPublicOperations": [
+    {
+      "method": "GET",
+      "route": "/api/clubs/{clubId}/workspace-semesters",
+      "status": "READ_IMPLEMENTED",
+      "limitation": "Overall workspace attribution/governance remains partial.",
+      "actors": [
+        "Quản lý CLB",
+        "Thành viên đã duyệt",
+        "CTSV/Admin có phạm vi"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/{clubId}/invitation-semesters",
+      "status": "READ_AND_INVITATION_WORKFLOW_IMPLEMENTED",
+      "limitation": "Availability from authoritative roster revision; revalidate identity on invite/consent/approval.",
+      "actors": [
+        "Quản lý CLB",
+        "CTSV/Admin có phạm vi"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/{clubId}/experience-policies",
+      "status": "READ_IMPLEMENTED",
+      "limitation": "Canonical semester; approved PERIOD/environment policies only.",
+      "actors": [
+        "Quản lý CLB",
+        "Thành viên đã duyệt",
+        "CTSV/Admin có phạm vi"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/v2/activities/{activityId}/sessions",
+      "status": "SAFE_SOURCE_READ_IMPLEMENTED",
+      "limitation": "Registration/current eligibility required; submission authority revalidates writes.",
+      "actors": [
+        "Sinh viên đã đăng ký"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/me/membership-applications",
+      "status": "SELF_HISTORY_IMPLEMENTED",
+      "limitation": "Legacy UNKNOWN is preserved; self-only capabilities.",
+      "actors": [
+        "Sinh viên: chính chủ"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/clubs/me/membership-applications/{applicationId}/withdraw",
+      "status": "IMPLEMENTED",
+      "limitation": "Own pending APPLICATION only; no body, optional Idempotency-Key.",
+      "actors": [
+        "Sinh viên: chính chủ"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activity-applications",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "GET",
+      "route": "/api/activity-applications",
+      "actors": [
+        "Quản lý CLB",
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "GET",
+      "route": "/api/activity-applications/{id}",
+      "actors": [
+        "Quản lý CLB",
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/activity-applications/{id}",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "POST",
+      "route": "/api/activity-applications/{id}/submit",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "POST",
+      "route": "/api/activity-applications/{id}/review",
+      "actors": [
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "GET",
+      "route": "/api/activity-applications/{id}/history",
+      "actors": [
+        "Quản lý CLB",
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "OPERATIONAL_SOURCE_IMPLEMENTED_SCORING_DEFERRED",
+      "frontendCompatibility": "expectedRawXp=null; numeric-only FE receipt adapter must be updated; never fake 0."
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/activities/{id}/publication",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/activities/{id}/staffing",
+      "actors": [
+        "Quản lý CLB",
+        "Sinh viên",
+        "Người xác minh"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/assignments",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/assignments/{assignmentId}/cancel",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/assignments/{assignmentId}/completions",
+      "actors": [
+        "Sinh viên"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/assignments/{assignmentId}/attendance-claims",
+      "actors": [
+        "Sinh viên"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/action-completions/{completionId}/verify",
+      "actors": [
+        "Người xác minh"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/recruitment",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/activities/{id}/recruitment",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/activities/{id}/recruitment/status",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{id}/recruitment/positions/{positionId}/join",
+      "actors": [
+        "Sinh viên"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "No new point award; manual attendance claims are not QR check-in.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/{clubId}/activity-recruitments",
+      "actors": [
+        "Quản lý CLB",
+        "Sinh viên"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "ActivityActionContractTests",
+      "limitation": "",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/{clubId}/eligible-members",
+      "actors": [
+        "Quản lý CLB"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "SemesterRosterContractTests",
+      "limitation": "",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/semesters/{identifier}/roster-imports/preview",
+      "actors": [
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "SemesterRosterContractTests",
+      "limitation": "Existing school-email accounts only; no implicit account creation.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/semesters/{identifier}/roster-imports/{importId}/commit",
+      "actors": [
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "SemesterRosterContractTests",
+      "limitation": "Existing school-email accounts only; no implicit account creation.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/semesters/{identifier}/student-roster",
+      "actors": [
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "SemesterRosterContractTests",
+      "limitation": "Existing school-email accounts only; no implicit account creation.",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/academic-calendar/{year}/{term}",
+      "actors": [
+        "Tất cả actor"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "StudyScheduleContractTests; ClubManager_GatewayRoutesNewApisToOwningServiceBeforeLegacyCatchAll",
+      "limitation": "FE consumer still browser-local; deployment/live acceptance pending.",
+      "version": "GUID; block expectedVersion plus expectedCalendarVersion on self writes; DELETE versions in query",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "PUT",
+      "route": "/api/academic-calendar/{year}/{term}",
+      "actors": [
+        "CTSV/Admin"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "StudyScheduleContractTests; ClubManager_GatewayRoutesNewApisToOwningServiceBeforeLegacyCatchAll",
+      "limitation": "FE consumer still browser-local; deployment/live acceptance pending.",
+      "version": "GUID; block expectedVersion plus expectedCalendarVersion on self writes; DELETE versions in query",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/me/study-schedule/{year}/{term}/{block}",
+      "actors": [
+        "Tất cả actor: self-only"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "StudyScheduleContractTests; ClubManager_GatewayRoutesNewApisToOwningServiceBeforeLegacyCatchAll",
+      "limitation": "FE consumer still browser-local; deployment/live acceptance pending.",
+      "version": "GUID; block expectedVersion plus expectedCalendarVersion on self writes; DELETE versions in query",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "PUT",
+      "route": "/api/users/me/study-schedule/{year}/{term}/{block}/{week}/{day}/{slotId}",
+      "actors": [
+        "Tất cả actor: self-only"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "StudyScheduleContractTests; ClubManager_GatewayRoutesNewApisToOwningServiceBeforeLegacyCatchAll",
+      "limitation": "FE consumer still browser-local; deployment/live acceptance pending.",
+      "version": "GUID; block expectedVersion plus expectedCalendarVersion on self writes; DELETE versions in query",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "DELETE",
+      "route": "/api/users/me/study-schedule/{year}/{term}/{block}/{week}/{day}/{slotId}",
+      "actors": [
+        "Tất cả actor: self-only"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "StudyScheduleContractTests; ClubManager_GatewayRoutesNewApisToOwningServiceBeforeLegacyCatchAll",
+      "limitation": "FE consumer still browser-local; deployment/live acceptance pending.",
+      "version": "GUID; block expectedVersion plus expectedCalendarVersion on self writes; DELETE versions in query",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/users/me/study-schedule/{year}/{term}/{block}/bulk-import",
+      "actors": [
+        "Tất cả actor: self-only"
+      ],
+      "status": "SOURCE_IMPLEMENTED",
+      "test": "StudyScheduleContractTests; ClubManager_GatewayRoutesNewApisToOwningServiceBeforeLegacyCatchAll",
+      "limitation": "FE consumer still browser-local; deployment/live acceptance pending.",
+      "version": "GUID; block expectedVersion plus expectedCalendarVersion on self writes; DELETE versions in query",
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/activities/{activityId}/resources",
+      "status": "EMBED_GALLERY_SOURCE_IMPLEMENTED",
+      "limitation": "Authenticated scope only; CLUB links limited to current club member/manager; no anonymous or private file delivery.",
+      "actors": [
+        "Quản lý CLB hiện tại",
+        "Thành viên CLB đã duyệt",
+        "Người xem đã xác thực trong phạm vi"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "POST",
+      "route": "/api/activities/{activityId}/resources",
+      "status": "EMBED_ONLY_SOURCE_IMPLEMENTED",
+      "limitation": "DOCUMENT/MEDIA not implemented (501); required Idempotency-Key; at most 100 attached resources.",
+      "actors": [
+        "Quản lý CLB hiện tại"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "PARTIAL_EMBED_ONLY"
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/activities/{activityId}/resources/{resourceId}",
+      "status": "EMBED_METADATA_SOURCE_IMPLEMENTED",
+      "limitation": "GUID expectedVersion; title/visibility/position only; required Idempotency-Key.",
+      "actors": [
+        "Quản lý CLB hiện tại"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "DELETE",
+      "route": "/api/activities/{activityId}/resources/{resourceId}",
+      "status": "AUDITED_DETACH_SOURCE_IMPLEMENTED",
+      "limitation": "JSON expectedVersion/reason and Idempotency-Key; soft detach retains immutable audit.",
+      "actors": [
+        "Quản lý CLB hiện tại"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    },
+    {
+      "method": "GET",
+      "route": "/api/activities/{activityId}/resources/history",
+      "status": "IMMUTABLE_HISTORY_SOURCE_IMPLEMENTED",
+      "limitation": "Current authority required; paginated; no former-manager grant.",
+      "actors": [
+        "Quản lý CLB hiện tại"
+      ],
+      "frontendIntegration": "NOT_VERIFIED",
+      "completionScope": "SOURCE_IMPLEMENTED_WITH_STATED_LIMITS"
+    }
+  ],
+  "existingOperationUpdates": [
+    {
+      "method": "GET",
+      "route": "/api/users/me/profile",
+      "status": "SOURCE_IMPLEMENTED_EXTENDED",
+      "notes": "Hồ sơ chính chủ + học vụ read-only; major/year chưa có nguồn."
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/users/me/profile",
+      "status": "SOURCE_IMPLEMENTED_EXTENDED",
+      "notes": "GUID expectedVersion; headline/DOB/address + avatar/cover; omitted giữ/null xóa; Idempotency-Key tùy chọn."
+    },
+    {
+      "method": "POST",
+      "route": "/api/media/upload-intents",
+      "status": "PARTIAL_BASIC_KINDS_IMPLEMENTED",
+      "notes": "club-logo/club-cover/activity-cover/student-avatar/student-cover; không phải upload tài liệu/video."
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/{id}",
+      "status": "SOURCE_DTO_FIXED",
+      "notes": "Manager DTO trả version, coverImageUrl, schedule (F01)."
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/me/managed",
+      "status": "SOURCE_DTO_FIXED",
+      "notes": "Cùng metadata manager, không mở rộng roster visibility."
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/clubs/{id}/public-profile",
+      "status": "SOURCE_IMPLEMENTED",
+      "notes": "Text/schedule có version; giữ scope quản lý hiện tại."
+    },
+    {
+      "method": "PUT",
+      "route": "/api/clubs/{id}/public-images",
+      "status": "SOURCE_OMISSION_NULL_FIXED",
+      "notes": "F02: chỉ trường gửi mới thay; null xóa; verify owner/kind; CAS."
+    },
+    {
+      "method": "PUT",
+      "route": "/api/activities/{activityId}/cover-image",
+      "status": "SOURCE_IMPLEMENTED",
+      "notes": "GUID activity expectedVersion; media verified owner; không dùng URL tùy ý."
+    },
+    {
+      "method": "GET",
+      "route": "/api/activities/{id}",
+      "status": "PARTIAL_EXTENSIONS_IMPLEMENTED",
+      "notes": "Publication bool/int cho application-owned; detail thêm EMBED resources/capabilities/availability; không phải public transport."
+    },
+    {
+      "method": "GET",
+      "route": "/api/activities",
+      "status": "SOURCE_PUBLICATION_METADATA_EXTENDED",
+      "notes": "Giữ GUID activity version; application-owned bổ sung isPublished/publicationVersion, không dùng CLOSE để ẩn."
+    },
+    {
+      "method": "POST",
+      "route": "/api/clubs/{id}/join",
+      "status": "SOURCE_HISTORY_FIXED",
+      "notes": "Reapply tạo ID mới, previousApplicationId, giữ lịch sử/consent; không auto-approve."
+    },
+    {
+      "method": "GET",
+      "route": "/api/clubs/me/memberships",
+      "status": "SOURCE_METADATA_EXTENDED",
+      "notes": "Code/logo/source/version/capabilities/semester/consent; legacy không đủ nguồn giữ UNKNOWN."
+    },
+    {
+      "method": "POST",
+      "route": "/api/clubs/{clubId}/members",
+      "status": "SOURCE_ROSTER_VALIDATION_IMPLEMENTED",
+      "notes": "Bắt buộc semesterId; kiểm tra school-email/account/roster/campus, outbox; consent và duyệt kiểm tra lại."
+    }
+  ],
+  "originalConsumerGapScope": {
+    "baseline": 16,
+    "resolved": 16,
+    "remaining": 0,
+    "note": "Counts only the 16 missing operations with an existing consumer in the 2026-10-21 audit; actor sets overlap. Proposed APIs and business gaps are separate.",
+    "remainingByActor": {
+      "Quản lý CLB": 0,
+      "CTSV/Admin": 0,
+      "Sinh viên": 0,
+      "Người xác minh": 0
+    },
+    "resolvedOperations": [
+      {
+        "method": "GET",
+        "route": "/api/clubs/{}/eligible-members",
+        "consumer": "searchEligibleClubMembers",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "current_facade",
+        "contract": "club-member-invitations-api.md",
+        "work_package": "P04"
+      },
+      {
+        "method": "GET",
+        "route": "/api/activity-applications/{}",
+        "consumer": "getActivityApplication",
+        "actors": [
+          "Quản lý CLB",
+          "CTSV/Admin"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "current_facade",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P06",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activity-applications",
+        "consumer": "createActivityApplication",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "current_facade",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P06",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "PATCH",
+        "route": "/api/activity-applications/{}",
+        "consumer": "updateActivityApplication",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "current_facade",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P06",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activity-applications/{}/submit",
+        "consumer": "submitActivityApplication",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "current_facade",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P06",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "PATCH",
+        "route": "/api/activities/{}/publication",
+        "consumer": "setActivityPublication",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "current_facade",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P06",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "GET",
+        "route": "/api/activities/{}/staffing",
+        "consumer": "getActivityStaffing",
+        "actors": [
+          "Quản lý CLB",
+          "Sinh viên",
+          "Người xác minh"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activities/{}/assignments",
+        "consumer": "ActivityStaffingPanel.assignments",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activities/{}/assignments/{}/cancel",
+        "consumer": "ActivityStaffingPanel.cancel",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activities/{}/action-completions/{}/verify",
+        "consumer": "ActivityStaffingPanel.verify",
+        "actors": [
+          "Người xác minh"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activities/{}/recruitment",
+        "consumer": "ActivityStaffingPanel.createRecruitment",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "PATCH",
+        "route": "/api/activities/{}/recruitment",
+        "consumer": "ActivityStaffingPanel.editRecruitment",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "PATCH",
+        "route": "/api/activities/{}/recruitment/status",
+        "consumer": "ActivityStaffingPanel.recruitmentStatus",
+        "actors": [
+          "Quản lý CLB"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "POST",
+        "route": "/api/activities/{}/recruitment/positions/{}/join",
+        "consumer": "ActivityStaffingPanel.joinPosition",
+        "actors": [
+          "Sinh viên"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      },
+      {
+        "method": "GET",
+        "route": "/api/clubs/{}/activity-recruitments",
+        "consumer": "QuestsTab",
+        "actors": [
+          "Quản lý CLB",
+          "Sinh viên"
+        ],
+        "status": "SOURCE_IMPLEMENTED_OPERATIONAL_NO_NEW_POINTS",
+        "scope": "direct_consumer",
+        "contract": "activity-action-staffing-api.md",
+        "work_package": "P07",
+        "limitation": "Scoring deferred; application FE receipt currently requires numeric expectedRawXp and must handle null/deferred status."
+      }
+    ],
+    "remainingOperations": []
+  },
+  "scoringDecision": "DEFERRED_BY_PRODUCT_OWNER",
+  "rosterIdentity": "EXISTING_SCHOOL_EMAIL_NO_ACCOUNT_CREATION",
+  "activityResources": {
+    "status": "PARTIAL_EMBED_GALLERY_ONLY",
+    "handoff": "backend-current-integration.md#resources",
+    "newImplementedPublicOperations": 5,
+    "detail": "GET /api/activities/{id}: resources/resourceAvailability/resourceCapabilities; existing core access policy retained",
+    "canUpload": false,
+    "supportedKinds": [
+      "EMBED"
+    ],
+    "publicVisibility": "Within authenticated activity access; CAMPUS_PUBLIC is not anonymous",
+    "incomplete": [
+      {
+        "method": "POST",
+        "route": "/api/activities/{activityId}/resources/upload-intents",
+        "status": "NOT_IMPLEMENTED",
+        "response": "501 RESOURCE_UPLOAD_NOT_IMPLEMENTED after current management check; no upload/receipt"
+      },
+      {
+        "method": "POST",
+        "route": "/api/activities/{activityId}/resources",
+        "status": "DOCUMENT_MEDIA_NOT_IMPLEMENTED"
+      },
+      {
+        "method": "GET",
+        "route": "/api/public/activities/{id}",
+        "status": "NOT_IMPLEMENTED_POLICY_NOT_DEFINED"
+      },
+      "Private file delivery, bytes/container/scanning/quarantine and expiry/orphan cleanup",
+      "Governance specialist capabilities; legacy treasurer cutover still awaiting product decision"
+    ]
+  },
+  "profileExtensions": {
+    "methodRoutes": [
+      "GET /api/users/me/profile",
+      "PATCH /api/users/me/profile"
+    ],
+    "status": "PARTIAL_WITH_IMPLEMENTED_SELF_FIELDS_AND_ROSTER_PROJECTION",
+    "completedSelfFields": [
+      "profile.headline",
+      "personal.dateOfBirth",
+      "personal.address",
+      "profile.avatarUrl",
+      "profile.coverImageUrl"
+    ],
+    "privateInternalProjection": "New personal fields and academic data excluded",
+    "academicStudentCode": "Current school-email identity and current Admin roster revision; read-only; source availability explicit",
+    "majorAndYear": "NO_AUTHORITATIVE_SOURCE; null; read-only",
+    "remaining": [
+      "Cosmetics/layout and official major/year source",
+      "DOCUMENT/MEDIA pipeline; anonymous activity policy; live acceptance"
+    ],
+    "selfMedia": {
+      "upload": "POST /api/media/upload-intents",
+      "kinds": [
+        "student-avatar",
+        "student-cover"
+      ],
+      "owner": "current principal account ID, positive numeric ownerId must match",
+      "attachment": "PATCH /api/users/me/profile",
+      "formats": [
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+      ],
+      "maxBytes": 5242880,
+      "verification": "server object bytes/MIME/size/dimensions and immutable verified destination",
+      "status": "SOURCE_IMPLEMENTED",
+      "liveStorageAcceptance": "NOT_RUN"
+    }
+  },
+  "governanceMigrationDecision": {
+    "status": "AWAITING_PRODUCT_OWNER",
+    "question": "Confirm legacy treasurer migration into authoritative semester; CTSV confirmation versus no inheritance. No implicit migration/grant."
+  },
+  "optionalRetained": [
+    "public member directory",
+    "durable pins",
+    "custom registration forms",
+    "physical fulfillment",
+    "contest",
+    "office succession"
+  ],
   "statusLabels": {
-    "COMPLETE": "✅ HOÀN THÀNH",
+    "SOURCE_IMPLEMENTED": "✅ ĐÃ CÓ BE trong phạm vi ghi rõ",
     "PARTIAL": "🟡 CHƯA HOÀN THIỆN",
     "NOT_IMPLEMENTED": "⏳ CHƯA TRIỂN KHAI",
-    "SKIPPED": "⏭ BỎ QUA — CHƯA CẦN"
+    "DEFERRED_BY_PRODUCT_OWNER": "⏸ TẠM HOÃN — CHƯA CHỐT ĐIỂM",
+    "SKIPPED_OPTIONAL_NEEDS_SPEC": "⏭ BỎ QUA / OPTIONAL — GIỮ LẠI"
   },
-  "countingUnit": "74 operations from the 2026-10-12 pending inventory; aliases counted once",
-  "counts": [
-    {
-      "actor": "Sinh viên",
-      "complete": 32,
-      "partial": 0,
-      "notImplemented": 0
+  "contractGroups": {
+    "activity-attendance-api.md": {
+      "status": "Not Yet",
+      "scope": "BE attendance/session source; action attendance is a separate reviewed claim",
+      "backend": "PARTIAL",
+      "done": "Buổi lặp, registration, QR/self attendance hiện có; thêm attendance-claims và verify cho action ATTENDANCE, có quyền độc lập.",
+      "remaining": "Claim không phải QR check-in, không tạo ActivityAttendance hoặc điểm qua legacy; điểm action/final report đang tạm hoãn.",
+      "section": "actions",
+      "source": "operations"
     },
-    {
-      "actor": "Quản lý CLB",
-      "complete": 23,
-      "partial": 1,
-      "notImplemented": 0
+    "activity-discovery-api.md": {
+      "status": "Done",
+      "scope": "BE source: existing authenticated feed/detail and low-axis rule; not new scoring or FE acceptance",
+      "backend": "SOURCE_IMPLEMENTED",
+      "done": "GET /api/v2/activities/feed, /api/v2/activities/{activityId}, recommendation rule hiện có; thêm GET /api/v2/activities/{activityId}/sessions cho sinh viên đã đăng ký, đúng campus/visibility.",
+      "remaining": "Không phải public anonymous; FE phải dùng nguồn v2 thay management sessions. Công thức điểm mới không được chốt bởi nhãn Done này.",
+      "section": "existing",
+      "source": "foundation"
     },
-    {
-      "actor": "Người xác minh",
-      "complete": 5,
-      "partial": 3,
-      "notImplemented": 0
+    "activity-profile-resources-api.md": {
+      "status": "Not Yet",
+      "scope": "BE resources; EMBED source implemented, file pipeline and anonymous transport incomplete",
+      "backend": "PARTIAL_EMBED_GALLERY_ONLY",
+      "done": "5 API gallery/tạo/sửa/gỡ/history EMBED đã có; activity detail có resources, resourceAvailability, resourceCapabilities. Cover PUT đã có.",
+      "remaining": "canUpload=false, supportedKinds=[EMBED]. DOCUMENT/MEDIA và upload-intents trả 501 sau kiểm tra quyền; private delivery/scanner/cleanup và GET /api/public/activities/{id} chưa làm.",
+      "section": "resources",
+      "source": "resources"
     },
-    {
-      "actor": "Quản trị hệ thống",
-      "complete": 4,
-      "partial": 6,
-      "notImplemented": 0
+    "api-contract-conventions.md": {
+      "status": "Not Yet",
+      "scope": "BE route-specific conventions and FE adoption",
+      "backend": "PARTIAL",
+      "done": "Luồng mới dùng principal hiện tại, CAS, transaction/receipt, chống gửi trùng và paging; kiểm tra quyền trước replay.",
+      "remaining": "Không đồng nhất mọi version thành GUID: application/action là int ID, application/staffing/publication dùng int version; legacy/profile/calendar/resource dùng GUID. Shape lỗi/paging theo từng route.",
+      "section": "conventions",
+      "source": "foundation"
+    },
+    "api-declaration-inventory.md": {
+      "status": "Done",
+      "scope": "Documentation: preserved 13/10 declaration snapshot; not regenerated current inventory",
+      "backend": "HISTORICAL_INVENTORY",
+      "done": "Giữ nguyên inventory facade cũ làm bằng chứng lịch sử; trạng thái BE mới dùng bảng hiện hành và manifest 40 operation.",
+      "remaining": "Không dùng số 95 wrappers/6 absent trong bản cũ như số liệu BE hiện tại; chưa chạy lại generator trên FE main.",
+      "section": "existing",
+      "source": "foundation"
+    },
+    "backend-api-implementation-handoff.md": {
+      "status": "Not Yet",
+      "scope": "BE implementation tracked by handoff; whole contract is incomplete",
+      "backend": "PARTIAL",
+      "done": "Các handler trong nhóm 16 consumer thiếu route ban đầu đã có; hoạt động vận hành, roster/invite, lịch học, self fields/media cơ bản và EMBED có persistence.",
+      "remaining": "Không đồng nghĩa toàn bộ contract Done: điểm hoãn, governance, file resources/cosmetics và live acceptance còn mở.",
+      "section": "overview",
+      "source": "foundation"
+    },
+    "backend-changes-for-frontend.md": {
+      "status": "Not Yet",
+      "scope": "BE capability index and FE adoption",
+      "backend": "PARTIAL",
+      "done": "F01/F02/F03/F05/F06 đã có bản sửa/luồng nguồn ở BE; đọc bảng current và hướng dẫn wire trước khi nối adapter.",
+      "remaining": "F04/cơ chế điểm action-final-report đang tạm hoãn; adapter expectedRawXp numeric chưa tương thích null. FE/deployment không được đánh Done.",
+      "section": "overview",
+      "source": "foundation"
+    },
+    "be-integration-guide.md": {
+      "status": "Done",
+      "scope": "Documentation: current wire deltas; not completed FE integration",
+      "backend": "DOCUMENTATION_SYNCED",
+      "done": "Hướng dẫn hiện hành cho các API mới/đổi ở backend-current-integration.md; có đúng loại ID/version, null/omission và trạng thái chưa hỗ trợ.",
+      "remaining": "Phần 14/10 được giữ dưới lịch sử, không dùng nó để bỏ qua extension mới hoặc nhận mọi version là GUID.",
+      "section": "conventions",
+      "source": "foundation"
+    },
+    "capstone-scope-contract.md": {
+      "status": "Done",
+      "scope": "Documentation: scope history plus explicit later product-owner decisions",
+      "backend": "DOCUMENTATION_SYNCED",
+      "done": "Chủ dự án đã yêu cầu roster theo email trường/tài khoản sẵn có và đã cho triển khai lịch học cá nhân; ghi nhận BE hiện có, không sửa phiếu đăng ký gốc.",
+      "remaining": "Tích hợp hệ thống trường/FAP, nguồn ngành/năm học chính thức vẫn chưa có. Điểm mới tạm hoãn. Mục không cần giữ BỎ QUA, không xóa.",
+      "section": "decisions",
+      "source": "foundation"
+    },
+    "club-contributions-points-api.md": {
+      "status": "Not Yet",
+      "scope": "BE new task/credit/point lifecycle; existing evidence/ledger routes are separate",
+      "backend": "DEFERRED_BY_PRODUCT_OWNER",
+      "done": "Contribution/evidence/review/ledger legacy hiện có; action completion/verification mới chỉ xác nhận công việc, không phát điểm.",
+      "remaining": "Task credit, ví CLUB_CREDIT, đổi thưởng, cap/rollover/reversal/final report awards chưa triển khai hoặc chưa chốt; không thay bằng Admin quest hay tiền Finance.",
+      "section": "decisions",
+      "source": "operations"
+    },
+    "club-event-operations-api.md": {
+      "status": "Not Yet",
+      "scope": "BE activity operations; specialist/forms and scoring extensions separate",
+      "backend": "PARTIAL_OPERATIONAL_SOURCE_IMPLEMENTED",
+      "done": "Application draft/submit/review/history, publication bool, staffing/assignment/completion/verify và tuyển người đã có; recurrence/attendance cũ giữ nguyên.",
+      "remaining": "CONTENT/event specialist cần governance thật; custom forms/reviewed registrations còn chưa làm/cần đặc tả. Điểm action đang hoãn.",
+      "section": "actions",
+      "source": "operations"
+    },
+    "club-governance-groups-api.md": {
+      "status": "Not Yet",
+      "scope": "BE multi-group semester governance and cross-service authorization",
+      "backend": "NOT_IMPLEMENTED",
+      "done": "Tái sử dụng membership/owner assignment/transfer và quyền thủ quỹ hiện có làm nền; workspace semester read đã có riêng.",
+      "remaining": "Terms/groups/union/revocation/expiry/revisions/report snapshots/vice nomination và policy liên service chưa hoàn thành. Chờ quyết định chuyển thủ quỹ legacy sang kỳ; không tự kế thừa/cấp quyền.",
+      "section": "decisions",
+      "source": "foundation"
+    },
+    "club-governance-groups-proposal.md": {
+      "status": "Not Yet",
+      "scope": "Retained governance decisions; not server authority",
+      "backend": "NOT_IMPLEMENTED",
+      "done": "Giữ quyết định nghiệp vụ đa nhóm và bản UI rehearsal; không xóa đề xuất hoặc biến báo cáo BQL thành cấp quyền.",
+      "remaining": "Cùng backlog/câu hỏi migration với club-governance-groups-api.md; local group labels không làm canManage=true.",
+      "section": "decisions",
+      "source": "foundation"
+    },
+    "club-member-invitations-api.md": {
+      "status": "Not Yet",
+      "scope": "BE roster-backed invitation flow implemented; delegated governance/live delivery incomplete",
+      "backend": "PARTIAL_CORE_SOURCE_IMPLEMENTED",
+      "done": "invitation-semesters, eligible-members, import roster và kiểm tra lại identity/revision ở mời/consent/duyệt đã có; consent vẫn Pending đến khi quản lý duyệt; outbox đúng recipient.",
+      "remaining": "POST members cần semesterId; lời mời legacy thiếu nguồn trả reconciliation 409. HR/group capability và delivery live chưa hoàn thành. Không còn coi roster lookup là chưa có.",
+      "section": "roster",
+      "source": "operations"
+    },
+    "club-navigation-applications-api.md": {
+      "status": "Not Yet",
+      "scope": "BE application history/metadata implemented; durable pins optional",
+      "backend": "PARTIAL_WITH_OPTIONAL_PINS",
+      "done": "Own application history, withdraw/reapply có audit, source/capability/version/code/logo metadata đã có; dữ liệu legacy giữ UNKNOWN.",
+      "remaining": "Durable pins vẫn chưa triển khai/optional; không chặn việc tích hợp inbox và rút đơn đã có BE. Không suy quyền từ navigation.",
+      "section": "membership",
+      "source": "foundation"
+    },
+    "club-public-profile-api.md": {
+      "status": "Not Yet",
+      "scope": "BE owner public profile and images source; specialist/live integration separate",
+      "backend": "PARTIAL_CORE_SOURCE_IMPLEMENTED",
+      "done": "GET manager/managed trả version/coverImageUrl/schedule; PATCH public-profile và PUT public-images có source, CAS, owner verification; F01/F02 đã sửa.",
+      "remaining": "Ảnh bỏ qua giữ nguyên, null xóa riêng. Specialist cần governance; kiểm chứng R2/delivery và FE save-reload live chưa làm.",
+      "section": "existing",
+      "source": "foundation"
+    },
+    "club-semester-plan-report-api.md": {
+      "status": "Not Yet",
+      "scope": "BE existing plan/statistics/export source; new action final-report scoring not included",
+      "backend": "PARTIAL_EXISTING_SOURCE_IMPLEMENTED",
+      "done": "Semester plans/statistics và tạo/xuất báo cáo quản lý hiện có giữ trạng thái source implemented trong phạm vi cũ.",
+      "remaining": "Không dùng báo cáo hiện có như final authority trao điểm action/budget hoặc báo cáo governance; các luồng đó chưa hoàn thành/đang hoãn.",
+      "section": "decisions",
+      "source": "foundation"
+    },
+    "existing-api-hardening.md": {
+      "status": "Not Yet",
+      "scope": "BE fixes plus remaining FE/policy compatibility",
+      "backend": "PARTIAL",
+      "done": "F01 manager DTO, F02 ảnh omitted/null, F03 roster invitation, F05 nguồn session cho sinh viên, F06 lịch sử/source/capability đã được sửa; suite BE hiện tại 914 test đạt.",
+      "remaining": "Công thức/final action awards F04 hoãn. FE adapter numeric expectedRawXp và nghiệm thu live còn mở; có route không tự là tích hợp hoàn tất.",
+      "section": "existing",
+      "source": "foundation"
+    },
+    "experience-scoring-contract.md": {
+      "status": "Not Yet",
+      "scope": "Product-owner-approved future scoring policy; legacy calculators preserved",
+      "backend": "DEFERRED_BY_PRODUCT_OWNER",
+      "done": "Giữ source/ledger/calculator legacy đã có làm bằng chứng; completion mới không cộng điểm.",
+      "remaining": "Chủ dự án chưa chốt ai duyệt cuối, công thức/caps/+1/rollover/reversal. expectedRawXp=null, scoringStatus=DEFERRED_BY_PRODUCT_OWNER, canAwardPoints=false; không thay bằng 0.",
+      "section": "decisions",
+      "source": "operations"
+    },
+    "frontend-api-debt-register.md": {
+      "status": "Not Yet",
+      "scope": "FE integration/debt, separated from BE source readiness",
+      "backend": "PARTIAL",
+      "done": "Nhóm 16 consumer operation thiếu route tại audit 21/10 đã có handler ở BE; manifest hiện 40 operation mới so với baseline b066f96.",
+      "remaining": "16/16 là phạm vi route cũ, không phải mọi chức năng Done. Chuyển consumer lịch học/self media/EMBED và xử lý scoring deferred vẫn là việc FE.",
+      "section": "overview",
+      "source": "foundation"
+    },
+    "internal-accounts-verification-api.md": {
+      "status": "Not Yet",
+      "scope": "BE existing accounts and scoped verification; future governance separated",
+      "backend": "PARTIAL_EXISTING_SOURCE_IMPLEMENTED",
+      "done": "Internal register/login, canonical profile và verification assignment/capability hiện có; action verifier kiểm tra quyền độc lập và không tự duyệt.",
+      "remaining": "Nguồn học vụ chính thức và quyền governance xuyên service chưa hoàn thành. Import roster chỉ ghép email trường, không tạo account.",
+      "section": "roster",
+      "source": "operations"
+    },
+    "my-clubs-membership-api.md": {
+      "status": "Done",
+      "scope": "BE source: self membership/application history, withdrawal and reapplication",
+      "backend": "SOURCE_IMPLEMENTED",
+      "done": "GET /api/clubs/me/membership-applications và POST own pending APPLICATION withdraw đã có; reapply tạo ID mới/giữ lịch sử, metadata source/version/capability/code/logo hiện có.",
+      "remaining": "UNKNOWN/invitation không tự rút; không dùng manager DELETE thay withdraw. Pins và màn hình FE/live không thuộc nhãn Done này.",
+      "section": "membership",
+      "source": "foundation"
+    },
+    "page-integration-checklist.md": {
+      "status": "Not Yet",
+      "scope": "FE/BE integration and browser/live acceptance",
+      "backend": "FE_INTEGRATION_NOT_VERIFIED",
+      "done": "Cập nhật phần BE sẵn có theo manifest và các hướng dẫn current; không đánh checkbox UI/browser/deployment từ 914 test BE.",
+      "remaining": "Lịch học còn consumer local, adapter scoring null cần đổi, file upload phải giữ tắt; live delivery/R2 chưa nghiệm thu.",
+      "section": "overview",
+      "source": "foundation"
+    },
+    "personal-experience-api.md": {
+      "status": "Not Yet",
+      "scope": "Existing experience reads versus unapproved new scoring semantics",
+      "backend": "PARTIAL_EXISTING_READS_NEW_SCORING_DEFERRED",
+      "done": "Self summary/activity-history/contributions/ledger/radar và rule recommendation hiện có; nguồn v2 sessions kiểm tra đăng ký/visibility.",
+      "remaining": "Không chốt công thức mới/+1/tích lũy/rollover bằng nhãn source-read; không biến raw XP thành ví spendable hoặc null nguồn thành số 0.",
+      "section": "decisions",
+      "source": "foundation"
+    },
+    "profile-cover-rewards-api.md": {
+      "status": "Not Yet",
+      "scope": "BE cosmetics/credit/reward scope and unresolved asset policy",
+      "backend": "DEFERRED_OR_NOT_IMPLEMENTED",
+      "done": "Self avatar/cover cơ bản đã có qua upload-intent + canonical profile; tách khỏi quyền sở hữu cosmetic.",
+      "remaining": "Catalog/inventory/equip/layout/club-shape chưa hoàn thành; credit/wallet/redemption/awards chờ chính sách điểm, format asset Q04 chưa chốt. Không import grant mẫu.",
+      "section": "profile",
+      "source": "profile"
+    },
+    "public-image-api.md": {
+      "status": "Not Yet",
+      "scope": "BE verified basic image flows; remaining kinds and live storage acceptance separate",
+      "backend": "PARTIAL_BASIC_IMAGES_IMPLEMENTED",
+      "done": "POST /api/media/upload-intents và attach club-logo/club-cover/activity-cover/student-avatar/student-cover đã có; ảnh verified bất biến, PNG/JPEG/WebP <=5 MiB.",
+      "remaining": "Application-logo/club-shape chưa hoàn thành; không tự cấp quyền cho kind mới. R2/CORS/signing origin/delivery/cleanup live chưa nghiệm thu.",
+      "section": "profile",
+      "source": "profile"
+    },
+    "public-member-directory-api.md": {
+      "status": "Not Yet",
+      "scope": "Optional/deferred capability; retained, not cancelled",
+      "backend": "SKIPPED_OPTIONAL_NEEDS_SPEC",
+      "done": "Giữ public leaders/count và private member APIs hiện có; không công khai danh sách thành viên từ nguồn private.",
+      "remaining": "Opt-in public directory chưa làm, BỎ QUA/optional theo scope hiện tại; không xóa yêu cầu, không tính là API bắt buộc đã hoàn thành.",
+      "section": "decisions",
+      "source": "foundation"
+    },
+    "self-profile-sync-api.md": {
+      "status": "Not Yet",
+      "scope": "BE canonical self profile implemented; complete profile extension scope remains partial",
+      "backend": "PARTIAL_WITH_CANONICAL_CORE_IMPLEMENTED",
+      "done": "GET/PATCH /api/users/me/profile có store/version/editableFields; headline/DOB/address và owner-verified avatar/cover đã có. studentCode từ roster chỉ đọc.",
+      "remaining": "major/year null NO_AUTHORITATIVE_SOURCE, không tự sửa academic; cosmetics/layout còn thiếu. Nguồn học vụ lỗi trả availability, không giả dữ liệu.",
+      "section": "profile",
+      "source": "profile"
+    },
+    "semester-student-roster-api.md": {
+      "status": "Done",
+      "scope": "BE source: existing-account school-email roster import/revision/carry-forward and scoped lookup",
+      "backend": "SOURCE_IMPLEMENTED_EXISTING_ACCOUNTS_ONLY",
+      "done": "Preview/commit/student-roster và eligible/invitation-semesters đã có; email trường của account sẵn có, CSV/JSON schema1, revision/campus/version/expiry, outbox và carry-forward có nguồn.",
+      "remaining": "Ghi chú BỎ QUA của bản cũ được thay cho phạm vi import này bằng quyết định trực tiếp của chủ dự án. Không có FAP sync/tạo account/chứng nhận ngành-năm học. FE/live chưa nghiệm thu.",
+      "section": "roster",
+      "source": "operations"
+    },
+    "study-schedule-api.md": {
+      "status": "Done",
+      "scope": "BE source: 6 calendar/private schedule operations; not FE integration or FAP synchronization",
+      "backend": "SOURCE_IMPLEMENTED",
+      "done": "GET/PUT academic-calendar và GET/PUT/DELETE/bulk-import lịch riêng đã có; Semester alias/campus, 10W/3W, GUID CAS, idempotency và SQL persistence.",
+      "remaining": "BỎ QUA cũ không còn áp dụng cho 6 API đã cho triển khai; FAP/OJT/auto schedule matching vẫn chưa làm. FE consumer còn local, không tự import localStorage.",
+      "section": "schedule",
+      "source": "schedule"
+    },
+    "verified-contributions-api.md": {
+      "status": "Not Yet",
+      "scope": "BE existing verified workflow and new operational completions; new award policy excluded",
+      "backend": "PARTIAL_EXISTING_SOURCE_IMPLEMENTED",
+      "done": "Private evidence/contribution/declaration/review/upgrade/ledger hiện có; thêm action completion/attendance claim/verify có source/capability và audit.",
+      "remaining": "Completion VERIFIED không có nghĩa đã trao điểm; final action award/budget/reversal mới đang tạm hoãn, không dùng legacy endpoint đi vòng.",
+      "section": "actions",
+      "source": "operations"
+    },
+    "workspace-semester-context-api.md": {
+      "status": "Not Yet",
+      "scope": "BE shared catalog read implemented; governance/finance attribution not complete",
+      "backend": "PARTIAL_CATALOG_SOURCE_IMPLEMENTED",
+      "done": "GET /api/clubs/{clubId}/workspace-semesters và invitation-semesters đã có, dựa Admin Semester thật, alias year/term/reportPeriod tường minh, availability/current/permissions.",
+      "remaining": "Không suy kỳ từ tháng/code, nhiều kỳ active báo AMBIGUOUS. Read catalog không cấp quyền governance, không tự thêm semester cho Finance hay reset membership/điểm.",
+      "section": "workspace",
+      "source": "foundation"
+    },
+    "activity-action-staffing-api.md": {
+      "status": "Not Yet",
+      "scope": "BE action operational routes implemented; scoring/final report/budget incomplete",
+      "backend": "PARTIAL_OPERATIONAL_SOURCE_IMPLEMENTED",
+      "done": "7 application và các route publication/staffing/assignment/recruitment/completion/verify đã có persistence, audit, CAS và quyền hiện tại.",
+      "remaining": "expectedRawXp=null/canAwardPoints=false; adapter FE numeric phải đổi. Final report/awards/budgets/caps/+1/rollover chưa chốt.",
+      "section": "actions",
+      "source": "operations"
+    },
+    "self-profile-extensions-api.md": {
+      "status": "Not Yet",
+      "scope": "BE extended self fields/basic media implemented; official academic source/cosmetics incomplete",
+      "backend": "PARTIAL_WITH_IMPLEMENTED_SELF_FIELDS",
+      "done": "Headline, dateOfBirth, address, avatar/cover và academic.studentCode từ roster đã có qua self GET/PATCH.",
+      "remaining": "Ngành/năm học chính thức vẫn null NO_AUTHORITATIVE_SOURCE; cosmetics/layout và live R2/FE acceptance chưa hoàn thành.",
+      "section": "profile",
+      "source": "profile"
+    },
+    "be-api-status.md": {
+      "status": "Done",
+      "scope": "Documentation: current BE operation status, not all backend features complete",
+      "backend": "PARTIAL_PROJECT",
+      "done": "Đồng bộ 40 operation mới và 13 operation có extension/fix; đầy đủ các nhãn source/partial/deferred.",
+      "remaining": "Chưa hoàn thành toàn bộ contract, chưa xác nhận FE hay deploy; số 74 operation cũ chỉ là checkpoint lịch sử.",
+      "section": "overview",
+      "source": "foundation"
+    },
+    "backend-current-integration.md": {
+      "status": "Done",
+      "scope": "Documentation: current BE-supported wire subset; not all backend/features/FE complete",
+      "backend": "PARTIAL_PROJECT",
+      "done": "Wire source hiện hành và giới hạn đã đồng bộ.",
+      "remaining": "Không xác nhận FE/deploy hay toàn bộ backend Done."
+    },
+    "README.md": {
+      "status": "Done",
+      "scope": "Documentation: current contract index; not backend/FE completion",
+      "backend": "PARTIAL_PROJECT",
+      "done": "Chỉ mục hiện hành, source pin và trạng thái theo nhóm.",
+      "remaining": "Các yêu cầu chưa làm được giữ, không tự hoàn thành."
+    },
+    "contract-lifecycle-audit.md": {
+      "status": "Done",
+      "scope": "Documentation: current pinned source/status audit; not complete backend or FE/live acceptance",
+      "backend": "PARTIAL_PROJECT",
+      "done": "Nhãn/matrix hiện hành dựa source BE và proof được pin.",
+      "remaining": "Không rerun facade inventory, FE E2E hoặc production acceptance."
+    },
+    "specs/001-discover-production/contracts/discover-ui-contract.md": {
+      "status": "Not Yet",
+      "scope": "UI integration; existing BE discover source is available",
+      "backend": "FE_INTEGRATION_NOT_VERIFIED",
+      "done": "Directory/detail/join và feed/recommendation source hiện có.",
+      "remaining": "Không tự đánh FE browser/adapter Done; quyết định recommendation mở rộng vẫn theo scope, nguồn quyền từ BE.",
+      "section": "existing",
+      "source": "foundation"
+    },
+    "specs/002-header-production/contracts/notification-summary.md": {
+      "status": "Done",
+      "scope": "BE source: existing self-safe notification reads and committed invite/import outbox; not live delivery",
+      "backend": "SOURCE_IMPLEMENTED",
+      "done": "Notification self-safe/read hiện có; invitation/import đã thêm outbox đúng người nhận.",
+      "remaining": "Chưa nghiệm thu delivery live; không hứa tất cả loại event mới, rewards hoặc governance notices đã có.",
+      "section": "roster",
+      "source": "operations"
+    },
+    "specs/003-activity-discovery/contracts/activity-discovery-contract.md": {
+      "status": "Not Yet",
+      "scope": "UI/BE integration and future policy scope",
+      "backend": "PARTIAL",
+      "done": "BE feed/detail/rule và safe sessions source đã có.",
+      "remaining": "FE adoption/E2E chưa xác nhận; scoring mới deferred; ML/schedule matching vẫn bỏ qua.",
+      "section": "existing",
+      "source": "foundation"
+    },
+    "specs/004-club-workspace/contracts/workspace-ui-contract.md": {
+      "status": "Not Yet",
+      "scope": "Workspace integration, separate from ready BE operational routes",
+      "backend": "PARTIAL",
+      "done": "Profile, semester catalogs, application/staffing, invitation/roster và EMBED source đã có.",
+      "remaining": "Governance/capabilities xuyên service, file pipeline, credit/reward và FE live còn thiếu; label Host/Staff không cấp quyền.",
+      "section": "actions",
+      "source": "operations"
+    },
+    "specs/005-profile-production/contracts/profile-service.md": {
+      "status": "Not Yet",
+      "scope": "Profile UI integration and remaining cosmetics/academic source",
+      "backend": "PARTIAL",
+      "done": "Canonical self profile + basic avatar/cover/roster studentCode source đã có.",
+      "remaining": "FE vẫn phải tích hợp; cosmetics/layout và major/year chưa có nguồn; không dùng local ownership/XP giả.",
+      "section": "profile",
+      "source": "profile"
     }
-  ],
-  "totals": {
-    "complete": 64,
-    "partial": 10,
-    "notImplemented": 0,
-    "total": 74
   },
-  "rows": [
-    {
-      "id": "API-001",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/auth/register",
-      "actualPath": "/api/auth/internal/register",
-      "title": "Đăng ký tài khoản nội bộ",
-      "status": "COMPLETE",
-      "note": "Password được hash; server gán role Sinh viên; body có username/email/password/displayName. Dùng route thực tế, không gọi đề xuất /api/auth/register.",
-      "contract": "internal-accounts-verification-api.md",
-      "evidence": "src/Services/AuthService/Endpoints/InternalAccountEndpoints.cs"
-    },
-    {
-      "id": "API-002",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/auth/login",
-      "actualPath": "/api/auth/internal/login",
-      "title": "Đăng nhập bằng mật khẩu",
-      "status": "COMPLETE",
-      "note": "Đăng nhập email/password, kiểm tra active/locked, trả auth envelope và refresh token hiện có. Không dùng dev-login làm login production.",
-      "contract": "internal-accounts-verification-api.md",
-      "evidence": "src/Services/AuthService/Endpoints/InternalAccountEndpoints.cs"
-    },
-    {
-      "id": "API-003",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/users/me/profile",
-      "actualPath": "/api/users/me/profile",
-      "title": "Đọc hồ sơ chính chủ",
-      "status": "COMPLETE",
-      "note": "Trả userId/version/profile/personal/editableFields và provenance PROJECT_ACCOUNT; profile chưa tạo có version GUID rỗng.",
-      "contract": "self-profile-sync-api.md",
-      "evidence": "src/Services/AuthService/Endpoints/CanonicalProfileEndpoints.cs"
-    },
-    {
-      "id": "API-004",
-      "actor": "Sinh viên",
-      "method": "PATCH",
-      "proposedPath": "/api/users/me/profile",
-      "actualPath": "/api/users/me/profile",
-      "title": "Cập nhật hồ sơ chính chủ",
-      "status": "COMPLETE",
-      "note": "PATCH profile/personal của chính mình, expectedVersion + Idempotency-Key; chưa hỗ trợ avatar/cover qua self profile.",
-      "contract": "self-profile-sync-api.md",
-      "evidence": "src/Services/AuthService/Endpoints/CanonicalProfileEndpoints.cs"
-    },
-    {
-      "id": "API-005",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v2/activities/feed",
-      "actualPath": "/api/v2/activities/feed",
-      "title": "Danh sách hoạt động khám phá",
-      "status": "COMPLETE",
-      "note": "Feed authenticated, display-safe; campus/member visibility, private-by-default, search/status/semester/SQL paging và buổi kế tiếp. Không roster/contact/minh chứng.",
-      "contract": "activity-discovery-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/StudentActivityEndpoints.cs"
-    },
-    {
-      "id": "API-006",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v2/activities/{activityId}",
-      "actualPath": "/api/v2/activities/{activityId}",
-      "title": "Chi tiết hoạt động khám phá",
-      "status": "COMPLETE",
-      "note": "Deep link đọc trực tiếp, kiểm tra campus/visibility như feed, DTO an toàn; không dùng management detail cho discovery.",
-      "contract": "activity-discovery-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/StudentActivityEndpoints.cs"
-    },
-    {
-      "id": "API-007",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v2/recommendations/activities",
-      "actualPath": "/api/v2/recommendations/activities",
-      "title": "Gợi ý theo trục thấp",
-      "status": "COMPLETE",
-      "note": "LOW_AXIS_RULE từ sáu trục X chưa làm tròn; eligible upcoming candidates qua toàn bộ các trang, thứ tự trục/start/ID, radar/policy snapshot. Outage503, không ghi điểm.",
-      "contract": "activity-discovery-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/StudentExperienceEndpoints.cs"
-    },
-    {
-      "id": "API-008",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}/manual-attendance-requests",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}/manual-attendance-requests",
-      "title": "Xin xác nhận điểm danh thủ công/online",
-      "status": "COMPLETE",
-      "note": "Xin xác nhận cho session đã diễn ra, có reason/evidenceRefs; yêu cầu ban đầu PENDING, không tự có điểm.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/ManualAttendanceEndpoints.cs"
-    },
-    {
-      "id": "API-009",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/activities/{activityId}/contributions",
-      "actualPath": "/api/activities/{activityId}/contributions",
-      "title": "Nộp đóng góp trong CLB",
-      "status": "COMPLETE",
-      "note": "Nộp cho nguồn activity/session đã công bố; proposedAttributes/evidenceRefs/message/expectedActivityVersion và key; unique source chống khai lại cùng công sức.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-010",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/users/me/contributions",
-      "actualPath": "/api/users/me/contributions",
-      "title": "Danh sách đóng góp thống nhất",
-      "status": "COMPLETE",
-      "note": "Hợp nhất canonical + legacy có nhãn, dedup mirror, lọc kỳ/status/pillar, SQL count/paging; calculation hiện trạng. Legacy semester unassigned, không cộng vào điểm verified.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Services/StudentContributionReadService.cs"
-    },
-    {
-      "id": "API-011",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/contributions/{id}",
-      "actualPath": "/api/contributions/{id}",
-      "title": "Chi tiết đóng góp CLB",
-      "status": "COMPLETE",
-      "note": "Detail có calculationBreakdown và lịch sử ledger effect/delta/allocation/revision/policy/verification. Snapshot mới bất biến; lịch sử cũ chỉ reconstruct nếu dữ liệu gốc khớp, thiếu căn cứ báo unavailable.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-012",
-      "actor": "Sinh viên",
-      "method": "PATCH",
-      "proposedPath": "/api/contributions/{id}",
-      "actualPath": "/api/contributions/{id}",
-      "title": "Bổ sung đóng góp CLB",
-      "status": "COMPLETE",
-      "note": "Author sửa SUBMITTED/REVISION_REQUESTED theo version; không sửa đóng góp đã ghi điểm.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-013",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/contributions/{id}/role-upgrade-requests",
-      "actualPath": "/api/contributions/{id}/role-upgrade-requests",
-      "title": "Xin nâng vai trò/kết quả",
-      "status": "COMPLETE",
-      "note": "Xin nâng cùng contribution; role/result/evidenceRefs/reason/version. Đang chờ không thay điểm; duyệt chỉ ghi delta.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-014",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/users/me/experience-ledger",
-      "actualPath": "/api/users/me/experience-ledger",
-      "title": "Sổ cái trải nghiệm của mình",
-      "status": "COMPLETE",
-      "note": "Paged self net ledger với sourceType/sourceId/sourceKey/sourceNamespace, policy/formula/revision/verification; không đưa XP mẫu vào ledger.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-015",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/contributions/evidence",
-      "actualPath": "/api/contributions/evidence",
-      "title": "Tải minh chứng riêng tư",
-      "status": "COMPLETE",
-      "note": "Multipart một PDF/PNG/JPEG tối đa 10 MiB; trả attachmentId/evidenceId. Private evidence chưa nhận WebP; public images có WebP riêng.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/PrivateEvidenceEndpoints.cs"
-    },
-    {
-      "id": "API-016",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/contributions/evidence/{attachmentId}/download",
-      "actualPath": "/api/contributions/evidence/{attachmentId}/download",
-      "title": "Tải minh chứng có quyền",
-      "status": "COMPLETE",
-      "note": "Tải cho owner hoặc reviewer assignment còn hiệu lực, private/no-store. Không phát public URL của minh chứng.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/PrivateEvidenceEndpoints.cs"
-    },
-    {
-      "id": "API-017",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/users/me/experience-summary",
-      "actualPath": "/api/users/me/experience-summary",
-      "title": "Tổng hợp hồ sơ trải nghiệm",
-      "status": "COMPLETE",
-      "note": "Summary đọc toàn bộ net ledger, counts riêng với points; nguồn attendance/membership có availability/asOf/version riêng. Nguồn lỗi trả null, không giả0; historical external counters chưa có snapshot được đánh dấu rõ.",
-      "contract": "personal-experience-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/StudentExperienceEndpoints.cs"
-    },
-    {
-      "id": "API-018",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/users/me/activity-history",
-      "actualPath": "/api/users/me/activity-history",
-      "title": "Lịch sử hoạt động của mình",
-      "status": "COMPLETE",
-      "note": "Self-only, cross-activity/session history; SQL filter/count/paging, registration/verified/revoked/legacy tách nhãn, không lộ dữ liệu sinh viên khác.",
-      "contract": "personal-experience-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/StudentActivityHistoryEndpoints.cs"
-    },
-    {
-      "id": "API-019",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/activities/{id}/participants",
-      "actualPath": "/api/activities/{id}/participants",
-      "title": "Đăng ký tham gia hoạt động",
-      "status": "COMPLETE",
-      "note": "Registration theo activity, kiểm tra publish/window/capacity/current eligibility và self identity; nguồn session dùng registration này. Không có registration riêng cho mỗi session.",
-      "contract": "activity-attendance-api.md",
-      "evidence": null
-    },
-    {
-      "id": "API-020",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/activities/{id}/check-in",
-      "actualPath": "/api/activities/{id}/check-in",
-      "title": "Điểm danh",
-      "status": "COMPLETE",
-      "note": "Body sessionId/challenge/location; QR 30 giây, cửa sổ và geofence; trả verification/recognition trung thực. Không nhận userId từ FE.",
-      "contract": "activity-attendance-api.md",
-      "evidence": null
-    },
-    {
-      "id": "API-021",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/activities/{id}/my-attendance",
-      "actualPath": "/api/activities/{id}/my-attendance",
-      "title": "Xem điểm danh của mình",
-      "status": "COMPLETE",
-      "note": "Xem attendance chính chủ; nguồn mới có session/version/method/contributionId/recognition. Legacy lịch ngày được giữ riêng.",
-      "contract": "activity-attendance-api.md",
-      "evidence": null
-    },
-    {
-      "id": "API-022",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/v1/declarations",
-      "actualPath": "/api/v1/declarations",
-      "title": "Khai báo ngoài CLB/+1",
-      "status": "COMPLETE",
-      "note": "Payload mới có semesterId/occurredAt/proposedAttributes/evidenceRefs, isOutsideClub=true và clubId=null; vào canonical ledger workflow. Không gửi payload legacy để làm luồng mới.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/DeclarationEndpoints.cs"
-    },
-    {
-      "id": "API-023",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v1/declarations/me",
-      "actualPath": "/api/v1/declarations/me",
-      "title": "Lịch sử khai báo",
-      "status": "COMPLETE",
-      "note": "Self normalized canonical declarations + legacy, SQL paging/dedup. Response đổi sang envelope items/page/pageSize/total/totalItems/totalPages; FE đọc items, không dùng array cũ.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/DeclarationEndpoints.cs"
-    },
-    {
-      "id": "API-024",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v1/declarations/{id}",
-      "actualPath": "/api/v1/declarations/{id}",
-      "title": "Chi tiết khai báo",
-      "status": "COMPLETE",
-      "note": "Canonical declaration trả detail giống contribution; kiểm tra author/assignment, có revisions/decisions và refs riêng tư.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/DeclarationEndpoints.cs"
-    },
-    {
-      "id": "API-025",
-      "actor": "Sinh viên",
-      "method": "PUT",
-      "proposedPath": "/api/v1/declarations/{id}",
-      "actualPath": "/api/v1/declarations/{id}",
-      "title": "Bổ sung khai báo",
-      "status": "COMPLETE",
-      "note": "Canonical declaration cần expectedVersion/proposedAttributes/evidenceRefs; evidenceDescription là message. Author revision; không sửa bản đã ghi điểm.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/DeclarationEndpoints.cs"
-    },
-    {
-      "id": "API-026",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v1/declarations/me/radar",
-      "actualPath": "/api/v1/declarations/me/radar",
-      "title": "Radar theo kỳ/tích lũy",
-      "status": "COMPLETE",
-      "note": "VERIFIED_NET_LEDGER theo PERIOD và CUMULATIVE; six radarAxes + plusOne, ERI/D/J/M và leader proof theo trụ cột; approved policy/version/asOf/ledgerRevision. Cumulative cần policy scope riêng, thiếu trả503.",
-      "contract": "experience-scoring-contract.md",
-      "evidence": "src/Services/AdminService/Services/StudentExperienceReadService.cs"
-    },
-    {
-      "id": "API-027",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v1/quests",
-      "actualPath": "/api/v1/quests",
-      "title": "Danh sách nhiệm vụ",
-      "status": "COMPLETE",
-      "note": "Catalog có criteria/version/targetPillar/eligibleActivityIds/policyVersion. Sinh viên mặc định nhận nhiệm vụ xếp theo trục thấp trước khi paging, lọc campus/kỳ/deadline/eligible sources; recommended=false đọc CATALOG. GET không tự seed.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Services/StudentQuestRecommendations.cs"
-    },
-    {
-      "id": "API-028",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v1/quests/me",
-      "actualPath": "/api/v1/quests/me",
-      "title": "Nhiệm vụ của mình",
-      "status": "COMPLETE",
-      "note": "Self participation, linkedContributionIds và progress derived từ net verified proof; revoked/cancelled =>REQUIRES_REVALIDATION, nguồn lỗi =>UNAVAILABLE/progressAvailable=false. Completion history được giữ.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Services/StudentQuestService.cs"
-    },
-    {
-      "id": "API-029",
-      "actor": "Sinh viên",
-      "method": "GET",
-      "proposedPath": "/api/v1/quests/{id}",
-      "actualPath": "/api/v1/quests/{id}",
-      "title": "Chi tiết nhiệm vụ",
-      "status": "COMPLETE",
-      "note": "Detail có frozen criteria/policy/version/counts, không roster; draft chỉ backoffice hoặc người đã tham gia được đọc. completedCount là lịch sử đã ghi, rewardXp chỉ legacy display.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/QuestEndpoints.cs"
-    },
-    {
-      "id": "API-030",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/v1/quests/{id}/join",
-      "actualPath": "/api/v1/quests/{id}/join",
-      "title": "Chọn nhiệm vụ",
-      "status": "COMPLETE",
-      "note": "Self join, canonical identity, approved matching criteria, campus/deadline/source eligibility, freeze criteria, chống trùng và retry. Đã đăng ký nguồn vẫn join khi full/closed; nguồn phải upcoming; đổi quest khi xử lý =>409.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/QuestEndpoints.cs"
-    },
-    {
-      "id": "API-031",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/v1/quests/{id}/complete",
-      "actualPath": "/api/v1/quests/{id}/complete",
-      "title": "Hoàn thành nhiệm vụ — siết API cũ",
-      "status": "COMPLETE",
-      "note": "Self-only, phải join, expectedVersion participation, verified eligible proof đúng tác giả/kỳ/source/pillar. Kiểm tra live cancellation trước replay, completion history append-only, không mint thêm điểm. note tối đa500.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/QuestEndpoints.cs"
-    },
-    {
-      "id": "API-032",
-      "actor": "Sinh viên",
-      "method": "POST",
-      "proposedPath": "/api/clubs/{id}/join",
-      "actualPath": "/api/clubs/{id}/join",
-      "title": "Xin gia nhập CLB",
-      "status": "COMPLETE",
-      "note": "Join bằng canonical profile Auth, active/unlocked/campus, consent và category info. Identity từ body không ghi đè Auth; transaction/unique/retry, key tùy chọn. Auth outage503.",
-      "contract": "my-clubs-membership-api.md",
-      "evidence": "src/Services/ClubService/Endpoints/MembershipEndpoints.cs"
-    },
-    {
-      "id": "API-033",
-      "actor": "Quản lý CLB",
-      "method": "PATCH",
-      "proposedPath": "/api/clubs/{clubId}/public-profile",
-      "actualPath": "/api/clubs/{clubId}/public-profile",
-      "title": "Sửa hồ sơ CLB công bố",
-      "status": "PARTIAL",
-      "note": "PATCH text/category/schedule và CAS đã có. GET /api/clubs/{id} của manager trả ClubFullResponse chưa có version (public DTO có version); thiếu đường đọc version cho manager để mở form/lưu lần đầu. FE chờ bổ sung read DTO, không tự tạo expectedVersion.",
-      "contract": "club-public-profile-api.md",
-      "evidence": "src/Services/ClubService/Endpoints/ClubPublicProfileEndpoints.cs"
-    },
-    {
-      "id": "API-034",
-      "actor": "Quản lý CLB",
-      "method": "POST",
-      "proposedPath": "/api/activities/{activityId}/sessions",
-      "actualPath": "/api/activities/{activityId}/sessions",
-      "title": "Tạo buổi/lịch lặp",
-      "status": "COMPLETE",
-      "note": "Tạo buổi đơn/lịch lặp theo giờ Việt Nam, ngày loại trừ, occurrence ID ổn định; dời cửa sổ điểm danh theo từng buổi; chống tạo lặp và kiểm tra version.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivitySessionEndpoints.cs"
-    },
-    {
-      "id": "API-035",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/activities/{activityId}/sessions",
-      "actualPath": "/api/activities/{activityId}/sessions",
-      "title": "Danh sách buổi",
-      "status": "COMPLETE",
-      "note": "Trả các buổi cùng version, semester, attendancePolicy và snapshot nguồn điểm.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivitySessionEndpoints.cs"
-    },
-    {
-      "id": "API-036",
-      "actor": "Quản lý CLB",
-      "method": "PATCH",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}",
-      "title": "Sửa buổi",
-      "status": "COMPLETE",
-      "note": "Sửa buổi đúng quyền và version; bảo vệ buổi đã có lịch sử điểm danh.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivitySessionEndpoints.cs"
-    },
-    {
-      "id": "API-037",
-      "actor": "Quản lý CLB",
-      "method": "POST",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}/close",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}/close",
-      "title": "Đóng buổi",
-      "status": "COMPLETE",
-      "note": "Đóng buổi theo trạng thái hợp lệ; lưu lịch sử, version và lý do.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivitySessionEndpoints.cs"
-    },
-    {
-      "id": "API-038",
-      "actor": "Quản lý CLB",
-      "method": "POST",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}/cancel",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}/cancel",
-      "title": "Hủy buổi",
-      "status": "COMPLETE",
-      "note": "Hủy có lý do/audit/outbox; thu hồi attendance và đảo điểm bằng bút toán mới.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivitySessionEndpoints.cs"
-    },
-    {
-      "id": "API-039",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}/attendance-challenge",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}/attendance-challenge",
-      "title": "Phát QR theo buổi",
-      "status": "COMPLETE",
-      "note": "QR ký HMAC, đổi mỗi 30 giây, ràng buộc activity/session/version; trả serverTime và hết hạn; chỉ manager đúng CLB được phát.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivitySessionEndpoints.cs"
-    },
-    {
-      "id": "API-040",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/clubs/{clubId}/semester-plans/{semesterId}",
-      "actualPath": "/api/clubs/{clubId}/semester-plans/{semesterId}",
-      "title": "Đọc kế hoạch kỳ",
-      "status": "COMPLETE",
-      "note": "Đọc kế hoạch kỳ đúng scope, canonical semester code và version.",
-      "contract": "club-semester-plan-report-api.md",
-      "evidence": "src/Services/ClubService/Endpoints/ClubSemesterPlanEndpoints.cs"
-    },
-    {
-      "id": "API-041",
-      "actor": "Quản lý CLB",
-      "method": "PUT",
-      "proposedPath": "/api/clubs/{clubId}/semester-plans/{semesterId}",
-      "actualPath": "/api/clubs/{clubId}/semester-plans/{semesterId}",
-      "title": "Lập/sửa kế hoạch kỳ",
-      "status": "COMPLETE",
-      "note": "Một kế hoạch hiện hành cho mỗi CLB/kỳ; mục tiêu không âm; CAS/version, revision history và idempotency.",
-      "contract": "club-semester-plan-report-api.md",
-      "evidence": "src/Services/ClubService/Endpoints/ClubSemesterPlanEndpoints.cs"
-    },
-    {
-      "id": "API-042",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/clubs/{clubId}/experience-statistics",
-      "actualPath": "/api/clubs/{clubId}/experience-statistics",
-      "title": "Thống kê trải nghiệm CLB",
-      "status": "COMPLETE",
-      "note": "Tính toàn dữ liệu: hoạt động/buổi, người duy nhất, lần đầu toàn dự án, vai trò hiệu lực, net raw points từng trụ cột và tiến độ mục tiêu.",
-      "contract": "club-semester-plan-report-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/ClubExperienceStatisticsEndpoints.cs"
-    },
-    {
-      "id": "API-043",
-      "actor": "Quản lý CLB",
-      "method": "POST",
-      "proposedPath": "/api/clubs/{clubId}/experience-reports",
-      "actualPath": "/api/clubs/{clubId}/experience-reports",
-      "title": "Tạo báo cáo PDF trải nghiệm",
-      "status": "COMPLETE",
-      "note": "Chốt snapshot thống kê đã đối chiếu planVersion/ledgerRevision; trả 202 và job PDF lưu trong DB.",
-      "contract": "club-semester-plan-report-api.md",
-      "evidence": "src/Services/ExportService/Endpoints/ClubExperienceReportEndpoints.cs"
-    },
-    {
-      "id": "API-044",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/clubs/{clubId}/experience-reports/{reportId}/download",
-      "actualPath": "/api/clubs/{clubId}/experience-reports/{reportId}/download",
-      "title": "Tải PDF trải nghiệm",
-      "status": "COMPLETE",
-      "note": "Tải PDF thực tế sau khi hoàn thành; private/no-store; kiểm tra quyền quản lý hiện tại, kể cả file đã tạo trước đó.",
-      "contract": "club-semester-plan-report-api.md",
-      "evidence": "src/Services/ExportService/Endpoints/ClubExperienceReportEndpoints.cs"
-    },
-    {
-      "id": "API-045",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/activities",
-      "actualPath": "/api/activities",
-      "title": "Danh sách quản lý hoạt động",
-      "status": "COMPLETE",
-      "note": "Dữ liệu quản lý có publication/semester/version/capacity/cấu hình điểm và điểm danh; người không quản lý chỉ nhận dữ liệu cá nhân được phép.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivityEndpoints.cs"
-    },
-    {
-      "id": "API-046",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/activities/{id}",
-      "actualPath": "/api/activities/{id}",
-      "title": "Chi tiết quản lý hoạt động",
-      "status": "COMPLETE",
-      "note": "Chi tiết gồm cấu hình nguồn đã công bố; không lộ danh sách người khác cho thành viên thông thường. Các occurrence được lấy qua API-035.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivityEndpoints.cs"
-    },
-    {
-      "id": "API-047",
-      "actor": "Quản lý CLB",
-      "method": "POST",
-      "proposedPath": "/api/activities",
-      "actualPath": "/api/activities",
-      "title": "Tạo hoạt động",
-      "status": "COMPLETE",
-      "note": "Tạo draft đúng CLB, lấy tên CLB từ authority; giữ cấu hình đăng ký, semester và điểm để công bố sau khi có policy hợp lệ.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivityEndpoints.cs"
-    },
-    {
-      "id": "API-048",
-      "actor": "Quản lý CLB",
-      "method": "PUT",
-      "proposedPath": "/api/activities/{id}",
-      "actualPath": "/api/activities/{id}",
-      "title": "Sửa/công bố/đóng hoạt động",
-      "status": "COMPLETE",
-      "note": "UPDATE/PUBLISH/CLOSE có version và idempotency; PUBLISH yêu cầu policy đã duyệt và snapshot; bảo vệ dữ liệu đã có lịch sử.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivityLifecycleEndpoints.cs"
-    },
-    {
-      "id": "API-049",
-      "actor": "Quản lý CLB",
-      "method": "DELETE",
-      "proposedPath": "/api/activities/{id}",
-      "actualPath": "/api/activities/{id}",
-      "title": "Hủy hoạt động",
-      "status": "COMPLETE",
-      "note": "Hủy hoạt động mới bằng expectedVersion/reason/key; giữ lịch sử, hủy các buổi và phát sự kiện đảo điểm.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivityTransitionEndpoints.cs"
-    },
-    {
-      "id": "API-050",
-      "actor": "Quản lý CLB",
-      "method": "PATCH",
-      "proposedPath": "/api/activities/{id}/complete",
-      "actualPath": "/api/activities/{id}/complete",
-      "title": "Đánh dấu hoạt động hoàn thành",
-      "status": "COMPLETE",
-      "note": "Hoàn thành khi hoạt động kết thúc và các buổi đã được xử lý; version, lý do, audit; không tự cộng điểm.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/ActivityTransitionEndpoints.cs"
-    },
-    {
-      "id": "API-051",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/clubs/{clubId}/members",
-      "actualPath": "/api/clubs/{clubId}/members",
-      "title": "Danh sách thành viên",
-      "status": "COMPLETE",
-      "note": "Hồ sơ hiện hành lấy từ Auth; applicationSnapshot được tách riêng. Thống kê không khả dụng trả available=false và số liệu null.",
-      "contract": "self-profile-sync-api.md",
-      "evidence": "src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs"
-    },
-    {
-      "id": "API-052",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/clubs/{clubId}/members/{memberId}",
-      "actualPath": "/api/clubs/{clubId}/members/{memberId}",
-      "title": "Chi tiết thành viên",
-      "status": "COMPLETE",
-      "note": "Hồ sơ hiện hành, hồ sơ gia nhập lịch sử và lịch sử tham gia phân trang; cùng quyền quản lý CLB.",
-      "contract": "self-profile-sync-api.md",
-      "evidence": "src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs"
-    },
-    {
-      "id": "API-053",
-      "actor": "Quản lý CLB",
-      "method": "PUT",
-      "proposedPath": "/api/clubs/{clubId}/members/{memberId}",
-      "actualPath": "/api/clubs/{clubId}/members/{memberId}",
-      "title": "Chặn sửa hồ sơ cá nhân người khác",
-      "status": "COMPLETE",
-      "note": "Giữ route tương thích và trả 403 `PERSONAL_PROFILE_SELF_ONLY` khi yêu cầu sửa hồ sơ cá nhân người khác. Tự sửa dùng canonical self profile.",
-      "contract": "existing-api-hardening.md",
-      "evidence": "src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs"
-    },
-    {
-      "id": "API-054",
-      "actor": "Quản lý CLB",
-      "method": "GET",
-      "proposedPath": "/api/clubs/{clubId}/activities/{activityId}/attendance",
-      "actualPath": "/api/clubs/{clubId}/activities/{activityId}/attendance",
-      "title": "Danh sách điểm danh quản lý",
-      "status": "COMPLETE",
-      "note": "Trả dữ liệu theo session, verification/recognition/version và nguồn; kiểm tra đúng CLB/hoạt động.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/SessionAttendanceManagement.cs"
-    },
-    {
-      "id": "API-055",
-      "actor": "Quản lý CLB",
-      "method": "PUT",
-      "proposedPath": "/api/clubs/{clubId}/activities/{activityId}/attendance/{memberId}",
-      "actualPath": "/api/clubs/{clubId}/activities/{activityId}/attendance/{memberId}",
-      "title": "Xác nhận điểm danh từng người",
-      "status": "COMPLETE",
-      "note": "Xác nhận theo buổi với version/lý do/minh chứng, capability attendance.verify và no-self; ghi outbox cho ledger.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/SessionAttendanceManagement.cs"
-    },
-    {
-      "id": "API-056",
-      "actor": "Quản lý CLB",
-      "method": "PUT",
-      "proposedPath": "/api/clubs/{clubId}/activities/{activityId}/attendance",
-      "actualPath": "/api/clubs/{clubId}/activities/{activityId}/attendance",
-      "title": "Xác nhận điểm danh hàng loạt",
-      "status": "COMPLETE",
-      "note": "Kiểm tra toàn bộ batch trước khi ghi, gồm no-self từng người; source/session/row versions và cùng giao dịch.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/ActivityService/Endpoints/SessionAttendanceManagement.cs"
-    },
-    {
-      "id": "API-057",
-      "actor": "Người xác minh",
-      "method": "GET",
-      "proposedPath": "/api/verifications/me/queue",
-      "actualPath": "/api/verifications/me/queue",
-      "title": "Hàng đợi được phân công",
-      "status": "PARTIAL",
-      "note": "Queue đúng assignment/no-self cho contribution/upgrade/manual; hiện chỉ clubId/page/pageSize, pending states. Chưa hỗ trợ sourceType/status và total riêng cho 3 nhóm; total chỉ đếm items contribution.",
-      "contract": "internal-accounts-verification-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-058",
-      "actor": "Người xác minh",
-      "method": "GET",
-      "proposedPath": "/api/activities/{activityId}/contributions",
-      "actualPath": "/api/activities/{activityId}/contributions",
-      "title": "Danh sách đóng góp CLB cần duyệt",
-      "status": "COMPLETE",
-      "note": "Paged contribution đúng activity và CLB được phân công; kiểm tra scope kể cả danh sách rỗng.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-059",
-      "actor": "Người xác minh",
-      "method": "POST",
-      "proposedPath": "/api/contributions/{id}/reviews",
-      "actualPath": "/api/contributions/{id}/reviews",
-      "title": "Duyệt đóng góp CLB",
-      "status": "COMPLETE",
-      "note": "ASSIGNED review APPROVE/REJECT/REQUEST_REVISION; version/reason/verifiedAttributes; decision/revision/ledger/outbox nguyên tử; không tự duyệt.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-060",
-      "actor": "Người xác minh",
-      "method": "POST",
-      "proposedPath": "/api/contributions/{id}/role-upgrade-requests/{requestId}/reviews",
-      "actualPath": "/api/contributions/{id}/role-upgrade-requests/{requestId}/reviews",
-      "title": "Duyệt nâng vai trò/kết quả",
-      "status": "COMPLETE",
-      "note": "Duyệt upgrade theo version của upgrade request; giữ blueprint/policy, ghi delta; reject giữ điểm cũ.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-061",
-      "actor": "Người xác minh",
-      "method": "GET",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}/manual-attendance-requests",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}/manual-attendance-requests",
-      "title": "Danh sách đề nghị điểm danh",
-      "status": "COMPLETE",
-      "note": "List theo activity/session: reviewer đọc phạm vi được giao, author chỉ đọc request của mình; paging.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/ManualAttendanceEndpoints.cs"
-    },
-    {
-      "id": "API-062",
-      "actor": "Người xác minh",
-      "method": "POST",
-      "proposedPath": "/api/activities/{activityId}/sessions/{sessionId}/manual-attendance-requests/{requestId}/review",
-      "actualPath": "/api/activities/{activityId}/sessions/{sessionId}/manual-attendance-requests/{requestId}/review",
-      "title": "Duyệt điểm danh thay thế",
-      "status": "COMPLETE",
-      "note": "Review manual có assignment/no-self/version/reason; APPROVED_PENDING chờ source confirmation rồi recognition receipt.",
-      "contract": "activity-attendance-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/ManualAttendanceEndpoints.cs"
-    },
-    {
-      "id": "API-063",
-      "actor": "Người xác minh",
-      "method": "GET",
-      "proposedPath": "/api/v1/student-affairs/declarations",
-      "actualPath": "/api/v1/student-affairs/declarations",
-      "title": "Hàng đợi khai báo ngoài CLB/+1",
-      "status": "PARTIAL",
-      "note": "Adapter queue canonical đã có và lọc assignment/no-self; còn lẫn DTO/hồ sơ legacy, nhánh staff đọc khai báo outside legacy không theo assignment mới. FE ưu tiên queue canonical, nhận diện legacy rõ.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/DeclarationEndpoints.cs"
-    },
-    {
-      "id": "API-064",
-      "actor": "Người xác minh",
-      "method": "POST",
-      "proposedPath": "/api/v1/student-affairs/declarations/{id}/review",
-      "actualPath": "/api/v1/student-affairs/declarations/{id}/review",
-      "title": "Duyệt khai báo ngoài CLB/+1",
-      "status": "PARTIAL",
-      "note": "Review canonical đã version/vector/assignment/ledger/outbox. Nhánh legacy outside của Admin/CTSV vẫn dùng review/scoring cũ; không đưa nhánh này vào luồng điểm verified mới.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/DeclarationEndpoints.cs"
-    },
-    {
-      "id": "API-065",
-      "actor": "Quản trị hệ thống",
-      "method": "GET",
-      "proposedPath": "/api/verifier-assignments",
-      "actualPath": "/api/verification-assignments",
-      "title": "Xem phân công xác minh",
-      "status": "COMPLETE",
-      "note": "Xem assignment admin; route thực tế /api/verification-assignments, lọc userId/clubId.",
-      "contract": "internal-accounts-verification-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerificationAssignmentEndpoints.cs"
-    },
-    {
-      "id": "API-066",
-      "actor": "Quản trị hệ thống",
-      "method": "POST",
-      "proposedPath": "/api/verifier-assignments",
-      "actualPath": "/api/verification-assignments",
-      "title": "Cấp phân công xác minh",
-      "status": "COMPLETE",
-      "note": "Cấp assignment cho account active/unlocked, sourceType CLUB/EXTERNAL/REAL_WORLD và capabilities, time/reason/key; resolve account từ Auth.",
-      "contract": "internal-accounts-verification-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerificationAssignmentEndpoints.cs"
-    },
-    {
-      "id": "API-067",
-      "actor": "Quản trị hệ thống",
-      "method": "PATCH",
-      "proposedPath": "/api/verifier-assignments/{assignmentId}",
-      "actualPath": "/api/verification-assignments/{assignmentId}",
-      "title": "Sửa/thu hồi phân công",
-      "status": "COMPLETE",
-      "note": "Sửa/thu hồi theo expectedVersion/isRevoked/reason, recheck tại review; không dùng path đề xuất /api/verifier-assignments.",
-      "contract": "internal-accounts-verification-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerificationAssignmentEndpoints.cs"
-    },
-    {
-      "id": "API-068",
-      "actor": "Quản trị hệ thống",
-      "method": "POST",
-      "proposedPath": "/api/contributions/{id}/adjustments",
-      "actualPath": "/api/contributions/{id}/adjustments",
-      "title": "Điều chỉnh/thu hồi điểm",
-      "status": "COMPLETE",
-      "note": "CORRECT/REVOKE có capability/no-self/version/reason; append effect, không sửa ledger cũ hoặc phục hồi nguồn đã hủy.",
-      "contract": "verified-contributions-api.md",
-      "evidence": "src/Services/AdminService/Endpoints/VerifiedContributionEndpoints.cs"
-    },
-    {
-      "id": "API-069",
-      "actor": "Quản trị hệ thống",
-      "method": "GET",
-      "proposedPath": "/api/v1/student-affairs/benchmarks",
-      "actualPath": "/api/v1/student-affairs/benchmarks",
-      "title": "Danh sách chính sách điểm",
-      "status": "PARTIAL",
-      "note": "List benchmark có sẵn; DTO legacy chưa có đủ approvalStatus/version/formula/precision/cumulative metadata. Đọc policy snapshot qua route bổ sung, không suy từ isActive.",
-      "contract": "experience-scoring-contract.md",
-      "evidence": "src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs"
-    },
-    {
-      "id": "API-070",
-      "actor": "Quản trị hệ thống",
-      "method": "GET",
-      "proposedPath": "/api/v1/student-affairs/benchmarks/active",
-      "actualPath": "/api/v1/student-affairs/benchmarks/active",
-      "title": "Chính sách đang hiệu lực",
-      "status": "PARTIAL",
-      "note": "active vẫn có thể tự tạo fallback FA26 khi DB trống và không đồng nghĩa APPROVED. FE không dùng response này làm bằng chứng policy đã được duyệt.",
-      "contract": "experience-scoring-contract.md",
-      "evidence": "src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs"
-    },
-    {
-      "id": "API-071",
-      "actor": "Quản trị hệ thống",
-      "method": "POST",
-      "proposedPath": "/api/v1/student-affairs/benchmarks",
-      "actualPath": "/api/v1/student-affairs/benchmarks",
-      "title": "Tạo chính sách điểm",
-      "status": "PARTIAL",
-      "note": "Create benchmark draft và approval workflow đã có; /approval hỗ trợ scope PERIOD/CUMULATIVE, effectiveAt và snapshot version. DTO create benchmark legacy chưa thể hiện đầy đủ cấu hình P01–P06/formula/precision và metadata phê duyệt; giữ PARTIAL cho operation quản trị này.",
-      "contract": "experience-scoring-contract.md",
-      "evidence": "src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs"
-    },
-    {
-      "id": "API-072",
-      "actor": "Quản trị hệ thống",
-      "method": "PUT",
-      "proposedPath": "/api/v1/student-affairs/benchmarks/{id}",
-      "actualPath": "/api/v1/student-affairs/benchmarks/{id}",
-      "title": "Cập nhật chính sách điểm",
-      "status": "PARTIAL",
-      "note": "Đã chặn update approved/locked, bump version; có draft mới giữ approved snapshot cũ. DTO update legacy chưa có CAS expectedVersion và đầy đủ chính sách tích lũy/effective.",
-      "contract": "experience-scoring-contract.md",
-      "evidence": "src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs"
-    },
-    {
-      "id": "API-073",
-      "actor": "Quản trị hệ thống",
-      "method": "POST",
-      "proposedPath": "/api/v1/student-affairs/benchmarks/{id}/lock",
-      "actualPath": "/api/v1/student-affairs/benchmarks/{id}/lock",
-      "title": "Khóa chính sách kỳ",
-      "status": "PARTIAL",
-      "note": "Lock/version có sẵn; isLocked chưa thay approval và snapshot ledger kỳ. Dùng /approval cho approved policy, không dùng lock để cấp quyền ghi điểm.",
-      "contract": "experience-scoring-contract.md",
-      "evidence": "src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs"
-    },
-    {
-      "id": "API-074",
-      "actor": "Quản trị hệ thống",
-      "method": "POST",
-      "proposedPath": "/api/clubs/{id}/managers",
-      "actualPath": "/api/clubs/{id}/managers",
-      "title": "Gán chủ nhiệm CLB",
-      "status": "PARTIAL",
-      "note": "Constraint/outbox có sẵn; AssignManager vẫn dùng ManagerUserId/ManagerName từ request, chưa resolve account active/unlocked/current name từ Auth.",
-      "contract": "existing-api-hardening.md",
-      "evidence": "src/Services/ClubService/Endpoints/ManagerEndpoints.cs"
-    }
-  ],
-  "supplemental": [
-    {
-      "id": "SUP-01",
-      "method": "POST",
-      "actualPath": "/api/media/upload-intents",
-      "status": "COMPLETE",
-      "note": "Club/activity public image intent; R2 thật cần cấu hình. Kind chỉ club-logo/club-cover/activity-cover, không avatar/cover cá nhân.",
-      "contract": "public-image-api.md"
-    },
-    {
-      "id": "SUP-02",
-      "method": "PUT",
-      "actualPath": "/api/clubs/{clubId}/public-images",
-      "status": "PARTIAL",
-      "note": "Write/issued-object verify đã có; cần expectedVersion nhưng manager detail GET chưa trả version, cùng vướng mắc API-033. Không mở Save trước khi BE bổ sung read DTO.",
-      "contract": "public-image-api.md"
-    },
-    {
-      "id": "SUP-03",
-      "method": "PUT",
-      "actualPath": "/api/activities/{activityId}/cover-image",
-      "status": "COMPLETE",
-      "note": "Cover activity đúng quyền/version; giữ blueprint và lịch sử.",
-      "contract": "public-image-api.md"
-    },
-    {
-      "id": "SUP-04",
-      "method": "POST",
-      "actualPath": "/api/clubs/me/membership-applications/{applicationId}/withdraw",
-      "status": "NOT_IMPLEMENTED",
-      "note": "Chưa có withdrawal; hỗ trợ ngoài tổng 74, FE không giả thành công.",
-      "contract": "my-clubs-membership-api.md"
-    },
-    {
-      "id": "SUP-05",
-      "method": "GET",
-      "actualPath": "/api/clubs/{clubId}/member-roles",
-      "status": "SKIPPED",
-      "note": "Chưa có generic catalog; MVP dùng owner/member tối thiểu, không bắt buộc mở đủ chức vụ.",
-      "contract": "club-member-roles-api.md"
-    },
-    {
-      "id": "SUP-06",
-      "method": "PATCH",
-      "actualPath": "/api/clubs/{clubId}/members/{membershipId}/role",
-      "status": "SKIPPED",
-      "note": "Chưa có generic role PATCH; không gọi proposal. Assignment verifier là quyền riêng.",
-      "contract": "club-member-roles-api.md"
-    },
-    {
-      "id": "ADD-01",
-      "method": "GET",
-      "actualPath": "/api/club-experience-reports/{reportId}",
-      "status": "COMPLETE",
-      "note": "Theo dõi job Pending/Processing/Completed/Failed và downloadUrl.",
-      "contract": "club-semester-plan-report-api.md"
-    },
-    {
-      "id": "ADD-02",
-      "method": "GET",
-      "actualPath": "/api/club-experience-reports/{reportId}/download",
-      "status": "COMPLETE",
-      "note": "Alias tải PDF theo reportId; current owner, private/no-store.",
-      "contract": "club-semester-plan-report-api.md"
-    },
-    {
-      "id": "ADD-03",
-      "method": "GET",
-      "actualPath": "/api/v1/student-affairs/benchmarks/{id}/policy",
-      "status": "COMPLETE",
-      "note": "Đọc benchmarkId/version/approvalStatus/versions (metadata approved policy). Không trả full snapshot/coefficients; không đọc /active để suy APPROVED.",
-      "contract": "experience-scoring-contract.md"
-    },
-    {
-      "id": "ADD-04",
-      "method": "POST",
-      "actualPath": "/api/v1/student-affairs/benchmarks/{id}/approval",
-      "status": "COMPLETE",
-      "note": "Technical approval snapshot có scope PERIOD/CUMULATIVE và effectiveAt; expectedVersion/environment/approvalBasis/parametersP01ThroughP06Agreed. Cumulative reader đã triển khai; vẫn cần cấu hình P06 được phê duyệt thật.",
-      "contract": "experience-scoring-contract.md"
-    },
-    {
-      "id": "ADD-05",
-      "method": "POST",
-      "actualPath": "/api/v1/student-affairs/benchmarks/{id}/draft",
-      "status": "COMPLETE",
-      "note": "Tạo draft tiếp theo, giữ approved snapshot cũ; version/reason/key.",
-      "contract": "experience-scoring-contract.md"
-    }
-  ],
   "verification": {
-    "date": "2026-10-14",
-    "releaseBuild": "PASS, warnings-as-errors, 0 warnings/0 errors",
-    "format": "All CI format gates passed",
-    "efModels": "8 services match migrations",
-    "tests": [
+    "totals": {
+      "total": 914,
+      "executed": 914,
+      "passed": 914,
+      "failed": 0,
+      "notExecuted": 0
+    },
+    "testAssemblies": [
       {
-        "path": "TestResults/StudentFinal_2026-10-14/ADMIN_LAPTOP-NQKMCUNV_2026-10-14_09_08_33.trx",
+        "assembly": "clubreporthub.tests.dll",
         "total": 123,
+        "executed": 123,
         "passed": 123,
         "failed": 0,
         "notExecuted": 0
       },
       {
-        "path": "TestResults/StudentFinal_2026-10-14/ADMIN_LAPTOP-NQKMCUNV_2026-10-14_09_08_53.trx",
+        "assembly": "adminservice.integrationtests.dll",
         "total": 85,
+        "executed": 85,
         "passed": 85,
         "failed": 0,
         "notExecuted": 0
       },
       {
-        "path": "TestResults/StudentFinal_2026-10-14/ADMIN_LAPTOP-NQKMCUNV_2026-10-14_09_09_29.trx",
-        "total": 532,
-        "passed": 532,
+        "assembly": "backend.stabilizationtests.dll",
+        "total": 706,
+        "executed": 706,
+        "passed": 706,
         "failed": 0,
         "notExecuted": 0
       }
     ],
-    "database": "Task-owned isolated SQL Server LocalDB; no production migration applied",
-    "frontend": "No FE changes in this implementation"
+    "checks": [
+      {
+        "name": "format",
+        "exitCode": 0,
+        "seconds": 11.53
+      },
+      {
+        "name": "format-verify",
+        "exitCode": 0,
+        "seconds": 10.6
+      },
+      {
+        "name": "release-build",
+        "exitCode": 0,
+        "seconds": 9.27
+      },
+      {
+        "name": "full-release-tests",
+        "exitCode": 0,
+        "seconds": 234.78
+      },
+      {
+        "name": "diff-check",
+        "exitCode": 0,
+        "seconds": 0.1
+      }
+    ],
+    "ciStyleModelChecks": [
+      {
+        "name": "style-ActivityService",
+        "exitCode": 0,
+        "seconds": 14.99
+      },
+      {
+        "name": "style-AdminService",
+        "exitCode": 0,
+        "seconds": 17.16
+      },
+      {
+        "name": "style-AuthService",
+        "exitCode": 0,
+        "seconds": 13.53
+      },
+      {
+        "name": "style-ClubService",
+        "exitCode": 0,
+        "seconds": 15.05
+      },
+      {
+        "name": "style-AdminService.IntegrationTests",
+        "exitCode": 0,
+        "seconds": 12.09
+      },
+      {
+        "name": "style-Backend.StabilizationTests",
+        "exitCode": 0,
+        "seconds": 31.08
+      },
+      {
+        "name": "style-shared-ci",
+        "exitCode": 0,
+        "seconds": 9.64
+      },
+      {
+        "name": "model-ActivityService",
+        "exitCode": 0,
+        "seconds": 4.65
+      },
+      {
+        "name": "model-AdminService",
+        "exitCode": 0,
+        "seconds": 4.99
+      },
+      {
+        "name": "model-AuthService",
+        "exitCode": 0,
+        "seconds": 4.91
+      },
+      {
+        "name": "model-ClubService",
+        "exitCode": 0,
+        "seconds": 4.48
+      },
+      {
+        "name": "model-ReportService",
+        "exitCode": 0,
+        "seconds": 6.31
+      },
+      {
+        "name": "model-FinanceService",
+        "exitCode": 0,
+        "seconds": 5.91
+      },
+      {
+        "name": "model-ExportService",
+        "exitCode": 0,
+        "seconds": 6.83
+      },
+      {
+        "name": "model-NotificationService",
+        "exitCode": 0,
+        "seconds": 4.95
+      }
+    ],
+    "coverageCollected": true,
+    "sql": "Configured SQL Server disposable databases; prior-schema migrations and CAS including activity resources; HTTP and YARP route-selection tests.",
+    "proofDirectory": "C:\\Users\\ADMIN\\Downloads\\DOAN\\.contract-audit\\be-work-2026-10-21\\resources-final-results"
+  },
+  "verificationProvenance": "Imported existing BE proof at pinned commit; no new BE suite or FE E2E run for this documentation synchronization.",
+  "liveAcceptance": "NOT_RUN",
+  "historicalInventory": {
+    "path": "history/be-api-status-2026-10-14.json",
+    "date": "2026-10-14",
+    "scope": "74 operations from the 2026-10-12 pending inventory; aliases counted once"
   }
 }

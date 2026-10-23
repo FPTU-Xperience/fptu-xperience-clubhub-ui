@@ -1,5 +1,26 @@
 # Contract hoạt động, buổi lặp và điểm danh — 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: BE attendance/session source; action attendance is a separate reviewed claim
+
+Backend Progress: PARTIAL
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#actions).
+
+**Đã có BE:** Buổi lặp, registration, QR/self attendance hiện có; thêm attendance-claims và verify cho action ATTENDANCE, có quyền độc lập.
+
+**Chưa hoàn thành / giới hạn:** Claim không phải QR check-in, không tạo ActivityAttendance hoặc điểm qua legacy; điểm action/final report đang tạm hoãn.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Contract hoạt động, buổi lặp và điểm danh — 2026-10-12
+
 <!-- BE_STATUS_2026_10_14_START -->
 ## Trạng thái BE hiện hành — 14/10/2026
 
@@ -86,3 +107,5 @@ Bulk attendance PUT cũ giữ cho người có quyền; phải kiểm tra từng
 QR tại ranh giới30s/opensAt/closesAt; server clock; cùng token nhiều người; token sai/hết hạn; đủ/thiếu location và rìa geofence; từ chối GPS→manual; online; unrelated club/revoked permission; duplicate race/retry; QR+manual cùng nguồn; session lặp không lẫn buổi; hủy hoạt động; restart giữ attendance/history.
 
 Đo tải API danh sách và check-in với số tài khoản/buổi/request/concurrency/dữ liệu được ghi rõ; báo latency p50/p95/p99, throughput, tỷ lệ lỗi và số duplicate/ledger net. Không tự nhận ngưỡng SLA chưa có trong phiếu. Kiểm tra toàn vẹn DB sau tải, không chỉ đo HTTP200.
+
+</details>

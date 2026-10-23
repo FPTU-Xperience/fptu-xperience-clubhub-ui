@@ -2,11 +2,32 @@
 
 Implement Status: Done
 
-Status Scope: Documentation: regenerated declaration inventory, not backend feature completion
+Status Scope: Documentation: preserved 13/10 declaration snapshot; not regenerated current inventory
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Backend Progress: HISTORICAL_INVENTORY
 
-Source Evidence: scripts/audit-api-contracts.mjs was executed against current source: 95 wrappers, 87 declared, 2 composed, 6 absent, 0 unresolved wrappers. Unresolved helper groups remain listed explicitly; no handler/deployment sign-off.
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#existing).
+
+**Đã có BE:** Giữ nguyên inventory facade cũ làm bằng chứng lịch sử; trạng thái BE mới dùng bảng hiện hành và manifest 40 operation.
+
+**Chưa hoàn thành / giới hạn:** Không dùng số 95 wrappers/6 absent trong bản cũ như số liệu BE hiện tại; chưa chạy lại generator trên FE main.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# FE facade / BE declaration inventory — 2026-10-13
+
+Historical Implement Status: Done
+
+Historical Status Scope: Documentation: regenerated declaration inventory, not backend feature completion
+
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Historical Source Evidence: scripts/audit-api-contracts.mjs was executed against current source: 95 wrappers, 87 declared, 2 composed, 6 absent, 0 unresolved wrappers. Unresolved helper groups remain listed explicitly; no handler/deployment sign-off.
 
 Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f617bd5144ab1b1a6cd0e74983983a4d`; remote comparison is a separate check recorded in the lifecycle audit; this generator does not fetch or verify remote main. This inventories declarations, not handler reachability, DTO compatibility, authorization or deployed health. Report submodule prefix is explicitly resolved from ReportEndpoints.cs. Unresolved group declarations: 17; retained below for manual review.
 
@@ -129,3 +150,5 @@ Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f
 - `src\Services\AdminService\Endpoints\QuestEndpoints.cs:group:/{id}`
 - `src\Services\AdminService\Endpoints\QuestEndpoints.cs:group:/{id}/join`
 - `src\Services\AdminService\Endpoints\QuestEndpoints.cs:group:/{id}/complete`
+
+</details>

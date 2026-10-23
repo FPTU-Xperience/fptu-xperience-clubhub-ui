@@ -1,3 +1,24 @@
+# Lời mời thành viên — giữ tương thích — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE roster-backed invitation flow implemented; delegated governance/live delivery incomplete
+
+Backend Progress: PARTIAL_CORE_SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#roster).
+
+**Đã có BE:** invitation-semesters, eligible-members, import roster và kiểm tra lại identity/revision ở mời/consent/duyệt đã có; consent vẫn Pending đến khi quản lý duyệt; outbox đúng recipient.
+
+**Chưa hoàn thành / giới hạn:** POST members cần semesterId; lời mời legacy thiếu nguồn trả reconciliation 409. HR/group capability và delivery live chưa hoàn thành. Không còn coi roster lookup là chưa có.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Lời mời thành viên — giữ tương thích — cập nhật 2026-10-12
 
@@ -25,13 +46,13 @@ Nếu dùng invite legacy: server resolve account dự án active/unlocked/canon
 
 # Club member invitations and CTSV semester roster
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation: partial existing invite/consent workflow
+Historical Status Scope: Backend implementation: partial existing invite/consent workflow
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: MemberManagementEndpoints.cs InviteClubMember exists; MembershipEndpoints.cs requires personal consent before approval. SemesterEndpoints.cs is backoffice-scoped; school roster/eligible lookup, canonical invite identity/semester validation and invitation delivery events are missing.
+Historical Source Evidence: MemberManagementEndpoints.cs InviteClubMember exists; MembershipEndpoints.cs requires personal consent before approval. SemesterEndpoints.cs is backoffice-scoped; school roster/eligible lookup, canonical invite identity/semester validation and invitation delivery events are missing.
 
 Status (2026-10-09): **partially supported on latest API main**. Semester persistence, invitation creation, personal consent and manager approval exist. CTSV semester roster persistence/import, manager-scoped eligibility search and invite-time student eligibility verification remain missing. Frontend integration with those missing routes is provisional.
 
@@ -131,5 +152,7 @@ Fresh fetch still resolves to 80818266; no new eligibility/roster route was foun
 
 The recipient/source discriminator and self withdrawal are reconciled in [my-clubs-membership-api.md](my-clubs-membership-api.md). If enabling withdrawn reapplication, update eligible-member exclusion to the same active-record uniqueness rule rather than excluding all history forever. HR recruitment authority comes from the D06 server capability catalog, not global manager role. In-app invitation notifications commit through outbox and existing NotificationService; no new notification list/read API is needed.
 
+
+</details>
 
 </details>

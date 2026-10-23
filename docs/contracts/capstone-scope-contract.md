@@ -1,5 +1,26 @@
 # Contract phạm vi FA26SE224 — 2026-10-12
 
+Implement Status: Done
+
+Status Scope: Documentation: scope history plus explicit later product-owner decisions
+
+Backend Progress: DOCUMENTATION_SYNCED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Chủ dự án đã yêu cầu roster theo email trường/tài khoản sẵn có và đã cho triển khai lịch học cá nhân; ghi nhận BE hiện có, không sửa phiếu đăng ký gốc.
+
+**Chưa hoàn thành / giới hạn:** Tích hợp hệ thống trường/FAP, nguồn ngành/năm học chính thức vẫn chưa có. Điểm mới tạm hoãn. Mục không cần giữ BỎ QUA, không xóa.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Contract phạm vi FA26SE224 — 2026-10-12
+
 <!-- BE_STATUS_2026_10_14_START -->
 ## Trạng thái BE hiện hành — 14/10/2026
 
@@ -67,7 +88,7 @@ Một người có thể có nhiều vai trò nhưng API phải kiểm tra quy�
 | ID | Chức năng | Quyết định | Contract |
 | --- | --- | --- | --- |
 | F01 | Đăng ký/đăng nhập/đăng xuất, tài khoản nội bộ và cập nhật hồ sơ | GIỮ — BẮT BUỘC | [Tài khoản/quyền](internal-accounts-verification-api.md), [hồ sơ](self-profile-sync-api.md) |
-| F02 | CLB đã công bố, tìm/lọc, yêu cầu gia nhập/trạng thái/vai trò | GIỮ — BẮT BUỘC | [CLB](club-public-profile-api.md), [My Clubs](my-clubs-membership-api.md), [vai trò](club-member-roles-api.md) |
+| F02 | CLB đã công bố, tìm/lọc, yêu cầu gia nhập/trạng thái/vai trò | GIỮ — BẮT BUỘC | [CLB](club-public-profile-api.md), [My Clubs](my-clubs-membership-api.md), [vai trò](club-governance-groups-api.md) |
 | F03 | Hoạt động, buổi lặp, điều kiện, đăng ký, công bố/đóng/hủy | GIỮ — BẮT BUỘC | [Event](club-event-operations-api.md), [điểm danh](activity-attendance-api.md), [discovery](activity-discovery-api.md) |
 | F04 | QR đổi 30 giây, cửa sổ giờ/bán kính, xác nhận thủ công/online | GIỮ — BẮT BUỘC | [Điểm danh](activity-attendance-api.md) |
 | F05 | Nộp/bổ sung minh chứng, xác minh đóng góp CLB/ngoài CLB/+1, nâng vai trò | GIỮ — BẮT BUỘC | [Đóng góp xác thực](verified-contributions-api.md) |
@@ -95,3 +116,5 @@ Luồng bắt buộc phải đi qua API và DB dự án, tồn tại sau restart
 Chính sách chưa chốt được ghi ở [bảng chờ duyệt](experience-scoring-contract.md#tham-số-chờ-giảng-viên-duyệt). Có thể tiếp tục phân tích/thiết kế và kiểm thử bằng cấu hình demo gắn nhãn. Trước khi ghi điểm thật phải có cấu hình được duyệt; không cần chốt các chính sách ví/quà/roster đã BỎ QUA.
 
 Đánh dấu BỎ QUA là thay đổi tài liệu phạm vi trong lần này. Không xóa màn hình/API, không đổi migration/dữ liệu, không tự bật thêm tính năng. [Handoff](backend-api-implementation-handoff.md) và [register](frontend-api-debt-register.md) đã được cập nhật cùng phạm vi.
+
+</details>

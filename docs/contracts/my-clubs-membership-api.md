@@ -1,3 +1,24 @@
+# Xin gia nhập và trạng thái CLB của mình — cập nhật 2026-10-12
+
+Implement Status: Done
+
+Status Scope: BE source: self membership/application history, withdrawal and reapplication
+
+Backend Progress: SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#membership).
+
+**Đã có BE:** GET /api/clubs/me/membership-applications và POST own pending APPLICATION withdraw đã có; reapply tạo ID mới/giữ lịch sử, metadata source/version/capability/code/logo hiện có.
+
+**Chưa hoàn thành / giới hạn:** UNKNOWN/invitation không tự rút; không dùng manager DELETE thay withdraw. Pins và màn hình FE/live không thuộc nhãn Done này.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Xin gia nhập và trạng thái CLB của mình — cập nhật 2026-10-12
 
@@ -31,13 +52,13 @@ GIỮ — HỖ TRỢ self withdrawal/reapply/history đề xuất, invitation me
 
 # Own memberships, applications and self withdrawal
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation: existing composed reads only
+Historical Status Scope: Backend implementation: existing composed reads only
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: ClubEndpoints.cs exposes own access/memberships and review timestamps; MembershipEndpoints.cs has no self withdrawal route. ClubWorkflowStatuses.cs lacks WITHDRAWN, and ClubMembershipResponse lacks source/capability/version/code/logo.
+Historical Source Evidence: ClubEndpoints.cs exposes own access/memberships and review timestamps; MembershipEndpoints.cs has no self withdrawal route. ClubWorkflowStatuses.cs lacks WITHDRAWN, and ClubMembershipResponse lacks source/capability/version/code/logo.
 
 D10; 2026-10-09, main 80818266. Existing GET `/api/clubs/me/access`, GET `/api/clubs/me/memberships`, public club detail, join and manager approve/reject are usable. Do not duplicate them unless replacing composed reads with the richer projections below.
 
@@ -70,3 +91,5 @@ The [navigation/inbox addendum](club-navigation-applications-api.md) owns durabl
 The adapter no longer fixes canWithdraw to false: it consumes authoritative true only for a pending sent request, excluding invitations. The inspected backend does not send that capability or implement withdrawal, so the current button remains disabled. Pending invitations remain a separate section. Sent pending requests persist indefinitely in the inbox; approved/rejected results disappear exactly seven elapsed days after reviewedAtUtc, while historical membership/access records remain intact. Unknown/missing/future review times do not qualify as recent results.
 
 Use explicit source/canAcceptInvitation metadata in the deployed replacement rather than permanently inferring invitation status from consent flags. Current browser-local pins are account-scoped UI preferences and do not grant club authority.
+
+</details>

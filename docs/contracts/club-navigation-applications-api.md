@@ -2,11 +2,32 @@
 
 Implement Status: Not Yet
 
-Status Scope: Backend implementation: session addendum
+Status Scope: BE application history/metadata implemented; durable pins optional
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Backend Progress: PARTIAL_WITH_OPTIONAL_PINS
 
-Source Evidence: Existing code/logo/access/review fields support part of the UI. Self withdrawal, source/action/version metadata and persistent account pins are absent; exact source files and acceptance tasks are detailed below.
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#membership).
+
+**Đã có BE:** Own application history, withdraw/reapply có audit, source/capability/version/code/logo metadata đã có; dữ liệu legacy giữ UNKNOWN.
+
+**Chưa hoàn thành / giới hạn:** Durable pins vẫn chưa triển khai/optional; không chặn việc tích hợp inbox và rút đơn đã có BE. Không suy quyền từ navigation.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Club quick navigation, pins and application inbox
+
+Historical Implement Status: Not Yet
+
+Historical Status Scope: Backend implementation: session addendum
+
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+
+Historical Source Evidence: Existing code/logo/access/review fields support part of the UI. Self withdrawal, source/action/version metadata and persistent account pins are absent; exact source files and acceptance tasks are detailed below.
 
 This is the session addendum to D10 [own memberships](my-clubs-membership-api.md), D06 [governance](club-governance-groups-api.md) and [shared conventions](api-contract-conventions.md). It adds persistent pin preferences and the inbox display rule; it does not create a second membership, role or withdrawal authority.
 
@@ -109,3 +130,5 @@ Optional D10 selection DTO may include `{clubId,clubCode,name,logoUrl,displayRol
 3. Test pending age independence; approved/rejected just before, exactly at and after seven days; UTC/offset equality, missing/future review dates, and preservation of approved access/history.
 4. Add durable pins only when deploying preference sync: reload/cross-device persistence, two-account separation, duplicate/concurrent pin, unpin retry, revoked membership, inactive club, stale logo/name/code, refresh/outage and Gateway verbs.
 5. Integrate FE after deployment; remove reliance on guessed invitation flags and treat server as preference authority. No local API/source audit establishes live functionality.
+
+</details>

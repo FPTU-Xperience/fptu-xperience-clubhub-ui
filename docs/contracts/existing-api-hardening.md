@@ -1,3 +1,24 @@
+# Hardening API giữ và tương thích — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE fixes plus remaining FE/policy compatibility
+
+Backend Progress: PARTIAL
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#existing).
+
+**Đã có BE:** F01 manager DTO, F02 ảnh omitted/null, F03 roster invitation, F05 nguồn session cho sinh viên, F06 lịch sử/source/capability đã được sửa; suite BE hiện tại 914 test đạt.
+
+**Chưa hoàn thành / giới hạn:** Công thức/final action awards F04 hoãn. FE adapter numeric expectedRawXp và nghiệm thu live còn mở; có route không tự là tích hợp hoàn tất.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Hardening API giữ và tương thích — cập nhật 2026-10-12
 
@@ -33,13 +54,13 @@ CompleteQuestAsync không cấp trusted points theo StudentUserId tự do; áp d
 
 # Existing API contracts requiring changes, not duplicate endpoints
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend/consumer hardening
+Historical Status Scope: Backend/consumer hardening
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: MemberManagementEndpoints.cs still permits managed personal snapshot writes; ManagerEndpoints.cs trusts client ManagerName; QuestEndpoints.cs accepts target StudentUserId; ReportContracts.cs exposes StoragePath. Existing routes are not proof of the required fixes.
+Historical Source Evidence: MemberManagementEndpoints.cs still permits managed personal snapshot writes; ManagerEndpoints.cs trusts client ManagerName; QuestEndpoints.cs accepts target StudentUserId; ReportContracts.cs exposes StoragePath. Existing routes are not proof of the required fixes.
 
 D14; source audit 2026-10-09, main 80818266. Follow [conventions](api-contract-conventions.md). The following are explicit backend or FE integration tasks rather than evidence that every route is absent.
 
@@ -69,3 +90,5 @@ Backend-only existing workflows (disband/transfer/reviews, global roles, audit, 
 - Existing authenticated report downloads are the attachment transport; never use StoragePath as a browser URL. D14 still must redact the JSON storage path.
 - Dashboard counts/next activity compose existing club, activity, manager-membership and report reads. No contribution-review total is fabricated; D07 owns that missing projection. Upcoming/pending card summaries remain optional richer selection data.
 - Existing owner transfer/disband/reviews, roles/audit, manual finance adjustments and approved-report activity creation are established backend workflows, not missing APIs just because there is no UI facade/screen. Keep final lifecycle verification separate from route declarations.
+
+</details>

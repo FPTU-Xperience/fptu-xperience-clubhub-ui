@@ -1,5 +1,26 @@
 # Contract tài khoản nội bộ và phân quyền xác minh — 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: BE existing accounts and scoped verification; future governance separated
+
+Backend Progress: PARTIAL_EXISTING_SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#roster).
+
+**Đã có BE:** Internal register/login, canonical profile và verification assignment/capability hiện có; action verifier kiểm tra quyền độc lập và không tự duyệt.
+
+**Chưa hoàn thành / giới hạn:** Nguồn học vụ chính thức và quyền governance xuyên service chưa hoàn thành. Import roster chỉ ghép email trường, không tạo account.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Contract tài khoản nội bộ và phân quyền xác minh — 2026-10-12
+
 <!-- BE_STATUS_2026_10_14_START -->
 ## Trạng thái BE hiện hành — 14/10/2026
 
@@ -45,7 +66,7 @@ Route chốt GET/POST `/api/verification-assignments`, PATCH `/{id}` (GUID). POS
 
 Hiện có GET `/api/verifications/me/queue?clubId=...&page=1&pageSize=20`: chỉ hồ sơ thuộc assignment/capability hiện hành, trả safe metadata. Detail/download/review recheck assignment tại commit, không chỉ khi load queue. Declarations queue/review legacy có thể được dùng qua adapter với cùng policy; tránh triển khai hai authority review cho một record.
 
-Thu hồi quyền có version/audit/invalidation, ảnh hưởng request sau và review đang chạy tại commit. Cấm người dùng tự promote/grant/approve hồ sơ mình qua route role/quest/bulk attendance. Chức vụ CLB cũ không bắt buộc triển khai đủ8 loại; catalog tối thiểu có manager/owner/member đủ quản lý vai trò trong phiếu, phần mở rộng đã đánh dấu BỎ QUA tại [roles](club-member-roles-api.md).
+Thu hồi quyền có version/audit/invalidation, ảnh hưởng request sau và review đang chạy tại commit. Cấm người dùng tự promote/grant/approve hồ sơ mình qua route role/quest/bulk attendance. Chức vụ CLB cũ không bắt buộc triển khai đủ8 loại; catalog tối thiểu có manager/owner/member đủ quản lý vai trò trong phiếu, phần mở rộng đã đánh dấu BỎ QUA tại [roles](club-governance-groups-api.md).
 
 ## Quản trị và audit
 
@@ -56,3 +77,5 @@ Audit ghi actor/resource/action/time/before-after cần thiết/reason/outcome/t
 ## Nghiệm thu
 
 Register không cấp role; email duplicate/race; password không lộ; login/refresh/logout/locked; self profile đối chiếu account; manager đúng/sai CLB; verifier được/không được giao; admin không bypass self-review; assignment revoked giữa load/review; private evidence; restart lưu accounts/assignments/audit; API/UI kiểm tra quyền độc lập.
+
+</details>

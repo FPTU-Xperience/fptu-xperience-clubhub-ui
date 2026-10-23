@@ -1,3 +1,24 @@
+# Hoạt động và đăng ký CLB — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE activity operations; specialist/forms and scoring extensions separate
+
+Backend Progress: PARTIAL_OPERATIONAL_SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#actions).
+
+**Đã có BE:** Application draft/submit/review/history, publication bool, staffing/assignment/completion/verify và tuyển người đã có; recurrence/attendance cũ giữ nguyên.
+
+**Chưa hoàn thành / giới hạn:** CONTENT/event specialist cần governance thật; custom forms/reviewed registrations còn chưa làm/cần đặc tả. Điểm action đang hoãn.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Hoạt động và đăng ký CLB — cập nhật 2026-10-12
 
@@ -38,13 +59,13 @@ Finance approvals/settlement/global manager grants specialist ngoài phạm vi. 
 
 # Event content, staff and registration applications
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: ActivityWriteEndpoints.cs contains CRUD, participants, check-in and attendance; specialist content PATCH, staff assignment, versioned registration forms and reviewed registration application resources are absent.
+Historical Source Evidence: ActivityWriteEndpoints.cs contains CRUD, participants, check-in and attendance; specialist content PATCH, staff assignment, versioned registration forms and reviewed registration application resources are absent.
 
 D12; proposed gap behind the agreed role matrix. Existing ActivityService CRUD, participant registration, check-in and attendance remain available. There is no staff/form/submitted-answer approval contract in main 80818266. Do not replace attendance with application records. Shared [conventions](api-contract-conventions.md) apply.
 
@@ -72,5 +93,7 @@ Notifications use source outbox/recipient dedupe for assignment and registration
 
 Tests: CONTENT cannot assign staff; EVENT cannot rewrite personal profiles/finance; cross-club staff; form version/required answer; duplicate registration; closed/cancelled event; owner-only withdraw; last-seat race; no participant duplication; private answers absent from discovery. FE only currently promises these responsibilities in the role popup; full operations UI still requires an integration task after backend contracts exist.
 
+
+</details>
 
 </details>

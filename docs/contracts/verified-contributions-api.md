@@ -1,5 +1,26 @@
 # Contract đóng góp xác thực và sổ cái — 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: BE existing verified workflow and new operational completions; new award policy excluded
+
+Backend Progress: PARTIAL_EXISTING_SOURCE_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#actions).
+
+**Đã có BE:** Private evidence/contribution/declaration/review/upgrade/ledger hiện có; thêm action completion/attendance claim/verify có source/capability và audit.
+
+**Chưa hoàn thành / giới hạn:** Completion VERIFIED không có nghĩa đã trao điểm; final action award/budget/reversal mới đang tạm hoãn, không dùng legacy endpoint đi vòng.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Contract đóng góp xác thực và sổ cái — 2026-10-12
+
 <!-- BE_STATUS_2026_10_14_START -->
 ## Trạng thái BE hiện hành — 14/10/2026
 
@@ -110,3 +131,5 @@ Outbox thông báo đúng chủ thể khi submit/revision requested/approved/rej
 ## Nghiệm thu
 
 Author/reviewer/admin/manager khác CLB; self-review qua mọi route; account/assignment revoked; private download; pending không có điểm; APPROVE race/replay chỉ một effect; upgrade reject giữ điểm; upgrade approve chỉ delta; correction/reversal giữ lịch sử; event duplicate/outbox retry; semester snapshot; restart/reload; task completion không cộng lại; source bị khai lại qua declaration không ghi trùng.
+
+</details>

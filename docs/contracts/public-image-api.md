@@ -1,3 +1,24 @@
+# Ảnh công bố cơ bản và minh chứng riêng tư — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE verified basic image flows; remaining kinds and live storage acceptance separate
+
+Backend Progress: PARTIAL_BASIC_IMAGES_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HO_SO_CA_NHAN_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#profile).
+
+**Đã có BE:** POST /api/media/upload-intents và attach club-logo/club-cover/activity-cover/student-avatar/student-cover đã có; ảnh verified bất biến, PNG/JPEG/WebP <=5 MiB.
+
+**Chưa hoàn thành / giới hạn:** Application-logo/club-shape chưa hoàn thành; không tự cấp quyền cho kind mới. R2/CORS/signing origin/delivery/cleanup live chưa nghiệm thu.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Ảnh công bố cơ bản và minh chứng riêng tư — cập nhật 2026-10-12
 
@@ -29,13 +50,13 @@ Contribution/attendance evidence **private** theo [contribution](verified-contri
 
 # Public image API contract (backend work required)
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation and storage integration
+Historical Status Scope: Backend implementation and storage integration
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Club.LogoUrl is readable; public detail mapper returns null cover. No media upload intent, public-images PUT, activity cover PUT or user-image persistence; yarp.json has no /api/media route.
+Historical Source Evidence: Club.LogoUrl is readable; public detail mapper returns null cover. No media upload intent, public-images PUT, activity cover PUT or user-image persistence; yarp.json has no /api/media route.
 
 Status: proposed contract for `fptu-xperience-clubhub-api`, rechecked on 2026-10-09 against fetched main `80818266`. The three currently called media/club/activity routes remain absent; self image attachment uses the canonical profile contract below. The first three have frontend callers in `src/services/api.js`; self avatar/background and club shape upload need facade integration when the backend contract exists.
 
@@ -117,5 +138,7 @@ The existing FE uploads PUT then submits the returned publicUrl. Keep that wire 
 
 Follow [conventions](api-contract-conventions.md), D01 in [handoff](backend-api-implementation-handoff.md). Actual signing credentials stay server-side. Public domain selection does not verify Gateway, object reads, CORS, backend secrets or deployment. Test all of those before calling upload integration live.
 
+
+</details>
 
 </details>

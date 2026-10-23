@@ -1,3 +1,24 @@
+# Profile theo phiếu v1.4 — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: Profile UI integration and remaining cosmetics/academic source
+
+Backend Progress: PARTIAL
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HO_SO_CA_NHAN_BE_2026-10-22.md); [current operation status](../../../docs/contracts/be-api-status.md); [wire details](../../../docs/contracts/backend-current-integration.md#profile).
+
+**Đã có BE:** Canonical self profile + basic avatar/cover/roster studentCode source đã có.
+
+**Chưa hoàn thành / giới hạn:** FE vẫn phải tích hợp; cosmetics/layout và major/year chưa có nguồn; không dùng local ownership/XP giả.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Profile theo phiếu v1.4 — cập nhật 2026-10-12
 
@@ -14,13 +35,13 @@ GIỮ [self GET/PATCH](../../../docs/contracts/self-profile-sync-api.md) persist
 
 # Profile service boundary — refreshed 2026-10-09
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Canonical self-profile GET/PATCH/media/experience/owned-cosmetics contracts remain missing from Auth/Club source. Account-local browser state and membership imports are not durable self-profile integration.
+Historical Source Evidence: Canonical self-profile GET/PATCH/media/experience/owned-cosmetics contracts remain missing from Auth/Club source. Account-local browser state and membership imports are not durable self-profile integration.
 
 ## Current temporary implementation
 
@@ -38,5 +59,7 @@ Load/save/retry preserve session isolation and prior data on failure. The inform
 
 Follow the [implementation handoff](../../../docs/contracts/backend-api-implementation-handoff.md), D01/D02/D03/D08. Route the replacement through the existing API facade, deliberately review local imports, preserve Preview/Cancel with no write, and prove cross-account/cross-device privacy. API main 80818266 has no canonical self-profile read/write; production integration remains pending.
 
+
+</details>
 
 </details>

@@ -1,3 +1,117 @@
+# Trạng thái API BE cho FE — 23/10/2026
+
+Implement Status: Done
+
+Status Scope: Documentation: current BE operation status, not all backend features complete
+
+Backend Progress: PARTIAL_PROJECT
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/TRIEN_KHAI_CONTRACT_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#overview).
+
+**Đã có BE:** Đồng bộ 40 operation mới và 13 operation có extension/fix; đầy đủ các nhãn source/partial/deferred.
+
+**Chưa hoàn thành / giới hạn:** Chưa hoàn thành toàn bộ contract, chưa xác nhận FE hay deploy; số 74 operation cũ chỉ là checkpoint lịch sử.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+
+## Cách đọc
+
+Nguồn BE là nhánh `feat/backend-contract-completion`, **không phải main**. Muốn tích hợp phải chạy đúng commit/migration/cấu hình; push Git không chứng minh server đã deploy. JSON đồng hành: [be-api-status.json](be-api-status.json). [Hướng dẫn wire hiện hành](backend-current-integration.md) ưu tiên hơn ví dụ đề xuất/lịch sử.
+
+- **✅ Đã có BE**: source/HTTP/SQL đã có trong phạm vi ghi rõ; không tự là FE/live Done.
+- **🟡 Chưa hoàn thiện**: chỉ dùng phần đã nêu. POST resources chỉ hỗ trợ EMBED; canManage không thay canUpload/supportedKinds.
+- **⏳ Chưa triển khai**: không gọi như API thật; stub 501 không được tính là hoàn thành.
+- **⏸ Tạm hoãn**: phần điểm mới chờ chủ sản phẩm chốt; không xóa, không giả null thành 0.
+- **⏭ Bỏ qua/optional**: giữ yêu cầu và code; không tính là core đã hoàn thành.
+
+**40** là số operation mới so với BE `b066f96`, không phải tổng API hệ thống. **16/16** consumer operation từng thiếu route ở audit 21/10 đã có handler; điều đó không xác nhận đủ nghiệp vụ tất cả contract. Không cộng trùng API dùng chung theo actor. Bảng 74 operation/32 sinh viên của 14/10 giữ dưới lịch sử, không phải backlog hiện hành.
+
+## 40 operation mới có triển khai trong phạm vi ghi rõ
+
+| Method | Route | Actor | Trạng thái BE / giới hạn |
+| --- | --- | --- | --- |
+| GET | `/api/clubs/{clubId}/workspace-semesters` | Quản lý CLB, Thành viên đã duyệt, CTSV/Admin có phạm vi | **✅ Đã có BE trong phạm vi này** — Overall workspace attribution/governance remains partial. |
+| GET | `/api/clubs/{clubId}/invitation-semesters` | Quản lý CLB, CTSV/Admin có phạm vi | **✅ Đã có BE trong phạm vi này** — Availability from authoritative roster revision; revalidate identity on invite/consent/approval. |
+| GET | `/api/clubs/{clubId}/experience-policies` | Quản lý CLB, Thành viên đã duyệt, CTSV/Admin có phạm vi | **✅ Đã có BE trong phạm vi này** — Canonical semester; approved PERIOD/environment policies only. |
+| GET | `/api/v2/activities/{activityId}/sessions` | Sinh viên đã đăng ký | **✅ Đã có BE trong phạm vi này** — Registration/current eligibility required; submission authority revalidates writes. |
+| GET | `/api/clubs/me/membership-applications` | Sinh viên: chính chủ | **✅ Đã có BE trong phạm vi này** — Legacy UNKNOWN is preserved; self-only capabilities. |
+| POST | `/api/clubs/me/membership-applications/{applicationId}/withdraw` | Sinh viên: chính chủ | **✅ Đã có BE trong phạm vi này** — Own pending APPLICATION only; no body, optional Idempotency-Key. |
+| POST | `/api/activity-applications` | Quản lý CLB | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| GET | `/api/activity-applications` | Quản lý CLB, CTSV/Admin | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| GET | `/api/activity-applications/{id}` | Quản lý CLB, CTSV/Admin | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| PATCH | `/api/activity-applications/{id}` | Quản lý CLB | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| POST | `/api/activity-applications/{id}/submit` | Quản lý CLB | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| POST | `/api/activity-applications/{id}/review` | CTSV/Admin | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| GET | `/api/activity-applications/{id}/history` | Quản lý CLB, CTSV/Admin | **✅ BE vận hành; điểm tạm hoãn** — expectedRawXp=null; scoringStatus=DEFERRED_BY_PRODUCT_OWNER |
+| PATCH | `/api/activities/{id}/publication` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| GET | `/api/activities/{id}/staffing` | Quản lý CLB, Sinh viên, Người xác minh | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/assignments` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/assignments/{assignmentId}/cancel` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/assignments/{assignmentId}/completions` | Sinh viên | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/assignments/{assignmentId}/attendance-claims` | Sinh viên | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/action-completions/{completionId}/verify` | Người xác minh | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/recruitment` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| PATCH | `/api/activities/{id}/recruitment` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| PATCH | `/api/activities/{id}/recruitment/status` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| POST | `/api/activities/{id}/recruitment/positions/{positionId}/join` | Sinh viên | **✅ Đã có BE trong phạm vi này** — No new point award; manual attendance claims are not QR check-in. |
+| GET | `/api/clubs/{clubId}/activity-recruitments` | Quản lý CLB, Sinh viên | **✅ Đã có BE trong phạm vi này** |
+| GET | `/api/clubs/{clubId}/eligible-members` | Quản lý CLB | **✅ Đã có BE trong phạm vi này** |
+| POST | `/api/v1/semesters/{identifier}/roster-imports/preview` | CTSV/Admin | **✅ Đã có BE trong phạm vi này** — Existing school-email accounts only; no implicit account creation. |
+| POST | `/api/v1/semesters/{identifier}/roster-imports/{importId}/commit` | CTSV/Admin | **✅ Đã có BE trong phạm vi này** — Existing school-email accounts only; no implicit account creation. |
+| GET | `/api/v1/semesters/{identifier}/student-roster` | CTSV/Admin | **✅ Đã có BE trong phạm vi này** — Existing school-email accounts only; no implicit account creation. |
+| GET | `/api/academic-calendar/{year}/{term}` | Tất cả actor | **✅ Đã có BE trong phạm vi này** — FE consumer still browser-local; deployment/live acceptance pending. |
+| PUT | `/api/academic-calendar/{year}/{term}` | CTSV/Admin | **✅ Đã có BE trong phạm vi này** — FE consumer still browser-local; deployment/live acceptance pending. |
+| GET | `/api/users/me/study-schedule/{year}/{term}/{block}` | Tất cả actor: self-only | **✅ Đã có BE trong phạm vi này** — FE consumer still browser-local; deployment/live acceptance pending. |
+| PUT | `/api/users/me/study-schedule/{year}/{term}/{block}/{week}/{day}/{slotId}` | Tất cả actor: self-only | **✅ Đã có BE trong phạm vi này** — FE consumer still browser-local; deployment/live acceptance pending. |
+| DELETE | `/api/users/me/study-schedule/{year}/{term}/{block}/{week}/{day}/{slotId}` | Tất cả actor: self-only | **✅ Đã có BE trong phạm vi này** — FE consumer still browser-local; deployment/live acceptance pending. |
+| POST | `/api/users/me/study-schedule/{year}/{term}/{block}/bulk-import` | Tất cả actor: self-only | **✅ Đã có BE trong phạm vi này** — FE consumer still browser-local; deployment/live acceptance pending. |
+| GET | `/api/activities/{activityId}/resources` | Quản lý CLB hiện tại, Thành viên CLB đã duyệt, Người xem đã xác thực trong phạm vi | **✅ Đã có BE trong phạm vi này** — Authenticated scope only; CLUB links limited to current club member/manager; no anonymous or private file delivery. |
+| POST | `/api/activities/{activityId}/resources` | Quản lý CLB hiện tại | **🟡 EMBED đã có; DOCUMENT/MEDIA chưa làm** — DOCUMENT/MEDIA not implemented (501); required Idempotency-Key; at most 100 attached resources. |
+| PATCH | `/api/activities/{activityId}/resources/{resourceId}` | Quản lý CLB hiện tại | **✅ Đã có BE trong phạm vi này** — GUID expectedVersion; title/visibility/position only; required Idempotency-Key. |
+| DELETE | `/api/activities/{activityId}/resources/{resourceId}` | Quản lý CLB hiện tại | **✅ Đã có BE trong phạm vi này** — JSON expectedVersion/reason and Idempotency-Key; soft detach retains immutable audit. |
+| GET | `/api/activities/{activityId}/resources/history` | Quản lý CLB hiện tại | **✅ Đã có BE trong phạm vi này** — Current authority required; paginated; no former-manager grant. |
+
+## Operation hiện có được mở rộng/sửa
+
+| Method | Route | Trạng thái / hành vi đã thay |
+| --- | --- | --- |
+| GET | `/api/users/me/profile` | Hồ sơ chính chủ + học vụ read-only; major/year chưa có nguồn. |
+| PATCH | `/api/users/me/profile` | GUID expectedVersion; headline/DOB/address + avatar/cover; omitted giữ/null xóa; Idempotency-Key tùy chọn. |
+| POST | `/api/media/upload-intents` | club-logo/club-cover/activity-cover/student-avatar/student-cover; không phải upload tài liệu/video. |
+| GET | `/api/clubs/{id}` | Manager DTO trả version, coverImageUrl, schedule (F01). |
+| GET | `/api/clubs/me/managed` | Cùng metadata manager, không mở rộng roster visibility. |
+| PATCH | `/api/clubs/{id}/public-profile` | Text/schedule có version; giữ scope quản lý hiện tại. |
+| PUT | `/api/clubs/{id}/public-images` | F02: chỉ trường gửi mới thay; null xóa; verify owner/kind; CAS. |
+| PUT | `/api/activities/{activityId}/cover-image` | GUID activity expectedVersion; media verified owner; không dùng URL tùy ý. |
+| GET | `/api/activities/{id}` | Publication bool/int cho application-owned; detail thêm EMBED resources/capabilities/availability; không phải public transport. |
+| GET | `/api/activities` | Giữ GUID activity version; application-owned bổ sung isPublished/publicationVersion, không dùng CLOSE để ẩn. |
+| POST | `/api/clubs/{id}/join` | Reapply tạo ID mới, previousApplicationId, giữ lịch sử/consent; không auto-approve. |
+| GET | `/api/clubs/me/memberships` | Code/logo/source/version/capabilities/semester/consent; legacy không đủ nguồn giữ UNKNOWN. |
+| POST | `/api/clubs/{clubId}/members` | Bắt buộc semesterId; kiểm tra school-email/account/roster/campus, outbox; consent và duyệt kiểm tra lại. |
+
+## Chưa hoàn thành và tạm hoãn
+
+| Phần | Trạng thái / việc FE cần giữ |
+| --- | --- |
+| Điểm action/final report/raw budget/caps/+1/rollover/reversal và task credit/wallet/redemption | **⏸ TẠM HOÃN theo chủ dự án**. expectedRawXp=null, scoringStatus=DEFERRED_BY_PRODUCT_OWNER, canAwardPoints=false; VERIFIED completion chưa trao điểm. |
+| Tài liệu/video | **⏳ CHƯA TRIỂN KHAI**. Upload-intents và commit DOCUMENT/MEDIA trả 501; canUpload=false. Private delivery/scanner/quarantine/cleanup chưa có. |
+| Public activity detail ẩn danh | **⏳ CHƯA TRIỂN KHAI**. CAMPUS_PUBLIC vẫn cần tài khoản cùng campus; không đổi sang anonymous bằng filter FE. |
+| Governance đa nhóm | **⏳ CHƯA HOÀN THÀNH**. Term/groups/revision/union/expiry/report/nominations và quyền xuyên service; migration thủ quỹ cũ đang chờ quyết định. |
+| Cosmetics/layout, application-logo/club-shape | **⏳ CHƯA HOÀN THÀNH / cần policy**. Avatar/cover cơ bản không chứng minh inventory/equip đã có. |
+| Ngành/năm học chính thức | **⏳ CHƯA CÓ NGUỒN**. major/year=null, NO_AUTHORITATIVE_SOURCE; academic chỉ đọc. |
+| Directory/pins/custom forms/physical fulfillment/contest/office succession | **⏭ OPTIONAL / BỎ QUA / CẦN ĐẶC TẢ**. Giữ nguyên, không đếm như core Done. |
+| FE adapters, browser E2E, shared migrations, deploy, R2/delivery live | **CHƯA NGHIỆM THU**. Lượt này chỉ sửa tài liệu FE; không chuyển consumer hay UI. |
+
+## Bằng chứng
+
+BE suite đã chạy tại commit trên: **914 passed / 0 failed / 0 skipped** (123 unit, 85 Admin integration, 706 Backend stabilization); có SQL upgrade/CAS, Gateway route selection và coverage. Build -warnaserror, 15 style/model checks gồm 8 service EF và diff-check đạt. Đây là bằng chứng BE đã có, **không phải vừa chạy FE E2E hay nghiệm thu production**. [Manifest/proof gốc](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/contracts/be-operation-manifest.json).
+
+<details>
+<summary>Checkpoint 14/10: 74 operation — lịch sử, không dùng làm trạng thái hoặc tổng backlog hiện hành</summary>
+
 # Trạng thái API BE để tích hợp FE — 14/10/2026
 
 Đây là bảng tiến độ BE hiện hành, đối chiếu mã nguồn working tree trên nhánh `feat/student-api-completion`, commit nền `80818266`. Đọc cùng [hướng dẫn request/response thực tế](be-integration-guide.md) và [phạm vi v1.4](capstone-scope-contract.md). Đánh giá theo operation và phần yêu cầu còn thiếu; có route không tự đồng nghĩa hoàn thành.
@@ -227,3 +341,5 @@ Refresh/logout/me, notification list/read/read-all, clubs/me/access/memberships/
 - API-007: [StudentExperienceEndpoints.cs](../../../fptu-xperience-clubhub-api/src/Services/AdminService/Endpoints/StudentExperienceEndpoints.cs).
 - API-017: [StudentExperienceEndpoints.cs](../../../fptu-xperience-clubhub-api/src/Services/AdminService/Endpoints/StudentExperienceEndpoints.cs).
 - API-018: [StudentActivityHistoryEndpoints.cs](../../../fptu-xperience-clubhub-api/src/Services/ActivityService/Endpoints/StudentActivityHistoryEndpoints.cs).
+
+</details>

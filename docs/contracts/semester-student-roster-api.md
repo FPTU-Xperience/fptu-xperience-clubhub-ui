@@ -1,3 +1,24 @@
+# Roster sinh viên chính thức theo kỳ — cập nhật 2026-10-12
+
+Implement Status: Done
+
+Status Scope: BE source: existing-account school-email roster import/revision/carry-forward and scoped lookup
+
+Backend Progress: SOURCE_IMPLEMENTED_EXISTING_ACCOUNTS_ONLY
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#roster).
+
+**Đã có BE:** Preview/commit/student-roster và eligible/invitation-semesters đã có; email trường của account sẵn có, CSV/JSON schema1, revision/campus/version/expiry, outbox và carry-forward có nguồn.
+
+**Chưa hoàn thành / giới hạn:** Ghi chú BỎ QUA của bản cũ được thay cho phạm vi import này bằng quyết định trực tiếp của chủ dự án. Không có FAP sync/tạo account/chứng nhận ngành-năm học. FE/live chưa nghiệm thu.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Roster sinh viên chính thức theo kỳ — cập nhật 2026-10-12
 
@@ -23,13 +44,13 @@ Account/CLB/semester dự án và active/locked checks vẫn GIỮ theo [quyền
 
 # CTSV semester student roster
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: AdminDbContext persists Semesters and migration AddSemesters exists, but no semester student roster revision/import/carry-forward entities/routes in Admin/Auth contexts. General accounts and club roster reads are not the school roster.
+Historical Source Evidence: AdminDbContext persists Semesters and migration AddSemesters exists, but no semester student roster revision/import/carry-forward entities/routes in Admin/Auth contexts. General accounts and club roster reads are not the school roster.
 
 D05; proposed contract, audited 2026-10-09 against main `80818266`. Complements [invitations](club-member-invitations-api.md); reuse existing AdminService semesters, never create another semester catalog. Shared [conventions](api-contract-conventions.md) apply.
 
@@ -53,5 +74,7 @@ Errors include `ROSTER_UNAVAILABLE`, `ROSTER_CHANGED`, `IMPORT_EXPIRED`, `IDENTI
 
 Acceptance: empty vs missing vs carry-forward; duplicate/unknown identities; cross-campus administration; expired/stale commit and replay; concurrent replacement; lookup pagination; eligibility changes between search/invite/accept/approve; account locks; two-account invite consent approval. Semester rollover point reset and office succession are separately scoped, not hidden in roster import.
 
+
+</details>
 
 </details>

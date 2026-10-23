@@ -1,5 +1,26 @@
 # Contract tính điểm Trải nghiệm 6+1 — 2026-10-12
 
+Implement Status: Not Yet
+
+Status Scope: Product-owner-approved future scoring policy; legacy calculators preserved
+
+Backend Progress: DEFERRED_BY_PRODUCT_OWNER
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HOAN_THIEN_API_BE_KHONG_TINH_DIEM_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#decisions).
+
+**Đã có BE:** Giữ source/ledger/calculator legacy đã có làm bằng chứng; completion mới không cộng điểm.
+
+**Chưa hoàn thành / giới hạn:** Chủ dự án chưa chốt ai duyệt cuối, công thức/caps/+1/rollover/reversal. expectedRawXp=null, scoringStatus=DEFERRED_BY_PRODUCT_OWNER, canAwardPoints=false; không thay bằng 0.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
+# Contract tính điểm Trải nghiệm 6+1 — 2026-10-12
+
 <!-- BE_STATUS_2026_10_14_START -->
 ## Trạng thái BE hiện hành — 14/10/2026
 
@@ -138,10 +159,12 @@ Các số nguyên trong bảng là hiển thị làm tròn; không sửa công t
 
 ## Hiện trạng BE cần sửa trước nghiệm thu
 
-[ExperienceScoringCalculator](../../../fptu-xperience-clubhub-api/src/Shared/ClubReportHub.Shared/Experience/ExperienceScoringCalculator.cs:7) đã có hệ số/điểm thô đúng PDF. [ExperienceIndexCalculator](../../../fptu-xperience-clubhub-api/src/Shared/ClubReportHub.Shared/Experience/ExperienceIndexCalculator.cs:22) đã có bão hòa, D/J/M/ERI và bậc, nhưng ngưỡng/title/default tau là phương án đang có, không phải bằng chứng P01–P06 đã được duyệt.
+[ExperienceScoringCalculator](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/src/Shared/ClubReportHub.Shared/Experience/ExperienceScoringCalculator.cs#L7) đã có hệ số/điểm thô đúng PDF. [ExperienceIndexCalculator](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/src/Shared/ClubReportHub.Shared/Experience/ExperienceIndexCalculator.cs#L22) đã có bão hòa, D/J/M/ERI và bậc, nhưng ngưỡng/title/default tau là phương án đang có, không phải bằng chứng P01–P06 đã được duyệt.
 
-[BuildStudentRadarAsync](../../../fptu-xperience-clubhub-api/src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs:360) hiện chọn benchmark theo query, đọc mọi khai báo Approved của sinh viên mà chưa lọc kỳ; cộng vào một `FinalCategory ?? Category`; dùng Role để xác định leader proof. Phải thêm liên kết kỳ, vector nhiều trụ cột, thuộc tính đã xác thực và nguồn sổ cái/snapshot. Không coi endpoint tồn tại là F05–F08 đã hoàn thành.
+[BuildStudentRadarAsync](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/src/Services/AdminService/Endpoints/BenchmarkEndpoints.cs#L360) hiện chọn benchmark theo query, đọc mọi khai báo Approved của sinh viên mà chưa lọc kỳ; cộng vào một `FinalCategory ?? Category`; dùng Role để xác định leader proof. Phải thêm liên kết kỳ, vector nhiều trụ cột, thuộc tính đã xác thực và nguồn sổ cái/snapshot. Không coi endpoint tồn tại là F05–F08 đã hoàn thành.
 
 ## Ca nghiệm thu
 
 Đối chiếu chín phép tính trên; role×scale bị chặn trước thưởng kết quả; vector 0.4/0.4/0.2 bảo toàn tổng; 4 trụ cột/trùng mã/tổng sai bị từ chối; tau≤0 bị từ chối cấu hình; S=0; sáu trục bằng nhau; một trục duy nhất; chỉ +1; ERI>100 hợp lệ; bổ sung/upgrade bị từ chối giữ điểm cũ; replay/race một nguồn không ghi hai lần; nhiệm vụ hoàn thành không cộng thêm; kỳ trước không bị query kỳ sau cộng lẫn; đổi policy không tính lại lịch sử; Leader proof đúng trụ cột và bị thu hồi; không lộ minh chứng/hồ sơ khác.
+
+</details>

@@ -1,3 +1,24 @@
+# Chợ phần thưởng và cover cosmetics — cập nhật 2026-10-12
+
+Implement Status: Not Yet
+
+Status Scope: BE cosmetics/credit/reward scope and unresolved asset policy
+
+Backend Progress: DEFERRED_OR_NOT_IMPLEMENTED
+
+Source Review: 2026-10-23; backend `b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62` on `feat/backend-contract-completion`, not backend main. Existing BE proof: 914 passed / 0 failed / 0 skipped; source/local SQL verification, not FE/live acceptance.
+
+Source Evidence: [BE source handoff](https://github.com/FPTU-Xperience/fptu-xperience-clubhub-api/blob/b1edcbf1f4aefb95c5d8020ee9f7d159b9c20a62/docs/audit/HO_SO_CA_NHAN_BE_2026-10-22.md); [current operation status](be-api-status.md); [wire details](backend-current-integration.md#profile).
+
+**Đã có BE:** Self avatar/cover cơ bản đã có qua upload-intent + canonical profile; tách khỏi quyền sở hữu cosmetic.
+
+**Chưa hoàn thành / giới hạn:** Catalog/inventory/equip/layout/club-shape chưa hoàn thành; credit/wallet/redemption/awards chờ chính sách điểm, format asset Q04 chưa chốt. Không import grant mẫu.
+
+Nhãn này mô tả đúng phạm vi ở `Status Scope`; Done của tài liệu/read/source không có nghĩa cả dự án, UI hay deploy đã xong. Các nhận định trước 23/10 và payload đề xuất dưới phần lịch sử không thay trạng thái/wire hiện hành.
+
+<details>
+<summary>Yêu cầu gốc và lịch sử trước đồng bộ 23/10 — giữ để tham khảo; không phải trạng thái hiện hành</summary>
+
 <!-- CAPSTONE_SCOPE_2026_10_12 -->
 # Chợ phần thưởng và cover cosmetics — cập nhật 2026-10-12
 
@@ -23,13 +44,13 @@ Experience/bậc/danh hiệu vẫn GIỮ [scoring](experience-scoring-contract.m
 
 # Cover cosmetics and club point redemption
 
-Implement Status: Not Yet
+Historical Implement Status: Not Yet
 
-Status Scope: Backend implementation
+Historical Status Scope: Backend implementation
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Historical Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
 
-Source Evidence: Admin quest/XP models exist; no server cosmetic catalog/inventory, club wallet, redemption receipt or verified shape publication entities/endpoints. FE cosmetic ownership remains local sample state.
+Historical Source Evidence: Admin quest/XP models exist; no server cosmetic catalog/inventory, club wallet, redemption receipt or verified shape publication entities/endpoints. FE cosmetic ownership remains local sample state.
 
 Frontend scope: independent cover background, stamp shape, text and temporary club rewards. ProfileCoverArt uses a 1200x300 canvas. Shapes occupy their own 240x240 local viewport at 100% scale, preserve the source aspect ratio and rotate/scale about their own center. Common vector stamps use the selected palette secondary/accent colors; their position, rotation and scale remain independent of the background. Uploaded stamps retain source colors and use independent HSL adjustments. Uploaded assets remain original PNG/SVG images, with HSL adjustments applied only to the stamp.
 
@@ -155,5 +176,7 @@ GET `/rewards/redemptions/me?page=...` returns own receipt history; manager over
 
 Acceptance: draft/publish/retire, verified PNG and cross-issuer denial, account ownership reusable across clubs, image mode ownership check, free defaults, combo grants both separate choices, duplicate/parallel redemption, insufficient credit, transaction rollback, stale versions, retired owned asset behavior, canonical profile render parity including 240px/draggable text. Live mock migration requires explicit review and must never mint sampled grants.
 
+
+</details>
 
 </details>
