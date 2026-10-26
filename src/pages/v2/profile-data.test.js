@@ -129,10 +129,10 @@ test('save validates editable profile and private application fields', () => {
     assert.throws(() => saveProfile(studentA, { displayName: '   ' }, storage), /tên hiển thị/i);
     assert.throws(() => saveProfile(studentA, { headline: 'x'.repeat(161) }, storage), /160/);
     assert.throws(() => saveProfile(studentA, { avatarUrl: 'javascript:alert(1)' }, storage), /ảnh đại diện/i);
-    assert.throws(() => saveProfile(studentA, { personal: { phoneNumber: '123' } }, storage), /số điện thoại/i);
+    assert.throws(() => saveProfile(studentA, { personal: { phoneNumber: 'abc123' } }, storage), /số điện thoại/i);
     assert.throws(
-        () => saveProfile(studentA, { skills: Array.from({ length: 13 }, (_, index) => `Skill ${index}`) }, storage),
-        /12/,
+        () => saveProfile(studentA, { skills: Array.from({ length: 31 }, (_, index) => `Skill ${index}`) }, storage),
+        /30/,
     );
     const current = readProfile(studentA, storage);
     assert.equal(current.profile.displayName, prior.profile.displayName);
@@ -211,7 +211,9 @@ test('profile clubs show only approved memberships from the API response', () =>
         { clubId: 7, clubName: 'F-Code', role: 'MEMBER', status: 'APPROVED' },
         { clubId: 8, clubName: 'F-Style', role: 'MEMBER', status: 'PENDING' },
     ];
-    assert.deepEqual(mapProfileMemberships(rows), [{ clubId: 7, clubName: 'F-Code', clubCode: '', logoUrl: '', role: 'MEMBER' }]);
+    assert.deepEqual(mapProfileMemberships(rows), [
+        { clubId: 7, clubName: 'F-Code', clubCode: '', logoUrl: '', role: 'MEMBER' },
+    ]);
     assert.deepEqual(mapProfileMemberships(null), []);
 });
 
@@ -222,7 +224,13 @@ test('profile memberships load club logos and preserve approved clubs when a log
             { clubId: 7, clubName: 'F-Code', status: 'APPROVED' },
             { clubId: 8, clubName: 'F-Style', status: 'PENDING' },
             { clubId: 9, clubName: 'Club 9', status: 'APPROVED' },
-            { clubId: 10, clubName: 'Club 10', clubCode: 'C10', status: 'APPROVED', logoUrl: 'https://cdn.example.com/10.png' },
+            {
+                clubId: 10,
+                clubName: 'Club 10',
+                clubCode: 'C10',
+                status: 'APPROVED',
+                logoUrl: 'https://cdn.example.com/10.png',
+            },
         ],
         getClub: async (id) => {
             requested.push(id);
@@ -232,7 +240,10 @@ test('profile memberships load club logos and preserve approved clubs when a log
         },
     });
     assert.deepEqual(requested, [7, 9, 10]);
-    assert.deepEqual(clubs.map((club) => club.clubCode), ['F-CODE', '', 'C10']);
+    assert.deepEqual(
+        clubs.map((club) => club.clubCode),
+        ['F-CODE', '', 'C10'],
+    );
     assert.deepEqual(
         clubs.map((club) => [club.clubId, club.logoUrl]),
         [
@@ -259,8 +270,5 @@ test('production profile sources stay isolated from demo dependencies', () => {
 
 test('authenticated V2 router owns the production profile route', () => {
     const source = readFileSync(new URL('./V2App.jsx', import.meta.url), 'utf8');
-    assert.match(
-        source,
-        /path="profile"\s+element=\{<ProfilePage[\s\S]*?profileResult=\{profileResult\}/,
-    );
+    assert.match(source, /path="profile"\s+element=\{<ProfilePage[\s\S]*?profileResult=\{profileResult\}/);
 });

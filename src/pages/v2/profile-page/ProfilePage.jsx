@@ -25,6 +25,8 @@ import ProfileCoverModal from './ProfileCoverModal';
 import ProfileCoverArt from './ProfileCoverArt';
 import ProfileClubLogo from './ProfileClubLogo';
 import './ProfilePage.scss';
+import { Link } from 'react-router-dom';
+import { useProfileExperience } from '../../../services/profile-experience.js';
 
 const pillarLabels = ['Học tập', 'Nghiên cứu', 'Quốc tế', 'Thể thao & văn hóa', 'Cộng đồng', 'Khởi nghiệp'];
 
@@ -55,7 +57,7 @@ function Radar({ pillars }) {
                         </g>
                     );
                 })}
-                <polygon points={polygon(previous)} className="v2-profile-radar-previous" />
+                {previous.length === 6 && <polygon points={polygon(previous)} className="v2-profile-radar-previous" />}
                 <polygon points={polygon(values)} className="v2-profile-radar-current" />
                 {values.map((value, index) => {
                     const [x, y] = point(index, value);
@@ -67,10 +69,12 @@ function Radar({ pillars }) {
                     <i />
                     Kỳ này
                 </span>
-                <span>
-                    <i />
-                    Kỳ trước
-                </span>
+                {previous.length === 6 && (
+                    <span>
+                        <i />
+                        Kỳ trước
+                    </span>
+                )}
             </div>
         </div>
     );
@@ -108,6 +112,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
         setNotice('');
     }, [sessionKey]);
     const memberships = useProfileMemberships(api, sessionKey);
+    const experience = useProfileExperience(api, user?.id, sessionKey);
     const staged = result.data && profileDraft ? previewProfile(result.data, profileDraft) : result.data;
     const data = staged ? (shared ? toSharedProfile(staged) : staged) : null;
     const saveChanges = async () => {
@@ -148,10 +153,30 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
         frameUsePalette,
     }) => {
         if (imageModal === 'avatar') {
-            if (file) await saveImage('avatar', file);
+            if (file) {
+                await saveImage('avatar', file, {
+                    avatarFrame: frame,
+                    avatarMode,
+                    avatarDesign,
+                    avatarFrameUsePalette: frameUsePalette,
+                });
+                return;
+            }
             await result.save({ avatarFrame: frame, avatarMode, avatarDesign, avatarFrameUsePalette: frameUsePalette });
         } else if (imageModal === 'cover') {
-            if (file) await saveImage('cover', file);
+            if (file) {
+                await saveImage('cover', file, {
+                    coverPreset: preset,
+                    coverShape: shape,
+                    coverShapeTransform: shapeTransform,
+                    coverShapeHsl: shapeHsl,
+                    coverShapeUsePalette: shapeUsePalette,
+                    coverBackgroundColor: backgroundColor,
+                    coverBackgroundPaint: backgroundPaint,
+                    coverText,
+                });
+                return;
+            }
             await result.save({
                 coverPreset: preset,
                 coverShape: shape,
@@ -258,6 +283,10 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                     {imageError}
                 </p>
             )}
+            <p className="v2-profile-note">
+                Thông tin cá nhân và ảnh cơ bản lưu trên máy chủ. Khung, màu, shape và bố cục trang trí hiện chỉ lưu
+                trên thiết bị.
+            </p>
             {shared && (
                 <section className="v2-profile-privacy-banner" role="status">
                     <Eye size={18} />
@@ -337,16 +366,28 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                             <div className="v2-profile-stats">
                                 <Stat
                                     icon={Award}
-                                    label="Điểm đóng góp ghi nhận"
-                                    value="—"
+                                    label="Xperience Point thô"
+                                    value={experience.summary?.rawExperiencePoints?.toLocaleString('vi-VN') ?? '—'}
                                     hidden={shared}
-                                    note="Chưa có API tổng hợp cá nhân"
+                                    note={
+                                        experience.summary
+                                            ? `Học kỳ ${experience.summary.semesterId} · không phải số dư đổi quà`
+                                            : experience.error || 'Đang tải báo cáo học kỳ'
+                                    }
                                 />
                                 <Stat
                                     icon={BookOpen}
-                                    label="Hoạt động đã tham dự"
-                                    value="—"
-                                    note="Chưa có API lịch sử cá nhân"
+                                    label="Lượt điểm danh xác minh"
+                                    value={
+                                        experience.summary?.availability?.attendance
+                                            ? (experience.summary.verifiedAttendanceCount ?? '—')
+                                            : '—'
+                                    }
+                                    note={
+                                        experience.summary?.availability?.attendance
+                                            ? 'Nguồn điểm danh máy chủ'
+                                            : 'Nguồn điểm danh chưa khả dụng'
+                                    }
                                 />
                                 <Stat
                                     icon={FolderOpen}
@@ -358,9 +399,15 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                             <section className="v2-profile-panel v2-profile-experience">
                                 <div>
                                     <h2>Hành trình của bạn không chỉ được đo bằng điểm số.</h2>
-                                    <p>Biểu đồ mẫu; số liệu trải nghiệm cá nhân chưa được kết nối.</p>
+                                    <p>
+                                        {experience.radar
+                                            ? `Radar chính thức · học kỳ ${experience.radar.value.semesterId || experience.radar.value.semesterCode}`
+                                            : experience.radarError || 'Đang tải radar chính thức…'}
+                                    </p>
                                 </div>
-                                <Radar pillars={data.summary.experiencePillars} />
+                                {!shared && experience.radar && (
+                                    <Radar pillars={{ current: experience.radar.axes, previous: [] }} />
+                                )}
                             </section>
                         </>
                     ) : (
@@ -372,9 +419,13 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                                 </div>
                             </div>
                             <p className="v2-profile-empty">
-                                {shared
-                                    ? 'Lịch sử riêng tư được ẩn trong bản chia sẻ.'
-                                    : 'Lịch sử minh chứng cá nhân chưa có API để hiển thị.'}
+                                {shared ? (
+                                    'Lịch sử riêng tư được ẩn trong bản chia sẻ.'
+                                ) : (
+                                    <Link to="/v2/personal-experience">
+                                        Xem trải nghiệm và minh chứng cá nhân từ hệ thống
+                                    </Link>
+                                )}
                             </p>
                         </section>
                     )}

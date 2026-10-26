@@ -1,10 +1,35 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Eye } from 'lucide-react';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import { CLUB_PAGE_FIELDS as fields, CLUB_PAGE_TABS as tabs } from './club-page-fields';
 import ClubScheduleEditor from './ClubScheduleEditor';
+import { useWorkspaceSemester } from '../../WorkspaceSemesterContext';
+import { persistedClubScheduleLabel } from './club-schedule-data';
 
-export default function ClubPageInfoModal({ club, saving, error, onClose, onPreview }) {
+export default function ClubPageInfoModal({ club: sourceClub, saving, error, onClose, onPreview, api }) {
+    const { semester } = useWorkspaceSemester();
+    const club = {
+        ...sourceClub,
+        scheduleLabel: persistedClubScheduleLabel(sourceClub.schedule, semester) || sourceClub.scheduleLabel,
+    };
+    const [categories, setCategories] = useState(null);
+    const [categoryError, setCategoryError] = useState('');
+    useEffect(() => {
+        let active = true;
+        if (api)
+            api.request('/api/clubs/categories')
+                .then((value) => {
+                    const rows = Array.isArray(value) ? value : value?.items;
+                    if (!Array.isArray(rows)) throw new Error('Không tải được lĩnh vực từ máy chủ.');
+                    if (active) setCategories(Object.fromEntries(rows.map((row) => [row.code, row.name])));
+                })
+                .catch((issue) => {
+                    if (active) setCategoryError(issue.message);
+                });
+        return () => {
+            active = false;
+        };
+    }, [api]);
     const [draft, setDraft] = useState(() => Object.fromEntries(fields.map(({ name }) => [name, club[name] ?? ''])));
     const [activeTab, setActiveTab] = useState(tabs[0].id);
     const [validation, setValidation] = useState('');
@@ -33,7 +58,11 @@ export default function ClubPageInfoModal({ club, saving, error, onClose, onPrev
             return;
         }
         setValidation('');
-        onPreview(values);
+        onPreview(
+            Object.fromEntries(
+                Object.entries(values).filter(([name, value]) => value !== String(club[name] ?? '').trim()),
+            ),
+        );
     };
     const navigateTabs = (event, index) => {
         let next;
@@ -50,6 +79,7 @@ export default function ClubPageInfoModal({ club, saving, error, onClose, onPrev
         <V2Modal title="Chỉnh sửa thông tin CLB" onClose={onClose} wide>
             <form className="club-page-modal-form" onSubmit={submit} aria-busy={saving} noValidate>
                 <p>Xem trước nội dung trên trang CLB, sau đó xác nhận lưu thay đổi.</p>
+                {categoryError && <p role="status">{categoryError}</p>}
                 <div className="club-page-info-tabs" role="tablist" aria-label="Nội dung chỉnh sửa">
                     {tabs.map((tab, index) => (
                         <button
@@ -84,6 +114,8 @@ export default function ClubPageInfoModal({ club, saving, error, onClose, onPrev
                                 {fields
                                     .filter(({ name }) => tab.fields.includes(name))
                                     .map(({ name, label, options, multiline, ...constraints }) => {
+                                        if (name === 'category' && api)
+                                            options = categories || { [draft.category]: draft.category };
                                         if (name === 'scheduleLabel')
                                             return (
                                                 <div className="is-wide" key={name}>

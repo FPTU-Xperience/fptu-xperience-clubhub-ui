@@ -3,6 +3,7 @@ import { Pencil, RefreshCw } from 'lucide-react';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import { editReportXp, mergeReportXp, validateReportXp, xpReportApplicable, xpReportTotal } from './report-xp';
 import './ReportXpStep.scss';
+import WorkspacePolicyStatus from '../../../components/v2/activity-detail/WorkspacePolicyStatus';
 
 const format = (value) => value.toLocaleString('vi-VN', { maximumFractionDigits: 4 });
 function XpTable({ label, columns, children }) {
@@ -41,7 +42,10 @@ export function ReportXpPreview({ snapshot, applicable }) {
                     </p>
                 </>
             ) : (
-                <p>Chưa có bảng Xperience Point từ máy chủ. Lưu/nộp hiện tại chỉ gửi nội dung báo cáo, chưa gửi hoặc cộng Xperience Point.</p>
+                <p>
+                    Chưa có bảng Xperience Point từ máy chủ. Lưu/nộp hiện tại chỉ gửi nội dung báo cáo, chưa gửi hoặc
+                    cộng Xperience Point.
+                </p>
             )}
         </div>
     );
@@ -111,6 +115,7 @@ export default function ReportXpStep({ api, scope, snapshot, onChange, actor, di
     const canEdit = connected && !disabled && !loading && snapshot?.capabilities?.canEdit === true;
     return (
         <section className="v2-report-editor-card v2-report-xp" aria-label="Báo cáo Xperience Point">
+            <WorkspacePolicyStatus api={api} clubId={scope.clubId} semesterId={scope.period} />
             <div className="v2-report-editor-card-heading">
                 <div>
                     <h2>Báo cáo Xperience Point</h2>
@@ -131,15 +136,16 @@ export default function ReportXpStep({ api, scope, snapshot, onChange, actor, di
             </div>
             {!applicable ? (
                 <p className="v2-report-xp-notice">
-                    Mẫu báo cáo này dùng để lập kế hoạch, chưa quyết toán Xperience Point. Điểm thực tế được tổng hợp trong báo cáo
-                    hoạt động hoặc cuối kỳ sau khi có minh chứng.
+                    Mẫu báo cáo này dùng để lập kế hoạch, chưa quyết toán Xperience Point. Điểm thực tế được tổng hợp
+                    trong báo cáo hoạt động hoặc cuối kỳ sau khi có minh chứng.
                 </p>
             ) : (
                 <>
                     {!connected && (
                         <p className="v2-report-xp-notice" role="status">
-                            Chưa kết nối dữ liệu báo cáo Xperience Point. Máy chủ hiện chưa hỗ trợ tự điền, lưu bảng Xperience Point và lịch sử
-                            chỉnh sửa. Bạn vẫn có thể hoàn thiện nội dung báo cáo; Xperience Point chưa được gửi hoặc cộng điểm.
+                            Chưa kết nối dữ liệu báo cáo Xperience Point. Máy chủ hiện chưa hỗ trợ tự điền, lưu bảng
+                            Xperience Point và lịch sử chỉnh sửa. Bạn vẫn có thể hoàn thiện nội dung báo cáo; Xperience
+                            Point chưa được gửi hoặc cộng điểm.
                         </p>
                     )}
                     {!validScope && (

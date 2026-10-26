@@ -25,6 +25,18 @@ export async function mutateActivityStaffing(api, activityId, path, body, key, m
         body: JSON.stringify(body),
     });
 }
+export function validateStaffingMutationReceipt(value, activityId, previousVersion) {
+    if (
+        !value ||
+        typeof value.id !== 'string' ||
+        !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value.id) ||
+        (value.activityId != null && String(value.activityId) !== String(activityId)) ||
+        !Number.isSafeInteger(value.version) ||
+        value.version <= previousVersion
+    )
+        throw new Error('Máy chủ chưa xác nhận thay đổi. Vui lòng tải lại trước khi thử tiếp.');
+    return value;
+}
 export function recruitmentPayload(draft, actions) {
     if (!draft.title.trim()) throw new Error('Nhập tên nhiệm vụ tuyển dụng.');
     if (

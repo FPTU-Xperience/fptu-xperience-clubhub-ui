@@ -27,7 +27,12 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
     const location = useLocation();
     const navigate = useNavigate();
     const manager = !observation && result.workspace?.role === 'MANAGER';
-    const semesterSelection = useWorkspaceSemesterSelection(sessionKey, result.clubId, result.workspace?.semesters);
+    const semesterSelection = useWorkspaceSemesterSelection(
+        sessionKey,
+        result.clubId,
+        result.workspace?.semesters,
+        api,
+    );
     // Refresh shared summaries when entering activities or the member roster.
     const dashboardRefreshKey = /\/(activities|members)\/?$/.test(location.pathname) ? location.key : null;
     const dashboard = useWorkspaceDashboard(
@@ -111,9 +116,21 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     </header>
                     <div className="v2-workspace-content">
                         {relativePath === 'student-declarations' && !canViewDeclarations ? (
-                            <PageState status="forbidden" description="Chỉ BQL được cấp quyền trong CLB mới có thể mở trải nghiệm của sinh viên." />
+                            <PageState
+                                status="forbidden"
+                                description="Chỉ BQL được cấp quyền trong CLB mới có thể mở trải nghiệm của sinh viên."
+                            />
                         ) : reportCreate || reportEditId ? (
-                            <ReportEditorPage key={`${sessionKey}:${result.clubId}:${reportEditId || 'create'}:${location.search}`} api={api} sessionKey={sessionKey} workspace={result.workspace} base={base} semester={semesterSelection.semester} reportId={reportEditId} readOnly={observation} />
+                            <ReportEditorPage
+                                key={`${sessionKey}:${result.clubId}:${reportEditId || 'create'}:${location.search}`}
+                                api={api}
+                                sessionKey={sessionKey}
+                                workspace={result.workspace}
+                                base={base}
+                                semester={semesterSelection.semester}
+                                reportId={reportEditId}
+                                readOnly={observation}
+                            />
                         ) : reportDetailId ? (
                             <ReportDetailPage
                                 key={`${sessionKey}:${result.clubId}:${reportDetailId}`}

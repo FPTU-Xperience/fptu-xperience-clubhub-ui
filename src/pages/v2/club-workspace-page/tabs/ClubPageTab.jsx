@@ -8,6 +8,7 @@ import ClubPageImageModal from './club-page/ClubPageImageModal';
 import './ClubPageTab.scss';
 import { useEntityMedia } from '../../../../components/media/EntityMediaContext';
 import { subscribePublicMediaSaved } from '../../../../services/public-media-sync';
+import { clubSchedulePayload } from './club-page/club-schedule-data';
 
 function useImagePreview(file, savedUrl) {
     const [preview, setPreview] = useState(null);
@@ -74,13 +75,21 @@ export default function ClubPageTab({ manager = false, workspace }) {
         };
     }, [api, clubId, attempt, semester?.id]);
 
-    useEffect(() => subscribePublicMediaSaved('club', (signal) => {
-        if (signal.id !== String(clubId)) return;
-        const version = requestVersion.current;
-        api.getClub(clubId).then((data) => {
-            if (version === requestVersion.current) setClub(data);
-        }).catch(() => { /* Retain the acknowledged media and current editor on refresh failure. */ });
-    }), [api, clubId]);
+    useEffect(
+        () =>
+            subscribePublicMediaSaved('club', (signal) => {
+                if (signal.id !== String(clubId)) return;
+                const version = requestVersion.current;
+                api.getClub(clubId)
+                    .then((data) => {
+                        if (version === requestVersion.current) setClub(data);
+                    })
+                    .catch(() => {
+                        /* Retain the acknowledged media and current editor on refresh failure. */
+                    });
+            }),
+        [api, clubId],
+    );
 
     const openEditor = (section) => {
         if (!manager || saving) return;
@@ -111,7 +120,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
                 clubId,
             );
             if (version !== requestVersion.current) return;
-            const images = { [field]: url };
+            const images = { [field]: url, expectedVersion: club.version };
             const updated = await api.updateClubPublicImages(clubId, images);
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...images, ...(updated || {}) }));
@@ -152,7 +161,12 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setError('');
         setNotice('');
         try {
-            const updated = await api.updateClubPublicProfile(clubId, fields);
+            const payload = { ...fields, expectedVersion: club.version };
+            if (Object.hasOwn(fields, 'scheduleLabel')) {
+                payload.schedule = clubSchedulePayload(fields.scheduleLabel, semester);
+                delete payload.scheduleLabel;
+            }
+            const updated = await api.updateClubPublicProfile(clubId, payload);
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...fields, ...(updated || {}) }));
             setProfileDraft(null);
@@ -252,6 +266,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
             )}
             {manager && club && editor && !imageEditor && (
                 <ClubPageInfoModal
+                    api={api}
                     club={previewClub}
                     saving={saving}
                     error={modalError}

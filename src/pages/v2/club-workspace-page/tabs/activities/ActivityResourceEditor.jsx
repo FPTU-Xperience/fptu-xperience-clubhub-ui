@@ -7,7 +7,22 @@ import {
     validateActivityFile,
 } from '../../../../../components/v2/activity-detail/activity-resources-data';
 
-export default function ActivityResourceEditor({ kind, resources, drafts, onAdd, onRemove, onSave, canSave, busy }) {
+export default function ActivityResourceEditor({
+    kind,
+    resources,
+    drafts,
+    onAdd,
+    onRemove,
+    onSave,
+    canSave,
+    capabilities,
+    busy,
+}) {
+    const canUpload =
+        capabilities?.canManage === true &&
+        capabilities?.canUpload === true &&
+        capabilities.supportedKinds?.includes(kind);
+    const canLink = capabilities?.canManage === true && capabilities.supportedKinds?.includes('EMBED');
     const [linkOpen, setLinkOpen] = useState(false);
     const [error, setError] = useState('');
     const [visibility, setVisibility] = useState(kind === 'DOCUMENT' ? 'CLUB' : 'PUBLIC');
@@ -84,7 +99,7 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                             }
                             aria-label={kind === 'DOCUMENT' ? 'Chọn tài liệu hoạt động' : 'Chọn media hoạt động'}
                             onChange={selectFiles}
-                            disabled={busy}
+                            disabled={busy || !canUpload}
                         />
                     </label>
                     {kind === 'MEDIA' && (
@@ -95,7 +110,7 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                                 setError('');
                                 setLinkOpen(true);
                             }}
-                            disabled={busy}
+                            disabled={busy || !canLink}
                         >
                             <Link2 size={15} />
                             Thêm liên kết
@@ -103,6 +118,11 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                     )}
                 </div>
             </div>
+            {!canUpload && (
+                <p className="v2-activity-profile-notice">
+                    Máy chủ chưa hỗ trợ tải tệp. Liên kết chỉ lưu được với nhà cung cấp được hỗ trợ.
+                </p>
+            )}
             {error && (
                 <p className="v2-activity-profile-error" role="alert">
                     {error}

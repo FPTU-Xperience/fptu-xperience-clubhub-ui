@@ -32,9 +32,10 @@ export function displayClubSchedule(value) {
 }
 
 export function parseClubSchedule(value) {
-    const match = /^(SP|SU|FA)(\d{4}) · (.+) · (\d{2}:\d{2})–(\d{2}:\d{2}) · (Hằng tuần|Lặp lại h[àằ]ng tuần|Không lặp lại)$/.exec(
-        value || '',
-    );
+    const match =
+        /^(SP|SU|FA)(\d{4}) · (.+) · (\d{2}:\d{2})–(\d{2}:\d{2}) · (Hằng tuần|Lặp lại h[àằ]ng tuần|Không lặp lại)$/.exec(
+            value || '',
+        );
     if (!match) return null;
     const labels = match[3].split(', ');
     const days = labels.map((label) => STUDY_DAYS.find((day) => day.shortLabel === label)?.id);
@@ -58,4 +59,38 @@ export function parseClubSchedule(value) {
     )
         return null;
     return { term: match[1], year, days, start, end, repeat: match[6] !== 'Không lặp lại' };
+}
+
+export function clubSchedulePayload(label, semester) {
+    if (!label) return null;
+    const value = parseClubSchedule(label);
+    if (
+        !value ||
+        !value.repeat ||
+        !semester?.invitationCode ||
+        value.term !== semester.term ||
+        value.year !== semester.year
+    )
+        throw new Error('Chọn học kỳ đã cấu hình ở header và lịch lặp hàng tuần trước khi lưu.');
+    return {
+        semesterId: semester.invitationCode,
+        weekdays: value.days.map((day) => STUDY_DAYS.findIndex((item) => item.id === day) + 1),
+        startTime: formatClubTime(value.start),
+        endTime: formatClubTime(value.end),
+        repeatWeekly: true,
+        timezone: 'Asia/Ho_Chi_Minh',
+    };
+}
+
+export function persistedClubScheduleLabel(schedule, semester) {
+    if (!schedule || schedule.semesterId !== semester?.invitationCode || !semester.term || !semester.year) return '';
+    const minutes = (value) => Number(value.slice(0, 2)) * 60 + Number(value.slice(3));
+    return formatClubSchedule({
+        year: semester.year,
+        term: semester.term,
+        days: schedule.weekdays.map((day) => STUDY_DAYS[day - 1]?.id).filter(Boolean),
+        start: minutes(schedule.startTime),
+        end: minutes(schedule.endTime),
+        repeat: schedule.repeatWeekly,
+    });
 }

@@ -26,6 +26,8 @@ export default function StudySchedulePage({ user }) {
     const [week, setWeek] = useState(1);
     const [allEntries, setAllEntries] = useState([]);
     const [calendar, setCalendar] = useState(emptyAcademicCalendar);
+    const [canWrite, setCanWrite] = useState(false);
+    const [revision, setRevision] = useState(0);
     const [legacyCount, setLegacyCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
@@ -47,6 +49,7 @@ export default function StudySchedulePage({ user }) {
     useEffect(() => {
         let active = true;
         setLoading(true);
+        setCanWrite(false);
         setAllEntries([]);
         setCalendar(emptyAcademicCalendar);
         setError('');
@@ -62,6 +65,7 @@ export default function StudySchedulePage({ user }) {
                     }
                     setAllEntries(schedule.entries);
                     setCalendar(schedule.calendar);
+                    setCanWrite(schedule.canWrite === true);
                     setLegacyCount(legacy.entries.length);
                 }
             })
@@ -74,7 +78,7 @@ export default function StudySchedulePage({ user }) {
         return () => {
             active = false;
         };
-    }, [user, period.year, period.term, period.block]);
+    }, [user, period.year, period.term, period.block, revision]);
 
     const changePeriod = (part) => {
         setEditing(null);
@@ -91,6 +95,7 @@ export default function StudySchedulePage({ user }) {
     };
 
     const openSlot = (day, slot) => {
+        if (loading || busy || !canWrite) return;
         const current = getStudySlot(entries, day.id, slot.id);
         setEditing({ day, slot });
         setDraft(current || { subject: '', room: '' });
@@ -225,7 +230,7 @@ export default function StudySchedulePage({ user }) {
                 <button
                     type="button"
                     className="v2-button v2-button--primary v2-study-schedule-bulk-trigger"
-                    disabled={loading || busy}
+                    disabled={loading || busy || !canWrite}
                     onClick={() => setBulkOpen(true)}
                 >
                     Nhập hàng loạt
@@ -262,6 +267,20 @@ export default function StudySchedulePage({ user }) {
                     {error}
                 </p>
             )}
+            {!loading && (
+                <button
+                    className="v2-button"
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                        setEditing(null);
+                        setRevision((value) => value + 1);
+                    }}
+                >
+                    Tải lại từ máy chủ
+                </button>
+            )}
+            {!loading && !error && !canWrite && <p role="status">Học kỳ này chỉ đọc theo cấu hình máy chủ.</p>}
             {notice && (
                 <p className="v2-study-schedule-notice" role="status">
                     {notice}
@@ -359,7 +378,7 @@ export default function StudySchedulePage({ user }) {
                                                 <button
                                                     className={`v2-study-schedule-cell${entry ? ' is-filled' : ''}`}
                                                     type="button"
-                                                    disabled={loading || busy}
+                                                    disabled={loading || busy || !canWrite}
                                                     onClick={() => openSlot(day, slot)}
                                                     aria-label={`${day.label}, slot ${index + 1}, ${slot.label}: ${entry ? `${entry.subject}${entry.room ? `, ${entry.room}` : ''}. Sửa lịch học` : 'Thêm môn học'}`}
                                                 >

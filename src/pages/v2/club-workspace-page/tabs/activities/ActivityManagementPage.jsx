@@ -12,6 +12,7 @@ import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
 import { saveActivityResource } from '../../../../../services/activity-resources';
+import ActivityResourceManagement from '../../../../../components/v2/activity-detail/ActivityResourceManagement';
 import ActivityPublicationControl from './ActivityPublicationControl';
 import ActivityStaffingPanel from '../../../../../components/v2/activity-detail/ActivityStaffingPanel';
 import './ActivityEditing.scss';
@@ -125,7 +126,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
     };
     const saveCore = async (event) => {
         event.preventDefault();
-        if (busy || !coreDraft) return;
+        if (busy || !coreDraft || activity.sourceApplicationId) return;
         const values = coreDraft;
         if (![values.title, values.description, values.location].every((value) => value.trim())) {
             setError('Vui lòng nhập tên, địa điểm và mô tả hoạt động.');
@@ -142,6 +143,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         setNotice('');
         try {
             await api.updateActivity(activity.id, {
+                expectedVersion: activity.version,
                 title: values.title.trim(),
                 description: values.description.trim(),
                 startTimeUtc: start.toISOString(),
@@ -168,7 +170,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         setNotice('');
         try {
             const url = await api.uploadPublicImage(selectedFile, 'activity-cover', activity.id);
-            await api.updateActivityCoverImage(activity.id, url);
+            await api.updateActivityCoverImage(activity.id, url, activity.version);
             if (alive.current) {
                 setCoverOpen(false);
                 setCoverFile(null);
@@ -191,7 +193,11 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         if (
             busy ||
             !activity.resourceCapabilities.canManage ||
-            (rows.some((row) => row.file) && !activity.resourceCapabilities.canUpload)
+            rows.some(
+                (row) =>
+                    !activity.resourceCapabilities.supportedKinds.includes(row.kind) ||
+                    (row.file && !activity.resourceCapabilities.canUpload),
+            )
         )
             return;
         setBusy(true);
@@ -298,7 +304,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                         setEditorDraft({ ...(coreDraft || coreFields(activity)) });
                                         setTab('overview');
                                     }}
-                                    disabled={busy}
+                                    disabled={busy || Boolean(activity.sourceApplicationId)}
                                 >
                                     <Pencil size={15} />
                                     Chỉnh sửa
@@ -332,17 +338,29 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                     >
                         {tab === 'overview' && <ActivityOverview activity={displayed} />}
                         {['documents', 'media'].includes(tab) && (
-                            <ActivityResourceEditor
-                                key={tab}
-                                kind={tab === 'documents' ? 'DOCUMENT' : 'MEDIA'}
-                                resources={activity.resources}
-                                drafts={drafts}
-                                onAdd={addDrafts}
-                                onRemove={removeDraft}
-                                onSave={saveResources}
-                                canSave={canSaveResources}
-                                busy={busy}
-                            />
+                            <>
+                                <ActivityResourceEditor
+                                    key={tab}
+                                    kind={tab === 'documents' ? 'DOCUMENT' : 'MEDIA'}
+                                    resources={activity.resources}
+                                    drafts={drafts}
+                                    onAdd={addDrafts}
+                                    onRemove={removeDraft}
+                                    onSave={saveResources}
+                                    canSave={canSaveResources}
+                                    capabilities={activity.resourceCapabilities}
+                                    busy={busy}
+                                />
+                                {activity.resourceCapabilities.canManage && (
+                                    <ActivityResourceManagement
+                                        key={activity.id}
+                                        api={api}
+                                        activityId={activity.id}
+                                        resources={activity.resources}
+                                        onChanged={result.retry}
+                                    />
+                                )}
+                            </>
                         )}
                         {['assignments', 'recruitment'].includes(tab) && (
                             <ActivityStaffingPanel

@@ -28,7 +28,11 @@ export function createMockStudyScheduleRepository(storageOverride) {
     return {
         async get(user, period) {
             const storage = requireAccount(user);
-            return { ...period, calendar: readAcademicCalendar(period, storage), entries: readStudyPeriod(user, period, storage) };
+            return {
+                ...period,
+                calendar: readAcademicCalendar(period, storage),
+                entries: readStudyPeriod(user, period, storage),
+            };
         },
         async putSlot(user, period, week, day, slotId, value) {
             const storage = requireAccount(user);
@@ -54,4 +58,9 @@ export function createMockStudyScheduleRepository(storageOverride) {
     };
 }
 
-export const studyScheduleRepository = createMockStudyScheduleRepository();
+// Keep the mock factory for isolated demo/tests; production always uses the API.
+export { createStudyScheduleApi } from '../../services/schedule-api.js';
+import { createStudyScheduleApi } from '../../services/schedule-api.js';
+export const studyScheduleRepository = createStudyScheduleApi({
+    request: (...args) => import('../../services/api.js').then(({ default: api }) => api.request(...args)),
+});

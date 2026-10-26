@@ -16,8 +16,14 @@ export async function saveActivityResource(api, activityId, draft) {
         const endpointValue = import.meta.env?.VITE_R2_S3_ENDPOINT;
         const bucket = import.meta.env?.VITE_R2_BUCKET_NAME;
         let signingHost = '';
-        try { const endpoint = new URL(endpointValue); if (endpoint.protocol === 'https:') signingHost = endpoint.hostname; } catch { /* Unconfigured origins must not receive file bytes. */ }
-        const validOrigin = signingHost && bucket && (url.hostname === signingHost || url.hostname === `${bucket}.${signingHost}`);
+        try {
+            const endpoint = new URL(endpointValue);
+            if (endpoint.protocol === 'https:') signingHost = endpoint.hostname;
+        } catch {
+            /* Unconfigured origins must not receive file bytes. */
+        }
+        const validOrigin =
+            signingHost && bucket && (url.hostname === signingHost || url.hostname === `${bucket}.${signingHost}`);
         if (
             url.protocol !== 'https:' ||
             !url.hostname.endsWith('.r2.cloudflarestorage.com') ||
@@ -53,4 +59,30 @@ export async function saveActivityResource(api, activityId, draft) {
     });
     if (!saved?.id) throw new Error('Máy chủ chưa xác nhận lưu tài nguyên.');
     return saved;
+}
+
+export function updateActivityResource(api, activityId, resource, fields, key) {
+    return api.request(
+        `/api/activities/${encodeURIComponent(activityId)}/resources/${encodeURIComponent(resource.id)}`,
+        {
+            method: 'PATCH',
+            headers: { 'Idempotency-Key': key },
+            body: JSON.stringify({
+                expectedVersion: resource.version,
+                title: fields.title,
+                visibility: fields.visibility,
+                position: Number(fields.position),
+            }),
+        },
+    );
+}
+export function detachActivityResource(api, activityId, resource, reason, key) {
+    return api.request(
+        `/api/activities/${encodeURIComponent(activityId)}/resources/${encodeURIComponent(resource.id)}`,
+        {
+            method: 'DELETE',
+            headers: { 'Idempotency-Key': key },
+            body: JSON.stringify({ expectedVersion: resource.version, reason }),
+        },
+    );
 }

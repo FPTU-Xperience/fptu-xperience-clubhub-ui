@@ -17,6 +17,11 @@ import {
 } from './activity-application-data';
 import '../report-detail-page/ReportEditorPage.scss';
 import './ActivityApplicationPage.scss';
+import {
+    validApplicationReceipt as validReceipt,
+    applicationXpLabel,
+} from '../../../services/activity-application-contract.js';
+import WorkspacePolicyStatus from '../../../components/v2/activity-detail/WorkspacePolicyStatus';
 
 const steps = ['Thông tin hoạt động', 'Action & dự toán Xperience Point', 'Tuyển nhân sự', 'Kiểm tra & gửi duyệt'];
 function Field({ label, value, onChange, options, multiline, ...props }) {
@@ -48,24 +53,18 @@ function Field({ label, value, onChange, options, multiline, ...props }) {
     );
 }
 const localDate = (value) =>
-    new Intl.DateTimeFormat('sv-SE', {
-        timeZone: 'Asia/Ho_Chi_Minh',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    })
-        .format(new Date(value))
-        .replace(' ', 'T');
-const validReceipt = (value) =>
-    value &&
-    Number.isSafeInteger(value.id) &&
-    value.id > 0 &&
-    Number.isSafeInteger(value.version) &&
-    value.version > 0 &&
-    Number.isFinite(value.expectedRawXp) &&
-    value.expectedRawXp >= 0;
+    value && Number.isFinite(Date.parse(value))
+        ? new Intl.DateTimeFormat('sv-SE', {
+              timeZone: 'Asia/Ho_Chi_Minh',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+          })
+              .format(new Date(value))
+              .replace(' ', 'T')
+        : '';
 
 export default function ActivityApplicationPage({ api, workspace, base, semester, context, readOnly }) {
     const { clubAccess } = useAuth();
@@ -123,7 +122,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 const value = await api.getActivityApplication(requestedId);
                 if (
                     !validReceipt(value) ||
-                    !value.actions?.length ||
+                    !Array.isArray(value.actions) ||
                     String(value.clubId) !== String(workspace?.clubId || context?.clubId)
                 )
                     throw new Error('Hồ sơ không hợp lệ hoặc không thuộc CLB này.');
@@ -287,7 +286,10 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 <div>
                     <span className="v2-report-editor-eyebrow">HỒ SƠ ĐỀ XUẤT HOẠT ĐỘNG</span>
                     <h1>Tạo hoạt động</h1>
-                    <p>{workspace?.name || access?.clubName} · Duyệt kế hoạch và ngân sách Xperience Point trước khi triển khai</p>
+                    <p>
+                        {workspace?.name || access?.clubName} · Duyệt kế hoạch và ngân sách Xperience Point trước khi
+                        triển khai
+                    </p>
                 </div>
                 <span className="v2-application-badge">{submitted ? 'Chờ CTSV duyệt lần 1' : 'Bản nháp kế hoạch'}</span>
             </header>
@@ -309,8 +311,8 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     <CheckCircle2 size={32} />
                     <h2>Đã gửi hồ sơ #{receipt.id}</h2>
                     <p>
-                        Xperience Point đề xuất theo server: <strong>{formatXp(receipt.expectedRawXp)} raw Xperience Point</strong>. Hoạt động và
-                        tuyển nhân sự chỉ được triển khai sau khi CTSV duyệt kế hoạch.
+                        Xperience Point theo server: <strong>{applicationXpLabel(receipt)}</strong>. Hoạt động và tuyển
+                        nhân sự chỉ được triển khai sau khi CTSV duyệt kế hoạch.
                     </p>
                     <p>
                         Khi hoạt động kết thúc, báo cáo được sinh từ dữ liệu thực hiện; CTSV duyệt lần hai trước khi cấp
@@ -352,11 +354,16 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     {receipt && (
                         <p className="v2-report-editor-notice" role="status">
                             Hồ sơ #{receipt.id} · phiên bản {receipt.version} đã lưu. Dự toán server:{' '}
-                            {formatXp(receipt.expectedRawXp)} raw Xperience Point.{' '}
+                            {applicationXpLabel(receipt)}.{' '}
                             <Link to={`${location.pathname}?${resumeQuery}`}>Mở lại bản đã lưu</Link>
                         </p>
                     )}
                     <fieldset disabled={busy || Boolean(receipt && !canUpdate)} className="v2-application-fields">
+                        <p className="v2-report-editor-notice">
+                            Điểm và tổng tính tại đây là đề xuất tham khảo. Backend hiện hoãn tính/cộng điểm action;
+                            duyệt hồ sơ hoặc xác minh hoàn thành không cấp XP.
+                        </p>
+                        <WorkspacePolicyStatus api={api} clubId={draft.clubId} semesterId={draft.period} />
                         <section hidden={stage !== 0} data-step="0" className="v2-report-editor-card">
                             <h2>Thông tin hoạt động</h2>
                             <Field
@@ -433,8 +440,8 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 </button>
                             </div>
                             <p>
-                                Mỗi lượt = Điểm nền × min(Hệ số vai trò × Hệ số quy mô, 8). Dự toán = Xperience Point mỗi lượt × Số
-                                người × Số lượt/người.
+                                Mỗi lượt = Điểm nền × min(Hệ số vai trò × Hệ số quy mô, 8). Dự toán = Xperience Point
+                                mỗi lượt × Số người × Số lượt/người.
                             </p>
                             <p className="v2-report-editor-hint">
                                 Các dòng ban đầu là gợi ý; hãy thay bằng kế hoạch thực tế. Dự toán giả định hoàn thành
@@ -532,8 +539,9 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                             />
                                         </div>
                                         <p className="v2-application-action-total">
-                                            {formatXp(estimate.perOccurrence)} Xperience Point/lượt × {action.expectedPeople || 0}{' '}
-                                            người × {action.expectedOccurrencesPerPerson || 0} lượt ={' '}
+                                            {formatXp(estimate.perOccurrence)} Xperience Point/lượt ×{' '}
+                                            {action.expectedPeople || 0} người ×{' '}
+                                            {action.expectedOccurrencesPerPerson || 0} lượt ={' '}
                                             <strong>{formatXp(estimate.rawXp)} raw Xperience Point</strong>
                                         </p>
                                         <small>
@@ -629,8 +637,8 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 </>
                             )}
                             <p className="v2-report-editor-hint">
-                                Tham gia vị trí tạo phân công staff, chưa được tính là hoàn thành và chưa nhận Xperience Point. Vai
-                                trò hoạt động không cấp quyền quản trị CLB.
+                                Tham gia vị trí tạo phân công staff, chưa được tính là hoàn thành và chưa nhận Xperience
+                                Point. Vai trò hoạt động không cấp quyền quản trị CLB.
                             </p>
                         </section>
                         <section hidden={stage !== 3} data-step="3" className="v2-report-editor-card">
@@ -684,12 +692,13 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 </table>
                             </div>
                             <p>
-                                CTSV duyệt kế hoạch và hạn mức Xperience Point trước khi hoạt động chạy. Báo cáo kết thúc sẽ lấy dữ
-                                liệu thực hiện để tính Xperience Point thực tế; người lập chỉ chỉnh phần thông tin.
+                                CTSV duyệt kế hoạch và hạn mức Xperience Point trước khi hoạt động chạy. Báo cáo kết
+                                thúc sẽ lấy dữ liệu thực hiện để tính Xperience Point thực tế; người lập chỉ chỉnh phần
+                                thông tin.
                             </p>
                             <p className="v2-report-editor-hint">
-                                Dự toán dưới đây là preview trên biểu mẫu. Server tính lại và trả về tổng khi lưu; Xperience Point
-                                chính thức chỉ phát sinh sau lần duyệt tổng kết.
+                                Dự toán dưới đây là preview trên biểu mẫu. Server tính lại và trả về tổng khi lưu;
+                                Xperience Point chính thức chỉ phát sinh sau lần duyệt tổng kết.
                             </p>
                             {!draft.independentActionsConfirmed && (
                                 <button className="v2-button" type="button" onClick={() => setStage(1)}>
@@ -702,10 +711,14 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                         <div>
                             <span>Xperience Point đề xuất · dự toán trên biểu mẫu</span>
                             <strong>
-                                {Number.isFinite(total.rawXp) ? formatXp(total.rawXp) : '—'} <small>raw Xperience Point</small>
+                                {Number.isFinite(total.rawXp) ? formatXp(total.rawXp) : '—'}{' '}
+                                <small>raw Xperience Point</small>
                             </strong>
                         </div>
-                        <p>{draft.actions.length} action · Xperience Point được duyệt và Xperience Point chính thức sẽ có sau quyết định CTSV.</p>
+                        <p>
+                            {draft.actions.length} action · Xperience Point được duyệt và Xperience Point chính thức sẽ
+                            có sau quyết định CTSV.
+                        </p>
                     </aside>
                     <footer className="v2-report-editor-footer">
                         <div>

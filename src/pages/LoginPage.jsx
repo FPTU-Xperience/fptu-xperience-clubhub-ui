@@ -14,6 +14,8 @@ export default function LoginPage() {
     const [googleReady, setGoogleReady] = useState(false);
     const [showEmailLogin, setShowEmailLogin] = useState(false);
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const shortcuts = import.meta.env.VITE_LOGIN_ACCOUNT_SHORTCUTS === 'true';
     const [emailError, setEmailError] = useState('');
     const googleButtonRef = useRef(null);
 
@@ -32,7 +34,7 @@ export default function LoginPage() {
         setEmailError('');
         setIsLoading(true);
         try {
-            await login(normalizedEmail);
+            await login(normalizedEmail, password);
             success('Chào mừng bạn quay lại FPTU-Xperience ClubHub!');
             navigate('/dashboard');
         } catch (err) {
@@ -180,7 +182,11 @@ export default function LoginPage() {
 
                         <AnimatePresence initial={false}>
                             {showEmailLogin && (
-                                <motion.form
+                                {shortcuts && <div role="group" aria-label="Điền nhanh email">
+                                <button type="button" onClick={() => setEmail('admin@fpt.edu.vn')}>Admin</button>
+                                <button type="button" onClick={() => setEmail('ctsv.an@fpt.edu.vn')}>CTSV</button>
+                            </div>}
+                            <motion.form
                                     onSubmit={handleEmailSubmit}
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
@@ -225,7 +231,9 @@ export default function LoginPage() {
                                             </p>
                                         )}
                                     </div>
-                                    <motion.button
+                                    <label>Mật khẩu<input type="password" required maxLength={128} autoComplete="current-password"
+                                    value={password} onChange={event => setPassword(event.target.value)} /></label>
+                                <motion.button
                                         type="submit"
                                         disabled={isLoading}
                                         whileHover={{ scale: 1.01 }}

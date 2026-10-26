@@ -13,9 +13,25 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
     const [error, setError] = useState('');
+    const [catalog, setCatalog] = useState(null);
     const active = useRef(true);
     const lock = useRef(false);
     const semesterId = semester?.invitationCode || '';
+    useEffect(() => {
+        let current = true;
+        setCatalog(null);
+        api.request(`/api/clubs/${encodeURIComponent(clubId)}/invitation-semesters`)
+            .then((data) => {
+                if (current) setCatalog({ items: data.items || [] });
+            })
+            .catch((issue) => {
+                if (current) setCatalog({ items: [], error: issue.message });
+            });
+        return () => {
+            current = false;
+        };
+    }, [api, clubId, version]);
+    const invitationSemester = catalog?.items.find((item) => item.invitationCode === semesterId);
     useEffect(() => {
         active.current = true;
         return () => {
@@ -27,9 +43,12 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
         setSelected(null);
         setResult(null);
         setError('');
-        if (!semesterId) {
+        if (!semesterId || !invitationSemester?.canInvite) {
             setLoading(false);
-            setError('Học kỳ ở header chưa có cấu hình tra cứu.');
+            setError(
+                catalog?.error ||
+                    (catalog ? 'Học kỳ này chưa có roster đang học cho phép mời.' : 'Đang tải quyền mời theo học kỳ…'),
+            );
             return undefined;
         }
         if (search.trim().length < 2) {
@@ -67,7 +86,7 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
             current = false;
             clearTimeout(timer);
         };
-    }, [api, clubId, semesterId, search, page, version]);
+    }, [api, clubId, semesterId, search, page, version, catalog, invitationSemester?.canInvite]);
     const send = async (event) => {
         event.preventDefault();
         if (
@@ -83,7 +102,7 @@ export default function InviteMemberModal({ api, clubId, onClose, onInvited }) {
         setSending(true);
         setError('');
         try {
-            await api.inviteClubMember(clubId, selected, semesterId);
+            await api.inviteClubMember(clubId, selected, semesterId, result.rosterVersion);
             if (active.current) onInvited(selected);
         } catch (issue) {
             if (active.current) {

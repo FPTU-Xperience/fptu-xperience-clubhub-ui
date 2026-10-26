@@ -3,6 +3,11 @@ import { mapActivityResources } from '../../components/v2/activity-detail/activi
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 import { activityPublication, isActivityPublic } from './activity-publication.js';
 import { resolveActivityContactPoint } from './activity-contact-point.js';
+import {
+    loadStudentActivityFeed,
+    loadStudentActivityDetail,
+    loadStudentRecommendations,
+} from '../../services/student-read-api.js';
 
 export function classifyActivityError(error) {
     if (error?.status === 403) return 'forbidden';
@@ -17,6 +22,8 @@ export function mapActivityDetailItem(raw = {}) {
     return {
         ...activityPublication(raw),
         id: String(raw.id),
+        version: typeof raw.version === 'string' ? raw.version : null,
+        resourceAvailability: raw.resourceAvailability || 'UNCONFIGURED',
         clubId: String(raw.clubId || ''),
         clubCode: String(raw.clubCode || raw.code || ''),
         clubName: String(raw.clubName || 'CLB'),
@@ -28,6 +35,9 @@ export function mapActivityDetailItem(raw = {}) {
         endTime: raw.endTime || raw.endTimeUtc || '',
         resources: mapActivityResources(raw.resources),
         resourceCapabilities: {
+            supportedKinds: Array.isArray(raw.resourceCapabilities?.supportedKinds)
+                ? raw.resourceCapabilities.supportedKinds
+                : [],
             canManage: raw.resourceCapabilities?.canManage === true,
             canUpload: raw.resourceCapabilities?.canUpload === true,
         },
@@ -42,7 +52,7 @@ export function mapActivityFeedItem(raw = {}) {
     return item && isActivityPublic(item) && ['UPCOMING', 'LIVE'].includes(item.status) ? item : null;
 }
 
-export function useActivityDetail(api, sessionKey, activityId) {
+export function useActivityDetail(api, sessionKey, activityId, student = false) {
     const mediaRevision = usePublicMediaRevision('activity');
     const identity = `${sessionKey}:${activityId}`;
     const [version, setVersion] = useState(0);
@@ -56,7 +66,7 @@ export function useActivityDetail(api, sessionKey, activityId) {
         }
         setResult({ identity, status: 'loading', data: null });
         Promise.resolve()
-            .then(() => api.getActivity(id))
+            .then(() => (student ? loadStudentActivityDetail(api, id) : api.getActivity(id)))
             .then(
                 (raw) => {
                     const activity = mapActivityDetailItem(raw);
@@ -79,7 +89,7 @@ export function useActivityDetail(api, sessionKey, activityId) {
         return () => {
             active = false;
         };
-    }, [api, activityId, sessionKey, version, mediaRevision]);
+    }, [api, activityId, sessionKey, version, mediaRevision, student]);
     const current = result.identity === identity ? result : { status: 'loading', data: null };
     return { ...current, retry: () => setVersion((value) => value + 1) };
 }
@@ -161,22 +171,12 @@ function useActivityRequest(loader, mapper, sessionKey) {
 }
 
 export function useActivityFeed(api, sessionKey, clubId) {
-    const loader = useCallback(() => api.getActivities(clubId), [api, clubId]);
+    const loader = useCallback(() => loadStudentActivityFeed(api, clubId), [api, clubId]);
     const mapper = useCallback(mapActivityFeed, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }
 export function useRecommendedActivities(api, sessionKey) {
-    const loader = useCallback(() => api.getActivities(), [api]);
-    const mapper = useCallback(
-        (value) =>
-            mapActivityFeed(value)
-                .slice(0, 6)
-                .map((activity, index) => ({
-                    recommendationId: `temporary-${activity.id}`,
-                    rank: index + 1,
-                    activity,
-                })),
-        [],
-    );
+    const loader = useCallback(() => loadStudentRecommendations(api), [api]);
+    const mapper = useCallback(mapRecommendations, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }

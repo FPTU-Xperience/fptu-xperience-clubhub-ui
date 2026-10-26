@@ -12,6 +12,7 @@ import '../../../components/v2/activity-card/ActivityCard.scss';
 import './ActivityDetailPage.scss';
 import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLinks';
 import ActivityStaffingPanel from '../../../components/v2/activity-detail/ActivityStaffingPanel';
+import StudentSessionSources from '../../../components/v2/activity-detail/StudentSessionSources';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -21,7 +22,7 @@ const tabs = [
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh của tôi'],
 ];
-function PublicActivityProfile({ activity, clubCode, sessionKey }) {
+function PublicActivityProfile({ activity, clubCode, sessionKey, api }) {
     const [tab, setTab] = useState('overview');
     const resources = publicActivityResources(activity.resources);
     const clubLink = <ClubNavigationLinks clubCode={clubCode} />;
@@ -30,10 +31,20 @@ function PublicActivityProfile({ activity, clubCode, sessionKey }) {
             {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
             {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
-            {['assignments', 'recruitment'].includes(tab) && <ActivityStaffingPanel activityId={activity.id} mode={tab} />}
+            {['media', 'documents'].includes(tab) && activity.resourceAvailability !== 'AVAILABLE' && (
+                <p role="status">Chưa tải được nguồn tài nguyên hoặc bạn chưa có quyền xem.</p>
+            )}
+            {['assignments', 'recruitment'].includes(tab) && (
+                <ActivityStaffingPanel activityId={activity.id} mode={tab} />
+            )}
             {tab === 'attendance' && (
                 <div className="v2-activity-profile-panel">
                     <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager={false} />
+                    <StudentSessionSources
+                        key={`sessions:${sessionKey}:${activity.id}`}
+                        api={api}
+                        activityId={activity.id}
+                    />
                 </div>
             )}
         </ActivityProfileLayout>
@@ -42,7 +53,7 @@ function PublicActivityProfile({ activity, clubCode, sessionKey }) {
 
 export default function ActivityDetailPage({ api, sessionKey }) {
     const { activityId } = useParams();
-    const result = useActivityDetail(api, sessionKey, activityId);
+    const result = useActivityDetail(api, sessionKey, activityId, true);
     const activity = result.data;
     const directory = useClubDirectory(api, sessionKey);
     const clubCode =
@@ -64,6 +75,7 @@ export default function ActivityDetailPage({ api, sessionKey }) {
                     activity={activity}
                     clubCode={clubCode}
                     sessionKey={sessionKey}
+                    api={api}
                 />
             ) : (
                 <PageState

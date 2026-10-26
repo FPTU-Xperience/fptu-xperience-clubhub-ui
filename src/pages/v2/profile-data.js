@@ -7,14 +7,15 @@ import { getCoverColors, getCoverShapes, canUseCoverItem, readCoverInventory } f
 
 import { normalizeCoverTransform, normalizeCoverText, normalizeShapeHsl } from './profile-page/cover-design.js';
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
+import { canonicalProfileSnapshot, selfProfilePatch } from '../../services/self-profile-contract.js';
 
 export const PROFILE_STORAGE_VERSION = 1;
 const MAX_DISPLAY_NAME = 120;
 const MAX_HEADLINE = 160;
 const MAX_ABOUT = 2000;
-const MAX_LIST_ITEMS = 12;
-const MAX_LIST_ITEM_LENGTH = 80;
-const PHONE_NUMBER_PATTERN = /^\+?[0-9]{9,15}$/;
+const MAX_LIST_ITEMS = 30;
+const MAX_LIST_ITEM_LENGTH = 100;
+const PHONE_NUMBER_PATTERN = /^[0-9+ ()-]{1,20}$/;
 
 const clone = (value) => structuredClone(value);
 const accountIdentity = (user) => {
@@ -117,9 +118,9 @@ function editablePersonal(value, fallback) {
     }
     if (dateOfBirth) parseBirthDate(formatBirthDate(dateOfBirth));
     if (phoneNumber && !PHONE_NUMBER_PATTERN.test(phoneNumber)) {
-        throw new Error('Số điện thoại phải có từ 9 đến 15 chữ số.');
+        throw new Error('Số điện thoại tối đa 20 ký tự, chỉ gồm chữ số, +, khoảng trắng, dấu ngoặc và dấu gạch ngang.');
     }
-    if (address.length > 500) throw new Error('Địa chỉ tối đa 500 ký tự.');
+    if (address.length > 300) throw new Error('Địa chỉ tối đa 300 ký tự.');
 
     return { dateOfBirth, phoneNumber, address };
 }
@@ -447,14 +448,7 @@ export function useProfile(user, sessionKey, api) {
         setResult({ status: 'loading', data: null, error: null });
         Promise.resolve()
             .then(async () => {
-                const current = readProfile(user);
-                if (!api?.getMyMemberships || savedProfileRecord(user, globalThis.localStorage)) return current;
-                try {
-                    return readProfileFromMemberships(user, await api.getMyMemberships());
-                } catch (issue) {
-                    if (issue?.status === 401 || issue?.status === 403) throw issue;
-                    return current;
-                }
+                return canonicalProfileSnapshot(user, readProfile(user), await api.request('/api/users/me/profile'));
             })
             .then((data) => {
                 if (gate.current.isCurrent(request, sessionKey)) setResult({ status: 'populated', data, error: null });
@@ -474,7 +468,7 @@ export function useProfile(user, sessionKey, api) {
                 (event.key === key || event.detail?.key === key || (event.type === 'storage' && event.key === null))
             ) {
                 gate.current.invalidate();
-                setResult({ status: 'populated', data: readProfile(user), error: null });
+                setVersion((value) => value + 1);
             }
         };
         window.addEventListener('storage', updated);
@@ -488,17 +482,44 @@ export function useProfile(user, sessionKey, api) {
     const retry = useCallback(() => setVersion((value) => value + 1), []);
     const save = useCallback(
         async (patch) => {
-            gate.current.invalidate();
-            const snapshot = previewProfile(result.data || readProfile(user), patch);
-            const data = saveProfile(user, {
-                ...snapshot.profile,
-                personal: snapshot.personal,
-                academic: snapshot.academic,
-            });
+            if (!result.data?.version) throw new Error('Hãy tải hồ sơ từ máy chủ trước khi lưu.');
+            const snapshot = previewProfile(result.data, patch);
+            const request = gate.current.next(sessionKey);
+            const wire = selfProfilePatch(result.data, patch);
+            const response = wire
+                ? await api.request('/api/users/me/profile', {
+                      method: 'PATCH',
+                      headers: { 'Idempotency-Key': crypto.randomUUID() },
+                      body: JSON.stringify(wire),
+                  })
+                : null;
+            if (!gate.current.isCurrent(request, sessionKey)) throw new Error('Phiên chỉnh sửa hồ sơ đã thay đổi.');
+            // Cosmetics have a separate, device-local contract; canonical fields are never imported from old local data.
+            const cosmeticFields = [
+                'avatarFrame',
+                'avatarMode',
+                'avatarDesign',
+                'avatarFrameUsePalette',
+                'coverPreset',
+                'coverShape',
+                'coverShapeUsePalette',
+                'coverBackgroundColor',
+                'coverBackgroundPaint',
+                'coverShapeTransform',
+                'coverShapeHsl',
+                'coverText',
+            ];
+            const cosmetics = Object.fromEntries(
+                cosmeticFields
+                    .filter((name) => Object.hasOwn(patch, name))
+                    .map((name) => [name, snapshot.profile[name]]),
+            );
+            if (Object.keys(cosmetics).length) saveProfile(user, cosmetics);
+            const data = response ? canonicalProfileSnapshot(user, snapshot, response) : snapshot;
             setResult({ status: 'populated', data, error: null });
             return data;
         },
-        [user, result.data],
+        [user, result.data, api, sessionKey],
     );
     return { ...result, retry, save };
 }
