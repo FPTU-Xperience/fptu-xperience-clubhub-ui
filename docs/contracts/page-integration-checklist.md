@@ -1,3 +1,5 @@
+> Current reconciliation — 2026-10-26: [API/UI integration and remaining obligations](main-api-ui-reconciliation-2026-10-26.md) supersedes older absence/browser-only claims for the capabilities listed there. The earlier audit/checklists below are historical; source integration and live acceptance remain separate.
+
 # ClubHub FE ↔ BE integration checklist by page
 
 Implement Status: Not Yet

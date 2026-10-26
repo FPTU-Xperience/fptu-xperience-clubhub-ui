@@ -1,3 +1,5 @@
+> Current reconciliation — 2026-10-26: [API/UI integration and remaining obligations](main-api-ui-reconciliation-2026-10-26.md) supersedes older absence/browser-only claims for the capabilities listed there. The earlier audit/checklists below are historical; source integration and live acceptance remain separate.
+
 # Frontend API debt register — rechecked 2026-10-13
 
 Personal experience update 2026-10-21: own report/list/detail and direct external submission with mandatory evidence now use declared source routes. The [current personal-experience contract](personal-experience-api.md) supersedes older D03 endpoint-absence claims where explicitly noted; affiliated-club endorsement and a student semester catalog remain pending. UI displays Xperience Point while retaining API field names.

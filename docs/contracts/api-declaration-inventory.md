@@ -1,44 +1,40 @@
-# FE facade / BE declaration inventory — 2026-10-13
+# FE facade / BE declaration inventory — 2026-10-26
 
 Implement Status: Done
 
-Status Scope: Documentation: regenerated declaration inventory, not backend feature completion
+Status Scope: Documentation declaration inventory only; not backend feature or live integration completion.
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `a3b8a883f63b6721071a0e09861ac32b3c81eacf`; remote comparison is a separate check recorded in the lifecycle audit; this generator does not fetch or verify remote main. This inventories declarations, not handler reachability, DTO compatibility, authorization or deployed health. Report submodule prefix is explicitly resolved from ReportEndpoints.cs. Unresolved group declarations: 17; retained below for manual review.
 
-Source Evidence: scripts/audit-api-contracts.mjs was executed against current source: 95 wrappers, 87 declared, 2 composed, 6 absent, 0 unresolved wrappers. Unresolved helper groups remain listed explicitly; no handler/deployment sign-off.
-
-Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f617bd5144ab1b1a6cd0e74983983a4d`; remote comparison is a separate check recorded in the lifecycle audit; this generator does not fetch or verify remote main. This inventories declarations, not handler reachability, DTO compatibility, authorization or deployed health. Report submodule prefix is explicitly resolved from ReportEndpoints.cs. Unresolved group declarations: 17; retained below for manual review.
-
-95 wrappers: 87 declared, 2 composed, 6 absent, 0 unresolved.
+102 wrappers: 99 declared, 1 composed, 2 delegated to session-client, 0 absent, 0 unresolved.
 
 | Wrapper | HTTP | Normalized path | Declaration status / source |
 | --- | --- | --- | --- |
 | login | POST | `/api/auth/dev-login` | DECLARED — src/Services/AuthService/Endpoints/AuthEndpoints.cs:28 |
 | loginWithGoogle | POST | `/api/auth/google` | DECLARED — src/Services/AuthService/Endpoints/AuthEndpoints.cs:23 |
-| refresh | POST | `/api/auth/refresh` | DECLARED — src/Services/AuthService/Endpoints/AuthEndpoints.cs:40 |
-| logout | POST | `/api/auth/logout` | DECLARED — src/Services/AuthService/Endpoints/AuthEndpoints.cs:44 |
+| refresh | POST | `/api/auth/refresh` | DELEGATED |
+| logout | POST | `/api/auth/logout` | DELEGATED |
 | getUsers | GET | `/api/users` | DECLARED — src/Services/AuthService/Endpoints/UserEndpoints.cs:27 |
 | getCurrentUser | GET | `/api/users/me` | DECLARED — src/Services/AuthService/Endpoints/UserEndpoints.cs:19 |
 | createUser | POST | `/api/users` | DECLARED — src/Services/AuthService/Endpoints/UserEndpoints.cs:31 |
 | updateUser | PUT | `/api/users/{}` | DECLARED — src/Services/AuthService/Endpoints/UserEndpoints.cs:32 |
 | lockUser | PATCH | `/api/users/{}/lock` | DECLARED — src/Services/AuthService/Endpoints/UserEndpoints.cs:36 |
 | unlockUser | PATCH | `/api/users/{}/unlock` | DECLARED — src/Services/AuthService/Endpoints/UserEndpoints.cs:37 |
-| getClubs | GET | `/api/clubs` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:25 |
-| getClub | GET | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:56 |
-| updateClub | PUT | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:72 |
-| uploadPublicImage | POST | `/api/media/upload-intents` | ABSENT |
-| updateClubPublicImages | PUT | `/api/clubs/{}/public-images` | ABSENT |
-| updateClubPublicProfile | PATCH | `/api/clubs/{}/public-profile` | ABSENT |
-| updateActivityCoverImage | PUT | `/api/activities/{}/cover-image` | ABSENT |
-| deleteClub | DELETE | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:78 |
-| getMyMemberships | GET | `/api/clubs/me/memberships` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:46 |
+| getClubs | GET | `/api/clubs` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:29 |
+| getClub | GET | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:60 |
+| updateClub | PUT | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:76 |
+| uploadPublicImage | POST | `/api/media/upload-intents` | DECLARED — src/Services/AuthService/Endpoints/PublicMediaEndpoints.cs:24 |
+| updateClubPublicImages | PUT | `/api/clubs/{}/public-images` | DECLARED — src/Services/ClubService/Endpoints/ClubPublicImageEndpoints.cs:18 |
+| updateClubPublicProfile | PATCH | `/api/clubs/{}/public-profile` | DECLARED — src/Services/ClubService/Endpoints/ClubPublicProfileEndpoints.cs:19 |
+| updateActivityCoverImage | PUT | `/api/activities/{}/cover-image` | DECLARED — src/Services/ActivityService/Endpoints/ActivityCoverImageEndpoints.cs:16 |
+| deleteClub | DELETE | `/api/clubs/{}` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:82 |
+| getMyMemberships | GET | `/api/clubs/me/memberships` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:50 |
 | getMyClubSelection | GET | `/api/clubs/me/access + /api/clubs` | COMPOSED |
-| getMyMembershipApplications | GET | `/api/clubs/me/memberships + /api/clubs` | COMPOSED |
-| withdrawMyMembershipApplication | POST | `/api/clubs/me/membership-applications/{}/withdraw` | ABSENT |
-| getMyClubAccess | GET | `/api/clubs/me/access` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:51 |
-| getManagedClubs | GET | `/api/clubs/me/managed` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:41 |
-| joinClub | POST | `/api/clubs/{}/join` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:27 |
+| getMyMembershipApplications | GET | `/api/clubs/me/membership-applications` | DECLARED — src/Services/ClubService/Endpoints/SelfMembershipApplicationEndpoints.cs:17 |
+| withdrawMyMembershipApplication | POST | `/api/clubs/me/membership-applications/{}/withdraw` | DECLARED — src/Services/ClubService/Endpoints/SelfMembershipApplicationEndpoints.cs:18 |
+| getMyClubAccess | GET | `/api/clubs/me/access` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:55 |
+| getManagedClubs | GET | `/api/clubs/me/managed` | DECLARED — src/Services/ClubService/Endpoints/ClubEndpoints.cs:45 |
+| joinClub | POST | `/api/clubs/{}/join` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:28 |
 | getClubApplications | GET | `/api/clubs/applications` | DECLARED — src/Services/ClubService/Endpoints/ApplicationEndpoints.cs:25 |
 | getMyClubApplications | GET | `/api/clubs/applications/me` | DECLARED — src/Services/ClubService/Endpoints/ApplicationEndpoints.cs:31 |
 | createClubApplication | POST | `/api/clubs/applications` | DECLARED — src/Services/ClubService/Endpoints/ApplicationEndpoints.cs:40 |
@@ -46,17 +42,17 @@ Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f
 | approveClubApplication | POST | `/api/clubs/applications/{}/approve` | DECLARED — src/Services/ClubService/Endpoints/ApplicationEndpoints.cs:52 |
 | requestClubApplicationRevision | POST | `/api/clubs/applications/{}/request-revision` | DECLARED — src/Services/ClubService/Endpoints/ApplicationEndpoints.cs:58 |
 | rejectClubApplication | POST | `/api/clubs/applications/{}/reject` | DECLARED — src/Services/ClubService/Endpoints/ApplicationEndpoints.cs:64 |
-| getClubMemberships | GET | `/api/clubs/{}/memberships` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:32 |
-| approveClubMembership | POST | `/api/clubs/memberships/{}/approve` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:37 |
-| rejectClubMembership | POST | `/api/clubs/memberships/{}/reject` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:42 |
-| getClubMembers | GET | `/api/clubs/{}/members` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:30 |
-| searchEligibleClubMembers | GET | `/api/clubs/{}/eligible-members` | ABSENT |
-| inviteClubMember | POST | `/api/clubs/{}/members` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:34 |
-| getClubMember | GET | `/api/clubs/{}/members/{}` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:39 |
-| updateClubMemberProfile | PUT | `/api/clubs/{}/members/{}` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:43 |
-| assignClubTreasurer | POST | `/api/clubs/{}/treasurers` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:47 |
-| removeClubTreasurer | POST | `/api/clubs/memberships/{}/member` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:52 |
-| deleteClubMember | DELETE | `/api/clubs/{}/members/{}` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:48 |
+| getClubMemberships | GET | `/api/clubs/{}/memberships` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:33 |
+| approveClubMembership | POST | `/api/clubs/memberships/{}/approve` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:38 |
+| rejectClubMembership | POST | `/api/clubs/memberships/{}/reject` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:43 |
+| getClubMembers | GET | `/api/clubs/{}/members` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:31 |
+| searchEligibleClubMembers | GET | `/api/clubs/{}/eligible-members` | DECLARED — src/Services/ClubService/Endpoints/ClubRosterEligibilityEndpoints.cs:15 |
+| inviteClubMember | POST | `/api/clubs/{}/members` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:35 |
+| getClubMember | GET | `/api/clubs/{}/members/{}` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:41 |
+| updateClubMemberProfile | PUT | `/api/clubs/{}/members/{}` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:45 |
+| assignClubTreasurer | POST | `/api/clubs/{}/treasurers` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:48 |
+| removeClubTreasurer | POST | `/api/clubs/memberships/{}/member` | DECLARED — src/Services/ClubService/Endpoints/MembershipEndpoints.cs:53 |
+| deleteClubMember | DELETE | `/api/clubs/{}/members/{}` | DECLARED — src/Services/ClubService/Endpoints/MemberManagementEndpoints.cs:50 |
 | getReports | GET | `/api/reports` | DECLARED — src/Services/ReportService/Endpoints/ReportQueryEndpoints.cs:17 |
 | getReport | GET | `/api/reports/{}` | DECLARED — src/Services/ReportService/Endpoints/ReportQueryEndpoints.cs:21 |
 | getReportingDeadlines | GET | `/api/reporting-deadlines` | DECLARED — src/Services/ReportService/Endpoints/DeadlineEndpoints.cs:24 |
@@ -73,19 +69,26 @@ Generated with `node scripts/audit-api-contracts.mjs`. BE local HEAD: `80818266f
 | downloadUploadedReportFile | GET | `/api/reports/{}/uploaded-file/download` | DECLARED — src/Services/ReportService/Endpoints/ReportFileEndpoints.cs:24 |
 | downloadReportAttachment | GET | `/api/reports/{}/attachments/{}/download` | DECLARED — src/Services/ReportService/Endpoints/ReportFileEndpoints.cs:39 |
 | uploadReportAttachment | POST | `/api/reports/{}/attachments/upload` | DECLARED — src/Services/ReportService/Endpoints/ReportFileEndpoints.cs:36 |
+| uploadContributionEvidence | POST | `/api/contributions/evidence` | DECLARED — src/Services/AdminService/Endpoints/PrivateEvidenceEndpoints.cs:14 |
+| downloadContributionEvidence | GET | `/api/contributions/evidence/{}/download` | DECLARED — src/Services/AdminService/Endpoints/PrivateEvidenceEndpoints.cs:78 |
 | deleteReportAttachment | DELETE | `/api/reports/{}/attachments/{}` | DECLARED — src/Services/ReportService/Endpoints/ReportFileEndpoints.cs:40 |
-| getActivities | GET | `/api/activities` | DECLARED — src/Services/ActivityService/Endpoints/ActivityEndpoints.cs:39 |
-| getActivity | GET | `/api/activities/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityEndpoints.cs:108 |
-| createActivity | POST | `/api/activities` | DECLARED — src/Services/ActivityService/Endpoints/ActivityEndpoints.cs:147 |
-| updateActivity | PUT | `/api/activities/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:18 |
-| cancelActivity | DELETE | `/api/activities/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:19 |
-| checkInActivity | POST | `/api/activities/{}/check-in` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:21 |
-| getMyActivityAttendance | GET | `/api/activities/{}/my-attendance` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:22 |
-| registerParticipant | POST | `/api/activities/{}/participants` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:20 |
-| completeActivity | PATCH | `/api/activities/{}/complete` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:23 |
+| getActivities | GET | `/api/activities` | DECLARED — src/Services/ActivityService/Endpoints/ActivityEndpoints.cs:46 |
+| getActivity | GET | `/api/activities/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityEndpoints.cs:119 |
+| getActivityApplication | GET | `/api/activity-applications/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityApplicationEndpoints.cs:19 |
+| createActivityApplication | POST | `/api/activity-applications` | DECLARED — src/Services/ActivityService/Endpoints/ActivityApplicationEndpoints.cs:17 |
+| updateActivityApplication | PATCH | `/api/activity-applications/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityApplicationEndpoints.cs:20 |
+| submitActivityApplication | POST | `/api/activity-applications/{}/submit` | DECLARED — src/Services/ActivityService/Endpoints/ActivityApplicationEndpoints.cs:21 |
+| createActivity | POST | `/api/activities` | DECLARED — src/Services/ActivityService/Endpoints/ActivityEndpoints.cs:161 |
+| updateActivity | PUT | `/api/activities/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:21 |
+| setActivityPublication | PATCH | `/api/activities/{}/publication` | DECLARED — src/Services/ActivityService/Endpoints/ActivityStaffingEndpoints.cs:20 |
+| cancelActivity | DELETE | `/api/activities/{}` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:22 |
+| checkInActivity | POST | `/api/activities/{}/check-in` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:24 |
+| getMyActivityAttendance | GET | `/api/activities/{}/my-attendance` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:25 |
+| registerParticipant | POST | `/api/activities/{}/participants` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:23 |
+| completeActivity | PATCH | `/api/activities/{}/complete` | DECLARED — src/Services/ActivityService/Endpoints/ActivityWriteEndpoints.cs:26 |
 | getActivityAttendance | GET | `/api/clubs/{}/activities/{}/attendance` | DECLARED — src/Services/ActivityService/Endpoints/AttendanceManagementEndpoints.cs:29 |
-| updateActivityAttendance | PUT | `/api/clubs/{}/activities/{}/attendance/{}` | DECLARED — src/Services/ActivityService/Endpoints/AttendanceManagementEndpoints.cs:202 |
-| bulkUpdateActivityAttendance | PUT | `/api/clubs/{}/activities/{}/attendance` | DECLARED — src/Services/ActivityService/Endpoints/AttendanceManagementEndpoints.cs:348 |
+| updateActivityAttendance | PUT | `/api/clubs/{}/activities/{}/attendance/{}` | DECLARED — src/Services/ActivityService/Endpoints/AttendanceManagementEndpoints.cs:205 |
+| bulkUpdateActivityAttendance | PUT | `/api/clubs/{}/activities/{}/attendance` | DECLARED — src/Services/ActivityService/Endpoints/AttendanceManagementEndpoints.cs:355 |
 | getBudgetProposals | GET | `/api/finance/proposals` | DECLARED — src/Services/FinanceService/Endpoints/ProposalEndpoints.cs:23 |
 | createBudgetProposal | POST | `/api/finance/proposals` | DECLARED — src/Services/FinanceService/Endpoints/ProposalEndpoints.cs:25 |
 | approveBudget | POST | `/api/finance/proposals/{}/approve` | DECLARED — src/Services/FinanceService/Endpoints/ProposalEndpoints.cs:32 |

@@ -1,3 +1,5 @@
+> Current reconciliation — 2026-10-26: [API/UI integration and remaining obligations](main-api-ui-reconciliation-2026-10-26.md) supersedes older absence/browser-only claims for the capabilities listed there. The earlier audit/checklists below are historical; source integration and live acceptance remain separate.
+
 # Personal experience summary, evidence and radar
 
 Contract tổng hợp 2026-10-22: [Báo cáo Xperience Point và trải nghiệm tự khai](../../../fptu-xperience-doc/docs/contracts/xperience-report-and-self-declaration-contract.md) — phạm vi Admin/ClubHub, một quyền xử lý CLB, mismatch 403 và backend acceptance.
