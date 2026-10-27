@@ -3,23 +3,6 @@ import { usePublicMediaRevision } from '../../services/use-public-media-revision
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 const text = (value, fallback = '') => String(value ?? fallback);
-const viteEnv = import.meta.env || {};
-export const isMyClubsMockEnabled = viteEnv.DEV && viteEnv.VITE_MOCK_MY_CLUBS === 'true';
-
-const mockSelection = [
-    {
-        clubId: 1, clubCode: 'fcode', name: 'F-Code', role: 'MANAGER', pendingApplications: 3,
-        upcomingActivity: { title: 'Code Camp: Build for Campus', startTime: '2026-09-28T08:30:00+07:00', location: 'Innovation Lab' },
-    },
-    {
-        clubId: 2, clubCode: 'fstyle', name: 'F-Style', role: 'MEMBER',
-        upcomingActivity: { title: 'Creative Portfolio Workshop', startTime: '2026-10-02T18:00:00+07:00', location: 'Phòng Studio A' },
-    },
-];
-const mockApplications = [
-    { applicationId: 'mock-application-1', club: { clubId: 'fmelody', clubCode: 'FMELODY', name: 'F-Melody' }, reason: 'Mình muốn tham gia ban truyền thông.', status: 'PENDING', canWithdraw: true },
-];
-
 export function classifyMyClubsError(error) {
     if (error?.status === 401) return 'unauthorized';
     if (error?.status === 403) return 'forbidden';
@@ -112,7 +95,7 @@ function useRequest(loader, mapper, sessionKey) {
 
 export function useMyClubSelection(api, sessionKey) {
     return useRequest(
-        useCallback(() => (isMyClubsMockEnabled ? mockSelection : api.getMyClubSelection()), [api]),
+        useCallback(() => api.getMyClubSelection(), [api]),
         useCallback(mapMyClubSelection, []),
         sessionKey,
     );
@@ -120,7 +103,7 @@ export function useMyClubSelection(api, sessionKey) {
 
 export function useMyMembershipApplications(api, sessionKey) {
     return useRequest(
-        useCallback(() => (isMyClubsMockEnabled ? mockApplications : api.getMyMembershipApplications()), [api]),
+        useCallback(() => api.getMyMembershipApplications(), [api]),
         useCallback(mapMyMembershipApplications, []),
         sessionKey,
     );

@@ -6,7 +6,6 @@ import MyClubCard from '../../../components/v2/my-clubs/MyClubCard';
 import MyMembershipApplications from '../../../components/v2/my-clubs/MyMembershipApplications';
 import {
     APPLICATION_RESULT_WINDOW_MS,
-    isMyClubsMockEnabled,
     useMyMembershipApplications,
     visibleSentApplications,
 } from '../my-clubs-data';
@@ -34,7 +33,6 @@ export default function MyClubsPage({ api, sessionKey }) {
     }, [applications.data, now]);
     const [withdrawingId, setWithdrawingId] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
-    const [mockWithdrawnIds, setMockWithdrawnIds] = useState([]);
     const navigate = useNavigate();
     const [acceptingId, setAcceptingId] = useState('');
     const [invitationError, setInvitationError] = useState('');
@@ -78,14 +76,9 @@ export default function MyClubsPage({ api, sessionKey }) {
         setWithdrawingId(applicationId);
         setWithdrawError('');
         try {
-            if (isMyClubsMockEnabled) {
-                await new Promise((resolve) => setTimeout(resolve, 350));
-                setMockWithdrawnIds((ids) => [...ids, applicationId]);
-            } else {
-                await api.withdrawMyMembershipApplication(applicationId);
-                applications.retry();
-                selection.retry();
-            }
+            await api.withdrawMyMembershipApplication(applicationId);
+            applications.retry();
+            selection.retry();
         } catch {
             setWithdrawError('Không thể rút đơn lúc này. Bạn có thể thử lại.');
         } finally {
@@ -131,9 +124,7 @@ export default function MyClubsPage({ api, sessionKey }) {
                 description={applications.status === 'empty' ? 'Bạn chưa có đơn tham gia nào.' : undefined}
             >
                 <MyMembershipApplications
-                    applications={visibleSentApplications(applications.data, now).filter(
-                        (application) => !mockWithdrawnIds.includes(application.applicationId),
-                    )}
+                    applications={visibleSentApplications(applications.data, now)}
                     withdrawingId={withdrawingId}
                     onWithdraw={withdraw}
                     acceptingId={acceptingId}
