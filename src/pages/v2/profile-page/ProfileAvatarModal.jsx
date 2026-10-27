@@ -206,7 +206,7 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                     </p>
                 )}
                 {tab === 'frame' && <Link to="/v2/my-clubs">Mở Kho quà tại CLB của tôi →</Link>}
-                <p className="v2-avatar-note">Ảnh và khung đang lưu theo tài khoản trên thiết bị này.</p>
+                <p className="v2-avatar-note">Ảnh tải lên được lưu trên máy chủ. Lựa chọn khung lưu theo tài khoản trên thiết bị này.</p>
                 {error && (
                     <p className="v2-profile-form-error" role="alert">
                         {error}
