@@ -12,6 +12,7 @@ export function canonicalProfileSnapshot(user, local, response) {
         version: response.version,
         profileSource: response.profileSource,
         editableFields: response.editableFields,
+        onboarding: response.onboarding,
         profile: {
             ...local.profile,
             ...response.profile,
@@ -64,7 +65,7 @@ export function canonicalProfileSnapshot(user, local, response) {
 export function selfProfilePatch(snapshot, patch) {
     const result = { expectedVersion: snapshot.version };
     const fields = new Set(snapshot.editableFields);
-    const sections = { profile: patch, personal: patch.personal || {} };
+    const sections = { profile: patch, personal: patch.personal || {}, academic: patch.academic || {} };
     for (const [section, values] of Object.entries(sections)) {
         for (const [name, input] of Object.entries(values)) {
             if (!fields.has(`${section}.${name}`)) continue;

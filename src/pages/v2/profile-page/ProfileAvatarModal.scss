@@ -27,16 +27,6 @@
     a {
         color: #c2410c;
     }
-    footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        position: sticky;
-        bottom: 0;
-        padding: 16px 0;
-        border-top: 1px solid #e2e8f0;
-        background: white;
-    }
     button:disabled {
         opacity: 0.55;
         cursor: not-allowed;

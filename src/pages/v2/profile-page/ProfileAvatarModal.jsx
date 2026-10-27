@@ -101,8 +101,23 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                 if (!saving && !syncing) onClose();
             }}
             className="v2-avatar-modal"
+            footer={
+                <>
+                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
+                        Hủy
+                    </button>
+                    <button
+                        type="submit"
+                        form={`${id}-form`}
+                        className="v2-button v2-button--primary"
+                        disabled={saving || syncing || !changed || !owned}
+                    >
+                        {saving ? 'Đang lưu…' : 'Lưu ảnh đại diện'}
+                    </button>
+                </>
+            }
         >
-            <form className="v2-avatar-form" onSubmit={submit}>
+            <form id={`${id}-form`} className="v2-avatar-form" onSubmit={submit}>
                 {tab !== 'image' && (
                     <div className="v2-avatar-preview">
                         <ProfileAvatar profile={draftProfile} imageUrl={preview || images.avatar} frame={frame} large />
@@ -206,24 +221,14 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                     </p>
                 )}
                 {tab === 'frame' && <Link to="/v2/my-clubs">Mở Kho quà tại CLB của tôi →</Link>}
-                <p className="v2-avatar-note">Ảnh tải lên được lưu trên máy chủ. Lựa chọn khung lưu theo tài khoản trên thiết bị này.</p>
+                <p className="v2-avatar-note">
+                    Ảnh tải lên được lưu trên máy chủ. Lựa chọn khung lưu theo tài khoản trên thiết bị này.
+                </p>
                 {error && (
                     <p className="v2-profile-form-error" role="alert">
                         {error}
                     </p>
                 )}
-                <footer>
-                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
-                        Hủy
-                    </button>
-                    <button
-                        type="submit"
-                        className="v2-button v2-button--primary"
-                        disabled={saving || syncing || !changed || !owned}
-                    >
-                        {saving ? 'Đang lưu…' : 'Lưu ảnh đại diện'}
-                    </button>
-                </footer>
             </form>
         </V2Modal>
     );

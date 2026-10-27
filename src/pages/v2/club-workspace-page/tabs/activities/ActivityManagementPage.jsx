@@ -170,13 +170,13 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         setNotice('');
         try {
             const url = await api.uploadPublicImage(selectedFile, 'activity-cover', activity.id);
-            await api.updateActivityCoverImage(activity.id, url, activity.version);
+            const updated = await api.updateActivityCoverImage(activity.id, url, activity.version);
             if (alive.current) {
                 setCoverOpen(false);
                 setCoverFile(null);
                 setNotice('Đã lưu ảnh bìa.');
                 result.retry();
-                return url;
+                return updated.coverImageUrl;
             }
         } catch (issue) {
             if (alive.current)
@@ -185,6 +185,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                         ? 'Máy chủ chưa hỗ trợ lưu ảnh bìa hoạt động. Ảnh mới chưa được lưu.'
                         : issue.message || 'Không thể lưu ảnh bìa.',
                 );
+            throw issue;
         } finally {
             if (alive.current) setBusy(false);
         }

@@ -22,7 +22,12 @@ export function createAcademicCalendarApi(api) {
 // Version state belongs to the mounted account/period, never to browser storage.
 export function createStudyScheduleApi(api) {
     const versions = new Map();
-    const scope = (user, period) => `${user?.id}:${periodPath(period)}/${period.block}`;
+    const reads = new Map();
+    const writing = new Set();
+    const scope = (user, period) => {
+        if (!user?.id) throw new Error('Cần đăng nhập để quản lý lịch học.');
+        return `${user.id}:${periodPath(period)}/${period.block}`;
+    };
     const path = (period) => `/api/users/me/study-schedule/${periodPath(period)}/${segment(period.block)}`;
     const remember = (user, period, result) => {
         if (typeof result?.version !== 'string' || typeof result?.calendarVersion !== 'string')
@@ -39,7 +44,11 @@ export function createStudyScheduleApi(api) {
         return value;
     };
     const mutate = async (user, period, endpoint, method, body) => {
+        const identity = scope(user, period);
+        if (writing.has(identity)) throw new Error('Đang lưu lịch học. Vui lòng chờ.');
         const version = current(user, period);
+        writing.add(identity);
+        reads.delete(identity);
         try {
             const result = await api.request(endpoint, {
                 method,
@@ -53,13 +62,23 @@ export function createStudyScheduleApi(api) {
             } else remember(user, period, result);
             return result;
         } catch (error) {
-            if (error.status === 409) versions.delete(scope(user, period));
+            // A lost response may have committed. Require a fresh read before retrying.
+            versions.delete(identity);
             throw error;
+        } finally {
+            writing.delete(identity);
         }
     };
     return {
         async get(user, period) {
-            return remember(user, period, await api.request(path(period)));
+            const identity = scope(user, period);
+            if (writing.has(identity)) throw new Error('Đang lưu lịch học. Vui lòng chờ.');
+            const ticket = Symbol();
+            reads.set(identity, ticket);
+            versions.delete(identity);
+            const result = await api.request(path(period));
+            if (reads.get(identity) === ticket) remember(user, period, result);
+            return result;
         },
         putSlot(user, period, week, day, slotId, value) {
             return mutate(user, period, `${path(period)}/${week}/${segment(day)}/${segment(slotId)}`, 'PUT', {

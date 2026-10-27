@@ -1,106 +1,100 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MIN_INTERESTS, onboardingStorageKey, readOnboarding, saveOnboarding } from './onboarding.js';
-import { readProfile, saveProfile } from './profile-data.js';
+import { MAJORS, readOnboarding, saveOnboarding } from './onboarding.js';
 
-function memoryStorage() {
-    const data = new Map();
-    return {
-        getItem: (key) => data.get(key) ?? null,
-        setItem: (key, value) => data.set(key, value),
-    };
-}
-
-test('onboarding is isolated by authenticated user', () => {
-    assert.equal(onboardingStorageKey({ id: 'student-a' }), 'clubhub:v2:onboarding:student-a');
-    assert.notEqual(onboardingStorageKey({ id: 'student-a' }), onboardingStorageKey({ id: 'student-b' }));
+const snapshot = (id = 4) => ({
+    userId: id,
+    version: 'v1',
+    profile: { interests: [] },
+    personal: {},
+    academic: { major: null, studentCode: 'SE1' },
+    onboarding: { version: 0, completedAt: null, syncTimetable: false },
+    editableFields: [
+        'academic.major',
+        'profile.interests',
+        'personal.address',
+        'onboarding.completed',
+        'onboarding.version',
+        'onboarding.syncTimetable',
+    ],
 });
+const preferences = {
+    major: MAJORS[0],
+    interests: ['technology', 'design', 'community'],
+    personal: { address: 'HCM', userId: 8 },
+    academic: { campus: 'FORGED' },
+};
 
-test('completed preferences round-trip and deduplicate interests', () => {
-    const storage = memoryStorage();
-    const user = { id: 'student-a' };
-    const value = saveOnboarding(
-        user,
-        {
-            major: 'Kỹ thuật phần mềm',
-            interests: ['technology', 'design', 'community', 'technology'],
-            syncTimetable: true,
+test('onboarding reads the authenticated canonical profile and does not trust browser flags', async () => {
+    const api = {
+        request: async (path) => {
+            assert.equal(path, '/api/users/me/profile');
+            return snapshot();
         },
-        storage,
+    };
+    const value = await readOnboarding({ id: 4 }, api);
+    assert.equal(value.preferences, null);
+    assert.equal(value.snapshot.academic.studentCode, 'SE1');
+    await assert.rejects(readOnboarding({ id: 5 }, api), /onboarding/);
+});
+
+test('onboarding completion atomically sends version, preferences and only editable private fields', async () => {
+    let payload;
+    const result = await saveOnboarding({ id: 4 }, preferences, snapshot(), {
+        request: async (path, options) => {
+            assert.equal(path, '/api/users/me/profile');
+            assert.equal(options.method, 'PATCH');
+            assert.ok(options.headers['Idempotency-Key']);
+            payload = JSON.parse(options.body);
+            return {
+                ...snapshot(),
+                academic: { major: MAJORS[0] },
+                profile: payload.profile,
+                onboarding: { version: 1, completedAt: '2026-10-27T10:00:00Z', syncTimetable: false },
+            };
+        },
+    });
+    assert.equal(result.major, MAJORS[0]);
+    assert.equal(payload.expectedVersion, 'v1');
+    assert.deepEqual(payload.academic, { major: MAJORS[0] });
+    assert.deepEqual(payload.personal, { address: 'HCM' });
+    assert.deepEqual(payload.onboarding, { completed: true, version: 1, syncTimetable: false });
+    assert.equal(payload.profile.interests.length, 3);
+});
+
+test('invalid choices, unsupported backend and failed saves never complete onboarding', async () => {
+    const noWrite = {
+        request: async () => {
+            throw new Error('must not write');
+        },
+    };
+    for (const interests of [
+        ['technology', 'technology', 'technology'],
+        ['Code', 'CODE', 'code'],
+    ])
+        await assert.rejects(saveOnboarding({ id: 4 }, { ...preferences, interests }, snapshot(), noWrite), /3/);
+    await assert.rejects(saveOnboarding({ id: 4 }, { ...preferences, major: 'Unknown' }, snapshot(), noWrite), /3/);
+    await assert.rejects(
+        saveOnboarding({ id: 4 }, preferences, { ...snapshot(), editableFields: [] }, noWrite),
+        /cho phép/,
     );
-    assert.deepEqual(readOnboarding(user, storage), value);
-    assert.deepEqual(value.interests, ['technology', 'design', 'community']);
-});
-
-test(`onboarding requires at least ${MIN_INTERESTS} interests`, () => {
-    assert.throws(
-        () =>
-            saveOnboarding(
-                { id: 'student-a' },
-                { major: 'Kỹ thuật phần mềm', interests: ['technology', 'design'] },
-                memoryStorage(),
-            ),
-        /ít nhất 3 sở thích/,
+    await assert.rejects(
+        saveOnboarding({ id: 4 }, preferences, snapshot(), {
+            request: async () => {
+                throw Object.assign(new Error('stale'), { status: 409 });
+            },
+        }),
+        { status: 409 },
     );
 });
 
-test('onboarding saves all supplied fields into the same account profile', () => {
-    const storage = memoryStorage();
-    const user = { id: 'student-a', name: 'Minh Anh' };
-    saveOnboarding(user, {
-        major: 'Kỹ thuật phần mềm',
-        interests: ['technology', 'design', 'community'],
-        profile: { displayName: 'Anh', headline: 'Hello campus', about: 'About me', skills: ['React', 'Design'] },
-        academic: { campus: 'FPTU Hồ Chí Minh', year: 'K20', studentCode: 'SE123456' },
-        personal: { dateOfBirth: '2004-05-17', phoneNumber: '0901234567', address: 'TP. Hồ Chí Minh' },
-    }, storage);
-    const profile = readProfile(user, storage);
-    assert.equal(profile.profile.displayName, 'Anh');
-    assert.equal(profile.profile.headline, 'Hello campus');
-    assert.equal(profile.profile.about, 'About me');
-    assert.deepEqual(profile.profile.skills, ['React', 'Design']);
-    assert.deepEqual(profile.profile.interests, ['Công nghệ', 'Thiết kế & sáng tạo', 'Cộng đồng']);
-    assert.deepEqual(profile.academic, { campus: 'FPTU Hồ Chí Minh', year: 'K20', studentCode: 'SE123456', major: 'Kỹ thuật phần mềm' });
-    assert.equal(profile.personal.dateOfBirth, '2004-05-17');
-    assert.equal(profile.personal.phoneNumber, '0901234567');
-    assert.equal(profile.personal.address, 'TP. Hồ Chí Minh');
-    assert.equal(readProfile({ id: 'student-b' }, storage).academic.major, '');
-});
-
-test('legacy onboarding fills missing profile data once and respects later edits', () => {
-    const storage = memoryStorage();
-    const user = { id: 'student-a' };
-    storage.setItem(onboardingStorageKey(user), JSON.stringify({ version: 1, major: 'Kỹ thuật phần mềm', interests: ['technology', 'design', 'community'], completedAt: '2026-01-01' }));
-    assert.ok(readOnboarding(user, storage));
-    assert.equal(readProfile(user, storage).academic.major, 'Kỹ thuật phần mềm');
-    assert.deepEqual(readProfile(user, storage).profile.interests, ['Công nghệ', 'Thiết kế & sáng tạo', 'Cộng đồng']);
-    saveProfile(user, { academic: { major: 'Ngôn ngữ Anh' }, interests: ['Nghệ thuật', 'Nhiếp ảnh'] }, storage);
-    const preferences = readOnboarding(user, storage);
-    assert.equal(preferences.major, 'Ngôn ngữ Anh');
-    assert.deepEqual(preferences.interests, ['arts', 'Nhiếp ảnh']);
-    assert.equal(readProfile(user, storage).academic.major, 'Ngôn ngữ Anh');
-    saveProfile(user, { academic: { major: '' }, interests: [] }, storage);
-    assert.ok(readOnboarding(user, storage));
-    assert.equal(readProfile(user, storage).academic.major, '');
-    assert.deepEqual(readProfile(user, storage).profile.interests, []);
-});
-
-test('legacy migration preserves profile information already supplied by the student', () => {
-    const storage = memoryStorage();
-    const user = { id: 'student-a' };
-    saveProfile(user, { academic: { major: 'Ngôn ngữ Anh', campus: 'Campus của tôi' }, interests: ['Nghệ thuật'] }, storage);
-    storage.setItem(onboardingStorageKey(user), JSON.stringify({ version: 1, major: 'Kỹ thuật phần mềm', interests: ['technology', 'design', 'community'] }));
-    readOnboarding(user, storage);
-    assert.equal(readProfile(user, storage).academic.major, 'Ngôn ngữ Anh');
-    assert.equal(readProfile(user, storage).academic.campus, 'Campus của tôi');
-    assert.deepEqual(readProfile(user, storage).profile.interests, ['Nghệ thuật']);
-});
-
-test('invalid personal data cannot complete onboarding or overwrite a saved profile', () => {
-    const storage = memoryStorage();
-    const user = { id: 'student-a' };
-    saveProfile(user, { displayName: 'Existing name' }, storage);
-    assert.throws(() => saveOnboarding(user, { major: 'Kỹ thuật phần mềm', interests: ['technology', 'design', 'community'], profile: { displayName: 'New name' }, personal: { dateOfBirth: '2003-02-29' } }, storage), /ngày sinh/i);
-    assert.equal(readOnboarding(user, storage), null);
-    assert.equal(readProfile(user, storage).profile.displayName, 'Existing name');
+test('completed onboarding survives subsequent interest edits and is isolated across accounts', async () => {
+    const value = {
+        ...snapshot(),
+        onboarding: { version: 1, completedAt: '2026-10-27T10:00:00Z', syncTimetable: false },
+    };
+    const api = { request: async () => value };
+    assert.ok((await readOnboarding({ id: 4 }, api)).preferences);
+    await assert.rejects(readOnboarding({ id: 5 }, api));
+    await assert.rejects(readOnboarding({ id: 4 }, { request: async () => ({ ...value, onboarding: undefined }) }));
 });
