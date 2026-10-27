@@ -73,25 +73,6 @@
         outline-offset: 2px;
     }
 
-    .v2-study-schedule-legacy {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 18px;
-        padding: 12px 14px;
-        border: 1px solid #fed7aa;
-        border-radius: 10px;
-        background: #fff7ed;
-    }
-
-    .v2-study-schedule-legacy p {
-        margin: 0;
-        color: #9a3412;
-        font-size: 12px;
-    }
-
     .v2-study-schedule-panel {
         overflow: hidden;
         border: 1px solid var(--v2-line);

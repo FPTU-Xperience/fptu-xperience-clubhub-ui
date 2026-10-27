@@ -79,8 +79,5 @@ export function createStudyScheduleApi(api) {
         bulkImport(user, period, entries, mode) {
             return mutate(user, period, `${path(period)}/bulk-import`, 'POST', { entries, mode });
         },
-        async getLegacy() {
-            return { entries: [] };
-        },
     };
 }

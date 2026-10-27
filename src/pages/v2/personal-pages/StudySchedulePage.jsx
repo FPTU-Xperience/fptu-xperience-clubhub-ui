@@ -28,7 +28,6 @@ export default function StudySchedulePage({ user }) {
     const [calendar, setCalendar] = useState(emptyAcademicCalendar);
     const [canWrite, setCanWrite] = useState(false);
     const [revision, setRevision] = useState(0);
-    const [legacyCount, setLegacyCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -54,8 +53,9 @@ export default function StudySchedulePage({ user }) {
         setCalendar(emptyAcademicCalendar);
         setError('');
         setNotice('');
-        Promise.all([studyScheduleRepository.get(user, period), studyScheduleRepository.getLegacy(user)])
-            .then(([schedule, legacy]) => {
+        studyScheduleRepository
+            .get(user, period)
+            .then((schedule) => {
                 if (active) {
                     for (let number = 1; number <= weekCount; number += 1) {
                         toStudyEntryMap(
@@ -66,7 +66,6 @@ export default function StudySchedulePage({ user }) {
                     setAllEntries(schedule.entries);
                     setCalendar(schedule.calendar);
                     setCanWrite(schedule.canWrite === true);
-                    setLegacyCount(legacy.entries.length);
                 }
             })
             .catch((loadError) => {
@@ -150,22 +149,6 @@ export default function StudySchedulePage({ user }) {
         }
     };
 
-    const importLegacy = async () => {
-        if (busy || loading) return;
-        setBusy(true);
-        setError('');
-        try {
-            const schedule = await studyScheduleRepository.importLegacy(user, period);
-            setAllEntries(schedule.entries);
-            setLegacyCount(0);
-            setNotice(`Đã chuyển lịch cũ vào cả 10 tuần của ${formatStudyTerm(period)} · Block 10W.`);
-        } catch (importError) {
-            setError(importError?.message || 'Không thể chuyển lịch cũ.');
-        } finally {
-            setBusy(false);
-        }
-    };
-
     const importTemplate = async (template, mode) => {
         setBusy(true);
         try {
@@ -241,22 +224,6 @@ export default function StudySchedulePage({ user }) {
                     ? `${formatStudyTerm(period)}: học kỳ bắt đầu ${calendar.termStartDate}; Block 10W từ ${calendar.block10StartDate}, Block 3W từ ${calendar.block3StartDate}.`
                     : `Mốc thời gian của ${formatStudyTerm(period)} chưa được quản trị viên cấu hình. Bạn vẫn có thể nhập lịch theo tuần trong block.`}
             </p>
-            {legacyCount > 0 && (
-                <div className="v2-study-schedule-legacy">
-                    <p>
-                        Có {legacyCount} ô lịch cũ chưa gắn học kỳ. Chọn năm, học kỳ và Block 10W trống để chuyển vào cả
-                        10 tuần.
-                    </p>
-                    <button
-                        type="button"
-                        className="v2-button"
-                        disabled={period.block !== '10W' || allEntries.length > 0 || loading || busy}
-                        onClick={importLegacy}
-                    >
-                        Chuyển lịch cũ vào kỳ này
-                    </button>
-                </div>
-            )}
             {loading && (
                 <p className="v2-study-schedule-notice" role="status">
                     Đang tải lịch học...

@@ -1,17 +1,8 @@
-import { studyPeriodKey } from './study-schedule-data.js';
-
-export const ACADEMIC_CALENDAR_STORAGE_KEY = 'clubhub:v2:academic-calendar';
-
 export const emptyAcademicCalendar = Object.freeze({
     termStartDate: '',
     block10StartDate: '',
     block3StartDate: '',
 });
-
-function termKey(period) {
-    studyPeriodKey({ ...period, block: '10W' });
-    return `${period.year}:${period.term}`;
-}
 
 function parseDate(value) {
     if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
@@ -36,33 +27,4 @@ export function validateAcademicCalendar(value) {
         block10StartDate: value.block10StartDate,
         block3StartDate: value.block3StartDate,
     };
-}
-
-export function readAcademicCalendar(period, storage = globalThis.localStorage) {
-    const key = termKey(period);
-    if (!storage) return { ...emptyAcademicCalendar };
-    try {
-        const record = JSON.parse(storage.getItem(ACADEMIC_CALENDAR_STORAGE_KEY));
-        const calendar = record?.version === 1 ? record.terms?.[key] : null;
-        return calendar ? validateAcademicCalendar(calendar) : { ...emptyAcademicCalendar };
-    } catch {
-        return { ...emptyAcademicCalendar };
-    }
-}
-
-export function saveAcademicCalendar(period, value, storage = globalThis.localStorage) {
-    const key = termKey(period);
-    const calendar = validateAcademicCalendar(value);
-    if (!storage?.getItem || !storage?.setItem) throw new Error('Bộ nhớ lịch học kỳ tạm thời hiện chưa khả dụng.');
-    let record;
-    try {
-        record = JSON.parse(storage.getItem(ACADEMIC_CALENDAR_STORAGE_KEY));
-    } catch {
-        record = null;
-    }
-    const terms = record?.version === 1 && record.terms && typeof record.terms === 'object' && !Array.isArray(record.terms)
-        ? record.terms
-        : {};
-    storage.setItem(ACADEMIC_CALENDAR_STORAGE_KEY, JSON.stringify({ version: 1, terms: { ...terms, [key]: calendar } }));
-    return calendar;
 }

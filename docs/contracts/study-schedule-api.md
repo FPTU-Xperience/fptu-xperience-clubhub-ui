@@ -1,165 +1,143 @@
-> Current reconciliation — 2026-10-26: [API/UI integration and remaining obligations](main-api-ui-reconciliation-2026-10-26.md) supersedes older absence/browser-only claims for the capabilities listed there. The earlier audit/checklists below are historical; source integration and live acceptance remain separate.
+# Student study schedule and academic calendar API contract
 
-# Student study schedule API contract
+Implement Status: Implemented in backend source; frontend uses the API exclusively.
 
-Implement Status: Not Yet
+Source Review: 2026-10-27. Backend revision bbf736798c4109cdd29d879b538eaa279a07fa39.
+Source/test integration is separate from authenticated production acceptance and deployment configuration.
 
-Status Scope: Backend implementation
+## Ownership and implementations
 
-Source Review: 2026-10-13; backend HEAD and fetched origin/main 80818266f617bd5144ab1b1a6cd0e74983983a4d. Source audit only; live deployment and backend tests were not verified.
+- AuthService owns private study schedules: [StudyScheduleEndpoints](../../../fptu-xperience-clubhub-api/src/Services/AuthService/Endpoints/StudyScheduleEndpoints.cs).
+- AdminService owns campus academic calendar configuration linked to an official semester: [AcademicCalendarEndpoints](../../../fptu-xperience-clubhub-api/src/Services/AdminService/Endpoints/AcademicCalendarEndpoints.cs).
+- DTOs and validation: [AcademicCalendarContracts](../../../fptu-xperience-clubhub-api/src/Shared/ClubReportHub.Shared/Schedules/AcademicCalendarContracts.cs).
+- Persistence migrations: AuthService PrivateStudySchedules and AdminService AcademicCalendarBySemester, both dated 2026-10-22.
+- Backend acceptance scenarios: [StudyScheduleContractTests](../../../fptu-xperience-clubhub-api/tests/Backend.StabilizationTests/StudyScheduleContractTests.cs); route selection: ClubManagerGatewayTests.
+- ClubHub uses [schedule-api.js](../../src/services/schedule-api.js) through the existing authenticated API client. Admin UI uses its existing API client in [AcademicCalendar](../../../fptu-xperience-admin-ui/src/pages/seasons/AcademicCalendar.jsx).
 
-Source Evidence: Semester catalog persistence exists, but AuthDbContext/AdminDbContext have no private weekly timetable or academic block-date resources, import/cell routes or academic-calendar Gateway prefix.
+No browser timetable/calendar repository, mock fallback or automatic local-data migration remains. Missing authority/configuration returns the API error rather than an empty local success.
 
-Status: **proposed for backend implementation**, updated 2026-10-07. `/v2/study-schedule` currently uses an account-scoped browser mock repository. These endpoints do not exist in the backend yet. Keep `dev-login` unchanged.
+## Identifiers
 
-## Scope and ownership
+Year: 2000–2100. Term: SP, SU or FA. Block: 10W or 3W. Day: mon through sun.
+Weeks are block-local: 1–10 for 10W and 1–3 for 3W. Display labels such as FA26 do not replace separate year/term fields.
 
-- A student selects a calendar year, one of three terms (`SP` Spring, `SU` Summer, `FA` Fall), and a block (`10W` or `3W`). **Within each term, Block 10W is the first phase (10 teaching weeks), followed by Block 3W as the second phase (3 teaching weeks); they do not run in parallel.** Each week can have a different schedule. A cell stores one subject and optional room for a day and timeslot.
-- The bulk import form accepts a **weekly template**: subject, day, slot, and optional room for each class. It applies each template row to **every week of the selected block** in one operation. A student can edit or clear an individual week's cell afterward.
-- Admin UI configures `termStartDate`, `block10StartDate`, and `block3StartDate` once per year and term. The two block starts must be Mondays; 3W may follow a break but cannot begin until the 10W block has completed ten teaching weeks. Students only read these shared dates. The FE derives calendar week numbers and Monday–Sunday column dates from the start of the selected block and keeps block-local week identifiers for edits. Attendance, activity registration, FAP import, and public sharing are outside this contract. `/v2/my-schedule` remains the separate club activity schedule.
-- The private timetable can live in AuthService: map self-service routes outside the management-only `/api/users` group, use `AuthPolicies.AllActors`, derive owner ID from the bearer token, and never accept a client-supplied user ID as authority. The gateway already forwards `/api/users/{**catch-all}` to AuthService. The shared academic calendar needs a gateway route and server authorization independent of timetable ownership.
+| Slot | 10W | 3W |
+| --- | --- | --- |
+| slot-1 | 07:00–09:15 | 07:00–08:30 |
+| slot-2 | 09:30–11:45 | 08:45–10:15 |
+| slot-3 | 12:30–14:45 | 10:30–12:00 |
+| slot-4 | 15:00–17:15 | 12:30–14:00 |
+| slot-5 | 17:30–19:45 | 14:15–15:45 |
+| slot-6 | Invalid | 16:00–17:30 |
+| slot-7 | Invalid | 17:45–19:15 |
 
-## Identifiers and timetable
+Subject is trimmed, required, 1–120 characters. Room is optional, trimmed, up to 80 characters.
 
-`year` is an integer from 2000 to 2100. `term` is exactly `SP`, `SU`, or `FA`; `block` is exactly `10W` or `3W`; `day` is `mon`, `tue`, `wed`, `thu`, `fri`, `sat`, or `sun`. `week` is **block-local**: **1–10** in 10W and **1–3** in the following 3W block. The FE shows the 3W weeks as `Tuần 1–3`, as requested. These identifiers match [the FE constants](../../src/pages/v2/study-schedule-data.js). Times are local campus display times; clients send slot IDs, not timestamps.
+## Academic calendar
 
-The FE displays term names as the term code plus the last two year digits, for example `FA26` and `SP27`. API fields remain separate (`term: "FA"`, `year: 2026`).
+GET /api/academic-calendar/{year}/{term} requires an active authenticated account. Campus defaults to its authoritative profile campus. An authorized global Admin can select an explicit campusCode query; a campus-scoped actor cannot cross campuses. Supported campuses: HAN, HCM, DAN, CAN, QNH.
 
-| Slot ID  | Block 10W   | Block 3W    |
-| -------- | ----------- | ----------- |
-| `slot-1` | 07:00–09:15 | 07:00–08:30 |
-| `slot-2` | 09:30–11:45 | 08:45–10:15 |
-| `slot-3` | 12:30–14:45 | 10:30–12:00 |
-| `slot-4` | 15:00–17:15 | 12:30–14:00 |
-| `slot-5` | 17:30–19:45 | 14:15–15:45 |
-| `slot-6` | —           | 16:00–17:30 |
-| `slot-7` | —           | 17:45–19:15 |
+Response fields:
 
-Block 3W has seven 90-minute slots, 15-minute breaks between slots, and a 30-minute lunch break from 12:00 to 12:30. `slot-6` and `slot-7` are invalid for 10W. A single week has at most 35 cells in 10W or 49 in 3W. One full block holds at most 350 or 147 cells respectively.
+| Field | Meaning |
+| --- | --- |
+| year, term | Requested alias |
+| semesterId, semesterKey | Official semester GUID and code |
+| campusCode | Resolved authoritative campus |
+| version | Opaque GUID; use exactly as returned |
+| isActive, canWrite | Semester state and write eligibility |
+| availability | UNCONFIGURED, AVAILABLE or STALE_CONFIGURATION |
+| termStartDate, block10StartDate, block3StartDate | YYYY-MM-DD dates; empty strings when the known semester has no configuration |
 
-## Endpoints and JSON DTOs
+PUT to the same path requires the server backoffice policy, campus authorization, an Idempotency-Key header, and this body:
 
-All routes require the existing bearer token. Use camelCase JSON. The path identifies the selected period; timetable mutations identify the week where relevant.
-
-### `GET /api/academic-calendar/{year}/{term}`
-
-Any authenticated student or admin can read the shared configuration. Return `200 OK` with:
-
-```json
+~~~json
 {
-    "year": 2026,
-    "term": "FA",
-    "termStartDate": "2026-05-30",
-    "block10StartDate": "2026-06-01",
-    "block3StartDate": "2026-08-17"
+  "expectedVersion": "<version from GET>",
+  "termStartDate": "2026-08-30",
+  "block10StartDate": "2026-08-31",
+  "block3StartDate": "2026-11-09"
 }
-```
+~~~
 
-Return all three date fields as `""` when the term is not configured. Dates use campus local calendar dates in `YYYY-MM-DD` format, without time zone conversion.
+Returns the full GET DTO with the new version. Dates must be real; termStartDate equals the official semester start. Both block starts must be Mondays, block3StartDate must be at least 70 days after block10StartDate, and all 13 teaching weeks must fit within the official semester bounds. Inactive semesters are read-only. Changes append an audit revision and do not move/delete private timetable cells.
 
-### `PUT /api/academic-calendar/{year}/{term}`
+### Required semester alias configuration
 
-Only `ADMIN`, `SYSTEM_ADMIN`, or `STUDENT_AFFAIRS_ADMIN` may update. Request body contains exactly the three date fields above. Require real dates, Monday for both block starts, `termStartDate <= block10StartDate`, and `block3StartDate >= block10StartDate + 70 days`. Return `200 OK` with the full GET DTO. Store one configuration per `(Year, Term)` with an update timestamp and updating admin ID for audit. Editing dates changes calendar labels but must not move or erase student entries associated with block-local weeks. Reject invalid dates/order with `400`, non-admin writes with `403`. The server must enforce authorization; FE route gating is only presentation.
+The backend resolves Workspace:SemesterAliases:{semester-guid}:Year and :Term against existing official semester records. Neither frontend nor backend guesses that mapping from dates or code strings. An absent mapping returns 404 SEMESTER_UNCONFIGURED; duplicate mappings return 409 SEMESTER_ALIAS_AMBIGUOUS. A known semester without block dates is different from an unknown alias. Configure aliases through the deployment-managed backend configuration before expecting a selected year/term to load.
 
-### `GET /api/users/me/study-schedule/{year}/{term}/{block}`
+## Private study schedule
 
-`200 OK`, including when empty:
+Root: /api/users/me/study-schedule/{year}/{term}/{block}. Ownership comes exclusively from the bearer identity; no userId is sent in the payload. All operations revalidate the active/unlocked account and calendar authority. Responses are private/no-store.
 
-```json
+GET root returns:
+
+~~~json
 {
-    "year": 2026,
-    "term": "FA",
-    "block": "3W",
-    "calendar": {
-        "termStartDate": "2026-05-30",
-        "block10StartDate": "2026-06-01",
-        "block3StartDate": "2026-08-17"
-    },
-    "entries": [{ "week": 1, "day": "mon", "slotId": "slot-1", "subject": "SWP391", "room": "AL-R101" }]
+  "year": 2026,
+  "term": "FA",
+  "block": "3W",
+  "version": "<block GUID, empty GUID for a new block>",
+  "calendarVersion": "<calendar GUID>",
+  "calendar": {
+    "termStartDate": "2026-08-30",
+    "block10StartDate": "2026-08-31",
+    "block3StartDate": "2026-11-09"
+  },
+  "semesterKey": "<official semester code>",
+  "semesterId": "<official semester GUID>",
+  "campusCode": "HAN",
+  "availability": "AVAILABLE",
+  "canWrite": true,
+  "entries": []
 }
-```
+~~~
 
-Return **all weeks** of this period in one response, sorted by week, day, then slot number. `entries: []` means empty. `calendar` is the same shared configuration returned by the academic-calendar GET endpoint, including empty strings before admin configuration. `room` is always a string, `""` if omitted. Do not expose database IDs or account IDs.
+Each entry is {week, day, slotId, subject, room}. Entries are ordered by week, day and slot. Historical own reads remain available when a semester is inactive; new writes do not.
 
-### `PUT /api/users/me/study-schedule/{year}/{term}/{block}/{week}/{day}/{slotId}`
+### PUT one cell
 
-Request: `{ "subject": "SWP391", "room": "AL-R101" }`.
+PUT root/{week}/{day}/{slotId}, with Idempotency-Key:
 
-Trim both strings. `subject` is required, 1–120 characters after trimming; `room` is optional, 0–80 characters after trimming. Return `200 OK` with `{ "week", "day", "slotId", "subject", "room" }`. PUT creates or replaces **only** this cell and is idempotent for the same body. Other weeks and periods stay unchanged.
-
-### `DELETE /api/users/me/study-schedule/{year}/{term}/{block}/{week}/{day}/{slotId}`
-
-Return `204 No Content` whether or not the cell exists. Delete only the selected user's cell in that week.
-
-### `POST /api/users/me/study-schedule/{year}/{term}/{block}/bulk-import`
-
-The body is a **weekly template**, without a week field. The server expands it to every week in the selected block:
-
-```json
+~~~json
 {
-    "mode": "skip",
-    "entries": [
-        { "day": "mon", "slotId": "slot-1", "subject": "SWP391", "room": "AL-R101" },
-        { "day": "wed", "slotId": "slot-3", "subject": "Tiếng Anh", "room": "" }
-    ]
+  "subject": "SWP391",
+  "room": "AL-R101",
+  "expectedVersion": "<current block version>",
+  "expectedCalendarVersion": "<current calendar version>"
 }
-```
+~~~
 
-`mode` is `skip` or `replace`. `skip` keeps an existing cell and fills only empty cells; `replace` overwrites the matching cell in each week. Reject a blank template, invalid day/slot, duplicate day+slot rows, invalid text, or more than 35/49 template rows with `400` **before** writing. Apply the whole import in one transaction so no partial block is saved on failure. Return `200 OK`:
+Returns {week, day, slotId, subject, room, version, calendarVersion}. Creates/replaces only this cell. Frontend remembers the returned versions for the next mutation.
 
-```json
+### DELETE one cell
+
+DELETE root/{week}/{day}/{slotId}?expectedVersion=...&expectedCalendarVersion=..., with Idempotency-Key and no body. Returns 204. Frontend reloads GET to obtain the new block version before the next edit.
+
+### Bulk import
+
+POST root/bulk-import, with Idempotency-Key:
+
+~~~json
 {
-    "imported": 6,
-    "skipped": 0,
-    "replaced": 0,
-    "entries": [
-        { "week": 1, "day": "mon", "slotId": "slot-1", "subject": "SWP391", "room": "AL-R101" },
-        { "week": 1, "day": "wed", "slotId": "slot-3", "subject": "Tiếng Anh", "room": "" },
-        { "week": 2, "day": "mon", "slotId": "slot-1", "subject": "SWP391", "room": "AL-R101" },
-        { "week": 2, "day": "wed", "slotId": "slot-3", "subject": "Tiếng Anh", "room": "" },
-        { "week": 3, "day": "mon", "slotId": "slot-1", "subject": "SWP391", "room": "AL-R101" },
-        { "week": 3, "day": "wed", "slotId": "slot-3", "subject": "Tiếng Anh", "room": "" }
-    ]
+  "mode": "skip",
+  "entries": [{"day": "mon", "slotId": "slot-1", "subject": "SWP391", "room": "AL-R101"}],
+  "expectedVersion": "<current block version>",
+  "expectedCalendarVersion": "<current calendar version>"
 }
-```
+~~~
 
-`imported`, `skipped`, and `replaced` count **week cells**, not template rows. `entries` contains the complete updated period in the same entry shape/order as GET. An identical second request with `skip` skips those cells; with `replace` it produces the same timetable. The FE preview reports collisions and defaults to `skip` before the user confirms.
+The body is one weekly template, expanded to all weeks of this block. At most 35 template cells for 10W or 49 for 3W. Duplicate day/slot, empty templates, invalid slot/text or mode fail before writing. skip retains occupied cells; replace overwrites matching cells. The entire import is atomic.
 
-## Validation and persistence
+Returns {imported, skipped, replaced, entries, version, calendarVersion}. Counters count week cells; entries is the complete updated block. Two template rows fill 20 cells in 10W or 6 in 3W when empty.
 
-- Reject invalid year/term/block/week/day/slot combinations, malformed JSON, and invalid field lengths with `400 Bad Request` and field-oriented validation consistent with AuthService. An unauthenticated/expired session returns `401 Unauthorized`.
-- Key persistent cells by `(UserId, Year, Term, Block, Week, Day, SlotId)` with a unique constraint. Store `Subject`, `Room`, and update timestamp. Store the shared calendar separately by `(Year, Term)`. Different-week writes must not erase each other. Do not log subject or room values.
-- Enforce the existing active-account/session policy. The schedule remains private across role changes and account switching. BE must not infer or change a selected term based on the current date.
+## Conflict and failure handling
 
-## FE mock and migration handoff
+- 400: invalid period/week/day/slot/text, unsupported or duplicate JSON fields, missing required versions, invalid calendar dates/template.
+- 401/403: missing identity, ineligible account, unauthorized campus/calendar write or internal access.
+- 404: unknown official semester alias.
+- 409: ambiguous alias, inactive/stale semester, calendar or block version conflict. Frontend invalidates cached block versions and requires a fresh GET after conflicts.
+- 413: bounded JSON payload exceeded.
+- 503: calendar authority/internal credential unavailable. Do not fall back to browser storage or treat it as invalid student input.
 
-[The temporary timetable repository](../../src/pages/v2/study-schedule-repository.js) exposes `get`, per-week `putSlot`/`deleteSlot`, and block-wide `bulkImport`. It persists private cells by account, year, term, block, and week under `clubhub:v2:study-schedule:<authenticated-id>` in `localStorage`. [The admin calendar repository](../../src/pages/v2/academic-calendar-repository.js) stores shared dates under `clubhub:v2:academic-calendar` in the same browser and only allows admin roles to save via its UI API. This mock does not synchronize across devices or provide a security boundary. The initial student term selection is only a navigation convenience based on the browser month. Without configured block dates, the FE displays block-local weeks without calendar dates.
-
-Version-2 local records represented a repeating schedule for the whole block. The mock reads those entries into **every week** on upgrade, preserving their meaning. Version-1 local records had no term; they remain unassigned until the user explicitly transfers them into an empty 10W period, which fills all 10 weeks. These local migrations are not BE endpoints.
-
-Any student-entered `termStarts` from the earlier browser mock are ignored. They must not become shared academic calendar configuration; an admin enters the three dates explicitly.
-
-When BE is deployed, replace repository methods with calls through [the existing API client](../../src/services/api.js), retaining auth, base URL, refresh/error handling, and camelCase conversion. Treat the server schedule as authoritative. Do not silently upload local mock records; any import into BE requires an explicit review/confirm flow.
-
-## Acceptance checks
-
-- [ ] New account: empty GET. PUT, GET, second PUT, DELETE, GET round-trip one week cell with normalized text.
-- [ ] A cell in week 1 does not appear in another week unless bulk import put it there. SP/SU/FA, years, blocks, and users remain isolated.
-- [ ] Admin GET/PUT round-trip the three shared dates; student can GET but receives 403 on PUT. Invalid weekdays/order fail before persistence.
-- [ ] FE and BE preserve the fixed phase order 10W then 3W within a term; 3W weeks are numbered 1–3 inside that block and begin after the 10W teaching period ends, with an optional break.
-- [ ] Admin-configured block Mondays produce correct ISO calendar weeks and day headers, including a year boundary. Changing dates leaves existing weekly entries intact. The two arrows beside the week heading above the timetable move one block-local week and stop at the first/last week.
-- [ ] Bulk template with two rows fills 20 cells in 10W or 6 in 3W. `skip` preserves conflicts; `replace` overwrites them. Invalid or duplicate rows cause no partial writes.
-- [ ] Invalid week (`0`, `11` for 10W, `4` for 3W), 10W `slot-6`/`slot-7`, invalid period, and overlong fields return 400.
-- [ ] Unauthenticated calls return 401; one user cannot see or modify another user's entries.
-- [ ] Gateway GET/PUT/DELETE/POST and FE week switching, reload, account switching, preview, conflict handling, and error states work on authenticated sessions.
-
-
-## Latest-main reconciliation — 2026-10-09
-
-Main 80818266 now persists AdminService semesters (`GET/POST /api/v1/semesters`, GET active, PUT identifier; aliases `/api/semesters`). These routes require backoffice authorization; do not call them directly as a student or create a parallel semester catalog. They provide start/end and canonical GUID/code, not the term/10W/3W date configuration above or private timetable cells. The proposed calendar and timetable routes remain absent.
-
-Link calendar configuration to `Semester.Id`, campus scope and configured year/term alias. Retain FE year/term/block routes through an explicit alias resolver; unknown/ambiguous mapping is an error, not a date-based inference. Reuse existing semester start where policy maps it to termStartDate; store block dates separately under the linked record. Backoffice writes use existing campus/global policy. Student calendar projection is authenticated read-only; it does not broaden backoffice semester rights.
-
-Add opaque calendar/version and expectedVersion to writes, and per-cell/block version checks to prevent bulk import racing manual edits. Block template import validates all rows and commits atomically; stale configuration/period ->409. Empty calendar dates mean a known semester with missing block configuration, not a nonexistent semester. Semester deactivation prevents new writes without erasing prior personal schedules; authorized historic self reads remain available. The weekly CLB page schedule is presentation metadata and remains separate from the student's 10W/3W timetable.
-
-Acceptance adds authoritative semester alias and cross-campus administration tests, inactive semester, manual-vs-bulk conflict and preservation when calendar dates change. See [conventions](api-contract-conventions.md), D09 [handoff](backend-api-implementation-handoff.md).
+Existing backend tests cover owner isolation, campus policy, version replay, invalid payloads, atomic bulk import, calendar changes, inactive history, alias failures, append-only history, migrations and SQL concurrency. Frontend tests cover the request DTO/version boundary and calendar/week/template presentation. These tests do not establish that production semester aliases or a real authenticated round trip have been configured and verified.
