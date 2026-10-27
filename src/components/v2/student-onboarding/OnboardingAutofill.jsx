@@ -1,61 +1,17 @@
-import { Mail, Sparkles } from 'lucide-react';
-import { CAMPUSES, campusLabel } from '../../../pages/v2/profile-options';
+import { Mail } from 'lucide-react';
+import { campusLabel } from '../../../pages/v2/profile-options';
 
-export default function OnboardingAutofill({ email, inferred, draft, onChange }) {
-    const recognized = Boolean(inferred.studentCode || inferred.campus);
+export default function OnboardingAutofill({ email, draft }) {
     return (
         <section className="v2-onboarding-autofill">
-            <div className="v2-onboarding-email">
-                <Mail size={20} aria-hidden="true" />
-                <div>
-                    <small>Email đăng nhập</small>
-                    <strong>{email || 'Chưa có email'}</strong>
-                </div>
-            </div>
-            <p className="v2-onboarding-autofill-message">
-                <Sparkles size={18} aria-hidden="true" />
-                <span>
-                    {recognized
-                        ? 'Đã nhận diện thông tin từ email FPT. Bạn có thể kiểm tra và điều chỉnh trước khi tiếp tục.'
-                        : 'Bạn có thể chọn campus và nhập mã sinh viên bên dưới để bổ sung vào hồ sơ.'}
-                </span>
-            </p>
+            <div className="v2-onboarding-email"><Mail size={20} aria-hidden="true" /><div>
+                <small>Email đăng nhập</small><strong>{email || 'Chưa có email'}</strong>
+            </div></div>
+            <p>Campus và mã sinh viên do nhà trường quản lý. Liên hệ phòng CTSV nếu thông tin chưa chính xác.</p>
             <div className="v2-onboarding-fields">
-                <label className="v2-access-field">
-                    <span>Mã sinh viên</span>
-                    <input
-                        name="studentCode"
-                        value={draft.studentCode}
-                        onChange={(event) => onChange('studentCode', event.target.value.toUpperCase())}
-                        maxLength="30"
-                        placeholder="Ví dụ: CE161131"
-                    />
-                </label>
-                <label className="v2-access-field">
-                    <span>Campus</span>
-                    <select
-                        name="campus"
-                        value={draft.campus}
-                        onChange={(event) => onChange('campus', event.target.value)}
-                    >
-                        <option value="">Chọn campus</option>
-                        {CAMPUSES.map((campus) => (
-                            <option key={campus} value={campus}>
-                                {campusLabel(campus)}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label className="v2-access-field">
-                    <span>Khóa học</span>
-                    <input
-                        name="year"
-                        value={draft.year}
-                        onChange={(event) => onChange('year', event.target.value)}
-                        maxLength="30"
-                        placeholder="Ví dụ: K16"
-                    />
-                </label>
+                <label className="v2-access-field"><span>Mã sinh viên</span><input value={draft.studentCode || 'Chưa có trong danh sách học kỳ'} readOnly /></label>
+                <label className="v2-access-field"><span>Campus</span><input value={campusLabel(draft.campus) || draft.campus || 'Chưa có dữ liệu'} readOnly /></label>
+                <label className="v2-access-field"><span>Khóa học</span><input value={draft.year || 'Chưa có dữ liệu'} readOnly /></label>
             </div>
         </section>
     );

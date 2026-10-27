@@ -54,10 +54,15 @@ function V2Login() {
 
     const handleGoogleCredential = useCallback(
         (response) => {
-            if (response?.credential) finishLogin(async () => {
-                try { return await loginWithGoogle(response.credential); }
-                finally { popupAuthEnd.current?.(); popupAuthEnd.current = null; }
-            });
+            if (response?.credential)
+                finishLogin(async () => {
+                    try {
+                        return await loginWithGoogle(response.credential);
+                    } finally {
+                        popupAuthEnd.current?.();
+                        popupAuthEnd.current = null;
+                    }
+                });
         },
         [finishLogin, loginWithGoogle],
     );
@@ -109,7 +114,10 @@ function V2Login() {
             setError('Vui lòng nhập một địa chỉ email hợp lệ.');
             return;
         }
-        if (!password) { setError('Vui lòng nhập mật khẩu.'); return; }
+        if (!password) {
+            setError('Vui lòng nhập mật khẩu.');
+            return;
+        }
         finishLogin(() => login(normalizedEmail, password));
     };
 
@@ -154,10 +162,17 @@ function V2Login() {
                         ) : (
                             <small>Đăng nhập Google chưa sẵn sàng.</small>
                         )}
-                        <button className="v2-access-login-divider v2-access-email-toggle" type="button"
-                            aria-expanded={emailExpanded} aria-controls="v2-email-login" disabled={busy}
-                            onClick={() => setEmailExpanded(expanded => !expanded)}>
-                            <span>Hoặc dùng email <ChevronDown size={14} aria-hidden="true" /></span>
+                        <button
+                            className="v2-access-login-divider v2-access-email-toggle"
+                            type="button"
+                            aria-expanded={emailExpanded}
+                            aria-controls="v2-email-login"
+                            disabled={busy}
+                            onClick={() => setEmailExpanded((expanded) => !expanded)}
+                        >
+                            <span>
+                                Hoặc dùng email <ChevronDown size={14} aria-hidden="true" />
+                            </span>
                         </button>
                         {(error || authError) && (
                             <p className="v2-access-form-error" id="v2-login-error" role="alert">
@@ -168,9 +183,25 @@ function V2Login() {
                             {shortcuts && (
                                 <div className="v2-access-shortcuts">
                                     <span className="v2-access-shortcuts-label">Điền nhanh email</span>
-                                    <div className="v2-access-shortcuts-buttons" role="group" aria-label="Điền nhanh email">
-                                        <button type="button" disabled={busy} onClick={() => setEmail('admin@fpt.edu.vn')}>Admin</button>
-                                        <button type="button" disabled={busy} onClick={() => setEmail('ctsv.an@fpt.edu.vn')}>CTSV</button>
+                                    <div
+                                        className="v2-access-shortcuts-buttons"
+                                        role="group"
+                                        aria-label="Điền nhanh email"
+                                    >
+                                        <button
+                                            type="button"
+                                            disabled={busy}
+                                            onClick={() => setEmail('admin@fpt.edu.vn')}
+                                        >
+                                            Admin
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={busy}
+                                            onClick={() => setEmail('ctsv.an@fpt.edu.vn')}
+                                        >
+                                            CTSV
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -191,10 +222,18 @@ function V2Login() {
                             </label>
                             <label className="v2-access-field" htmlFor="v2-password">
                                 <span>Mật khẩu</span>
-                                <input id="v2-password" type="password" required maxLength={128} autoComplete="current-password"
-                                    value={password} onChange={event => setPassword(event.target.value)} disabled={busy} />
+                                <input
+                                    id="v2-password"
+                                    type="password"
+                                    required
+                                    maxLength={128}
+                                    autoComplete="current-password"
+                                    value={password}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    disabled={busy}
+                                />
                             </label>
-                                <button className="v2-access-button primary full" type="submit" disabled={busy}>
+                            <button className="v2-access-button primary full" type="submit" disabled={busy}>
                                 {busy ? 'Đang xác thực...' : 'Tiếp tục'} <ArrowRight size={17} />
                             </button>
                         </form>
@@ -209,18 +248,55 @@ function V2Login() {
 }
 
 export default function V2Access({ children }) {
-    const { user, isAuthenticated, loading } = useAuth();
-    const [preferences, setPreferences] = useState(undefined);
+    const { user, isAuthenticated, loading, api, logout } = useAuth();
+    const [state, setState] = useState(null);
+    const [attempt, setAttempt] = useState(0);
     const needsOnboarding = !isAffairsViewer(user);
+    const account = String(user?.id || '');
 
     useEffect(() => {
-        setPreferences(isAuthenticated && needsOnboarding ? readOnboarding(user) : null);
-    }, [isAuthenticated, user, needsOnboarding]);
+        let active = true;
+        setState(null);
+        if (isAuthenticated && needsOnboarding)
+            readOnboarding(user, api)
+                .then((value) => {
+                    if (active) setState({ ...value, account });
+                })
+                .catch((error) => {
+                    if (active) setState({ account, error });
+                });
+        return () => {
+            active = false;
+        };
+    }, [isAuthenticated, user, needsOnboarding, api, account, attempt]);
 
     if (loading) return <LoadingScreen />;
     if (!isAuthenticated) return <V2Login />;
-    if (needsOnboarding && preferences === undefined) return <LoadingScreen />;
-    if (needsOnboarding && !preferences)
-        return <StudentOnboarding key={user?.id || user?.email} user={user} onComplete={setPreferences} />;
+    if (needsOnboarding && (!state || state.account !== account)) return <LoadingScreen />;
+    if (needsOnboarding && state.error)
+        return (
+            <div className="v2-access-shell v2-access-page">
+                <div className="v2-access-loading">
+                    <p role="alert">{state.error.message || 'Không thể tải hồ sơ onboarding.'}</p>
+                    <button type="button" className="v2-button" onClick={() => setAttempt((value) => value + 1)}>
+                        Thử lại
+                    </button>
+                    <button type="button" className="v2-button" onClick={logout}>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+        );
+    if (needsOnboarding && !state.preferences)
+        return (
+            <StudentOnboarding
+                key={account}
+                user={user}
+                snapshot={state.snapshot}
+                api={api}
+                onReload={() => setAttempt((value) => value + 1)}
+                onComplete={(preferences) => setState((current) => ({ ...current, preferences }))}
+            />
+        );
     return children;
 }

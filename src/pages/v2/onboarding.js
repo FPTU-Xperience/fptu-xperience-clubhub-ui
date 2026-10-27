@@ -1,5 +1,3 @@
-import { readProfile, saveProfile } from './profile-data.js';
-
 export const ONBOARDING_VERSION = 1;
 export const MIN_INTERESTS = 3;
 
@@ -26,70 +24,82 @@ export const INTERESTS = [
     { id: 'leadership', label: 'Lãnh đạo', description: 'Tổ chức, mentoring, điều phối' },
 ];
 
-export function onboardingStorageKey(user) {
-    const identity = user?.id || user?.email;
-    return identity ? `clubhub:v2:onboarding:${identity}` : null;
+const client = async (api) => api || (await import('../../services/api.js')).default;
+
+function validateSnapshot(user, value) {
+    if (
+        String(value?.userId) !== String(user?.id) ||
+        typeof value?.version !== 'string' ||
+        !value.profile ||
+        !value.personal ||
+        !Array.isArray(value.editableFields) ||
+        !Number.isInteger(value.onboarding?.version) ||
+        !Object.hasOwn(value.onboarding, 'completedAt')
+    )
+        throw new Error('Máy chủ chưa hỗ trợ dữ liệu onboarding. Vui lòng thử lại sau.');
+    return value;
 }
 
 export function isValidOnboarding(value) {
+    // Completion is a server decision; later profile edits do not reset it.
     return (
         value?.version === ONBOARDING_VERSION &&
-        typeof value.major === 'string' &&
-        value.major.length > 0 &&
-        Array.isArray(value.interests) &&
-        value.interests.length >= MIN_INTERESTS
+        typeof value.completedAt === 'string' &&
+        Number.isFinite(Date.parse(value.completedAt))
     );
 }
 
-export function readOnboarding(user, storage = globalThis.localStorage) {
-    const key = onboardingStorageKey(user);
-    if (!key || !storage) return null;
-    try {
-        const value = JSON.parse(storage.getItem(key));
-        if (!isValidOnboarding(value)) return null;
-        const profile = readProfile(user, storage);
-        if (!value.profileSynced) {
-            try {
-                saveProfile(user, {
-                    academic: { major: profile.academic.major || value.major },
-                    interests: profile.profile.interests.length ? profile.profile.interests : value.interests.map((id) => INTERESTS.find((item) => item.id === id)?.label || id),
-                }, storage);
-                value.profileSynced = true;
-                storage.setItem(key, JSON.stringify(value));
-            } catch {
-                // A completed onboarding remains completed if local storage is unavailable.
-                return value;
-            }
-        }
-        const current = readProfile(user, storage);
-        return {
-            ...value,
-            major: current.academic.major,
-            interests: current.profile.interests.map((label) => INTERESTS.find((item) => item.label === label)?.id || label),
-        };
-    } catch {
-        return null;
-    }
+export function onboardingPreferences(snapshot) {
+    if (!isValidOnboarding(snapshot.onboarding)) return null;
+    return {
+        ...snapshot.onboarding,
+        major: snapshot.academic?.major || '',
+        interests: snapshot.profile.interests.map(
+            (label) => INTERESTS.find((item) => item.label === label)?.id || label,
+        ),
+    };
 }
 
-export function saveOnboarding(user, preferences, storage = globalThis.localStorage) {
-    const key = onboardingStorageKey(user);
-    if (!key || !storage) throw new Error('Không thể lưu sở thích khi chưa có tài khoản.');
-    const value = {
-        version: ONBOARDING_VERSION,
-        major: String(preferences.major || '').trim(),
-        interests: [...new Set(preferences.interests)],
-        syncTimetable: Boolean(preferences.syncTimetable),
-        completedAt: new Date().toISOString(),
-        profileSynced: true,
+export async function readOnboarding(user, api) {
+    if (!user?.id) throw new Error('Cần đăng nhập để tải onboarding.');
+    const snapshot = validateSnapshot(user, await (await client(api)).request('/api/users/me/profile'));
+    return { snapshot, preferences: onboardingPreferences(snapshot) };
+}
+
+export async function saveOnboarding(user, preferences, snapshot, api) {
+    validateSnapshot(user, snapshot);
+    const major = String(preferences.major || '').trim();
+    const interests = [...new Set((preferences.interests || []).map((value) => String(value).trim()).filter(Boolean))];
+    if (
+        !MAJORS.includes(major) ||
+        new Set(interests.map((value) => value.toLocaleLowerCase())).size < MIN_INTERESTS ||
+        interests.length > 30 ||
+        interests.some((value) => value.length > 100)
+    )
+        throw new Error('Vui lòng chọn chuyên ngành và ít nhất 3 sở thích hợp lệ.');
+    const editable = new Set(snapshot.editableFields);
+    if (!['academic.major', 'profile.interests', 'onboarding.completed'].every((field) => editable.has(field)))
+        throw new Error('Máy chủ chưa cho phép hoàn tất onboarding. Vui lòng thử lại sau.');
+    const body = {
+        expectedVersion: snapshot.version,
+        academic: { major },
+        profile: { interests: interests.map((id) => INTERESTS.find((item) => item.id === id)?.label || id) },
+        onboarding: { completed: true, version: ONBOARDING_VERSION, syncTimetable: Boolean(preferences.syncTimetable) },
     };
-    if (!isValidOnboarding(value)) throw new Error('Vui lòng chọn chuyên ngành và ít nhất 3 sở thích.');
-    saveProfile(user, {
-        ...(preferences.profile || {}),
-        academic: { ...(preferences.academic || {}), major: value.major },
-        ...(preferences.personal ? { personal: preferences.personal } : {}),
-        interests: value.interests.map((id) => INTERESTS.find((item) => item.id === id)?.label || id),
-    }, storage);
-    storage.setItem(key, JSON.stringify(value));
-    return value;
+    for (const [name, value] of Object.entries(preferences.personal || {})) {
+        if (editable.has('personal.' + name)) (body.personal ||= {})[name] = value || null;
+    }
+    const saved = validateSnapshot(
+        user,
+        await (
+            await client(api)
+        ).request('/api/users/me/profile', {
+            method: 'PATCH',
+            headers: { 'Idempotency-Key': crypto.randomUUID() },
+            body: JSON.stringify(body),
+        }),
+    );
+    const result = onboardingPreferences(saved);
+    if (!result) throw new Error('Máy chủ chưa xác nhận hoàn tất onboarding.');
+    return result;
 }

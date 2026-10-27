@@ -243,8 +243,25 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             }}
             wide
             className="v2-cover-modal"
+            footer={
+                <>
+                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
+                        Hủy
+                    </button>
+                    <button
+                        type="submit"
+                        form={`${tabId}-form`}
+                        className="v2-button v2-button--primary"
+                        disabled={
+                            saving || syncing || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)
+                        }
+                    >
+                        {saving ? 'Đang lưu…' : 'Lưu ảnh bìa'}
+                    </button>
+                </>
+            }
         >
-            <form onSubmit={submit} className="v2-cover-form">
+            <form id={`${tabId}-form`} onSubmit={submit} className="v2-cover-form">
                 <div className="v2-cover-editor-heading">
                     <div
                         className={`v2-cover-preview${(tab === 'shape' && shape !== 'none') || (tab === 'text' && coverText.visible) ? ' is-positioning' : ''}`}
@@ -268,7 +285,9 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             shapeTransform={shapeTransform}
                             shapeHsl={shapeHsl}
                             shapeUsePalette={shapeUsePalette}
-                            shapeAssetUrl={syncAsset && syncAsset.asset === selectedShape?.assetUrl ? syncAsset.vector : ''}
+                            shapeAssetUrl={
+                                syncAsset && syncAsset.asset === selectedShape?.assetUrl ? syncAsset.vector : ''
+                            }
                             coverText={coverText}
                             selectedParagraphId={selectedParagraphId}
                             textInteractive={tab === 'text'}
@@ -501,20 +520,6 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         {error}
                     </p>
                 )}
-                <footer>
-                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
-                        Hủy
-                    </button>
-                    <button
-                        type="submit"
-                        className="v2-button v2-button--primary"
-                        disabled={
-                            saving || syncing || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)
-                        }
-                    >
-                        {saving ? 'Đang lưu…' : 'Lưu ảnh bìa'}
-                    </button>
-                </footer>
             </form>
         </V2Modal>
     );

@@ -127,7 +127,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
             setImageFile(null);
             setEditor(null);
             setNotice(`Đã cập nhật ${label} CLB.`);
-            return url;
+            return updated[field];
         } catch (issue) {
             if (version !== requestVersion.current) return;
             setModalError(
@@ -135,6 +135,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     ? 'Máy chủ chưa hỗ trợ lưu ảnh CLB. Ảnh đã chọn được giữ để bạn thử lại.'
                     : issue?.message || 'Không thể lưu ảnh. Vui lòng thử lại.',
             );
+            throw issue;
         } finally {
             if (version === requestVersion.current) setSaving(false);
         }

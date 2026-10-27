@@ -3,6 +3,7 @@ import { putImageWithIntent, validateImageUpload } from './media-upload';
 import { selectionFromClubAccess } from './my-clubs-adapter';
 import { publishPublicMediaSaved } from './public-media-sync';
 import { createEntityMediaStore } from './entity-media-store.js';
+import { confirmedImageAttachment } from './media-attachment.js';
 import { createSessionClient } from './session-client.js';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000').replace(/\/+$/, '');
@@ -239,6 +240,7 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify(images),
         });
+        confirmedImageAttachment(updated, images);
         return this.acknowledgeMedia('club', clubId, images, updated, ticket);
     }
 
@@ -256,6 +258,7 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify({ coverImageUrl, expectedVersion }),
         });
+        confirmedImageAttachment(updated, { coverImageUrl });
         return this.acknowledgeMedia('activity', activityId, { coverImageUrl }, updated, ticket);
     }
 

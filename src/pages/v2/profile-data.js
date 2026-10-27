@@ -435,6 +435,7 @@ export function createProfileRequestGate() {
 
 export function useProfile(user, sessionKey, api) {
     const gate = useRef(null);
+    const savingCosmetics = useRef(false);
     if (!gate.current) gate.current = createProfileRequestGate();
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ status: 'loading', data: null, error: null });
@@ -463,6 +464,7 @@ export function useProfile(user, sessionKey, api) {
     useEffect(() => {
         const key = profileStorageKey(user);
         const updated = (event) => {
+            if (savingCosmetics.current && event.type === 'clubhub:profile-updated') return;
             if (
                 key &&
                 (event.key === key || event.detail?.key === key || (event.type === 'storage' && event.key === null))
@@ -514,7 +516,16 @@ export function useProfile(user, sessionKey, api) {
                     .filter((name) => Object.hasOwn(patch, name))
                     .map((name) => [name, snapshot.profile[name]]),
             );
-            if (Object.keys(cosmetics).length) saveProfile(user, cosmetics);
+            if (Object.keys(cosmetics).length) {
+                // This hook already has the acknowledged server response. Its
+                // own synchronous notification must not invalidate this save.
+                savingCosmetics.current = true;
+                try {
+                    saveProfile(user, cosmetics);
+                } finally {
+                    savingCosmetics.current = false;
+                }
+            }
             const data = response ? canonicalProfileSnapshot(user, snapshot, response) : snapshot;
             setResult({ status: 'populated', data, error: null });
             return data;
