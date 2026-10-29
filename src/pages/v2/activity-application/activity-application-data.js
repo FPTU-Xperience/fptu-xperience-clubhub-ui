@@ -41,6 +41,7 @@ export const newApplication = (clubId, period = '') => ({
     endTime: '',
     scale: 'Club',
     independentActionsConfirmed: false,
+    isInternal: true,
     actions: [
         newAction({ name: 'Check-in', expectedPeople: 100, maxAwardCount: 100, verificationMethod: 'ATTENDANCE' }),
         newAction({ name: 'Staff supporting', contributionRole: 'Organizer', expectedPeople: 10, maxAwardCount: 10 }),
@@ -170,6 +171,7 @@ export function applicationPayload(draft) {
         endTimeUtc: activityTimeUtc(draft.endTime),
         scale: draft.scale,
         independentActionsConfirmed: draft.independentActionsConfirmed,
+        isInternal: draft.isInternal !== false,
         actions: draft.actions.map((action) => ({
             clientId: action.clientId,
             name: action.name.trim(),

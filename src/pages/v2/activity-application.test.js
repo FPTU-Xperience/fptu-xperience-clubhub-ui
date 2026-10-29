@@ -124,6 +124,8 @@ test('payload retains policy facts, uses Vietnam dates and omits client Xperienc
     data.actions[0].roleMultiplier = 999;
     const body = applicationPayload(data);
     assert.equal(body.title, 'Workshop');
+    assert.equal(body.isInternal, true);
+    assert.equal(applicationPayload({ ...data, isInternal: false }).isInternal, false);
     assert.equal(body.startTimeUtc, '2026-11-01T02:00:00.000Z');
     assert.equal(body.endTimeUtc, '2026-11-01T05:00:00.000Z');
     assert.equal(body.recruitment, null);

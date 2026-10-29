@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { classifyActivityError, filterActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations } from './activity-data.js';
+import { loadStudentRecommendations } from '../../services/student-read-api.js';
 
 const activity = { id: 'a', clubId: 'c', clubName: 'F-Code', title: 'Workshop', description: 'React', location: 'Lab', status: 'UPCOMING' };
 
@@ -26,3 +27,20 @@ test('activity feed carries the public cover URL without private fields', () => 
 });
 test('recommendations are ranked, unique, and capped at six', () => { const rows = Array.from({ length: 7 }, (_, index) => ({ recommendationId: String(index), rank: 7 - index, activity: { ...activity, id: String(index) } })); assert.equal(mapRecommendations({ items: rows }).length, 6); assert.equal(mapRecommendations({ items: rows })[0].rank, 1); });
 test('activity availability failures remain distinct', () => { assert.equal(classifyActivityError({ status: 403 }), 'forbidden'); assert.equal(classifyActivityError({ status: 401 }), 'unauthorized'); assert.equal(classifyActivityError(new Error()), 'error'); });
+
+test('authorized internal activities retain their scope in feed and recommendations', () => {
+    const internal = { ...activity, isInternal: true };
+    assert.equal(mapActivityFeed([internal])[0].isInternal, true);
+    assert.equal(mapRecommendations([{ rank: 1, activity: internal }])[0].activity.isInternal, true);
+    assert.equal(mapActivityFeed([{ ...activity, isInternal: false }])[0].isInternal, false);
+});
+
+test('basic recommendations retain explicit unavailable-personalization metadata and real activities', async () => {
+    const value = { available: true, mode: 'BASIC', personalizationAvailable: false,
+        personalizationUnavailableReason: 'SCORE_POLICY_UNAPPROVED',
+        items: [{ rank: 1, activity, radarSnapshot: null, targetPillar: null }] };
+    const loaded = await loadStudentRecommendations({ request: async () => value });
+    assert.equal(loaded.mode, 'BASIC');
+    assert.equal(loaded.personalizationAvailable, false);
+    assert.equal(mapRecommendations(loaded)[0].activity.id, activity.id);
+});

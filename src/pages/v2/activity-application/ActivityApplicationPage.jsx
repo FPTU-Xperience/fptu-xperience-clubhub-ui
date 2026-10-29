@@ -389,6 +389,13 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                     onChange={(v) => change('scale', v)}
                                 />
                                 <Field
+                                    label="Phạm vi hiển thị"
+                                    name="isInternal"
+                                    value={String(draft.isInternal !== false)}
+                                    options={[["true", "Nội bộ CLB"], ["false", "Công khai cùng campus"]]}
+                                    onChange={(v) => change('isInternal', v === 'true')}
+                                />
+                                <Field
                                     label="Thời gian bắt đầu *"
                                     type="datetime-local"
                                     name="startTime"

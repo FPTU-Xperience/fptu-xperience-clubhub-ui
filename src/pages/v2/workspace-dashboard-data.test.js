@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import React from 'react';
 import { isOngoingWorkspaceActivity, summarizeWorkspaceDashboard, useWorkspaceDashboard } from './workspace-dashboard-data.js';
-import { useActivityDetail } from './activity-data.js';
+import { mapActivityDetailItem, useActivityDetail } from './activity-data.js';
 
 const ok = (value) => ({ status: 'fulfilled', value });
 const failed = { status: 'rejected', reason: new Error('unavailable') };
@@ -217,4 +217,40 @@ test('home activity filter matches the rail badge regardless of start date', () 
     assert.deepEqual(homeActivities.map((activity) => activity.id), [1, 2, 3]);
     assert.equal(summary.ongoingActivityCount, 3);
     assert.equal(homeActivities.length, summary.ongoingActivityCount);
+});
+
+test('workspace agenda and badge exclude elapsed schedules and show the current time phase', () => {
+    const now = Date.parse('2026-10-29T03:00:00Z');
+    const summary = summarizeWorkspaceDashboard([
+        ok({}),
+        ok([
+            { id: 1, status: 'Scheduled', startTimeUtc: '2026-09-15T05:30:00Z', endTimeUtc: '2026-09-15T07:00:00Z' },
+            { id: 2, status: 'Scheduled', startTimeUtc: '2026-10-29T02:00:00Z', endTimeUtc: '2026-10-29T04:00:00Z' },
+            { id: 3, status: 'Scheduled', startTimeUtc: '2026-10-30T03:00:00Z', endTimeUtc: '2026-10-30T04:00:00Z' },
+            { id: 4, status: 'Cancelled', startTimeUtc: '2026-10-30T03:00:00Z', endTimeUtc: '2026-10-30T04:00:00Z' },
+        ]), ok([]), ok([]),
+    ], true, now);
+    assert.deepEqual(summary.activities.map((a) => [a.id, a.status]), [[1, 'COMPLETED'], [2, 'LIVE'], [3, 'UPCOMING']]);
+    assert.equal(summary.ongoingActivityCount, 2);
+    assert.deepEqual(summary.activities.filter(isOngoingWorkspaceActivity).map((a) => a.id), [2, 3]);
+    assert.equal(summary.upcomingCount, 1);
+    assert.equal(summary.upcomingActivity.startTime, '2026-10-30T03:00:00Z');
+});
+
+test('workspace uses the authoritative next-session timeline instead of stale parent dates', () => {
+    const summary = summarizeWorkspaceDashboard([
+        ok({}), ok([{ id: 1, status: 'Scheduled', startTimeUtc: '2026-09-15T03:00:00Z',
+            endTimeUtc: '2026-09-15T04:00:00Z', timeline: { status: 'UPCOMING',
+                startTimeUtc: '2026-11-01T03:00:00Z', endTimeUtc: '2026-11-01T04:00:00Z' } }]),
+        ok([]), ok([]),
+    ], true, Date.parse('2026-10-29T03:00:00Z'));
+    assert.equal(summary.activities[0].status, 'UPCOMING');
+    assert.equal(summary.activities[0].startTime, '2026-11-01T03:00:00Z');
+    assert.equal(summary.ongoingActivityCount, 1);
+    assert.equal(summary.upcomingCount, 1);
+    const detail = mapActivityDetailItem({ id: 1, status: 'Scheduled', timeline: {
+        status: 'LIVE', startTimeUtc: '2026-10-29T02:00:00Z', endTimeUtc: '2026-10-29T04:00:00Z',
+    } });
+    assert.equal(detail.status, 'LIVE');
+    assert.equal(detail.startTime, '2026-10-29T02:00:00Z');
 });

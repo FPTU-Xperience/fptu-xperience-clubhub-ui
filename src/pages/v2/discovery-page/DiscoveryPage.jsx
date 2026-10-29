@@ -8,6 +8,7 @@ import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryF
 import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
 import { BottomCallout, DiscoverHero, EmptyState, SectionHeading } from '../../../components/v2/DiscoveryLayout';
 import PageState from '../../../components/v2/PageState';
+import { recommendationFailureDescription } from '../../../services/student-read-api.js';
 import {
     createCuratedClubSet,
     filterClubDirectory,
@@ -64,8 +65,12 @@ export default function DiscoverPage({ api, sessionKey }) {
                 <SectionHeading title="Hoạt động dành cho bạn" description="Những trải nghiệm đang phù hợp để bạn khám phá.">
                     <Link className="v2-discovery-button" to="/v2/activities">Xem tất cả hoạt động <ArrowUpRight size={18} /></Link>
                 </SectionHeading>
+                {recommendations.metadata?.mode === 'BASIC' && <p role="status">
+                    Gợi ý cơ bản theo lịch sắp tới. Cá nhân hóa theo Xperience Point hiện chưa khả dụng.
+                </p>}
                 <div className="v2-tabs v2-activity-filter-tabs" role="group" aria-label="Trạng thái hoạt động">{[['ALL','Tất cả'],['UPCOMING','Sắp diễn ra'],['LIVE','Đang diễn ra']].map(([value,label]) => <button key={value} type="button" aria-pressed={activityStatus === value} className={activityStatus === value ? 'active' : ''} onClick={() => setActivityStatus(value)}>{label}</button>)}</div>
-                <PageState status={recommendations.status} onRetry={recommendations.retry}>
+                <PageState status={recommendations.status} onRetry={recommendations.retry}
+                    description={recommendationFailureDescription(recommendations.error)}>
                     <div className="v2-event-grid">
                         {recommendedActivities.map((activity) => <ActivityCard key={activity.id} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
                     </div>

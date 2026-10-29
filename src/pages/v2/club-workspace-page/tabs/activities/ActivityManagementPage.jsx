@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../../../context/AuthContext';
 import { Camera, Eye, Pencil } from 'lucide-react';
 import { useActivityDetail } from '../../../activity-data';
+import ActivityVisibilityControl from './ActivityVisibilityControl';
 import PageState from '../../../../../components/v2/PageState';
 import ActivityProfileLayout, {
     ActivityOverview,
@@ -313,6 +314,8 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                             </>
                         }
                         beforeTabs={
+                            <><ActivityVisibilityControl api={api} activity={activity}
+                                disabled={busy || Boolean(coreDraft || editorDraft)} onSaved={() => result.retry()} />
                             <ActivityPublicationControl
                                 api={api}
                                 activity={activity}
@@ -321,6 +324,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                 hasUnsavedContent={Boolean(coreDraft || editorDraft || coverFile || drafts.length)}
                                 onSaved={() => result.retry()}
                             />
+                            </>
                         }
                         coverAction={
                             <button

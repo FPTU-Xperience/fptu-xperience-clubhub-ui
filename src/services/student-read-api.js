@@ -48,3 +48,13 @@ export async function loadStudentRecommendations(api) {
     if (value?.available !== true || !Array.isArray(value.items)) throw new Error('Gợi ý từ máy chủ chưa khả dụng.');
     return value;
 }
+
+export function recommendationFailureDescription(error) {
+    return {
+        SCORE_POLICY_UNAPPROVED: 'Gợi ý chưa khả dụng vì chưa có chính sách Xperience Point đã được duyệt và có hiệu lực cho phạm vi hiện tại. Vui lòng liên hệ CTSV.',
+        SCORE_POLICY_UNSUPPORTED: 'Chính sách Xperience Point hiện tại chưa được hệ thống hỗ trợ để tạo gợi ý.',
+        SEMESTER_REQUIRED: 'Chưa xác định được học kỳ hiện tại để tạo gợi ý. Vui lòng liên hệ CTSV.',
+        RECOMMENDATION_SOURCE_UNAVAILABLE: 'Chưa tải được nguồn hoạt động đủ điều kiện để tạo gợi ý. Hãy thử lại sau.',
+        RECOMMENDATION_SOURCE_CHANGED: 'Điều kiện xem hoạt động vừa thay đổi. Hãy thử tải lại gợi ý.',
+    }[error?.code];
+}

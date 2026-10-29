@@ -17,11 +17,14 @@ export function classifyActivityError(error) {
 
 export function mapActivityDetailItem(raw = {}) {
     const legacyStatus = String(raw.status || '').toUpperCase();
-    const status = legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
+    const status = legacyStatus === 'SCHEDULED' && raw.timeline?.status
+        ? raw.timeline.status
+        : legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
     if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(status)) return null;
     return {
         ...activityPublication(raw),
         id: String(raw.id),
+        isInternal: typeof raw.isInternal === 'boolean' ? raw.isInternal : null,
         version: typeof raw.version === 'string' ? raw.version : null,
         resourceAvailability: raw.resourceAvailability || 'UNCONFIGURED',
         clubId: String(raw.clubId || ''),
@@ -31,8 +34,8 @@ export function mapActivityDetailItem(raw = {}) {
         description: String(raw.description || ''),
         contactPoint: resolveActivityContactPoint(raw),
         coverImageUrl: String(raw.coverImageUrl || ''),
-        startTime: raw.startTime || raw.startTimeUtc || '',
-        endTime: raw.endTime || raw.endTimeUtc || '',
+        startTime: raw.timeline?.startTimeUtc || raw.startTime || raw.startTimeUtc || '',
+        endTime: raw.timeline?.endTimeUtc || raw.endTime || raw.endTimeUtc || '',
         resources: mapActivityResources(raw.resources),
         resourceCapabilities: {
             supportedKinds: Array.isArray(raw.resourceCapabilities?.supportedKinds)
@@ -158,7 +161,11 @@ function useActivityRequest(loader, mapper, sessionKey) {
             .then((value) => {
                 if (id !== request.current) return;
                 const data = mapper(value);
-                setResult({ status: data.length ? 'populated' : 'empty', data });
+                setResult({ status: data.length ? 'populated' : 'empty', data,
+                    metadata: typeof value?.mode === 'string' ? {
+                        mode: value.mode, personalizationAvailable: value.personalizationAvailable,
+                        personalizationUnavailableReason: value.personalizationUnavailableReason,
+                    } : null });
             })
             .catch((error) => {
                 if (id === request.current) setResult({ status: classifyActivityError(error), data: [], error });

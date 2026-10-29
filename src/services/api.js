@@ -109,8 +109,10 @@ class ApiService {
         }
 
         if (!response.ok) {
+            const problem = await response.clone().json().catch(() => null);
             const requestError = new Error(await this.getErrorMessage(response));
             requestError.status = response.status;
+            if (typeof problem?.code === 'string') requestError.code = problem.code;
             throw requestError;
         }
 
