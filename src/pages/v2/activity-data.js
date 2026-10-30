@@ -122,6 +122,15 @@ export function mapRecommendations(value) {
         .slice(0, 6);
 }
 
+// Discovery includes live and non-registerable activities too. Recommendations
+// only order the authorized feed; they never determine its availability or scope.
+export function selectDiscoveryActivities(feed, recommendations, status = 'ALL') {
+    const ranks = new Map(recommendations.map(({ activity, rank }) => [activity.id, rank]));
+    return filterActivityFeed(feed, '', status)
+        .sort((left, right) => (ranks.get(left.id) ?? Number.MAX_SAFE_INTEGER) - (ranks.get(right.id) ?? Number.MAX_SAFE_INTEGER))
+        .slice(0, 6);
+}
+
 export function sortActivitiesNewestFirst(items) {
     const timestamp = (item) => {
         const value = Date.parse(item.startTime || item.startTimeUtc || '');

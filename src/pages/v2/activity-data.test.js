@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyActivityError, filterActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations } from './activity-data.js';
+import { classifyActivityError, filterActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations, selectDiscoveryActivities } from './activity-data.js';
 import { loadStudentRecommendations } from '../../services/student-read-api.js';
 
 const activity = { id: 'a', clubId: 'c', clubName: 'F-Code', title: 'Workshop', description: 'React', location: 'Lab', status: 'UPCOMING' };
@@ -43,4 +43,39 @@ test('basic recommendations retain explicit unavailable-personalization metadata
     assert.equal(loaded.mode, 'BASIC');
     assert.equal(loaded.personalizationAvailable, false);
     assert.equal(mapRecommendations(loaded)[0].activity.id, activity.id);
+});
+
+test('discovery shows live and closed-registration feed activities when recommendations are empty', () => {
+    const feed = mapActivityFeed([
+        { ...activity, id: 'live', status: 'LIVE', isInternal: true, canRegister: false },
+        { ...activity, id: 'upcoming', canRegister: false },
+    ]);
+    assert.deepEqual(selectDiscoveryActivities(feed, []).map(item => item.id), ['live', 'upcoming']);
+    assert.deepEqual(selectDiscoveryActivities(feed, [], 'LIVE').map(item => item.id), ['live']);
+    assert.deepEqual(selectDiscoveryActivities(feed, [], 'UPCOMING').map(item => item.id), ['upcoming']);
+});
+
+test('recommendations prioritize authorized feed entries without expanding campus or membership scope', () => {
+    const feed = mapActivityFeed([
+        { ...activity, id: 'live', status: 'LIVE' },
+        { ...activity, id: 'later' },
+        { ...activity, id: 'soon' },
+    ]);
+    const ranking = mapRecommendations([
+        { rank: 1, activity: { ...activity, id: 'outside-feed' } },
+        { rank: 2, activity: { ...activity, id: 'soon' } },
+        { rank: 3, activity: { ...activity, id: 'later' } },
+    ]);
+    assert.deepEqual(selectDiscoveryActivities(feed, ranking).map(item => item.id), ['soon', 'later', 'live']);
+    assert.deepEqual(selectDiscoveryActivities([], ranking), []);
+    assert.deepEqual(feed.map(item => item.id), ['live', 'later', 'soon']);
+});
+
+test('discovery filters the complete feed before limiting the preview to six', () => {
+    const feed = mapActivityFeed([
+        ...Array.from({ length: 7 }, (_, index) => ({ ...activity, id: `upcoming-${index}` })),
+        { ...activity, id: 'live', status: 'LIVE' },
+    ]);
+    assert.equal(selectDiscoveryActivities(feed, []).length, 6);
+    assert.deepEqual(selectDiscoveryActivities(feed, [], 'LIVE').map(item => item.id), ['live']);
 });

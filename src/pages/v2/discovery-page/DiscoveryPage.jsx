@@ -2,13 +2,12 @@ import { useMemo, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ActivityCard from '../../../components/v2/activity-card/ActivityCard';
-import { filterActivityFeed, useRecommendedActivities } from '../activity-data';
+import { selectDiscoveryActivities, useActivityFeed, useRecommendedActivities } from '../activity-data';
 import ClubCard from '../../../components/v2/club-card/ClubCard';
 import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryFilters';
 import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
 import { BottomCallout, DiscoverHero, EmptyState, SectionHeading } from '../../../components/v2/DiscoveryLayout';
 import PageState from '../../../components/v2/PageState';
-import { recommendationFailureDescription } from '../../../services/student-read-api.js';
 import {
     createCuratedClubSet,
     filterClubDirectory,
@@ -23,10 +22,11 @@ const MAX_PAGES = 3;
 const MAX_SUGGESTED_CLUBS = PAGE_SIZE * MAX_PAGES;
 
 export default function DiscoverPage({ api, sessionKey, campus }) {
+    const activityFeed = useActivityFeed(api, sessionKey);
     const recommendations = useRecommendedActivities(api, sessionKey);
     const navigate = useNavigate();
     const [activityStatus, setActivityStatus] = useState('ALL');
-    const recommendedActivities = useMemo(() => filterActivityFeed(recommendations.data.map(({ activity }) => activity), '', activityStatus), [recommendations.data, activityStatus]);
+    const activities = useMemo(() => selectDiscoveryActivities(activityFeed.data, recommendations.data, activityStatus), [activityFeed.data, recommendations.data, activityStatus]);
     const result = useClubDirectory(api, sessionKey);
     const [query, setQuery] = useState('');
     const [category, setCategory] = useState('ALL');
@@ -62,15 +62,14 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
         <div className="v2-public-content">
             <DiscoverHero campus={campus} />
             <section className="v2-recommended-activities">
-                <SectionHeading title="Hoạt động dành cho bạn" description="Những trải nghiệm đang phù hợp để bạn khám phá.">
+                <SectionHeading title="Hoạt động dành cho bạn" description="Khám phá những hoạt động đang diễn ra và sắp tới.">
                     <Link className="v2-discovery-button" to="/v2/activities">Xem tất cả hoạt động <ArrowUpRight size={18} /></Link>
                 </SectionHeading>
                 <div className="v2-tabs v2-activity-filter-tabs" role="group" aria-label="Trạng thái hoạt động">{[['ALL','Tất cả'],['UPCOMING','Sắp diễn ra'],['LIVE','Đang diễn ra']].map(([value,label]) => <button key={value} type="button" aria-pressed={activityStatus === value} className={activityStatus === value ? 'active' : ''} onClick={() => setActivityStatus(value)}>{label}</button>)}</div>
-                <PageState status={recommendations.status} onRetry={recommendations.retry}
-                    description={recommendationFailureDescription(recommendations.error)}>
-                    {recommendedActivities.length ? (
+                <PageState status={activityFeed.status} onRetry={activityFeed.retry}>
+                    {activities.length ? (
                         <div className="v2-event-grid">
-                            {recommendedActivities.map((activity) => <ActivityCard key={activity.id} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
+                            {activities.map((activity) => <ActivityCard key={activity.id} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
                         </div>
                     ) : (
                         <EmptyState title="Chưa có hoạt động phù hợp" text="Thử chọn trạng thái khác để xem thêm hoạt động.">
