@@ -166,7 +166,7 @@
     }
     .v2-onboarding-form {
         min-width: 0;
-        padding: 40px clamp(24px, 4vw, 64px);
+        padding: 32px clamp(24px, 4vw, 64px);
     }
     .v2-onboarding-form h2 {
         margin: 24px 0 8px;
@@ -182,20 +182,29 @@
         line-height: 1.7;
     }
     .v2-onboarding-section {
-        padding-bottom: 24px;
+        margin: 18px 0 0;
+        padding-bottom: 16px;
         border-bottom: 1px solid #e2e8f0;
+    }
+    .v2-onboarding-section:last-of-type {
+        padding-bottom: 0;
+        border-bottom: 0;
     }
     .v2-onboarding-section legend {
         font-size: 14px;
     }
+    .v2-onboarding-form .v2-onboarding-interests {
+        margin: 16px 0 0;
+    }
     .v2-onboarding-section > p {
+        margin: 4px 0 12px;
         color: #64748b;
         line-height: 1.6;
     }
     .v2-onboarding-fields {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
+        gap: 14px 16px;
     }
     .v2-access-field {
         display: grid;
@@ -204,7 +213,7 @@
         margin-top: 16px;
     }
     .v2-onboarding-fields .v2-access-field {
-        margin-top: 0;
+        margin: 0;
     }
     .v2-access-field input,
     .v2-access-field select,
@@ -221,8 +230,8 @@
         position: sticky;
         bottom: 0;
         z-index: 1;
-        margin-bottom: -40px;
-        padding: 18px 0 24px;
+        margin-bottom: -32px;
+        padding: 16px 0 20px;
         background: #fff;
     }
     .v2-onboarding-sync-note {
@@ -356,6 +365,9 @@
         }
         .v2-onboarding-form {
             padding: 28px 24px 40px;
+        }
+        .v2-onboarding-actions {
+            margin-bottom: -40px;
         }
     }
 }

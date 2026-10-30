@@ -143,11 +143,8 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                         ) : step === 2 ? (
                             <OnboardingProfileFields draft={draft} onChange={updateDraft} />
                         ) : (
-                            <fieldset>
-                                <legend>Bạn quan tâm điều gì?</legend>
-                                <p>
-                                    Chọn ít nhất {MIN_INTERESTS} lĩnh vực · Đã chọn {interests.length}
-                                </p>
+                            <fieldset className="v2-onboarding-interests" aria-label="Sở thích">
+                                <p aria-live="polite">Đã chọn {interests.length} lĩnh vực</p>
                                 <div className="v2-access-interest-grid">
                                     {INTERESTS.map((interest) => {
                                         const selected = interests.includes(interest.id);
