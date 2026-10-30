@@ -30,6 +30,9 @@ import ReportEditorPage from './report-detail-page/ReportEditorPage';
 import PersonalExperiencePage from './personal-experience/PersonalExperiencePage';
 import './V2App.scss';
 import { PinnedClubsProvider } from './pinned-clubs';
+import GuidedHelp from '../../components/guided-help/GuidedHelp';
+import { clubGuidePlan } from '../../components/guided-help/guide-plans';
+import { campusLabel } from './profile-options';
 const DemoApp = lazy(() => import('./DemoApp'));
 
 function AuthenticatedV2App() {
@@ -72,7 +75,7 @@ function AuthenticatedV2App() {
                             <Route path="admin" element={<AffairsPage section="admin" />} />
                             <Route path="*" element={<Navigate to="/v2/clubs" replace />} />
                         </Route>
-                        <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
+                        <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} campus={campusLabel(user?.campusCode) || 'FPTU'} />} />
                         <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
                         <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
                         <Route
@@ -109,6 +112,7 @@ function AuthenticatedV2App() {
                     </Routes>
                 </main>
                 {!workspace && <Footer />}
+                <GuidedHelp plan={clubGuidePlan(location.pathname)} routeKey={location.pathname + location.search} accountKey={sessionKey} />
             </div>
         </PinnedClubsProvider>
         </EntityMediaProvider>

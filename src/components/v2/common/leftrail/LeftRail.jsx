@@ -4,6 +4,7 @@ import { usePinnedClubs } from '../../../../pages/v2/pinned-clubs';
 import { affairsNavigation, getAdminAppUrl, isAffairsViewer } from '../../../../pages/v2/affairs-access';
 import RailAccountSection from './RailAccountSection';
 import useRailDropdown from './useRailDropdown';
+import { campusLabel } from '../../../../pages/v2/profile-options';
 import './LeftRail.scss';
 const navigation = [
     ['/v2', 'Khám phá', true],
@@ -36,7 +37,7 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
                 </span>
             </Link>
 
-            <p className="v2-left-rail-campus">FPTU Hồ Chí Minh</p>
+            <p className="v2-left-rail-campus">{campusLabel(user?.campusCode) || 'Cộng đồng FPTU'}</p>
             <nav className="v2-left-rail-nav" aria-label="Điều hướng chính">
                 {navigation.map(([to, label, end]) => (
                     <NavLink key={to} to={to} end={end} className="v2-left-rail-nav-row">

@@ -5,6 +5,8 @@ import { INTERESTS, MIN_INTERESTS, saveOnboarding, onboardingAutofill } from '..
 import { formatBirthDate, parseBirthDate } from '../../../pages/v2/profile-date';
 import OnboardingProfileFields from './OnboardingProfileFields';
 import OnboardingAutofill from './OnboardingAutofill';
+import GuidedHelp from '../../guided-help/GuidedHelp';
+import { onboardingGuidePlan } from '../../guided-help/guide-plans';
 import '../../../pages/v2/V2Access.scss';
 import './StudentOnboarding.scss';
 
@@ -90,9 +92,10 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                         clubhub<span className="v2-access-brand-dot">.</span>
                     </span>
                 </a>
-                <span>
-                    BƯỚC {step} / 3 · {stepLabels[step - 1]}
-                </span>
+                <div className="v2-onboarding-header-tools">
+                    <span>BƯỚC {step} / 3 · {stepLabels[step - 1]}</span>
+                    <GuidedHelp inline plan={onboardingGuidePlan(step)} routeKey={`onboarding:${step}`} accountKey={user.id} disabled={busy} />
+                </div>
             </header>
             <main className="v2-onboarding-shell">
                 <section className="v2-onboarding-intro">

@@ -20,7 +20,12 @@
     background: white;
     border-bottom: 1px solid #fed7aa;
 }
-.v2-onboarding-header > span {
+.v2-onboarding-header-tools {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.v2-onboarding-header-tools > span {
     color: #9a3412;
     font-size: 10px;
     font-weight: 650;
@@ -359,7 +364,8 @@
             padding: 0 24px;
             gap: 16px;
         }
-        .v2-onboarding-header > span {
+        .v2-onboarding-header-tools { gap: 10px; }
+        .v2-onboarding-header-tools > span {
             font-size: 9px;
             text-align: right;
         }
