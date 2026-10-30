@@ -75,8 +75,7 @@ export default function ClubDeclarationActions({ api, clubId, record, permission
                 <>
                     {(!reviewConnected || !submitConnected) && (
                         <p className="club-student-declaration-notice">
-                            Quy trình CLB duyệt và chuyển lên CTSV chưa có API hỗ trợ. Các nút chỉ thực hiện khi máy chủ
-                            xác nhận quyền và bước xử lý; không dùng phê duyệt điểm của CTSV thay cho duyệt tại CLB.
+                            Chưa thể duyệt tại CLB hoặc chuyển hồ sơ lên CTSV.
                         </p>
                     )}
                     <label>

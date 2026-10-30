@@ -59,7 +59,7 @@ export function WorkspaceSemesterSelect() {
                 disabled={!semesters.length}
                 onChange={(event) => selectSemester(event.target.value)}
             >
-                {!semesters.length && <option value="">{error || 'Chưa có học kỳ từ máy chủ'}</option>}
+                {!semesters.length && <option value="">{error || 'Chưa có học kỳ'}</option>}
                 {semesters.map((item) => (
                     <option key={item.id} value={item.id}>
                         {item.label}

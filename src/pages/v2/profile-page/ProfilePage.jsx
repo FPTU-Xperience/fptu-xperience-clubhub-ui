@@ -283,10 +283,6 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                     {imageError}
                 </p>
             )}
-            <p className="v2-profile-note">
-                Thông tin cá nhân và ảnh cơ bản lưu trên máy chủ. Khung, màu, shape và bố cục trang trí hiện chỉ lưu
-                trên thiết bị.
-            </p>
             {shared && (
                 <section className="v2-profile-privacy-banner" role="status">
                     <Eye size={18} />
@@ -385,7 +381,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                                     }
                                     note={
                                         experience.summary?.availability?.attendance
-                                            ? 'Nguồn điểm danh máy chủ'
+                                            ? 'Đã xác minh'
                                             : 'Nguồn điểm danh chưa khả dụng'
                                     }
                                 />

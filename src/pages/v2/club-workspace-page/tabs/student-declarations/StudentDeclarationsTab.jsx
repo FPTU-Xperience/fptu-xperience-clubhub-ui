@@ -230,15 +230,7 @@ function StudentDeclarationList({ api, workspace, permissions }) {
             {() => (
                 <div className="club-student-declarations">
                     <p className="club-student-declaration-notice">
-                        Chỉ hiển thị hồ sơ gắn với {workspace.name} mà máy chủ cho phép bạn xem. Trải nghiệm gửi trực
-                        tiếp cho CTSV không tự động chia sẻ với CLB; luồng tham chiếu CLB cho trải nghiệm bên ngoài đang
-                        chờ backend hỗ trợ.
-                    </p>
-                    <p className="club-student-declaration-scope">
-                        Quyền của bạn: Xử lý trải nghiệm tự khai trong CLB (đọc, duyệt tại CLB và chuyển lên CTSV).
-                        {permissions.manage
-                            ? ' Chủ tịch và Phó chủ tịch mặc định đầy đủ quyền.'
-                            : ' Các thao tác được cấp theo checkbox phân quyền.'}
+                        Hồ sơ gắn với {workspace.name} không bao gồm trải nghiệm sinh viên gửi riêng cho CTSV.
                     </p>
                     <div className="club-student-declaration-filters">
                         <label>

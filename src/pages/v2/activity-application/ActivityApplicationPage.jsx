@@ -230,7 +230,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     : await api.createActivityApplication(payload, createKey.current);
                 if (!validReceipt(value) || !['DRAFT', 'REVISION_REQUESTED'].includes(value.status))
                     throw new Error(
-                        'Server chưa trả về hồ sơ action và dự toán Xperience Point hợp lệ. Vui lòng kiểm tra hỗ trợ backend.',
+                        'Không tải được hồ sơ và dự toán Xperience Point. Vui lòng thử lại.',
                     );
                 if (!mounted.current) return;
                 setReceipt(value);
@@ -255,8 +255,8 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 setError(
                     [404, 405, 501].includes(issue.status)
                         ? persistedId
-                            ? `Hồ sơ #${persistedId} đã lưu, nhưng máy chủ chưa hỗ trợ bước gửi duyệt Xperience Point. Hồ sơ chưa được gửi CTSV.`
-                            : 'Máy chủ chưa hỗ trợ hồ sơ hoạt động có action và duyệt Xperience Point. Dữ liệu đang ở biểu mẫu; chưa được lưu hoặc gửi CTSV. Bạn có thể xuất hồ sơ để giữ lại.'
+                            ? `Hồ sơ #${persistedId} đã lưu nhưng chưa gửi được CTSV. Vui lòng thử lại.`
+                            : 'Chưa thể lưu hoặc gửi hồ sơ. Bạn có thể xuất hồ sơ để giữ lại nội dung.'
                         : issue.message || 'Không thể lưu hồ sơ. Vui lòng thử lại.',
                 );
         } finally {
@@ -353,15 +353,14 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     )}
                     {receipt && (
                         <p className="v2-report-editor-notice" role="status">
-                            Hồ sơ #{receipt.id} · phiên bản {receipt.version} đã lưu. Dự toán server:{' '}
+                            Hồ sơ #{receipt.id} đã lưu. Dự toán Xperience Point:{' '}
                             {applicationXpLabel(receipt)}.{' '}
                             <Link to={`${location.pathname}?${resumeQuery}`}>Mở lại bản đã lưu</Link>
                         </p>
                     )}
                     <fieldset disabled={busy || Boolean(receipt && !canUpdate)} className="v2-application-fields">
                         <p className="v2-report-editor-notice">
-                            Điểm và tổng tính tại đây là đề xuất tham khảo. Backend hiện hoãn tính/cộng điểm action;
-                            duyệt hồ sơ hoặc xác minh hoàn thành không cấp XP.
+                            Điểm đề xuất chỉ để tham khảo, chưa phải Xperience Point được ghi nhận.
                         </p>
                         <WorkspacePolicyStatus api={api} clubId={draft.clubId} semesterId={draft.period} />
                         <section hidden={stage !== 0} data-step="0" className="v2-report-editor-card">

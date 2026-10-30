@@ -28,8 +28,7 @@ export default function WorkspacePolicyStatus({ api, clubId, semesterId }) {
                   ? 'Đang tải chính sách học kỳ…'
                   : state.data.availability === 'NO_APPROVED_POLICY'
                     ? 'Học kỳ chưa có chính sách được duyệt.'
-                    : `${state.data.items.length} chính sách được duyệt · môi trường ${state.data.environment}.`}{' '}
-            Catalog này không xác nhận tính điểm action hoặc quyết toán đã được triển khai.
+                    : `${state.data.items.length} chính sách được duyệt.`}
         </p>
     );
 }

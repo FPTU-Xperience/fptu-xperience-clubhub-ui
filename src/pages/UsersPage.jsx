@@ -206,7 +206,7 @@ export default function UsersPage() {
                                                         aria-label={`Chỉnh sửa ${target.fullName}`}
                                                         onClick={() => openEdit(target)}
                                                         disabled={protectedAdmin || unsupportedEditRole}
-                                                        title={unsupportedEditRole ? 'API hiện chưa hỗ trợ chỉnh sửa vai trò này.' : undefined}
+                                                        title={unsupportedEditRole ? 'Chưa thể chỉnh sửa vai trò này.' : undefined}
                                                         className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-gray-300 disabled:opacity-35"
                                                     >
                                                         Sửa

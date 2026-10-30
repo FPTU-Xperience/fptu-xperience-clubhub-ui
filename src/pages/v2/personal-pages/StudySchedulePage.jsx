@@ -228,7 +228,7 @@ export default function StudySchedulePage({ user }) {
             <p className="v2-study-schedule-calendar-note">
                 {calendar.block10StartDate
                     ? `${formatStudyTerm(period)}: học kỳ bắt đầu ${calendar.termStartDate}; Block 10W từ ${calendar.block10StartDate}, Block 3W từ ${calendar.block3StartDate}.`
-                    : `Mốc thời gian của ${formatStudyTerm(period)} chưa được quản trị viên cấu hình. Chỉ có thể chỉnh sửa khi máy chủ xác nhận lịch hợp lệ.`}
+                    : `Mốc thời gian của ${formatStudyTerm(period)} chưa được cấu hình.`}
             </p>
             {loading && (
                 <p className="v2-study-schedule-notice" role="status">
@@ -251,10 +251,10 @@ export default function StudySchedulePage({ user }) {
                         setRevision((value) => value + 1);
                     }}
                 >
-                    Tải lại từ máy chủ
+                    Tải lại lịch
                 </button>
             )}
-            {!loading && !error && !canWrite && <p role="status">Học kỳ này chỉ đọc theo cấu hình máy chủ.</p>}
+            {!loading && !error && !canWrite && <p role="status">Lịch học kỳ này chỉ cho phép xem.</p>}
             {notice && (
                 <p className="v2-study-schedule-notice" role="status">
                     {notice}

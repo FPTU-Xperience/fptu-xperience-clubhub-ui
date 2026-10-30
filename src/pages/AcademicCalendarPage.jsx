@@ -150,10 +150,6 @@ export default function AcademicCalendarPage() {
                     </button>
                 </div>
             </form>
-            <p className="text-sm text-muted">
-                Lịch học kỳ lấy từ máy chủ theo campus và học kỳ đã cấu hình. Ngày bắt đầu học kỳ phải khớp nguồn học kỳ
-                chính thức.
-            </p>
         </div>
     );
 }

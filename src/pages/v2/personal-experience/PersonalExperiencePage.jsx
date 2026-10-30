@@ -227,9 +227,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                             </select>
                         </Field>
                         <p className="personal-experience-notice" role="status">
-                            {!clubAccess.length ? 'Bạn chưa có CLB trực thuộc để lựa chọn. ' : ''}Luồng tham chiếu/xác
-                            nhận qua CLB chưa được máy chủ hỗ trợ. Bạn có thể chuẩn bị thông tin; chưa thể gửi theo lựa
-                            chọn này. Chọn “Gửi trực tiếp” nếu muốn nộp không qua CLB.
+                            {!clubAccess.length ? 'Bạn chưa có CLB trực thuộc để lựa chọn. ' : ''}Chưa thể gửi qua CLB. Chọn “Gửi trực tiếp” để nộp cho CTSV.
                         </p>
                     </>
                 )}

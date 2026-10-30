@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, GraduationCap, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { INTERESTS, MIN_INTERESTS, saveOnboarding, onboardingAutofill } from '../../../pages/v2/onboarding';
 import { formatBirthDate, parseBirthDate } from '../../../pages/v2/profile-date';
@@ -187,10 +187,6 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                                 )}
                             </fieldset>
                         )}
-                        <p className="v2-onboarding-sync-note">
-                            <RefreshCw size={16} aria-hidden="true" />
-                            Thông tin bạn nhập ở các bước tiếp theo sẽ được lưu vào hồ sơ tài khoản.
-                        </p>
                         {error && (
                             <p className="v2-access-form-error" role="alert">
                                 {error}
@@ -213,9 +209,7 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                                 >
                                     <ArrowLeft size={16} /> Quay lại
                                 </button>
-                            ) : (
-                                <span>Kiểm tra thông tin và nguồn dữ liệu trước khi tiếp tục.</span>
-                            )}
+                            ) : null}
                             <button
                                 className="v2-access-button primary"
                                 type="submit"

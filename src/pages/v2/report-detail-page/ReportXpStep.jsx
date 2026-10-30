@@ -143,9 +143,7 @@ export default function ReportXpStep({ api, scope, snapshot, onChange, actor, di
                 <>
                     {!connected && (
                         <p className="v2-report-xp-notice" role="status">
-                            Chưa kết nối dữ liệu báo cáo Xperience Point. Máy chủ hiện chưa hỗ trợ tự điền, lưu bảng
-                            Xperience Point và lịch sử chỉnh sửa. Bạn vẫn có thể hoàn thiện nội dung báo cáo; Xperience
-                            Point chưa được gửi hoặc cộng điểm.
+                            Chưa thể lưu bảng Xperience Point. Bạn vẫn có thể hoàn thiện nội dung báo cáo.
                         </p>
                     )}
                     {!validScope && (
@@ -178,9 +176,7 @@ export default function ReportXpStep({ api, scope, snapshot, onChange, actor, di
                     </p>
                     {snapshot && (
                         <p role="status" className="v2-report-editor-hint">
-                            Phiên bản {snapshot.version} · nguồn v{snapshot.sourceVersion} ·{' '}
-                            {snapshot.dirty ? 'Có thay đổi chưa lưu' : 'Đã tải từ máy chủ'}. Tự điền lại giữ các dòng đã
-                            chỉnh sửa khi nguồn còn hợp lệ.
+                            {snapshot.dirty ? 'Có thay đổi chưa lưu' : 'Đã tải bảng Xperience Point'}
                         </p>
                     )}
                     <div className="v2-report-editor-grid v2-report-xp-filters">

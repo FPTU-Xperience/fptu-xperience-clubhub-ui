@@ -146,15 +146,13 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                     <p className="v2-body-large">
                                         {club.description || 'Thông tin giới thiệu đang được cập nhật.'}
                                     </p>
-                                    <p>
-                                        Thông tin trên trang này đến từ nguồn dữ liệu ClubHub được phép hiển thị cho tài
-                                        khoản của bạn.
-                                    </p>
-                                    <div className="v2-inline">
-                                        {club.tags.map((tag) => (
-                                            <Pill key={tag}>{tag}</Pill>
-                                        ))}
-                                    </div>
+                                    {club.tags.length > 0 && (
+                                        <div className="v2-inline">
+                                            {club.tags.map((tag) => (
+                                                <Pill key={tag}>{tag}</Pill>
+                                            ))}
+                                        </div>
+                                    )}
                                 </section>
                                 <section className="v2-panel">
                                     <h2>Bạn sẽ tìm thấy gì ở đây?</h2>

@@ -329,7 +329,7 @@ export default function ActivityStaffingPanel({
             <p className="v2-staffing-notice">
                 {data.scoringStatus === 'DEFERRED_BY_PRODUCT_OWNER'
                     ? 'Tính điểm đang tạm hoãn. Phân công và xác minh hoàn thành không cộng Xperience Point.'
-                    : 'Nhận việc chưa có Xperience Point chính thức; ghi nhận theo chính sách máy chủ.'}
+                    : 'Nhận việc chưa được ghi nhận Xperience Point.'}
             </p>
             {error && !editing && !assigning && <p role="alert">{error}</p>}
             {notice && <p role="status">{notice}</p>}
@@ -592,7 +592,7 @@ export default function ActivityStaffingPanel({
                                     ))}
                                 </select>{' '}
                             </StaffingField>
-                            {!data.eligibleAssignees?.length && <p>Chưa có danh sách người đủ điều kiện từ máy chủ.</p>}
+                            {!data.eligibleAssignees?.length && <p>Chưa có người đủ điều kiện.</p>}
                             <StaffingField label={<> Action </>}>
                                 {' '}
                                 <select name="actionRuleId" required defaultValue="">

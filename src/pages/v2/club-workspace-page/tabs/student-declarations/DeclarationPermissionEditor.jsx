@@ -101,8 +101,7 @@ export default function DeclarationPermissionEditor({ api, clubId, onClose }) {
                 </p>
                 {!connected && (
                     <p className="club-student-declaration-notice" role="status">
-                        Chưa có API lưu phân quyền theo vai trò. Bạn có thể chuẩn bị lựa chọn bên dưới; các checkbox
-                        chưa thay đổi quyền thật cho đến khi cấu hình được máy chủ xác nhận.
+                        Chưa thể lưu phân quyền. Các lựa chọn bên dưới chưa có hiệu lực.
                     </p>
                 )}
                 {loading ? (

@@ -39,28 +39,7 @@ export function onboardingAutofill(user, snapshot) {
         studentCode,
         campus,
         year,
-        sources: {
-            studentCode: academic.studentCode ? 'Danh sách học kỳ' : inferred.studentCode ? 'Gợi ý từ email' : '',
-            campus: user?.campusCode ? 'Hồ sơ tài khoản' : inferred.campus ? 'Gợi ý từ email' : '',
-            year: academic.year ? 'Dữ liệu học vụ' : year ? 'Gợi ý từ mã sinh viên' : '',
-        },
     };
-}
-
-export function academicAvailabilityMessage(availability) {
-    return {
-        AVAILABLE: 'Mã sinh viên được xác nhận từ danh sách học kỳ hiện hành.',
-        SEMESTER_UNCONFIGURED: 'Nhà trường chưa cấu hình học kỳ hiện hành.',
-        SEMESTER_AMBIGUOUS: 'Có nhiều học kỳ đang active. CTSV cần xác định học kỳ hiện hành.',
-        ROSTER_UNAVAILABLE: 'Chưa có danh sách sinh viên được công bố cho campus trong học kỳ này.',
-        NOT_IN_ROSTER: 'Tài khoản chưa có trong danh sách sinh viên của học kỳ hiện hành.',
-        ROSTER_INACTIVE: 'Trạng thái sinh viên trong danh sách học kỳ hiện đang không hoạt động.',
-        IDENTITY_CHANGED: 'Thông tin tài khoản và danh sách học kỳ không khớp. Liên hệ CTSV để kiểm tra.',
-        NO_CANONICAL_SCHOOL_IDENTITY: 'Tài khoản chưa có danh tính hoặc campus trường hợp lệ.',
-        NOT_APPLICABLE: 'Tài khoản này không thuộc đối tượng danh sách sinh viên.',
-        UNCONFIGURED: 'Kết nối dữ liệu học vụ chưa được cấu hình.',
-        AUTHORITY_UNAVAILABLE: 'Chưa kết nối được nguồn dữ liệu học vụ. Vui lòng thử lại sau.',
-    }[availability] || 'Máy chủ chưa cung cấp trạng thái dữ liệu học vụ.';
 }
 
 function validateSnapshot(user, value) {
