@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MAJORS, readOnboarding, saveOnboarding } from './onboarding.js';
+import { MAJORS, readOnboarding, saveOnboarding, academicAvailabilityMessage, onboardingAutofill } from './onboarding.js';
+import { campusLabel } from './profile-options.js';
 
 const snapshot = (id = 4) => ({
     userId: id,
@@ -24,6 +25,45 @@ const preferences = {
     personal: { address: 'HCM', userId: 8 },
     academic: { campus: 'FORGED' },
 };
+
+test('academic states distinguish missing semester, missing campus roster and authority outage', () => {
+    assert.match(academicAvailabilityMessage('SEMESTER_UNCONFIGURED'), /chưa cấu hình học kỳ/);
+    assert.match(academicAvailabilityMessage('ROSTER_UNAVAILABLE'), /campus/);
+    assert.match(academicAvailabilityMessage('NOT_IN_ROSTER'), /Tài khoản chưa có/);
+    assert.match(academicAvailabilityMessage('AUTHORITY_UNAVAILABLE'), /Chưa kết nối/);
+    assert.equal(campusLabel('CAN'), 'FPTU Cần Thơ · Hovilo');
+    assert.equal(campusLabel(''), '');
+});
+
+test('semester identity overrides email inference and campus always follows the account', () => {
+    const value = onboardingAutofill(
+        { email: 'cuongnkce161131@fpt.edu.vn', campusCode: 'HCM' },
+        { academic: { studentCode: 'SE180123', semesterId: 'FALL2026', availability: 'AVAILABLE' } },
+    );
+    assert.equal(value.studentCode, 'SE180123');
+    assert.equal(value.campus, 'HCM');
+    assert.equal(value.year, 'K18');
+    assert.equal(value.semesterId, 'FALL2026');
+    assert.equal(value.sources.studentCode, 'Danh sách học kỳ');
+    assert.equal(value.sources.campus, 'Hồ sơ tài khoản');
+});
+
+test('student email fills missing identity as suggestions without claiming roster membership', () => {
+    const value = onboardingAutofill(
+        { email: 'cuongnkce161131@fpt.edu.vn' },
+        { academic: { availability: 'NOT_IN_ROSTER', semesterId: 'FALL2026' } },
+    );
+    assert.equal(value.studentCode, 'CE161131');
+    assert.equal(value.campus, 'FPTU Cần Thơ');
+    assert.equal(value.year, 'K16');
+    assert.equal(value.availability, 'NOT_IN_ROSTER');
+    assert.equal(value.sources.studentCode, 'Gợi ý từ email');
+    assert.equal(value.sources.campus, 'Gợi ý từ email');
+    const unknown = onboardingAutofill({ email: 'person@gmail.com' }, {});
+    assert.equal(unknown.studentCode, '');
+    assert.equal(unknown.campus, '');
+    assert.equal(unknown.year, '');
+});
 
 test('onboarding reads the authenticated canonical profile and does not trust browser flags', async () => {
     const api = {

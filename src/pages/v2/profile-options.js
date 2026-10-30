@@ -15,7 +15,8 @@ export const CAMPUS_NICKNAMES = {
 };
 
 export function campusLabel(campus) {
-    return CAMPUS_NICKNAMES[campus] ? `${campus} · ${CAMPUS_NICKNAMES[campus]}` : campus;
+    const name = { HAN: 'FPTU Hà Nội', HCM: 'FPTU Hồ Chí Minh', DAN: 'FPTU Đà Nẵng', CAN: 'FPTU Cần Thơ', QNH: 'FPTU Quy Nhơn', GLOBAL: 'Toàn trường' }[campus] || campus;
+    return CAMPUS_NICKNAMES[name] ? `${name} · ${CAMPUS_NICKNAMES[name]}` : name;
 }
 
 export function inferStudentYear(studentCode) {

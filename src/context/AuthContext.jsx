@@ -36,6 +36,7 @@ function toAuthUser(summary) {
     username: summary.username,
     name: summary.fullName,
     email: summary.email,
+    campusCode: summary.campusCode || '',
     roles: summary.roles,
     isActive: summary.isActive,
     isLocked: summary.isLocked,

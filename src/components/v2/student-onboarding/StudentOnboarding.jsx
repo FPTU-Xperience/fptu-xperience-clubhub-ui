@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, GraduationCap, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { INTERESTS, MIN_INTERESTS, saveOnboarding } from '../../../pages/v2/onboarding';
+import { INTERESTS, MIN_INTERESTS, saveOnboarding, onboardingAutofill } from '../../../pages/v2/onboarding';
 import { formatBirthDate, parseBirthDate } from '../../../pages/v2/profile-date';
 import OnboardingProfileFields from './OnboardingProfileFields';
 import OnboardingAutofill from './OnboardingAutofill';
@@ -11,14 +11,12 @@ import './StudentOnboarding.scss';
 export default function StudentOnboarding({ user, snapshot, api, onComplete, onReload }) {
     const navigate = useNavigate();
     const initialProfile = snapshot;
+    const academicAutofill = onboardingAutofill(user, snapshot);
     const [busy, setBusy] = useState(false);
     const [step, setStep] = useState(1);
     const [draft, setDraft] = useState(() => ({
-        ...initialProfile.academic,
+        ...academicAutofill,
         ...initialProfile.personal,
-        campus: user.campusCode || '',
-        studentCode: initialProfile.academic?.studentCode || '',
-        year: initialProfile.academic?.year || '',
         major: initialProfile.academic?.major || '',
         dateOfBirth: formatBirthDate(initialProfile.personal.dateOfBirth),
     }));
@@ -68,7 +66,6 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                 {
                     major: draft.major,
                     interests,
-                    academic: { campus: draft.campus, year: draft.year, studentCode: draft.studentCode },
                     personal: { dateOfBirth, phoneNumber: draft.phoneNumber, address: draft.address },
                 },
                 snapshot,
@@ -142,7 +139,7 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                                   : `Chọn ít nhất ${MIN_INTERESTS} lĩnh vực. Sở thích sẽ xuất hiện trong hồ sơ của bạn.`}
                         </p>
                         {step === 1 ? (
-                            <OnboardingAutofill email={user?.email} draft={draft} />
+                            <OnboardingAutofill email={user?.email} draft={academicAutofill} academic={snapshot.academic} />
                         ) : step === 2 ? (
                             <OnboardingProfileFields draft={draft} onChange={updateDraft} />
                         ) : (
@@ -192,7 +189,7 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                         )}
                         <p className="v2-onboarding-sync-note">
                             <RefreshCw size={16} aria-hidden="true" />
-                            Thông tin được lưu vào hồ sơ tài khoản trên máy chủ.
+                            Thông tin bạn nhập ở các bước tiếp theo sẽ được lưu vào hồ sơ tài khoản.
                         </p>
                         {error && (
                             <p className="v2-access-form-error" role="alert">
@@ -217,7 +214,7 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                                     <ArrowLeft size={16} /> Quay lại
                                 </button>
                             ) : (
-                                <span>Bạn có thể điều chỉnh thông tin đã điền.</span>
+                                <span>Kiểm tra thông tin và nguồn dữ liệu trước khi tiếp tục.</span>
                             )}
                             <button
                                 className="v2-access-button primary"
