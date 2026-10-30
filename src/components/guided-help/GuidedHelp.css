@@ -8,6 +8,12 @@
     position: static;
     z-index: auto;
 }
+.web-guide-public-notice {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 45;
+}
 .web-guide-launcher {
     display: inline-flex;
     align-items: center;

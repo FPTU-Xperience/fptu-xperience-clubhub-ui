@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
+import { Bell, ChevronDown, CircleHelp, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../../../context/ThemeContext';
@@ -36,7 +36,7 @@ function NotificationContent({ status, data, retry }) {
     );
 }
 
-export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api }) {
+export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
     const location = useLocation();
     const accountMenuRef = useRef(null);
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
@@ -50,7 +50,7 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
     useEffect(() => {
         notifications.close();
         setIsAccountMenuOpen(false);
-    }, [location.pathname, notifications.close]);
+    }, [location.pathname, location.search, notifications.close]);
 
     useEffect(() => {
         if (!notifications.isOpen && !isAccountMenuOpen) return undefined;
@@ -146,6 +146,14 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
                             <Link to="/v2/profile?tab=settings" role="menuitem">
                                 <Settings size={16} /> Cài đặt
                             </Link>
+                            {onStartGuide && (
+                                <button type="button" role="menuitem" onClick={() => {
+                                    setIsAccountMenuOpen(false);
+                                    onStartGuide();
+                                }}>
+                                    <CircleHelp size={16} /> Hướng dẫn sử dụng
+                                </button>
+                            )}
                             <button type="button" role="menuitem" onClick={toggleTheme}>
                                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} Chế độ tối{' '}
                                 <span>{theme === 'dark' ? 'Bật' : 'Tắt'}</span>

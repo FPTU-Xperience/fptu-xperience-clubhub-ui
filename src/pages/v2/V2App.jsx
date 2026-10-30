@@ -33,12 +33,15 @@ import { PinnedClubsProvider } from './pinned-clubs';
 import GuidedHelp from '../../components/guided-help/GuidedHelp';
 import { clubGuidePlan } from '../../components/guided-help/guide-plans';
 import { campusLabel } from './profile-options';
+import usePublicGuide from '../../components/guided-help/usePublicGuide';
+import { isAffairsViewer } from './affairs-access';
 const DemoApp = lazy(() => import('./DemoApp'));
 
 function AuthenticatedV2App() {
     const { user, logout, clubAccess, api } = useAuth();
     const location = useLocation();
     const sessionKey = user?.id || user?.email || 'anonymous';
+    const publicGuide = usePublicGuide(sessionKey, !isAffairsViewer(user));
     const { profileImages, profileResult } = usePersonalMedia();
 
     if (location.pathname.startsWith('/v2/demo')) {
@@ -57,12 +60,12 @@ function AuthenticatedV2App() {
     return (
         <EntityMediaProvider api={api}>
         <PinnedClubsProvider key={sessionKey} api={api} accountKey={sessionKey}>
-            <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}${directory ? ' v2-app--directory' : ''}`}>
+            <div data-guide-route={location.pathname + location.search} className={`v2-app${workspace ? ' v2-app--workspace' : ''}${directory ? ' v2-app--directory' : ''}`}>
                 <a className="v2-skip-link" href="#v2-main">
                     Đến nội dung chính
                 </a>
                 {!workspace && (
-                    <LeftRail user={user} profile={profileResult.data?.profile} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />
+                    <LeftRail user={user} profile={profileResult.data?.profile} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} onStartGuide={publicGuide.start} />
                 )}
                 <main id="v2-main" className="v2-main">
                     <Routes>
@@ -112,7 +115,8 @@ function AuthenticatedV2App() {
                     </Routes>
                 </main>
                 {!workspace && <Footer />}
-                <GuidedHelp plan={clubGuidePlan(location.pathname)} routeKey={location.pathname + location.search} accountKey={sessionKey} />
+                {workspace && <GuidedHelp plan={clubGuidePlan(location.pathname)} routeKey={location.pathname + location.search} accountKey={sessionKey} />}
+                {publicGuide.notice && <p className="web-guide-notice web-guide-public-notice" role="status">{publicGuide.notice}</p>}
             </div>
         </PinnedClubsProvider>
         </EntityMediaProvider>

@@ -19,7 +19,7 @@ const personalNavigation = [
     ['/v2/personal-experience', 'Trải nghiệm cá nhân'],
 ];
 
-export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
+export default function LeftRail({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
     const location = useLocation();
     const { pinnedClubs = [], togglePin } = usePinnedClubs() || {};
     const affairs = isAffairsViewer(user);
@@ -144,7 +144,7 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api }) {
                 )}
             </nav>
 
-            <RailAccountSection user={user} profile={profile} avatarUrl={avatarUrl} onLogout={onLogout} api={api} />
+            <RailAccountSection user={user} profile={profile} avatarUrl={avatarUrl} onLogout={onLogout} api={api} onStartGuide={onStartGuide} />
         </aside>
     );
 }

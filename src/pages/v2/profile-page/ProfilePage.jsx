@@ -205,7 +205,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
     }
 
     return (
-        <div className="v2-public-content v2-personal-page v2-profile-page">
+        <div className="v2-public-content v2-personal-page v2-profile-page" data-guide-editing={editing || saving || Boolean(profileDraft)}>
             <section className="v2-profile-cover">
                 <ProfileCoverArt
                     backgroundPaint={data.profile.coverBackgroundPaint || ''}

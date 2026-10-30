@@ -6,8 +6,12 @@ export function resolveGuideSteps(plan, queryAll, isVisible) {
     });
 }
 
-export function isGuideTargetVisible(element) {
-    if (!element.getClientRects().length || element.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+export function isGuideTargetPainted(element) {
+    if (!element.getClientRects().length) return false;
     const style = element.ownerDocument.defaultView.getComputedStyle(element);
     return style.display !== 'none' && style.visibility !== 'hidden';
+}
+
+export function isGuideTargetVisible(element) {
+    return !element.closest('[hidden], [inert], [aria-hidden="true"]') && isGuideTargetPainted(element);
 }

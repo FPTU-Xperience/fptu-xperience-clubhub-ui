@@ -65,9 +65,6 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
                 <SectionHeading title="Hoạt động dành cho bạn" description="Những trải nghiệm đang phù hợp để bạn khám phá.">
                     <Link className="v2-discovery-button" to="/v2/activities">Xem tất cả hoạt động <ArrowUpRight size={18} /></Link>
                 </SectionHeading>
-                {recommendations.metadata?.mode === 'BASIC' && <p role="status">
-                    Gợi ý cơ bản theo lịch sắp tới. Cá nhân hóa theo Xperience Point hiện chưa khả dụng.
-                </p>}
                 <div className="v2-tabs v2-activity-filter-tabs" role="group" aria-label="Trạng thái hoạt động">{[['ALL','Tất cả'],['UPCOMING','Sắp diễn ra'],['LIVE','Đang diễn ra']].map(([value,label]) => <button key={value} type="button" aria-pressed={activityStatus === value} className={activityStatus === value ? 'active' : ''} onClick={() => setActivityStatus(value)}>{label}</button>)}</div>
                 <PageState status={recommendations.status} onRetry={recommendations.retry}
                     description={recommendationFailureDescription(recommendations.error)}>
