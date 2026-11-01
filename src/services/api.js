@@ -5,6 +5,7 @@ import { publishPublicMediaSaved } from './public-media-sync';
 import { createEntityMediaStore } from './entity-media-store.js';
 import { confirmedImageAttachment } from './media-attachment.js';
 import { createSessionClient } from './session-client.js';
+import { verifyBrowserLogin } from './browser-session.js';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000').replace(/\/+$/, '');
 export const session = createSessionClient({ baseUrl: API_BASE_URL });
@@ -128,7 +129,7 @@ class ApiService {
                 body: JSON.stringify({ email: (email || '').trim(), password }),
             });
             this.media.reset();
-            session.acceptLogin(data, version);
+            session.acceptLogin(await verifyBrowserLogin(session, data), version);
             return data;
         });
     }
@@ -141,7 +142,7 @@ class ApiService {
                 body: JSON.stringify({ credential }),
             });
             this.media.reset();
-            session.acceptLogin(data, version);
+            session.acceptLogin(await verifyBrowserLogin(session, data), version);
             return data;
         });
     }

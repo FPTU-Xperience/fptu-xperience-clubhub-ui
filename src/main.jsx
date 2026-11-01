@@ -12,7 +12,7 @@ import './styles/index.scss';
 
 const V2App = lazy(() => import('./pages/v2/V2App'));
 import { session } from './services/api';
-import { createStaffSso } from './services/staff-sso.js';
+import { createBrowserSession } from './services/browser-session.js';
 import { watchSessionRedirect } from './services/session-client.js';
 
 // Async SSO bootstrap can outlive a Vite update; reuse the root and retire outdated bootstrap/listeners.
@@ -65,21 +65,31 @@ function renderApplication() {
 }
 
 async function start() {
+    runtime.stop?.();
+    runtime.stop = null;
     const generation = ++runtime.generation;
     const isCurrent = () => runtime.generation === generation;
-    let stopSso;
+    let stopBrowserSession;
     const bypass = import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH === 'true';
-    if (!bypass && import.meta.env.VITE_STAFF_SSO_ENABLED !== 'false') {
+    if (!bypass) {
         try {
-            const sso = createStaffSso({ session, isCurrent, landingPath: '/v2', signedOutUrl: '/v2', peerUrl: import.meta.env.VITE_ADMIN_APP_URL
-                || (import.meta.env.DEV ? 'http://localhost:5174' : 'https://fptux-admin-ui.pages.dev') });
-            if (await sso.bootstrap() || !isCurrent()) return;
-            stopSso = sso.watch();
-        } catch (error) { console.error('Không thể khởi tạo SSO:', error); }
+            const browserSession = createBrowserSession({ session, isCurrent });
+            await browserSession.bootstrap();
+            if (!isCurrent()) return;
+            stopBrowserSession = browserSession.watch();
+        } catch {
+            if (!isCurrent()) return;
+            runtime.root ||= ReactDOM.createRoot(document.getElementById('root'));
+            runtime.root.render(<main role="alert" style={{ padding: 40 }}>
+                <p>Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.</p>
+                <button type="button" onClick={start}>Thử lại</button>
+            </main>);
+            return;
+        }
     }
     if (!isCurrent()) return;
     const stopRedirect = watchSessionRedirect(session, { destination: '/v2' });
-    runtime.stop = () => { stopSso?.(); stopRedirect(); };
+    runtime.stop = () => { stopBrowserSession?.(); stopRedirect(); };
     renderApplication();
 }
 start();
