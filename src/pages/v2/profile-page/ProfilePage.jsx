@@ -27,6 +27,7 @@ import ProfileClubLogo from './ProfileClubLogo';
 import './ProfilePage.scss';
 import { Link } from 'react-router-dom';
 import { useProfileExperience } from '../../../services/profile-experience.js';
+import { experienceIndexValues } from '../../../services/experience-index-values.js';
 
 const pillarLabels = ['Học tập', 'Nghiên cứu', 'Quốc tế', 'Thể thao & văn hóa', 'Cộng đồng', 'Khởi nghiệp'];
 
@@ -113,6 +114,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
     }, [sessionKey]);
     const memberships = useProfileMemberships(api, sessionKey);
     const experience = useProfileExperience(api, user?.id, sessionKey);
+    const indices = experienceIndexValues(experience.radar?.value, user?.id);
     const staged = result.data && profileDraft ? previewProfile(result.data, profileDraft) : result.data;
     const data = staged ? (shared ? toSharedProfile(staged) : staged) : null;
     const saveChanges = async () => {
@@ -361,6 +363,13 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                         <>
                             <div className="v2-profile-stats">
                                 <Stat
+                                    icon={Sparkles}
+                                    label="Chỉ số trải nghiệm (ERI)"
+                                    value={indices?.eri.toLocaleString('vi-VN', { maximumFractionDigits: 2 }) ?? '—'}
+                                    hidden={shared}
+                                    note={indices ? 'Độ giàu trải nghiệm · thang 0–130' : experience.radarError || 'Đang tải chỉ số trải nghiệm'}
+                                />
+                                <Stat
                                     icon={Award}
                                     label="Xperience Point thô"
                                     value={experience.summary?.rawExperiencePoints?.toLocaleString('vi-VN') ?? '—'}
@@ -400,6 +409,16 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                                             ? `Radar chính thức · học kỳ ${experience.radar.value.semesterId || experience.radar.value.semesterCode}`
                                             : experience.radarError || 'Đang tải radar chính thức…'}
                                     </p>
+                                    {!shared && indices && (
+                                        <>
+                                            <dl className="v2-profile-index-breakdown">
+                                                <dt>Độ sâu</dt><dd>{indices.d.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}/100</dd>
+                                                <dt>Độ đều</dt><dd>{indices.j.toLocaleString('vi-VN', { style: 'percent', maximumFractionDigits: 2 })}</dd>
+                                                <dt>Hệ số thực tế (+1)</dt><dd>×{indices.m.toLocaleString('vi-VN', { maximumFractionDigits: 3 })}</dd>
+                                            </dl>
+                                            <p className="v2-profile-note">ERI = Độ sâu × (0,5 + 0,5 × Độ đều) × Hệ số thực tế. Trải nghiệm thực tế nằm ngoài sáu trục radar.</p>
+                                        </>
+                                    )}
                                 </div>
                                 {!shared && experience.radar && (
                                     <Radar pillars={{ current: experience.radar.axes, previous: [] }} />
