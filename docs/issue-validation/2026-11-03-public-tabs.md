@@ -8,3 +8,10 @@
 - Browser fixture renders the actual ActivityDetailPage and child components, with isolated auth/API test doubles only. It checks all six tabs, repeated visits, staffing/attendance/session requests, slow/out-of-order responses, retry selection, account isolation, no idle requests, header action placement, double-submit locking, and desktop/mobile overflow.
 - Validation on revision 7f6ad836d43a49dd8d50d5eecd7c9d88bedb5a56: 310 tests, notification browser scenarios, full activity browser scenarios, build and production bundle/health smoke all passed. https://github.com/FPTU-Xperience/fptu-xperience-clubhub-ui/actions/runs/41619153105
 - Production API data exposed a separate nullable-registration-window mismatch; backend fix tracked in docs/issue-validation/2026-11-03-public-registration-window.md in the API repo. Do not equate UI browser fixtures with a production student-account end-to-end test.
+
+
+## Final UI release
+- Source/release revision: 1053a17193d46f6889d9a50da65ba5807018869f.
+- https://github.com/FPTU-Xperience/fptu-xperience-clubhub-ui/actions/runs/41620185288 succeeded: 310 unit/contract tests, 17 notification viewport/state checks, desktop/mobile activity tab and registration browser flow, build, Cloudflare deploy and production bundle/API-health smoke.
+- Registration is visible in the header for all public tabs, submit is gated by the server flag, and no student registration control is added to workspace management reads without that API capability.
+- Manual deployment trigger restored; browser regression gates retained in the existing workflow. No new workflow files were created.
