@@ -77,6 +77,16 @@ try {
         assert.equal(await page.getByText('Hiện chưa thể đăng ký hoạt động này.',{exact:true}).count(),0);
         assert.equal(submitted,1);
       }
+      const spacing = await page.locator('.v2-activity-profile').evaluate(el => {
+        const box = selector => el.querySelector(selector).getBoundingClientRect();
+        const facts = box('.v2-activity-profile-quick-facts');
+        const registration = box('.v2-activity-profile-registration');
+        const tabs = box('.v2-activity-profile-tabs');
+        return { before:registration.top-facts.bottom, after:tabs.top-registration.bottom };
+      });
+      for (const [side, gap] of Object.entries(spacing))
+        assert.ok(gap >= 8 && gap <= 16, side + ' registration spacing must be compact: ' + gap);
+      console.log('ACTIVITY_SPACING_OK',JSON.stringify({width,internal,canRegister,...spacing}));
       await page.screenshot({path:'TestResults/deployed-registration/'+internal+'-'+canRegister+'-'+width+'.png',fullPage:true});
       await page.goto(base + '/v2/my-schedule');
       if(canRegister) await page.getByText('Software Engineering Weekly Lab',{exact:true}).waitFor();

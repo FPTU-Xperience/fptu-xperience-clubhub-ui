@@ -1,6 +1,8 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
     workflow_dispatch:
 
 permissions:
