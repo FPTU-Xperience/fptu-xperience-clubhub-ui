@@ -1,5 +1,7 @@
+import StudentActivityActions from '../../../components/v2/activity-detail/StudentActivityActions';
+import { useMyClubSelection } from '../my-clubs-data';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { useActivityDetail } from '../activity-data';
 import { isActivityPublic } from '../activity-publication';
 import { useClubDirectory } from '../discover-data';
@@ -22,13 +24,15 @@ const tabs = [
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh của tôi'],
 ];
-function PublicActivityProfile({ activity, clubCode, sessionKey, api }) {
+export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onChanged }) {
     const [tab, setTab] = useState('overview');
     const resources = publicActivityResources(activity.resources);
-    const clubLink = <ClubNavigationLinks clubCode={clubCode} />;
+    const membership = useMyClubSelection(api, sessionKey);
+    const isMember = membership.status === 'populated' && membership.data.some((club) => String(club.clubId) === String(activity.clubId));
+    const clubLink = <ClubNavigationLinks clubCode={clubCode} showWorkspace={isMember} />;
     return (
         <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink}>
-            {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
+            {tab === 'overview' && <><ActivityOverview activity={activity} clubLink={clubLink} /><StudentActivityActions api={api} activity={activity} onChanged={onChanged} /></>}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
             {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
             {['media', 'documents'].includes(tab) && activity.resourceAvailability !== 'AVAILABLE' && (
@@ -53,6 +57,7 @@ function PublicActivityProfile({ activity, clubCode, sessionKey, api }) {
 
 export default function ActivityDetailPage({ api, sessionKey }) {
     const { activityId } = useParams();
+    const location = useLocation();
     const result = useActivityDetail(api, sessionKey, activityId, true);
     const activity = result.data;
     const directory = useClubDirectory(api, sessionKey);
@@ -60,7 +65,7 @@ export default function ActivityDetailPage({ api, sessionKey }) {
         activity?.clubCode || directory.data?.find((club) => String(club.id) === activity?.clubId)?.code || '';
     return (
         <div className="v2-public-content v2-activity-detail-page">
-            <Link className="v2-text-link" to="/v2/activities">
+            <Link className="v2-text-link" to={`/v2/activities${location.search}`}>
                 ← Quay lại hoạt động
             </Link>
             {result.status === 'populated' && !isActivityPublic(activity) ? (

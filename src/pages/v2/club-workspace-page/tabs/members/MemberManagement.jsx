@@ -1,3 +1,4 @@
+import { useListQuery } from '../../../use-list-query';
 import { useWorkspaceSemester } from '../../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../../../context/AuthContext';
@@ -17,6 +18,12 @@ const statusLabel = { Approved: 'Đã duyệt', Pending: 'Chờ duyệt', Reject
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 
 export default function MemberManagement({ clubId, dashboard, readOnly = false }) {
+    const [list, setList] = useListQuery({ tab: 'members', search: '', role: 'All', page: 1 });
+    const { tab, search, role, page } = list;
+    const setTab = (value) => setList('tab', value);
+    const setSearch = (value) => setList('search', value);
+    const setRole = (value) => setList('role', value);
+    const setPage = (value) => setList('page', value);
     const { api, user } = useAuth();
     const { semester } = useWorkspaceSemester();
     useEffect(() => {
@@ -25,10 +32,6 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
         setError('');
     }, [semester?.id]);
     const ownProfile = useProfile(user, String(user?.id || ''), api);
-    const [tab, setTab] = useState('members');
-    const [search, setSearch] = useState('');
-    const [role, setRole] = useState('All');
-    const [page, setPage] = useState(1);
     const [version, setVersion] = useState(0);
     const [members, setMembers] = useState(null);
     const [applications, setApplications] = useState(null);

@@ -1,3 +1,4 @@
+import { useListQuery } from '../use-list-query';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 
@@ -29,9 +30,9 @@ export function useWorkspaceSemesterSelection(actorId, clubId, serverCatalog, ap
         : Array.isArray(serverCatalog)
           ? serverCatalog
           : [];
-    const [choice, setChoice] = useState(null);
+    const [choice, setChoice] = useListQuery({ semester: '' });
     const semester =
-        semesters.find((item) => choice?.scope === scope && item.id === choice.id) ||
+        semesters.find((item) => String(item.id) === choice.semester) ||
         semesters.find((item) => item.isCurrent) ||
         semesters[0] ||
         null;
@@ -40,7 +41,7 @@ export function useWorkspaceSemesterSelection(actorId, clubId, serverCatalog, ap
         semesters,
         error: catalog?.scope === scope ? catalog.error : '',
         selectSemester: (id) => {
-            if (semesters.some((item) => item.id === id)) setChoice({ scope, id });
+            if (semesters.some((item) => item.id === id)) setChoice('semester', id);
         },
     };
 }

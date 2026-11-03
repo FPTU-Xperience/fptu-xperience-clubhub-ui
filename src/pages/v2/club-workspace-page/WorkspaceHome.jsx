@@ -98,9 +98,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                                         variant="schedule"
                                         onOpen={(item) =>
                                             navigate(
-                                                manager
-                                                    ? `${base}/activities/${encodeURIComponent(item.id)}`
-                                                    : `/v2/activities/${encodeURIComponent(item.id)}`,
+                                                `${base}/activities/${encodeURIComponent(item.id)}`,
                                             )
                                         }
                                     />

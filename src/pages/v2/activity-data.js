@@ -57,7 +57,7 @@ export function mapActivityFeedItem(raw = {}) {
 
 export function useActivityDetail(api, sessionKey, activityId, student = false) {
     const mediaRevision = usePublicMediaRevision('activity');
-    const identity = `${sessionKey}:${activityId}`;
+    const identity = `${sessionKey}:${activityId}:${student}`;
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ identity, status: 'loading', data: null });
     useEffect(() => {

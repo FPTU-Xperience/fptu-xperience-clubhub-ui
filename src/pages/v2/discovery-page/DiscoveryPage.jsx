@@ -1,3 +1,4 @@
+import { useListQuery } from '../use-list-query';
 import { useMemo, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -28,9 +29,11 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
     const [activityStatus, setActivityStatus] = useState('ALL');
     const activities = useMemo(() => selectDiscoveryActivities(activityFeed.data, recommendations.data, activityStatus), [activityFeed.data, recommendations.data, activityStatus]);
     const result = useClubDirectory(api, sessionKey);
-    const [query, setQuery] = useState('');
-    const [category, setCategory] = useState('ALL');
-    const [page, setPage] = useState(1);
+    const [list, setList] = useListQuery({ query: '', category: 'ALL', page: 1 });
+    const { query, category, page } = list;
+    const setQuery = (value) => setList('query', value);
+    const setCategory = (value) => setList('category', value);
+    const setPage = (value) => setList('page', value);
     const entries = result.data || [];
     const suggestedEntries = useMemo(() => createCuratedClubSet(entries, MAX_SUGGESTED_CLUBS), [entries]);
     const categories = useMemo(

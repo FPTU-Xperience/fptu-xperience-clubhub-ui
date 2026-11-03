@@ -1,5 +1,6 @@
+import { PublicActivityProfile } from '../../../activities-page/ActivityDetailPage';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../../../context/AuthContext';
 import { Camera, Eye, Pencil } from 'lucide-react';
 import { useActivityDetail } from '../../../activity-data';
@@ -51,7 +52,8 @@ const coreFields = (activity) => ({
 
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
     const { user, clubAccess } = useAuth();
-    const result = useActivityDetail(api, sessionKey, manager ? activityId : null);
+    const location = useLocation();
+    const result = useActivityDetail(api, sessionKey, activityId);
     const activity = result.data;
     const [tab, setTab] = useState('overview');
     const [coreDraft, setCoreDraft] = useState(null);
@@ -226,7 +228,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
             }
         }
     };
-    if (!manager || (activity && String(activity.clubId) !== String(workspace.clubId)))
+    if (activity && String(activity.clubId) !== String(workspace.clubId))
         return <PageState status="forbidden" title="Bạn không có quyền quản lý hoạt động này" />;
     if (result.status !== 'populated')
         return (
@@ -236,6 +238,12 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 title={result.status === 'not-found' ? 'Không tìm thấy hoạt động' : undefined}
             />
         );
+    if (!manager) return (
+        <div className="v2-activity-management-page">
+            <Link className="v2-text-link" to={`${base}/activities${location.search}`}>← Danh sách hoạt động</Link>
+            <PublicActivityProfile activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
+        </div>
+    );
     const displayed = {
         ...activity,
         ...(coreDraft || {}),
@@ -255,7 +263,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
             activity.resourceCapabilities.canUpload);
     return (
         <div className="v2-activity-management-page">
-            <Link className="v2-text-link" to={`${base}/activities`}>
+            <Link className="v2-text-link" to={`${base}/activities${location.search}`}>
                 ← Danh sách hoạt động
             </Link>
             {notice && (

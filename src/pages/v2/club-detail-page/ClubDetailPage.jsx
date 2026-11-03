@@ -1,6 +1,6 @@
 import { ArrowLeft, CalendarDays, Mail, MapPin, Phone, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { Pill } from '../../../components/v2/DiscoveryLayout';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import PageState from '../../../components/v2/PageState';
@@ -30,6 +30,7 @@ const joinProfile = (viewer, profileSnapshot) => ({
 });
 
 export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }) {
+    const location = useLocation();
     const { clubCode } = useParams();
     const result = useClubDetail(api, clubCode, viewerAccess, sessionKey);
     const profileResult = useProfile(viewer, sessionKey, api);
@@ -122,7 +123,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     };
     return (
         <div className="v2-public-content v2-club-detail-page">
-            <Link to="/v2/clubs" className="v2-back">
+            <Link to={`/v2/clubs${location.search}`} className="v2-back">
                 <ArrowLeft size={16} /> Tất cả câu lạc bộ
             </Link>
             <PageState status={result.status} onRetry={result.retry}>

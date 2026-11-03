@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useListQuery } from '../use-list-query';
+import { useMemo } from 'react';
 import ClubCard from '../../../components/v2/club-card/ClubCard';
 import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryFilters';
 import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
@@ -15,11 +16,13 @@ import './AllClubsPage.scss';
 const PAGE_SIZE = 12;
 
 export default function AllClubsPage({ api, sessionKey }) {
+    const [list, setList] = useListQuery({ query: '', category: 'ALL', onlyRecruiting: false, page: 1 });
+    const { query, category, onlyRecruiting, page } = list;
+    const setQuery = (value) => setList('query', value);
+    const setCategory = (value) => setList('category', value);
+    const setOnlyRecruiting = (value) => setList('onlyRecruiting', value);
+    const setPage = (value) => setList('page', value);
     const result = useClubDirectory(api, sessionKey);
-    const [query, setQuery] = useState('');
-    const [category, setCategory] = useState('ALL');
-    const [onlyRecruiting, setOnlyRecruiting] = useState(false);
-    const [page, setPage] = useState(1);
     const entries = result.data || [];
     const categories = useMemo(
         () => orderDirectoryCategories([...new Set(entries.map((club) => club.category).filter(Boolean))]),
