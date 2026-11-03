@@ -53,9 +53,9 @@ const coreFields = (activity) => ({
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
     const { user, clubAccess } = useAuth();
     const location = useLocation();
-    const result = useActivityDetail(api, sessionKey, activityId);
-    const activity = result.data;
     const [tab, setTab] = useState('overview');
+    const result = useActivityDetail(api, sessionKey, activityId, !manager, manager ? 0 : tab);
+    const activity = result.data;
     const [coreDraft, setCoreDraft] = useState(null);
     const [editorDraft, setEditorDraft] = useState(null);
     const editing = editorDraft !== null;
@@ -230,7 +230,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
     };
     if (activity && String(activity.clubId) !== String(workspace.clubId))
         return <PageState status="forbidden" title="Bạn không có quyền quản lý hoạt động này" />;
-    if (result.status !== 'populated')
+    if (result.status !== 'populated' && !(activity && !manager && result.status === 'loading'))
         return (
             <PageState
                 status={result.status}
@@ -241,7 +241,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
     if (!manager) return (
         <div className="v2-activity-management-page">
             <Link className="v2-text-link" to={`${base}/activities${location.search}`}>← Danh sách hoạt động</Link>
-            <PublicActivityProfile workspaceRead activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
+            <PublicActivityProfile key={`${sessionKey}:${activity.id}`} activeTab={tab} onTabChange={setTab} refreshing={result.status === 'loading'} workspaceRead activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
         </div>
     );
     const displayed = {

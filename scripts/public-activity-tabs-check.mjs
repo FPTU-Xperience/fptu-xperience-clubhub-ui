@@ -11,7 +11,7 @@ try {
     }
     browser = await chromium.launch();
     fs.mkdirSync('TestResults/public-tabs', { recursive: true });
-    for (const width of [1440, 390]) {
+    for (const workspaceMode of [false, true]) for (const width of [1440, 390]) {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
         const errors = [];
         page.on('pageerror', error => { errors.push(error.message); console.error('Public tab browser error:', error.message); });
@@ -29,7 +29,7 @@ try {
                 if (slow) await new Promise(resolve => setTimeout(resolve, 500));
                 if (fail) return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'Temporary failure' }) });
                 await fulfill({ id: 1, clubId: 1, clubCode: 'TEST', clubName: 'Test Club', title: 'Snapshot ' + number + ' ' + account,
-                    description: 'Current server snapshot', status: 'UPCOMING', isInternal: false, isEligible: true,
+                    description: 'Current server snapshot', status: 'UPCOMING', isInternal: workspaceMode, isEligible: true,
                     canRegister: !registered, nextAction: registered ? 'VIEW' : 'REGISTER',
                     startTime: '2026-11-13T07:00:00Z', endTime: '2026-11-13T10:00:00Z' });
                 if (slow) delayedCompleted = true;
@@ -49,7 +49,7 @@ try {
             }
             throw new Error('Unexpected test request: ' + path);
         });
-        await page.goto('http://127.0.0.1:4174/tests/fixtures/public-tabs.html');
+        await page.goto('http://127.0.0.1:4174/tests/fixtures/public-tabs.html' + (workspaceMode ? '?workspace=1' : ''));
         const heading = page.locator('.v2-activity-profile-identity h1');
         const nav = page.getByRole('navigation', { name: 'Nội dung hoạt động' });
         const button = page.locator('.v2-activity-profile-actions').getByRole('button', { name: 'Đăng ký tham gia' });
@@ -100,7 +100,7 @@ try {
         while (!delayedCompleted) await new Promise(resolve => setTimeout(resolve, 25));
         assert.ok(!(await heading.textContent()).includes('student-a'), 'A different account cannot retain old activity state');
         assert.equal(await page.locator('body').evaluate(el => el.scrollWidth > innerWidth + 1), false, 'No horizontal overflow');
-        await page.screenshot({ path: 'TestResults/public-tabs/' + width + '.png', fullPage: true });
+        await page.screenshot({ path: 'TestResults/public-tabs/' + (workspaceMode ? 'internal-' : 'public-') + width + '.png', fullPage: true });
         assert.deepEqual(errors, []);
         await page.close();
     }
