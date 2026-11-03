@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './ClubNavigationLinks.scss';
 
-export default function ClubNavigationLinks({ clubCode, showPage = true, showWorkspace = false, workspaceLabel = 'Đến không gian CLB' }) {
+export default function ClubNavigationLinks({ clubCode, showPage = true, workspacePath = null, workspaceLabel = 'Đến không gian CLB' }) {
     if (!clubCode) return null;
     const code = encodeURIComponent(clubCode);
     return (
@@ -11,7 +11,7 @@ export default function ClubNavigationLinks({ clubCode, showPage = true, showWor
                     Đến trang CLB
                 </Link>
             )}
-            {showWorkspace && <Link className="v2-button" to={`/v2/my-clubs/${code}`}>
+            {workspacePath && <Link className="v2-button" to={workspacePath}>
                 {workspaceLabel}
             </Link>}
         </div>

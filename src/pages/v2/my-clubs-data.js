@@ -72,14 +72,14 @@ export function visibleSentApplications(applications, now = Date.now()) {
     });
 }
 
-function useRequest(loader, mapper, sessionKey) {
+function useRequest(loader, mapper, sessionKey, keepPrevious = true) {
     const mediaRevision = usePublicMediaRevision('club');
     const gate = useRef(createRequestGate());
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ status: 'loading', data: [] });
     useEffect(() => {
         const id = gate.current.next();
-        setResult((current) => current.sessionKey === sessionKey && current.status === 'populated'
+        setResult((current) => keepPrevious && current.sessionKey === sessionKey && current.status === 'populated'
             ? current : { sessionKey, status: 'loading', data: [] });
         Promise.resolve().then(loader).then((value) => {
             if (!gate.current.isCurrent(id)) return;
@@ -89,7 +89,7 @@ function useRequest(loader, mapper, sessionKey) {
             if (gate.current.isCurrent(id)) setResult({ sessionKey, status: classifyMyClubsError(error), data: [], error });
         });
         return () => gate.current.invalidate();
-    }, [loader, mapper, sessionKey, version, mediaRevision]);
+    }, [loader, mapper, sessionKey, version, mediaRevision, keepPrevious]);
     return { ...(result.sessionKey === sessionKey ? result : { status: 'loading', data: [] }), retry: () => setVersion((item) => item + 1) };
 }
 
@@ -106,5 +106,14 @@ export function useMyMembershipApplications(api, sessionKey) {
         useCallback(() => api.getMyMembershipApplications(), [api]),
         useCallback(mapMyMembershipApplications, []),
         sessionKey,
+    );
+}
+
+export function useMyApprovedMemberships(api, sessionKey) {
+    return useRequest(
+        useCallback(() => api.getMyMemberships(), [api]),
+        useCallback((value) => rows(value).filter((membership) => String(membership.status).toUpperCase() === 'APPROVED'), []),
+        sessionKey,
+        false,
     );
 }

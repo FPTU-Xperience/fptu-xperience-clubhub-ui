@@ -1,5 +1,6 @@
+import { activityWorkspacePath } from '../../../services/activity-club-navigation';
 import StudentActivityActions from '../../../components/v2/activity-detail/StudentActivityActions';
-import { useMyClubSelection } from '../my-clubs-data';
+import { useMyClubSelection, useMyApprovedMemberships } from '../my-clubs-data';
 import { useState } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { useActivityDetail } from '../activity-data';
@@ -28,8 +29,9 @@ export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onC
     const [tab, setTab] = useState('overview');
     const resources = workspaceRead ? activity.resources : publicActivityResources(activity.resources);
     const membership = useMyClubSelection(api, sessionKey);
-    const isMember = membership.status === 'populated' && membership.data.some((club) => String(club.clubId) === String(activity.clubId));
-    const clubLink = <ClubNavigationLinks clubCode={clubCode} showWorkspace={isMember} />;
+    const approvedMemberships = useMyApprovedMemberships(api, sessionKey);
+    const workspacePath = activityWorkspacePath(activity.clubId, membership, approvedMemberships);
+    const clubLink = <ClubNavigationLinks clubCode={clubCode} workspacePath={workspacePath} />;
     return (
         <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink}>
             {tab === 'overview' && <><ActivityOverview activity={activity} clubLink={clubLink} /><StudentActivityActions api={api} activity={activity} onChanged={onChanged} /></>}
@@ -62,7 +64,7 @@ export default function ActivityDetailPage({ api, sessionKey }) {
     const activity = result.data;
     const directory = useClubDirectory(api, sessionKey);
     const clubCode =
-        activity?.clubCode || directory.data?.find((club) => String(club.id) === activity?.clubId)?.code || '';
+        directory.data?.find((club) => String(club.id) === String(activity?.clubId))?.code || activity?.clubCode || '';
     return (
         <div className="v2-public-content v2-activity-detail-page">
             <Link className="v2-text-link" to={`/v2/activities${location.search}`}>
