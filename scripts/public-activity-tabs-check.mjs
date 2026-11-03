@@ -14,7 +14,7 @@ try {
     for (const width of [1440, 390]) {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
         const errors = [];
-        page.on('pageerror', error => errors.push(error.message));
+        page.on('pageerror', error => { errors.push(error.message); console.error('Public tab browser error:', error.message); });
         const counts = { detail: 0, resources: 0, staffing: 0, attendance: 0, sessions: 0, register: 0 };
         let slowNext = false, failNext = false, registered = false, delayedCompleted = false;
         await page.route('**/__tabs_api/**', async route => {

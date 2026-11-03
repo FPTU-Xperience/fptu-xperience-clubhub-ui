@@ -123,3 +123,5 @@ jobs:
 # Validate the notification source revision in this release.
 
 # Validate extracted notification component accessibility.
+
+# Run the isolated activity fixture with the production React transform.
