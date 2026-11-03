@@ -79,3 +79,21 @@ test('discovery filters the complete feed before limiting the preview to six', (
     assert.equal(selectDiscoveryActivities(feed, []).length, 6);
     assert.deepEqual(selectDiscoveryActivities(feed, [], 'LIVE').map(item => item.id), ['live']);
 });
+
+test('registration permission survives public detail, feed and recommendation mapping without requiring membership', () => {
+    const raw = { ...activity, isInternal: false, canRegister: true, eligible: true };
+    for (const mapped of [mapActivityDetailItem(raw), mapActivityFeed([raw])[0], mapRecommendations([{ rank: 1, activity: raw }])[0].activity]) {
+        assert.equal(mapped.isInternal, false);
+        assert.equal(mapped.canRegister, true);
+        assert.equal(mapped.eligible, true);
+    }
+});
+
+test('scope does not fabricate registration permission when the API denies or omits it', () => {
+    for (const isInternal of [true, false]) {
+        for (const canRegister of [false, undefined, 'true', 1]) {
+            assert.equal(mapActivityDetailItem({ ...activity, isInternal, canRegister }).canRegister, false);
+        }
+        assert.equal(mapActivityDetailItem({ ...activity, isInternal, canRegister: true }).canRegister, true);
+    }
+});

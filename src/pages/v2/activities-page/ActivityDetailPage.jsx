@@ -83,6 +83,7 @@ export default function ActivityDetailPage({ api, sessionKey }) {
                     clubCode={clubCode}
                     sessionKey={sessionKey}
                     api={api}
+                    onChanged={result.retry}
                 />
             ) : (
                 <PageState

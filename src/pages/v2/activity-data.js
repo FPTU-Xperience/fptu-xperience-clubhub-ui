@@ -24,6 +24,8 @@ export function mapActivityDetailItem(raw = {}) {
     return {
         ...activityPublication(raw),
         id: String(raw.id),
+        canRegister: raw.canRegister === true,
+        eligible: raw.eligible === true,
         isInternal: typeof raw.isInternal === 'boolean' ? raw.isInternal : null,
         version: typeof raw.version === 'string' ? raw.version : null,
         resourceAvailability: raw.resourceAvailability || 'UNCONFIGURED',
