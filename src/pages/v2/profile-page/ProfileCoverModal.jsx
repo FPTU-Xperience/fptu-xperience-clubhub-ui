@@ -97,7 +97,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             saving ||
             event.button !== 0 ||
             (tab !== 'shape' && tab !== 'text') ||
-            (tab === 'shape' && shape === 'none') ||
+            (tab === 'shape' && (shape === 'none' || shapeTransform.hidden)) ||
             (tab === 'text' && !coverText.visible)
         )
             return;
@@ -293,6 +293,9 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             textInteractive={tab === 'text'}
                         />
                     </div>
+                    <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
+                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
                     <p className="v2-cover-preview-note">
                         Xem trước toàn bộ ảnh bìa · Đề xuất 1200 × 300px (4:1) · Cùng bố cục với trang cá nhân.
                     </p>
@@ -435,7 +438,10 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     setShapeHsl(normalizeShapeHsl(shapes.find((item) => item.id === next)?.hsl));
                                 },
                             })}
-                            <p className="v2-cover-preview-note">
+                            <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
+                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
+                    <p className="v2-cover-preview-note">
                                 Stamp là lớp ảnh độc lập. Kéo trên ảnh xem trước để di chuyển; dùng thanh điều chỉnh để
                                 xoay và scale. Nền không thay đổi khi chỉnh stamp.
                             </p>
@@ -486,7 +492,10 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             {shapes.find((item) => item.id === shape)?.assetUrl && (
                                 <ShapeHslControls value={shapeHsl} onChange={setShapeHsl} disabled={saving} />
                             )}
-                            <p className="v2-cover-preview-note">
+                            <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
+                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
+                    <p className="v2-cover-preview-note">
                                 CLB có thể thêm shape riêng bằng PNG hoặc SVG tối đa 5 MB tại Kho quà.
                             </p>
                         </>

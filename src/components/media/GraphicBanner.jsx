@@ -52,6 +52,7 @@ export default function GraphicBanner({
             <rect width={size.width} height={size.height} fill={background.color || `url(#${id}-background)`} />
             <g
                 data-layer="shape"
+                display={value.shapeHidden ? 'none' : undefined}
                 transform={`translate(${value.shapeX * layout.xStep} ${value.shapeY * layout.yStep}) translate(${layout.cx} ${layout.cy}) scale(${(value.shapeScale / 100) * layout.shapeScale}) translate(-600 -150)`}
             >
                 {value.decoration === 'circles' && (

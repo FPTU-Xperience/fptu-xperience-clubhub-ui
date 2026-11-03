@@ -44,6 +44,7 @@ export function normalizeGraphicBanner(value) {
         ['eyebrow', 'title', 'subtitle'].map((field) => [field, value?.fonts?.[field] ?? value?.font ?? 'inter']),
     );
     if (
+        (next.shapeHidden !== undefined && typeof next.shapeHidden !== 'boolean') ||
         typeof next.visible !== 'boolean' ||
         Object.values(next.fonts).some((id) => !INITIALS_FONTS.some((font) => font.id === id))
     )
@@ -166,7 +167,7 @@ export async function createGraphicBannerFile(value, size = CLUB_BANNER_SIZE) {
     context.translate(design.shapeX * layout.xStep + layout.cx, design.shapeY * layout.yStep + layout.cy);
     context.scale((design.shapeScale / 100) * layout.shapeScale, (design.shapeScale / 100) * layout.shapeScale);
     context.translate(-600, -150);
-    if (design.decoration === 'circles') {
+    if (!design.shapeHidden && design.decoration === 'circles') {
         for (const [x, y, radius, opacity] of [
             [960, 30, 196, 0.07],
             [1020, 90, 257, 0.04],
@@ -176,7 +177,7 @@ export async function createGraphicBannerFile(value, size = CLUB_BANNER_SIZE) {
             context.arc(x, y, radius, 0, Math.PI * 2);
             context.fill();
         }
-    } else if (BANNER_PATHS[design.decoration]) {
+    } else if (!design.shapeHidden && BANNER_PATHS[design.decoration]) {
         context.fillStyle = 'rgba(255,255,255,.09)';
         BANNER_PATHS[design.decoration].forEach((path) => context.fill(new Path2D(path)));
     }
