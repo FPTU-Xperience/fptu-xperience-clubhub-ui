@@ -110,3 +110,5 @@ jobs:
                   NODE
 
 # Validate the notification source revision in this release.
+
+# Validate extracted notification component accessibility.
