@@ -57,19 +57,22 @@ export function mapActivityFeedItem(raw = {}) {
     return item && isActivityPublic(item) && ['UPCOMING', 'LIVE'].includes(item.status) ? item : null;
 }
 
-export function useActivityDetail(api, sessionKey, activityId, student = false) {
+export function useActivityDetail(api, sessionKey, activityId, student = false, refreshKey = 0) {
     const mediaRevision = usePublicMediaRevision('activity');
     const identity = `${sessionKey}:${activityId}:${student}`;
     const [version, setVersion] = useState(0);
-    const [result, setResult] = useState({ identity, status: 'loading', data: null });
+    const [result, setResult] = useState({ identity, refreshKey, status: 'loading', data: null });
     useEffect(() => {
         let active = true;
         const id = Number(activityId);
         if (!Number.isSafeInteger(id) || id <= 0) {
-            setResult({ identity, status: 'not-found', data: null });
+            setResult({ identity, refreshKey, status: 'not-found', data: null });
             return undefined;
         }
-        setResult({ identity, status: 'loading', data: null });
+        setResult((previous) => ({
+            identity, refreshKey, status: 'loading',
+            data: previous.identity === identity ? previous.data : null,
+        }));
         Promise.resolve()
             .then(() => (student ? loadStudentActivityDetail(api, id) : api.getActivity(id)))
             .then(
@@ -78,6 +81,7 @@ export function useActivityDetail(api, sessionKey, activityId, student = false) 
                     if (active)
                         setResult({
                             identity,
+                            refreshKey,
                             status: activity && Number(activity.id) === id ? 'populated' : 'not-found',
                             data: activity && Number(activity.id) === id ? activity : null,
                         });
@@ -86,6 +90,7 @@ export function useActivityDetail(api, sessionKey, activityId, student = false) 
                     if (active)
                         setResult({
                             identity,
+                            refreshKey,
                             status: error?.status === 404 ? 'not-found' : classifyActivityError(error),
                             data: null,
                         });
@@ -94,8 +99,10 @@ export function useActivityDetail(api, sessionKey, activityId, student = false) 
         return () => {
             active = false;
         };
-    }, [api, activityId, sessionKey, version, mediaRevision, student]);
-    const current = result.identity === identity ? result : { status: 'loading', data: null };
+    }, [api, activityId, sessionKey, version, mediaRevision, student, refreshKey]);
+    const current = result.identity === identity && result.refreshKey === refreshKey ? result : {
+        status: 'loading', data: result.identity === identity ? result.data : null,
+    };
     return { ...current, retry: () => setVersion((value) => value + 1) };
 }
 

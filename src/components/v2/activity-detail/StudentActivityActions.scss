@@ -1,0 +1,6 @@
+.v2-student-activity-actions {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 0;
+    > p { max-width: 360px; margin: 0; font-size: 12px; line-height: 1.5; color: var(--v2-muted, #64748b); }
+    .v2-button:disabled { opacity: .6; cursor: not-allowed; }
+    &--compact { padding: 0; }
+}

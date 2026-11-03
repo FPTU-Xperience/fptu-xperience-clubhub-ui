@@ -62,7 +62,7 @@ export default function ActivitiesPage({ api, sessionKey }) {
                                     activity={item}
                                     onOpen={(activity) => navigate(`/v2/activities/${activity.id}${window.location.search}`)}
                                 />
-                                {item.canRegister && <StudentActivityActions key={`${sessionKey}:${item.id}`} api={api} activity={item} onChanged={result.retry} registerOnly />}
+                                <StudentActivityActions key={`${sessionKey}:${item.id}`} api={api} activity={item} onChanged={result.retry} />
                                 </div>
                             ))}
                         </div>

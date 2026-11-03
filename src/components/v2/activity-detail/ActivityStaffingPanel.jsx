@@ -224,6 +224,11 @@ export default function ActivityStaffingPanel({
     useEffect(() => {
         let active = true;
         setLoading(true);
+        setData(null);
+        setEditing(false);
+        setAssigning(false);
+        setSubmitting(null);
+        setNotice('');
         setError('');
         getActivityStaffing(api, activityId)
             .then((value) => {
@@ -241,7 +246,7 @@ export default function ActivityStaffingPanel({
         return () => {
             active = false;
         };
-    }, [api, activityId, retry]);
+    }, [api, activityId, mode, user?.id, retry]);
     const mutate = async (path, body, success, method = 'POST') => {
         if (lock.current || readOnly) return;
         lock.current = true;
