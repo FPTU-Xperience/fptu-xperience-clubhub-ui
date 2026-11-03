@@ -7,6 +7,21 @@ Continue IMPLEMENTING approved issues one group at a time, starting C03 + recrui
 
 The current toolset has no operation to create/fork a ChatGPT conversation. User must use the application's Fork/Branch/new-chat UI. No new chat was created by the agent.
 
+## Approved addon — event registration cancellation (2026-11-04, Asia/Saigon)
+
+Status: approved requirement, NOT yet implemented or deployed.
+
+- Keep the existing button label **“Đã đăng ký”**. Do not replace it with a separate visible “Hủy đăng ký” button.
+- The registered button must be clickable when cancellation is supported; clicking opens a cancellation confirmation modal. Clicking it must not immediately mutate registration.
+- Modal clearly identifies the event, provides a confirm-cancellation action and a keep-registration/dismiss action.
+- Dismiss/keep registration causes no cancellation request or state change.
+- Only after confirmed successful API cancellation update registered status/detail and personal schedule from authoritative server state. A permitted subsequent registration can show “Đăng ký tham gia” again.
+- On cancellation failure keep the registered state and display the actionable error. Guard duplicate submissions/loading and stale account/activity responses.
+- Inspect actual backend cancellation support and eligibility/cutoffs first. Add backend persistence/authorization if necessary and testable, following API AGENTS.md. Do not invent an endpoint or implement client-only cancellation.
+- Maintain capacity/counter consistency and account ownership on the server. Preserve attendance/evidence/history according to the real contract; do not silently erase them or invent XP/refund rules.
+- Validate confirm/dismiss, successful cancellation plus reload, failed cancellation, account ownership, schedule reconciliation and capacity/concurrent requests where supported.
+- Existing approval for implementation, commit, push, deploy and testing applies. Keep issue-scoped evidence. This addon does not unpark C10+A04+A05.
+
 ## Repositories and current working branches
 - ClubHub UI: https://github.com/FPTU-Xperience/fptu-xperience-clubhub-ui ; fix/approved-issues-20261103. Head at audit: 587ac6eb7768af8667a68329aaa89d392256e90b.
 - Admin UI: https://github.com/FPTU-Xperience/fptu-xperience-admin-ui ; fix/approved-issues-20261103. Head: 73326f9d8474003c61760278cca21c263ef4b787.
@@ -19,6 +34,7 @@ The current toolset has no operation to create/fork a ChatGPT conversation. User
 ## Audit: remaining work
 | Group | Status / next action |
 |---|---|
+| C02 addon: cancellation | Open/approved. Keep “Đã đăng ký” clickable to open a confirm-cancellation modal; cancellation only after confirmation and server success. See addon above. |
 | C03 + recruitment part of C07 | First remaining implementation. ActivityStaffingEndpoints.Join STILL directly creates ActivityStaffAssignment. Need persisted PENDING application, reviewer host/event capability enforced by API, approve/reject flow in workspace Nhiệm vụ và đóng góp; assignment only after approval. Enforce version/idempotency, capacity, eligibility and concurrency at approval. Public Phân công needs HOST/STAFF projection; current Get visibility is privilege/self based, not the requested public projection. |
 | C04 | Partial. ClubHub directory/workspace page+filter URL persistence implemented. Audit remaining Admin lists and detail/modal pagination; Admin Engagement still uses useState(1), local query/major/cohort state, so reload/Back persistence is not complete. |
 | C06 | User-requested status remains “chưa implement điểm danh hoàn chỉnh”. Inspect real attendance/session contracts and end-to-end gaps; implement only supported product flow. No invented QR/check-in mechanism. |
@@ -78,4 +94,4 @@ The current toolset has no operation to create/fork a ChatGPT conversation. User
 - Keep issue-scoped commits and durable validation notes. Continue sequentially; ask only for actual missing product decisions, with evidence/options, while progressing independent work.
 
 ## Exact next-chat prompt
-Continue implementing FPTU-Xperience from docs/issue-validation/remaining-handoff.md on ClubHub UI branch fix/approved-issues-20261103. Start C03 + recruitment approval dependency of C07, not another planning pass. Re-read remote heads and API AGENTS.md. Commit/push/deploy/test are authorized. C10+A04+A05 remains parked for tonight. Preserve original activity club-link positions, 12px registration spacing, persisted registered state, schedule, no list registration button and no session polling. Use existing workflows only. Do not claim local execution or authenticated live acceptance without evidence.
+Continue implementing FPTU-Xperience from docs/issue-validation/remaining-handoff.md on ClubHub UI branch fix/approved-issues-20261103. Start C03 + recruitment approval dependency of C07, not another planning pass. Re-read remote heads and API AGENTS.md. Commit/push/deploy/test are authorized. C10+A04+A05 remains parked for tonight. Preserve original activity club-link positions, 12px registration spacing, persisted registered state, schedule, no list registration button and no session polling. Include the approved event cancellation addon: keep “Đã đăng ký”; clicking opens a confirmation modal, with cancellation only on confirmation and successful API persistence. Use existing workflows only. Do not claim local execution or authenticated live acceptance without evidence.
