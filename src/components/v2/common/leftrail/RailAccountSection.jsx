@@ -1,7 +1,7 @@
 import { getDisplayName } from '../../../../services/display-name';
 import { Bell, ChevronDown, CircleHelp, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useHeaderNotifications } from '../../../../pages/v2/header-data';
 import ProfileAvatar from '../../../../pages/v2/profile-page/ProfileAvatar';
@@ -40,6 +40,7 @@ function NotificationContent({ status, data, retry }) {
 
 export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
     const location = useLocation();
+    const navigate = useNavigate();
     const accountMenuRef = useRef(null);
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
     const { theme, toggleTheme } = useTheme();
@@ -77,7 +78,8 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
 
     const signOut = async () => {
         notifications.close();
-        await onLogout?.();
+        if (location.pathname.startsWith('/v2/demo')) await onLogout?.();
+        else navigate('/logout');
     };
 
     return (

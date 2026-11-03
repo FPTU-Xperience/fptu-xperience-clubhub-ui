@@ -1,3 +1,4 @@
+import LogoutPage from './pages/LogoutPage';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -52,6 +53,7 @@ function renderApplication() {
                 }
             >
                 <Routes>
+                    <Route path="/logout" element={<LogoutPage />} />
                     <Route path="/v2/*" element={<V2App />} />
                     <Route path="/reports/create" element={<LegacyReportEditorRedirect />} />
                     <Route path="/reports/:id/edit" element={<LegacyReportEditorRedirect />} />
