@@ -81,11 +81,11 @@ test('discovery filters the complete feed before limiting the preview to six', (
 });
 
 test('registration permission survives public detail, feed and recommendation mapping without requiring membership', () => {
-    const raw = { ...activity, isInternal: false, canRegister: true, eligible: true };
+    const raw = { ...activity, isInternal: false, canRegister: true, isEligible: true };
     for (const mapped of [mapActivityDetailItem(raw), mapActivityFeed([raw])[0], mapRecommendations([{ rank: 1, activity: raw }])[0].activity]) {
         assert.equal(mapped.isInternal, false);
         assert.equal(mapped.canRegister, true);
-        assert.equal(mapped.eligible, true);
+        assert.equal(mapped.isEligible, true);
     }
 });
 
