@@ -1,3 +1,4 @@
+import SessionExpiryGuard from './components/auth/SessionExpiryGuard';
 import LogoutPage from './pages/LogoutPage';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -45,6 +46,7 @@ function renderApplication() {
     runtime.root.render(
     <React.StrictMode>
         <BrowserRouter>
+            <SessionExpiryGuard session={session} loginTo="/v2">
             <Suspense
                 fallback={
                     <div role="status" style={{ padding: 40 }}>
@@ -61,6 +63,7 @@ function renderApplication() {
                     <Route path="/*" element={<ExistingApplication />} />
                 </Routes>
             </Suspense>
+            </SessionExpiryGuard>
         </BrowserRouter>
     </React.StrictMode>,
 );
@@ -71,14 +74,12 @@ async function start() {
     runtime.stop = null;
     const generation = ++runtime.generation;
     const isCurrent = () => runtime.generation === generation;
-    let stopBrowserSession;
     const bypass = import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH === 'true';
     if (!bypass) {
         try {
             const browserSession = createBrowserSession({ session, isCurrent });
             await browserSession.bootstrap();
             if (!isCurrent()) return;
-            stopBrowserSession = browserSession.watch();
         } catch {
             if (!isCurrent()) return;
             runtime.root ||= ReactDOM.createRoot(document.getElementById('root'));
@@ -91,7 +92,7 @@ async function start() {
     }
     if (!isCurrent()) return;
     const stopRedirect = watchSessionRedirect(session, { destination: '/v2' });
-    runtime.stop = () => { stopBrowserSession?.(); stopRedirect(); };
+    runtime.stop = () => { stopRedirect(); };
     renderApplication();
 }
 start();
