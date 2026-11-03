@@ -24,9 +24,9 @@ const tabs = [
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh của tôi'],
 ];
-export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onChanged }) {
+export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onChanged, workspaceRead = false }) {
     const [tab, setTab] = useState('overview');
-    const resources = publicActivityResources(activity.resources);
+    const resources = workspaceRead ? activity.resources : publicActivityResources(activity.resources);
     const membership = useMyClubSelection(api, sessionKey);
     const isMember = membership.status === 'populated' && membership.data.some((club) => String(club.clubId) === String(activity.clubId));
     const clubLink = <ClubNavigationLinks clubCode={clubCode} showWorkspace={isMember} />;

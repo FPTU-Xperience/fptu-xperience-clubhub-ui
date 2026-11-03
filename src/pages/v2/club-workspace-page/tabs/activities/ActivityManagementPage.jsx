@@ -241,7 +241,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
     if (!manager) return (
         <div className="v2-activity-management-page">
             <Link className="v2-text-link" to={`${base}/activities${location.search}`}>← Danh sách hoạt động</Link>
-            <PublicActivityProfile activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
+            <PublicActivityProfile workspaceRead activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
         </div>
     );
     const displayed = {
