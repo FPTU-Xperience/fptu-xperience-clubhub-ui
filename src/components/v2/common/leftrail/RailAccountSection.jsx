@@ -1,3 +1,4 @@
+import { getDisplayName } from '../../../../services/display-name';
 import { Bell, ChevronDown, CircleHelp, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -43,7 +44,7 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
     const { theme, toggleTheme } = useTheme();
     const sessionKey = user?.id || user?.email || null;
     const notifications = useHeaderNotifications(api, sessionKey);
-    const displayName = profile?.displayName || user?.name || user?.fullName || 'Sinh viên FPTU';
+    const displayName = getDisplayName(user, profile, 'Sinh viên FPTU');
     const secondaryIdentifier = user?.email || user?.studentCode || 'ClubHub';
     const avatar = user?.avatar || displayName.slice(0, 2).toUpperCase();
 

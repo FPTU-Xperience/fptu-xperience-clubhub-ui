@@ -1,3 +1,5 @@
+import { usePersonalMedia } from '../components/media/PersonalMediaContext';
+import { getDisplayName } from '../services/display-name';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -51,6 +53,7 @@ function formatActivityDate(value) {
 }
 
 export default function DashboardPage() {
+    const media = usePersonalMedia();
     const { user, clubAccess, hasPermission } = useAuth();
     const { notifications } = useNotifications();
     const [data, setData] = useState({
@@ -148,7 +151,7 @@ export default function DashboardPage() {
             >
                 <p className="text-sm font-semibold uppercase tracking-wider text-cyan-300">FPTU-Xperience</p>
                 <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
-                    Xin chào, {user?.name || user?.username}
+                    Xin chào, {getDisplayName(user, media?.profileResult.data?.profile)}
                 </h2>
             </motion.section>
 
