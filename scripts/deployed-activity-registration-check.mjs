@@ -27,7 +27,7 @@ try {
       // Every API request is intercepted: no test identity or write reaches production.
       if (url.pathname === '/api/users/me') return ok({id:999999,fullName:'Isolated UI reviewer',email:'reviewer@example.test',roles:['CLUB_MEMBER'],isActive:true,isLocked:false,campusCode:'HAN'});
       if (url.pathname === '/api/users/me/profile') return ok({userId:999999,version:'test',profile:{interests:[]},personal:{},academic:{},editableFields:[],onboarding:{version:1,completedAt:'2026-01-01T00:00:00Z'}});
-      if (url.pathname === '/api/v2/activities/4') return ok({id:4,clubId:1,clubCode:'TEST',clubName:'Isolated Test Club',title:'Software Engineering Weekly Lab',description:'Isolated API fixture',status:'LIVE',isInternal:internal,canRegister,isEligible:true,nextAction:canRegister?'REGISTER':'VIEW',startTime:'2026-09-15T05:30:00Z',endTime:'2026-12-15T08:30:00Z'});
+      if (url.pathname === '/api/v2/activities/4') return ok({id:4,clubId:1,clubCode:'TEST',clubName:'Isolated Test Club',title:'Software Engineering Weekly Lab',description:'Isolated API fixture',status:'LIVE',isInternal:internal,isRegistered:submitted>0,canRegister:canRegister && submitted===0,isEligible:true,nextAction:canRegister?'REGISTER':'VIEW',startTime:'2026-09-15T05:30:00Z',endTime:'2026-12-15T08:30:00Z'});
       if (url.pathname === '/api/activities/4/resources') return ok({items:[],availability:'AVAILABLE',resourceCapabilities:{supportedKinds:[],canManage:false,canUpload:false}});
       if (url.pathname === '/api/clubs') return ok([{id:1,code:'TEST',name:'Isolated Test Club',campusCode:'HAN',isActive:true}]);
       if (url.pathname === '/api/clubs/me/access') return ok(internal ? [{clubId:1,isApprovedMember:true}] : []);
@@ -46,30 +46,35 @@ try {
     try {
       await heading.waitFor({timeout:25000});
       assert.equal(await heading.textContent(),'Software Engineering Weekly Lab');
-      const button=page.locator('.v2-activity-profile-actions').getByRole('button',{name:'Đăng ký tham gia',exact:true});
+      const button=page.locator('.v2-activity-profile-registration').getByRole('button',{name:'Đăng ký tham gia',exact:true});
       assert.equal(await button.count(),1);
       assert.equal(await button.isVisible(),true);
       assert.equal(await button.isEnabled(),canRegister);
       if (internal) await page.locator('.v2-activity-profile-actions').getByRole('link', {name:'Đến không gian CLB',exact:true}).waitFor();
       const layout = await page.locator('.v2-activity-profile').evaluate(el => {
         const box = selector => el.querySelector(selector).getBoundingClientRect();
-        const title = box('h1'), facts = box('.v2-activity-profile-quick-facts'), actions = box('.v2-activity-profile-actions');
-        const links = [...el.querySelectorAll('.v2-activity-profile-actions a')].map(a => a.getBoundingClientRect());
-        const button = box('.v2-student-activity-actions button');
-        return {titleHeight:title.height,lineHeight:parseFloat(getComputedStyle(el.querySelector('h1')).lineHeight),
-          toolbarBelowFacts:actions.top >= facts.bottom,linksAligned:links.every(link => Math.abs(link.top-button.top)<2),
-          linksBelow:links.every(link => link.top>=button.bottom),
-          overflow:document.documentElement.scrollWidth > innerWidth+1};
+        const title = box('h1'), facts = box('.v2-activity-profile-quick-facts'), registration = box('.v2-activity-profile-registration');
+        const nav = el.querySelector('.v2-activity-profile-identity .v2-club-navigation-links');
+        const links = nav.getBoundingClientRect();
+        return {registrationBelow:registration.top>=facts.bottom, navigationAbove:links.bottom<=registration.top,
+          besideTitle:links.left>=title.right-1, titleTop:title.top, titleBottom:title.bottom,
+          linksTop:links.top, linksBottom:links.bottom, overflow:document.documentElement.scrollWidth>innerWidth+1};
       });
-      assert.equal(layout.toolbarBelowFacts,true,'Actions have a separate row below metadata');
-      assert.equal(layout.overflow,false,'No horizontal overflow');
-      if(width===1440) assert.ok(layout.titleHeight <= layout.lineHeight*1.2,'Title is not squeezed by action buttons');
-      if(width===1440) assert.equal(layout.linksAligned,true,'Navigation aligns with the registration button');
-      else assert.equal(layout.linksBelow,true,'Tablet/mobile navigation wraps onto its own row');
+      assert.equal(layout.registrationBelow,true);
+      assert.equal(layout.navigationAbove,true,'Club navigation stays in identity header above registration');
+      assert.equal(layout.overflow,false);
+      if(width>900) {
+        assert.equal(layout.besideTitle,true,'Club links retain their old position beside the title');
+        assert.ok(layout.linksTop<=layout.titleBottom && layout.linksBottom>=layout.titleTop,'Navigation aligns with title');
+      }
       await button.scrollIntoViewIfNeeded();
       if(canRegister) {
         await button.evaluate(el=>el.click());
-        await page.getByText('Máy chủ đã xác nhận đăng ký tham gia.',{exact:true}).waitFor();
+        await page.getByRole('button',{name:'Đã đăng ký',exact:true}).waitFor();
+        assert.equal(await page.getByText('Máy chủ đã xác nhận đăng ký tham gia.',{exact:true}).count(),0);
+        await page.reload();
+        await page.getByRole('button',{name:'Đã đăng ký',exact:true}).waitFor();
+        assert.equal(await page.getByText('Hiện chưa thể đăng ký hoạt động này.',{exact:true}).count(),0);
         assert.equal(submitted,1);
       }
       await page.screenshot({path:'TestResults/deployed-registration/'+internal+'-'+canRegister+'-'+width+'.png',fullPage:true});

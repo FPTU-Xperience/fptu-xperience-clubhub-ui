@@ -78,13 +78,11 @@
 .v2-activity-profile-mark.is-cancelled { background: #fef0f0; color: #a83131; }
 .v2-activity-profile-actions {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 16px 24px;
-    margin: 0 24px 24px 152px;
-    > .v2-club-navigation-links { margin-left: auto; }
-    > .v2-student-activity-actions { max-width: 100%; }
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 46px;
 }
 .v2-activity-profile-quick-facts {
     display: flex;
@@ -203,6 +201,10 @@
     .v2-activity-profile-identity {
         flex-wrap: wrap;
     }
+    .v2-activity-profile-actions {
+        padding-top: 0;
+        padding-left: 128px;
+    }
     .v2-activity-profile-columns {
         grid-template-columns: 1fr;
     }
@@ -221,10 +223,7 @@
         padding-top: 36px;
     }
     .v2-activity-profile-actions {
-        margin-left: 8px;
-        margin-right: 8px;
-        > .v2-club-navigation-links { margin-left: 0; width: 100%; }
-        > .v2-student-activity-actions { width: 100%; }
+        padding-left: 0;
     }
     .v2-activity-profile-quick-facts {
         margin-left: 8px;
@@ -234,9 +233,9 @@
     }
 }
 
-@media (min-width: 601px) and (max-width: 1100px) {
-    .v2-activity-profile-actions > .v2-club-navigation-links {
-        margin-left: 0;
-        width: 100%;
-    }
+.v2-activity-profile-registration {
+    margin: 0 24px 24px 152px;
+}
+@media (max-width: 600px) {
+    .v2-activity-profile-registration { margin-left: 8px; margin-right: 8px; }
 }

@@ -30,7 +30,7 @@ try {
                 if (fail) return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'Temporary failure' }) });
                 await fulfill({ id: 1, clubId: 1, clubCode: 'TEST', clubName: 'Test Club', title: 'Snapshot ' + number + ' ' + account,
                     description: 'Current server snapshot', status: 'UPCOMING', isInternal: workspaceMode, isEligible: true,
-                    canRegister: !registered, nextAction: registered ? 'VIEW' : 'REGISTER',
+                    isRegistered: registered, canRegister: !registered, nextAction: registered ? 'VIEW' : 'REGISTER',
                     startTime: '2026-11-13T07:00:00Z', endTime: '2026-11-13T10:00:00Z' });
                 if (slow) delayedCompleted = true;
                 return;
@@ -52,7 +52,7 @@ try {
         await page.goto('http://127.0.0.1:4174/tests/fixtures/public-tabs.html' + (workspaceMode ? '?workspace=1' : ''));
         const heading = page.locator('.v2-activity-profile-identity h1');
         const nav = page.getByRole('navigation', { name: 'Nội dung hoạt động' });
-        const button = page.locator('.v2-activity-profile-actions').getByRole('button', { name: 'Đăng ký tham gia' });
+        const button = page.locator('.v2-activity-profile-registration').getByRole('button', { name: 'Đăng ký tham gia' });
         await heading.filter({ hasText: 'Snapshot 1 student-a' }).waitFor();
         assert.equal(await button.isEnabled(), true);
         assert.equal(await button.count(), 1, 'Registration action lives in the header');
@@ -85,7 +85,7 @@ try {
         assert.equal(await nav.getByRole('button', { name: 'Tài liệu', exact: true }).getAttribute('aria-pressed'), 'true', 'Retry preserves selected tab');
         const afterRegister = counts.detail + 1;
         await button.evaluate(el => { el.click(); el.click(); });
-        await page.getByText('Máy chủ đã xác nhận đăng ký tham gia.', { exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Đã đăng ký', exact: true }).waitFor();
         await heading.filter({ hasText: 'Snapshot ' + afterRegister + ' student-a' }).waitFor();
         await page.waitForFunction(() => document.querySelector('.v2-student-activity-actions button')?.disabled);
         assert.equal(counts.register, 1, 'Double press only submits once');

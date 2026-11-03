@@ -35,7 +35,7 @@ export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onC
     const workspacePath = activityWorkspacePath(activity.clubId, membership, approvedMemberships);
     const clubLink = <ClubNavigationLinks clubCode={clubCode} workspacePath={workspacePath} />;
     return (
-        <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={<>{<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}{clubLink}</>}>
+        <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink} registrationActions={<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}>
             {refreshing ? <PageState status="loading" /> : <>
             {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
