@@ -3,7 +3,7 @@
 Audited 2026-11-03 against current remote branches. Read this file and linked issue validation evidence before implementing. This is a handoff, not proof that remaining code has been implemented.
 
 ## Continue instruction
-Continue IMPLEMENTING approved issues one group at a time, starting C03 + recruitment dependency of C07. Finish validation and issue evidence before proceeding to the next group. Commit, push and deploy are already authorized. Do not ask again about settled product decisions. Keep club creation rework C10+A04+A05 pending for tonight.
+Continue IMPLEMENTING approved issues one group at a time. C03 + C07 were released and validated on 2026-11-04; see [release evidence](2026-11-04-c03-c07.md). Continue with C04, following the existing list downward. The cancellation add-on is appended after existing issues. Finish validation and issue evidence before proceeding to the next group. Commit, push and deploy are already authorized. Do not ask again about settled product decisions. Keep club creation rework C10+A04+A05 pending for tonight.
 
 The current toolset has no operation to create/fork a ChatGPT conversation. User must use the application's Fork/Branch/new-chat UI. No new chat was created by the agent.
 
@@ -34,16 +34,16 @@ Status: approved requirement, NOT yet implemented or deployed.
 ## Audit: remaining work
 | Group | Status / next action |
 |---|---|
-| C02 addon: cancellation | Open/approved. Keep “Đã đăng ký” clickable to open a confirm-cancellation modal; cancellation only after confirmation and server success. See addon above. |
-| C03 + recruitment part of C07 | First remaining implementation. ActivityStaffingEndpoints.Join STILL directly creates ActivityStaffAssignment. Need persisted PENDING application, reviewer host/event capability enforced by API, approve/reject flow in workspace Nhiệm vụ và đóng góp; assignment only after approval. Enforce version/idempotency, capacity, eligibility and concurrency at approval. Public Phân công needs HOST/STAFF projection; current Get visibility is privilege/self based, not the requested public projection. |
+| C03 + recruitment part of C07 | Implemented/deployed 2026-11-04. Join persists PENDING application; current event manager/eligible HOST reviews, no self-review; assignment only on approval with version/idempotency/current eligibility/capacity/concurrency checks. Workspace queue and minimal public HOST/STAFF projection shipped. See release evidence; real-account acceptance remains unverified. |
 | C04 | Partial. ClubHub directory/workspace page+filter URL persistence implemented. Audit remaining Admin lists and detail/modal pagination; Admin Engagement still uses useState(1), local query/major/cohort state, so reload/Back persistence is not complete. |
 | C06 | User-requested status remains “chưa implement điểm danh hoàn chỉnh”. Inspect real attendance/session contracts and end-to-end gaps; implement only supported product flow. No invented QR/check-in mechanism. |
-| C07 evidence | Modal text/action/status clarity already improved. Resource attachment is incomplete; actual completion contract and recruitment approval integration still need verification. Submission is not completion/XP approval. |
+| C07 evidence | Implemented/deployed for the supported contract: persisted references to visible same-activity resources, scoped evidence links, server canSubmit, submission/independent verification and recruitment approval integration tested. No invented student upload permission; content/links and existing resource upload flow retained. Submission/verification awards no XP while scoring is deferred. See release evidence; real-account acceptance unverified. |
 | C08 | Open/blocker on authoritative redemption contract. Current reward-lifecycle.js still uses localStorage. No reward/redemption endpoint/model found in current production-source API tree. Existing display cannot be treated as authoritative stock, eligibility or balance. Need real contract before claiming production redemption. Include “Chưa mở đổi”, time zone and opening/closing boundaries when implementing. |
 | C10 + A04 + A05 | Explicitly parked for tonight. Rework entire club formation application, including student submit/CTSV discovery/campus/status/president consistency. Preserve backend requirements and approval. Do not resume automatically. |
 | A03 | Keep user-requested “chưa implement campus” in semesters/student-list scope. API has partial campus support; full integration and honest UI state remain to verify. No fake selector, taxonomy or new campus authorization. |
 | A06 | Partial. Radar fields mapped to real response with identity/stale checks and zero retention. Existing major/cohort/membership fields still need authoritative data-source audit; do not add modal fields or manufacture missing data. |
 | C12 | Open. ClubRolesInfo remains descriptive, not role management. Audit Git history 4431029,79c995e,fb26cd0,5360e76 for lost implementation/cause. Restore compatible existing role assignment/revocation and backend read-vs-modify enforcement, effective permissions refresh and last-admin protection. Custom/multiple roles only after history/API support is established. |
+| C02 addon: cancellation | Appended after existing issues, open/approved. Keep “Đã đăng ký” clickable to open a confirm-cancellation modal; cancellation only after confirmation and server success. See addon above. |
 
 ## Already implemented / preserve
 - C01 full display names, not username/last-word greetings.
@@ -70,7 +70,7 @@ Status: approved requirement, NOT yet implemented or deployed.
 - Admin auth/session release evidence is in Admin docs/issue-validation/2026-11-03.md (118 tests, deployment 41594312611).
 - Real signed-in student/CTSV end-to-end acceptance remains unverified. Builds, fixtures, anonymous smoke and image checks are distinct from real-account validation.
 
-## Source evidence for first remaining group
+## Historical C03 source evidence (superseded by 2026-11-04 release)
 - API src/Services/ActivityService/Endpoints/ActivityStaffingEndpoints.cs:
   - Map exposes staffing, assignments/completions, recruitment positions join, club recruitments; no application approval routes.
   - Join creates ActivityStaffAssignment immediately and audits JOIN_POSITION.
@@ -94,4 +94,4 @@ Status: approved requirement, NOT yet implemented or deployed.
 - Keep issue-scoped commits and durable validation notes. Continue sequentially; ask only for actual missing product decisions, with evidence/options, while progressing independent work.
 
 ## Exact next-chat prompt
-Continue implementing FPTU-Xperience from docs/issue-validation/remaining-handoff.md on ClubHub UI branch fix/approved-issues-20261103. Start C03 + recruitment approval dependency of C07, not another planning pass. Re-read remote heads and API AGENTS.md. Commit/push/deploy/test are authorized. C10+A04+A05 remains parked for tonight. Preserve original activity club-link positions, 12px registration spacing, persisted registered state, schedule, no list registration button and no session polling. Include the approved event cancellation addon: keep “Đã đăng ký”; clicking opens a confirmation modal, with cancellation only on confirmation and successful API persistence. Use existing workflows only. Do not claim local execution or authenticated live acceptance without evidence.
+Continue implementing FPTU-Xperience from docs/issue-validation/remaining-handoff.md on ClubHub UI branch fix/approved-issues-20261103. C03/C07 release evidence is in 2026-11-04-c03-c07.md; continue with C04 then down the remaining list, not another planning pass. Re-read remote heads and API AGENTS.md. Commit/push/deploy/test are authorized. C10+A04+A05 remains parked for tonight. Preserve original activity club-link positions, 12px registration spacing, persisted registered state, schedule, no list registration button and no session polling. Include the appended event cancellation addon after existing issues: keep “Đã đăng ký”; clicking opens a confirmation modal, with cancellation only on confirmation and successful API persistence. Use existing workflows only. Do not claim local execution or authenticated live acceptance without evidence.
