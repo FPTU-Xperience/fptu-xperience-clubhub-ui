@@ -1,6 +1,9 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
+        paths: [.github/workflows/deployment.yml]
     workflow_dispatch:
 
 permissions:
@@ -43,6 +46,17 @@ jobs:
 
             - name: Validate notification layout in browser
               run: node scripts/notification-visual-check.mjs
+
+            - name: Validate public tab refresh and registration in browser
+              run: node scripts/public-activity-tabs-check.mjs
+
+            - name: Save public activity screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: public-activity-tab-screenshots
+                  path: TestResults/public-tabs
+                  if-no-files-found: ignore
 
             - name: Save notification screenshots
               if: always()
