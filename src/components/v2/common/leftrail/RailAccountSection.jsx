@@ -29,8 +29,9 @@ function NotificationContent({ status, data, retry }) {
             {data.map((notification) => (
                 <li key={notification.id} className={notification.isRead ? 'is-read' : 'is-unread'}>
                     <strong>{notification.title}</strong>
+                    <small>{notification.isRead ? 'Đã đọc' : 'Chưa đọc'}</small>
                     <span>{notification.message}</span>
-                    <time dateTime={notification.createdAt}>{notification.createdAt}</time>
+                    <time dateTime={notification.createdAt}>{Number.isFinite(Date.parse(notification.createdAt)) ? new Date(notification.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'medium', timeStyle: 'short' }) : 'Chưa rõ thời gian'}</time>
                 </li>
             ))}
         </ul>
@@ -180,6 +181,8 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
                             <X size={17} />
                         </button>
                     </div>
+                    <p className="v2-rail-notification-state">6 thông báo gần nhất</p>
+                    <button type="button" className="v2-rail-notification-retry" disabled={notifications.status === 'loading'} onClick={notifications.retry}>Lấy thông báo mới</button>
                     <NotificationContent {...notifications} />
                 </section>
             )}

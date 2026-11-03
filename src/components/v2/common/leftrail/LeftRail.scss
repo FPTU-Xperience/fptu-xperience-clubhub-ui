@@ -526,3 +526,27 @@
         box-shadow: 0 12px 32px rgb(15 23 42 / 12%);
     }
 }
+
+.v2-rail-notification-list li {
+    position: relative;
+    border-radius: 12px;
+    padding: 14px;
+    overflow-wrap: anywhere;
+}
+.v2-rail-notification-list li.is-unread {
+    border-inline-start: 3px solid var(--v2-accent, #f97316);
+}
+.v2-rail-notification-list small {
+    display: inline-block;
+    width: fit-content;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--v2-surface, #f3f4f6);
+    color: var(--v2-text-muted, #6b7280);
+    font-size: 11px;
+}
+.v2-rail-notification-list li.is-unread small {
+    background: #fff1e8;
+    color: #9a3412;
+}
+.v2-rail-notification-list span { white-space: pre-wrap; }
