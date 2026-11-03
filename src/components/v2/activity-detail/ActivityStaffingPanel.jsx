@@ -631,7 +631,7 @@ export default function ActivityStaffingPanel({
             )}
             {submitting && (
                 <V2Modal
-                    title="Nộp minh chứng lượt thực hiện"
+                    title="Minh chứng thực hiện"
                     onClose={() => {
                         if (!busy) setSubmitting(null);
                     }}
@@ -655,6 +655,10 @@ export default function ActivityStaffingPanel({
                             );
                         }}
                     >
+                        <h3>{submitting.actionName}</h3>
+                        <p>{submitting.displayName} · {submitting.assignmentKind === 'HOST' ? 'Host' : 'Staff'}</p>
+                        <p>Phân công: {label(submitting.status)}. Gửi minh chứng tạo lượt chờ xác minh; chưa hoàn thành hoặc nhận XP.</p>
+                        {submitting.completions?.length > 0 && <details><summary>Lượt đã gửi</summary>{submitting.completions.map((row) => <p key={row.id}>{row.occurrenceLabel} · {label(row.status)}</p>)}</details>}
                         <fieldset disabled={busy}>
                             <StaffingField label="Mã lượt thực hiện">
                                 <input name="occurrenceKey" required maxLength={80} placeholder="Ví dụ: buoi-1" />
@@ -663,8 +667,9 @@ export default function ActivityStaffingPanel({
                                 <input name="occurrenceLabel" required maxLength={200} />
                             </StaffingField>
                             <StaffingField label="Minh chứng">
-                                <textarea name="evidence" required maxLength={4000} />
+                                <textarea name="evidence" required maxLength={4000} rows={5} placeholder="Công việc đã làm, kết quả, đường dẫn tài nguyên để đối chiếu" />
                             </StaffingField>
+                            <p>API hiện lưu nội dung và đường dẫn minh chứng. Chưa hỗ trợ đính kèm tệp cho lượt thực hiện này.</p>
                             <p>
                                 ATTENDANCE là khai báo thủ công có minh chứng, cần người có quyền xác minh độc lập;
                                 không thay cho QR check-in.
