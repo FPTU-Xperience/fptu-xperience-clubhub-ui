@@ -1,4 +1,3 @@
-import StudentActivityActions from '../../../components/v2/activity-detail/StudentActivityActions';
 import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
 import { useListQuery } from '../use-list-query';
 import { useMemo } from 'react';
@@ -62,7 +61,6 @@ export default function ActivitiesPage({ api, sessionKey }) {
                                     activity={item}
                                     onOpen={(activity) => navigate(`/v2/activities/${activity.id}${window.location.search}`)}
                                 />
-                                <StudentActivityActions key={`${sessionKey}:${item.id}`} api={api} activity={item} onChanged={result.retry} />
                                 </div>
                             ))}
                         </div>

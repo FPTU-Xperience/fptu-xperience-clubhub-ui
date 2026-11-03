@@ -1,6 +1,8 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
     workflow_dispatch:
 
 permissions:
@@ -47,6 +49,11 @@ jobs:
             - name: Validate public tab refresh and registration in browser
               run: node scripts/public-activity-tabs-check.mjs
 
+            - name: Validate built activity layout and registration-to-schedule flow
+              run: node scripts/deployed-activity-registration-check.mjs
+              env:
+                  ACTIVITY_PREVIEW: 'true'
+
             - name: Save public activity screenshots
               if: always()
               uses: actions/upload-artifact@v4
@@ -91,6 +98,13 @@ jobs:
 
             - name: Verify deployed activity registration rendering with isolated API traffic
               run: node scripts/deployed-activity-registration-check.mjs
+
+            - name: Save activity layout screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: activity-layout-and-schedule
+                  path: TestResults/deployed-registration
 
             - name: Verify production assets and API health
               run: |

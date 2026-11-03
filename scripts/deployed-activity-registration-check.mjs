@@ -1,10 +1,17 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
+const base = process.env.ACTIVITY_PREVIEW === 'true' ? 'http://127.0.0.1:4175' : 'https://fptux-clubhub-ui.pages.dev';
+const server = process.env.ACTIVITY_PREVIEW === 'true' ? spawn('node', ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', '4175', '--strictPort'], {stdio: 'inherit'}) : null;
+if (server) for (let attempt = 0; attempt < 60; attempt++) {
+    try { if ((await fetch(base)).ok) break; } catch {}
+    await new Promise(resolve => setTimeout(resolve, 500));
+}
 const browser = await chromium.launch();
 fs.mkdirSync('TestResults/deployed-registration', { recursive: true });
 try {
-  for (const internal of [false, true]) for (const canRegister of [true, false]) for (const width of [1440, 390]) {
+  for (const internal of [false, true]) for (const canRegister of [true, false]) for (const width of [1440, 1024, 390]) {
     const page = await browser.newPage({ viewport: { width, height: 1000 }, serviceWorkers: 'block' });
     let submitted = 0;
     const apiPaths = [];
@@ -23,15 +30,18 @@ try {
       if (url.pathname === '/api/v2/activities/4') return ok({id:4,clubId:1,clubCode:'TEST',clubName:'Isolated Test Club',title:'Software Engineering Weekly Lab',description:'Isolated API fixture',status:'LIVE',isInternal:internal,canRegister,isEligible:true,nextAction:canRegister?'REGISTER':'VIEW',startTime:'2026-09-15T05:30:00Z',endTime:'2026-12-15T08:30:00Z'});
       if (url.pathname === '/api/activities/4/resources') return ok({items:[],availability:'AVAILABLE',resourceCapabilities:{supportedKinds:[],canManage:false,canUpload:false}});
       if (url.pathname === '/api/clubs') return ok([{id:1,code:'TEST',name:'Isolated Test Club',campusCode:'HAN',isActive:true}]);
-      if (url.pathname === '/api/clubs/me/access') return ok([]);
-      if (url.pathname === '/api/clubs/me/memberships') return ok([]);
+      if (url.pathname === '/api/clubs/me/access') return ok(internal ? [{clubId:1,isApprovedMember:true}] : []);
+      if (url.pathname === '/api/clubs/me/memberships') return ok(internal ? [{clubId:1,status:'Approved'}] : []);
       if (url.pathname === '/api/activities/4/participants' && request.method()==='POST') {
         submitted++; return ok({success:true});
       }
+      const schedule = {activityId:4,clubId:1,clubName:'Isolated Test Club',title:'Software Engineering Weekly Lab',activityStatus:'Scheduled',sessionId:null,startTime:'2026-09-15T05:30:00Z',endTime:'2026-12-15T08:30:00Z',location:'DE-301'};
+      if (url.pathname === '/api/users/me/activity-history') return ok({items:submitted ? [schedule] : [],page:1,totalPages:submitted ? 1 : 0});
+      if (url.pathname === '/api/v2/activities/feed') return ok({items:[{...schedule,id:4,status:'LIVE',isInternal:internal,canRegister:true}],page:1,totalPages:1,scopeVersion:'test'});
       if (request.method()!=='GET') return route.abort();
       return ok({items:[],total:0,page:1,totalPages:0});
     });
-    await page.goto('https://fptux-clubhub-ui.pages.dev/v2/activities/4');
+    await page.goto(base + '/v2/activities/4');
     const heading = page.locator('.v2-activity-profile-identity h1');
     try {
       await heading.waitFor({timeout:25000});
@@ -40,6 +50,20 @@ try {
       assert.equal(await button.count(),1);
       assert.equal(await button.isVisible(),true);
       assert.equal(await button.isEnabled(),canRegister);
+      if (internal) await page.locator('.v2-activity-profile-actions').getByRole('link', {name:'Đến không gian CLB',exact:true}).waitFor();
+      const layout = await page.locator('.v2-activity-profile').evaluate(el => {
+        const box = selector => el.querySelector(selector).getBoundingClientRect();
+        const title = box('h1'), facts = box('.v2-activity-profile-quick-facts'), actions = box('.v2-activity-profile-actions');
+        const links = [...el.querySelectorAll('.v2-activity-profile-actions a')].map(a => a.getBoundingClientRect());
+        const button = box('.v2-student-activity-actions button');
+        return {titleHeight:title.height,lineHeight:parseFloat(getComputedStyle(el.querySelector('h1')).lineHeight),
+          toolbarBelowFacts:actions.top >= facts.bottom,linksAligned:links.every(link => Math.abs(link.top-button.top)<2),
+          overflow:document.documentElement.scrollWidth > innerWidth+1};
+      });
+      assert.equal(layout.toolbarBelowFacts,true,'Actions have a separate row below metadata');
+      assert.equal(layout.overflow,false,'No horizontal overflow');
+      if(width===1440) assert.ok(layout.titleHeight <= layout.lineHeight*1.2,'Title is not squeezed by action buttons');
+      if(width>=1024) assert.equal(layout.linksAligned,true,'Navigation aligns with the registration button');
       await button.scrollIntoViewIfNeeded();
       if(canRegister) {
         await button.evaluate(el=>el.click());
@@ -47,6 +71,12 @@ try {
         assert.equal(submitted,1);
       }
       await page.screenshot({path:'TestResults/deployed-registration/'+internal+'-'+canRegister+'-'+width+'.png',fullPage:true});
+      await page.goto(base + '/v2/my-schedule');
+      if(canRegister) await page.getByText('Software Engineering Weekly Lab',{exact:true}).waitFor();
+      else await page.getByText('Lịch trình đang trống',{exact:true}).waitFor();
+      await page.goto(base + '/v2/activities');
+      await page.locator('.v2-event-grid').waitFor();
+      assert.equal(await page.getByRole('button',{name:'Đăng ký tham gia',exact:true}).count(),0,'Activity list has detail links only');
       console.log('DEPLOYED_ACTIVITY_CTA_OK',JSON.stringify({path:'/v2/activities/4',internal,canRegister,width,submitted}));
     } catch(error) {
       console.error('INTERCEPTED_API_PATHS',JSON.stringify(apiPaths));
@@ -54,4 +84,4 @@ try {
       throw error;
     } finally { await page.close(); }
   }
-} finally {await browser.close();}
+} finally {await browser.close(); server?.kill();}

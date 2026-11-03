@@ -58,3 +58,15 @@ export function recommendationFailureDescription(error) {
         RECOMMENDATION_SOURCE_CHANGED: 'Điều kiện xem hoạt động vừa thay đổi. Hãy thử tải lại gợi ý.',
     }[error?.code];
 }
+
+export async function loadStudentActivitySchedule(api) {
+    const items = [];
+    for (let page = 1; ; page++) {
+        const value = await api.request(`/api/users/me/activity-history?page=${page}&pageSize=100`);
+        if (!Array.isArray(value?.items) || value.page !== page ||
+            !Number.isInteger(value.totalPages) || value.totalPages < 0 || value.totalPages > 1000)
+            throw new Error('Máy chủ chưa trả lịch trình hợp lệ.');
+        items.push(...value.items);
+        if (page >= value.totalPages) return items;
+    }
+}

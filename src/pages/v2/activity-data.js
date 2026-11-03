@@ -5,6 +5,7 @@ import { activityPublication, isActivityPublic } from './activity-publication.js
 import { resolveActivityContactPoint } from './activity-contact-point.js';
 import {
     loadStudentActivityFeed,
+    loadStudentActivitySchedule,
     loadStudentActivityDetail,
     loadStudentRecommendations,
 } from '../../services/student-read-api.js';
@@ -203,5 +204,34 @@ export function useActivityFeed(api, sessionKey, clubId) {
 export function useRecommendedActivities(api, sessionKey) {
     const loader = useCallback(() => loadStudentRecommendations(api), [api]);
     const mapper = useCallback(mapRecommendations, []);
+    return useActivityRequest(loader, mapper, sessionKey);
+}
+
+export function mapMyActivitySchedule(rows, now = Date.now()) {
+    const seen = new Set();
+    return rows.filter(row => {
+        const key = `${row.activityId}:${row.sessionId ?? 'legacy'}`;
+        if (!row.activityId || seen.has(key) || !Number.isFinite(Date.parse(row.startTime)) ||
+            !(Date.parse(row.endTime) > now) ||
+            [row.activityStatus, row.sessionStatus].some(status => ['CANCELLED', 'COMPLETED'].includes(String(status).toUpperCase())))
+            return false;
+        seen.add(key);
+        return true;
+    }).map(row => ({
+        id: String(row.activityId),
+        scheduleKey: `${row.activityId}:${row.sessionId ?? 'legacy'}`,
+        title: row.title,
+        clubId: String(row.clubId),
+        clubName: row.clubName,
+        startTime: row.startTime,
+        endTime: row.endTime,
+        location: row.location,
+        status: Date.parse(row.startTime) > now ? 'UPCOMING' : 'LIVE',
+    })).sort((left, right) => Date.parse(left.startTime) - Date.parse(right.startTime));
+}
+
+export function useMyActivitySchedule(api, sessionKey) {
+    const loader = useCallback(() => loadStudentActivitySchedule(api), [api]);
+    const mapper = useCallback(mapMyActivitySchedule, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }

@@ -4,3 +4,10 @@
     .v2-button:disabled { opacity: .6; cursor: not-allowed; }
     &--compact { padding: 0; }
 }
+
+.v2-activity-profile .v2-student-activity-actions .v2-button:disabled {
+    opacity: 1;
+    background: #eef2f6;
+    border-color: #d9e1eb;
+    color: #526277;
+}
