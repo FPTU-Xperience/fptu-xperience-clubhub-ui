@@ -108,3 +108,5 @@ jobs:
                   assert.equal(health.status, 200);
                   console.log('ONLINE_SMOKE_OK: production entry and bundle match this build; API health 200');
                   NODE
+
+# Validate the notification source revision in this release.

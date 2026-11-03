@@ -1,43 +1,12 @@
+import NotificationPopover from './NotificationPopover';
 import { getDisplayName } from '../../../../services/display-name';
-import { Bell, ChevronDown, CircleHelp, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
+import { Bell, ChevronDown, CircleHelp, LogOut, Moon, Settings, Sun, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useHeaderNotifications } from '../../../../pages/v2/header-data';
 import ProfileAvatar from '../../../../pages/v2/profile-page/ProfileAvatar';
 import './LeftRail.scss';
-function NotificationContent({ status, data, retry }) {
-    if (status === 'loading') return <p className="v2-rail-notification-state">Đang tải thông báo...</p>;
-    if (status === 'empty') return <p className="v2-rail-notification-state">Bạn chưa có thông báo mới.</p>;
-    if (status === 'unavailable') return <p className="v2-rail-notification-state">Thông báo hiện chưa khả dụng.</p>;
-    if (status === 'forbidden')
-        return <p className="v2-rail-notification-state">Bạn không có quyền xem thông báo này.</p>;
-    if (status === 'unauthorized')
-        return <p className="v2-rail-notification-state">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>;
-    if (status === 'error') {
-        return (
-            <div className="v2-rail-notification-state">
-                <p>Không thể tải thông báo. Vui lòng thử lại.</p>
-                <button className="v2-rail-notification-retry" type="button" onClick={retry}>
-                    Thử lại
-                </button>
-            </div>
-        );
-    }
-    return (
-        <ul className="v2-rail-notification-list" aria-label="Danh sách thông báo">
-            {data.map((notification) => (
-                <li key={notification.id} className={notification.isRead ? 'is-read' : 'is-unread'}>
-                    <strong>{notification.title}</strong>
-                    <small>{notification.isRead ? 'Đã đọc' : 'Chưa đọc'}</small>
-                    <span>{notification.message}</span>
-                    <time dateTime={notification.createdAt}>{Number.isFinite(Date.parse(notification.createdAt)) ? new Date(notification.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'medium', timeStyle: 'short' }) : 'Chưa rõ thời gian'}</time>
-                </li>
-            ))}
-        </ul>
-    );
-}
-
 export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
     const location = useLocation();
     const navigate = useNavigate();
@@ -171,22 +140,7 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
             </div>
 
             {notifications.isOpen && (
-                <section
-                    id="v2-rail-notification-popover"
-                    className="v2-rail-notification-popover"
-                    role="dialog"
-                    aria-label="Thông báo"
-                >
-                    <div className="v2-rail-notification-heading">
-                        <h2>Thông báo</h2>
-                        <button type="button" onClick={notifications.close} aria-label="Đóng thông báo">
-                            <X size={17} />
-                        </button>
-                    </div>
-                    <p className="v2-rail-notification-state">6 thông báo gần nhất</p>
-                    <button type="button" className="v2-rail-notification-retry" disabled={notifications.status === 'loading'} onClick={notifications.retry}>Lấy thông báo mới</button>
-                    <NotificationContent {...notifications} />
-                </section>
+                <NotificationPopover {...notifications} onClose={notifications.close} />
             )}
         </>
     );
