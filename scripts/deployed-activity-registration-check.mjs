@@ -13,6 +13,9 @@ fs.mkdirSync('TestResults/deployed-registration', { recursive: true });
 try {
   for (const internal of [false, true]) for (const canRegister of [true, false]) for (const width of [1440, 1024, 390]) {
     const page = await browser.newPage({ viewport: { width, height: 1000 }, serviceWorkers: 'block' });
+    page.on('pageerror', error => console.error('BROWSER_ERROR', error.message));
+    page.on('requestfailed', request => console.error('NETWORK_ERROR', request.url(), request.failure()?.errorText));
+    page.on('response', response => { if(response.status()>=400) console.error('HTTP_ERROR',response.status(),response.url()); });
     let submitted = 0;
     const apiPaths = [];
     await page.addInitScript(() => {

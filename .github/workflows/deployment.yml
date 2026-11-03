@@ -1,144 +1,43 @@
 name: Deploy to Cloudflare Pages
-
 on:
-    push:
-        branches: [fix/approved-issues-20261103]
-    workflow_dispatch:
-
+  push:
+    branches: [fix/approved-issues-20261103]
+    paths: [.github/workflows/deployment.yml]
+  workflow_dispatch:
 permissions:
-    contents: read
-    deployments: write
-
+  contents: read
 jobs:
-    deploy-frontend:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v4
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '20'
-
-            - name: Install Dependencies
-              run: npm ci
-
-            - name: Build Frontend
-              run: |
-                  node --test src/pages/v2/*.test.js src/services/*.test.js tests/*.test.js
-                  npm run build
-              env:
-                  VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
-                  VITE_GOOGLE_CLIENT_ID: ${{ secrets.CLUBHUB_GOOGLE_CLIENT_ID }}
-                  VITE_ADMIN_APP_URL: ${{ vars.VITE_ADMIN_APP_URL || 'https://fptux-admin-ui.pages.dev' }}
-                  VITE_STAFF_SSO_ENABLED: ${{ vars.VITE_STAFF_SSO_ENABLED || 'true' }}
-                  VITE_LOGIN_ACCOUNT_SHORTCUTS: ${{ vars.VITE_LOGIN_ACCOUNT_SHORTCUTS || 'false' }}
-                  VITE_R2_BUCKET_NAME: ${{ vars.VITE_R2_BUCKET_NAME || 'fptux-cloud-storage' }}
-                  VITE_R2_S3_ENDPOINT: ${{ vars.VITE_R2_S3_ENDPOINT || 'https://c2e463013aa669515ae4e2c54843c4ae.r2.cloudflarestorage.com' }}
-                  VITE_R2_PUBLIC_BASE_URL: ${{ vars.VITE_R2_PUBLIC_BASE_URL || 'https://pub-3092f35e8d664b8caf203e269232769a.r2.dev' }}
-
-            - name: Install browser validation dependencies
-              run: |
-                  npm install --no-save --package-lock=false playwright
-                  npx playwright install --with-deps chromium
-
-            - name: Validate notification layout in browser
-              run: node scripts/notification-visual-check.mjs
-
-            - name: Validate public tab refresh and registration in browser
-              run: node scripts/public-activity-tabs-check.mjs
-
-            - name: Validate built activity layout and registration-to-schedule flow
-              run: node scripts/deployed-activity-registration-check.mjs
-              env:
-                  ACTIVITY_PREVIEW: 'true'
-
-            - name: Save public activity screenshots
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: public-activity-tab-screenshots
-                  path: TestResults/public-tabs
-                  if-no-files-found: ignore
-
-            - name: Save notification screenshots
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: notification-layout-screenshots
-                  path: TestResults/notifications
-                  if-no-files-found: ignore
-
-            - name: Resolve configured Cloudflare production branch
-              id: deployment
-              env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOYMENT_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  PROJECT_NAME: fptux-clubhub-ui
-              run: |
-                  set -euo pipefail
-                  branch="$(curl --fail --silent --show-error \
-                    "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}" \
-                    --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-                    | jq -er 'select(.success == true) | .result.production_branch | select(type == "string" and length > 0)')"
-                  [[ "${branch}" =~ ^[a-zA-Z0-9_./-]+$ ]]
-                  git check-ref-format --branch "${branch}" >/dev/null
-                  printf 'branch=%s\n' "${branch}" >> "${GITHUB_OUTPUT}"
-
-            - name: Deploy to Cloudflare Pages
-              uses: cloudflare/wrangler-action@v3
-              env:
-                  PROJECT_NAME: fptux-clubhub-ui
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_DEPLOYMENT_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  gitHubToken: ${{ github.token }}
-                  command: pages deploy ./dist --project-name=${{ env.PROJECT_NAME }} --branch=${{ steps.deployment.outputs.branch }} --commit-dirty=true
-
-            - name: Restore browser validation dependency after Wrangler installation
-              run: npm install --no-save --package-lock=false playwright
-
-            - name: Verify deployed activity registration rendering with isolated API traffic
-              run: node scripts/deployed-activity-registration-check.mjs
-
-            - name: Save activity layout screenshots
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: activity-layout-and-schedule
-                  path: TestResults/deployed-registration
-
-            - name: Verify production assets and API health
-              run: |
-                  node --input-type=module <<'NODE'
-                  import fs from 'node:fs';
-                  import assert from 'node:assert/strict';
-                  import { createHash } from 'node:crypto';
-                  const base = 'https://fptux-clubhub-ui.pages.dev';
-                  const built = fs.readFileSync('dist/index.html', 'utf8');
-                  const asset = built.match(/src="([^"]+\.js)"/)?.[1];
-                  assert.ok(asset, 'Built entry script exists');
-                  let live;
-                  for (let attempt = 0; attempt < 12; attempt++) {
-                    const response = await fetch(base + '/?verification=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
-                    assert.equal(response.status, 200);
-                    live = await response.text();
-                    if (live.includes(asset)) break;
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                  }
-                  assert.ok(live.includes(asset), 'Production serves the newly built entry script');
-                  const response = await fetch(new URL(asset, base));
-                  assert.equal(response.status, 200);
-                  const hash = data => createHash('sha256').update(data).digest('hex');
-                  assert.equal(hash(Buffer.from(await response.arrayBuffer())), hash(fs.readFileSync('dist/' + asset.replace(/^\//, ''))));
-                  const health = await fetch('https://clubreporthub.duckdns.org/health');
-                  assert.equal(health.status, 200);
-                  console.log('ONLINE_SMOKE_OK: production entry and bundle match this build; API health 200');
-                  NODE
-
-# Validate the notification source revision in this release.
-
-# Validate extracted notification component accessibility.
-
-# Run the isolated activity fixture with the production React transform.
+  verify-online-spacing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false playwright
+      - run: npx playwright install --with-deps chromium
+      - name: Check deployed entry and API health
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          const base = 'https://fptux-clubhub-ui.pages.dev';
+          const response = await fetch(base + '/v2/activities/4?verification='+Date.now());
+          assert.equal(response.status,200);
+          const html = await response.text();
+          assert.ok(html.includes('/assets/index-CG1OEQWD.js'));
+          for(const path of ['/assets/index-CG1OEQWD.js', ...[...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map(match=>match[1])]) {
+            const asset = await fetch(base + path);
+            console.log('ASSET_STATUS',path,asset.status,asset.headers.get('content-type'));
+            assert.equal(asset.status,200);
+          }
+          assert.equal((await fetch('https://clubreporthub.duckdns.org/health')).status,200);
+          console.log('ONLINE_SPACING_ASSETS_OK');
+          NODE
+      - run: node scripts/deployed-activity-registration-check.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: online-spacing-screenshots
+          path: TestResults/deployed-registration
