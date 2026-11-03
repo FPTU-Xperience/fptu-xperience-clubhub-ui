@@ -1,6 +1,9 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
+        paths: [.github/workflows/deployment.yml]
     workflow_dispatch:
 
 permissions:
@@ -46,6 +49,17 @@ jobs:
 
             - name: Validate public tab refresh and registration in browser
               run: node scripts/public-activity-tabs-check.mjs
+
+            - name: Validate recruitment approval and evidence in browser
+              run: node scripts/staffing-browser-check.mjs
+
+            - name: Save staffing screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: staffing-approval-and-evidence
+                  path: TestResults/staffing
+                  if-no-files-found: ignore
 
             - name: Validate built activity layout and registration-to-schedule flow
               run: node scripts/deployed-activity-registration-check.mjs

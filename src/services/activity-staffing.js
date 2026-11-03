@@ -5,6 +5,9 @@ export function validateStaffing(value, activityId) {
         value.version < 1 ||
         !Array.isArray(value.actions) ||
         !Array.isArray(value.assignments) ||
+        (value.publicAssignments != null && !Array.isArray(value.publicAssignments)) ||
+        (value.applications != null && !Array.isArray(value.applications)) ||
+        (value.availableEvidenceResources != null && !Array.isArray(value.availableEvidenceResources)) ||
         (value.recruitment != null && !Array.isArray(value.recruitment.positions)) ||
         (value.eligibleAssignees != null && !Array.isArray(value.eligibleAssignees)) ||
         value.assignments.some((assignment) => assignment.completions != null && !Array.isArray(assignment.completions))

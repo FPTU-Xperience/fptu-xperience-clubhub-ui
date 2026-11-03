@@ -17,7 +17,8 @@ const draft = () => ({
 test('staffing response belongs to the requested activity and requires canonical version/lists', async () => {
     const value = { activityId: 15, version: 1, actions: [], assignments: [] };
     assert.equal(validateStaffing(value, '15'), value);
-    for (const invalid of [{}, { ...value, activityId: 7 }, { ...value, version: 0 }, { ...value, assignments: null }])
+    for (const invalid of [{}, { ...value, activityId: 7 }, { ...value, version: 0 }, { ...value, assignments: null },
+        { ...value, applications: {} }, { ...value, publicAssignments: {} }, { ...value, availableEvidenceResources: {} }])
         assert.throws(() => validateStaffing(invalid, 15));
     assert.equal(
         await getActivityStaffing(

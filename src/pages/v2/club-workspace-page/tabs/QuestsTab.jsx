@@ -14,6 +14,7 @@ export default function QuestsTab({ workspace, manager = false, readOnly = false
     const [error, setError] = useState('');
     const [selected, setSelected] = useState(null);
     const [retry, setRetry] = useState(0);
+    const [mode, setMode] = useState('recruitment');
     const filters = new URLSearchParams(workspaceSemesterQuery(semester, 'activities')).toString();
     useEffect(() => {
         setSelected(null);
@@ -56,8 +57,7 @@ export default function QuestsTab({ workspace, manager = false, readOnly = false
             <header>
                 <h1>Nhiệm vụ & đóng góp</h1>
                 <p>
-                    Nhận vị trí host/staff từ các hoạt động của CLB. Điểm đóng góp chờ xác minh và CTSV duyệt báo cáo
-                    kết thúc.
+                    Đăng ký vị trí host/staff, chờ duyệt và theo dõi phân công. Nộp minh chứng cần xác minh riêng; chưa cộng Xperience Point.
                 </p>
             </header>
             {selected ? (
@@ -66,9 +66,14 @@ export default function QuestsTab({ workspace, manager = false, readOnly = false
                         ← Danh sách nhiệm vụ
                     </button>
                     <h2>{selected.activityTitle}</h2>
+                    <div className="v2-staffing-toolbar" role="group" aria-label="Nội dung nhiệm vụ">
+                        <button type="button" className="v2-button" aria-pressed={mode === 'recruitment'} onClick={() => setMode('recruitment')}>Tuyển dụng và duyệt đơn</button>
+                        <button type="button" className="v2-button" aria-pressed={mode === 'assignments'} onClick={() => setMode('assignments')}>Phân công và minh chứng</button>
+                    </div>
                     <ActivityStaffingPanel
                         key={selected.activityId}
                         activityId={selected.activityId}
+                        mode={mode}
                         manager={manager && !readOnly}
                         readOnly={readOnly}
                         onChanged={() => setRetry((value) => value + 1)}

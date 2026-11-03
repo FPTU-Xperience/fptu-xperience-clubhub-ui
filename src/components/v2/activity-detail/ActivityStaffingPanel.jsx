@@ -210,6 +210,7 @@ export default function ActivityStaffingPanel({
     const [editing, setEditing] = useState(false);
     const [assigning, setAssigning] = useState(false);
     const [submitting, setSubmitting] = useState(null);
+    const [reviewing, setReviewing] = useState(null);
     const [retry, setRetry] = useState(0);
     const [notice, setNotice] = useState('');
     const lock = useRef(false);
@@ -221,6 +222,7 @@ export default function ActivityStaffingPanel({
             alive.current = false;
         };
     }, []);
+    useEffect(() => { setNotice(''); }, [api, activityId, mode, user?.id]);
     useEffect(() => {
         let active = true;
         setLoading(true);
@@ -228,7 +230,7 @@ export default function ActivityStaffingPanel({
         setEditing(false);
         setAssigning(false);
         setSubmitting(null);
-        setNotice('');
+        setReviewing(null);
         setError('');
         getActivityStaffing(api, activityId)
             .then((value) => {
@@ -271,6 +273,7 @@ export default function ActivityStaffingPanel({
             setEditing(false);
             setAssigning(false);
             setSubmitting(null);
+            setReviewing(null);
             setRetry((value) => value + 1);
             onChanged?.();
         } catch (issue) {
@@ -294,6 +297,10 @@ export default function ActivityStaffingPanel({
     const recruitment = data.recruitment;
     const canRecruit = manager && !readOnly && approved && caps.canManageRecruitment === true;
     const canAssign = manager && !readOnly && approved && caps.canManageAssignments === true;
+    const canReview = !readOnly && approved && caps.canReviewApplications === true;
+    const publicAssignments = (data.publicAssignments || []).filter(
+        (row) => !assignments.some((own) => own.id === row.id),
+    );
     return (
         <section className="v2-activity-staffing">
             <header>
@@ -336,12 +343,17 @@ export default function ActivityStaffingPanel({
                     ? 'Tính điểm đang tạm hoãn. Phân công và xác minh hoàn thành không cộng Xperience Point.'
                     : 'Nhận việc chưa được ghi nhận Xperience Point.'}
             </p>
-            {error && !editing && !assigning && <p role="alert">{error}</p>}
+            {error && !editing && !assigning && !reviewing && !submitting && <div><p role="alert">{error}</p><button type="button" className="v2-button" disabled={busy} onClick={() => setRetry((value) => value + 1)}>Tải lại dữ liệu</button></div>}
             {notice && <p role="status">{notice}</p>}
             {mode === 'assignments' ? (
                 <>
-                    {!manager && !caps.canVerify && <p>Chỉ hiển thị phân công và lượt thực hiện của bạn.</p>}
-                    {!assignments.length ? (
+                    {!manager && !caps.canVerify && <p>Danh sách host/staff của hoạt động. Minh chứng chỉ hiển thị cho chủ sở hữu và người có quyền xác minh.</p>}
+                    {publicAssignments.length > 0 && <div className="v2-staffing-assignment-list">
+                        {publicAssignments.map((row) => <article key={row.id}>
+                            <h3>{row.displayName}</h3><p>{row.assignmentKind === 'HOST' ? 'Host' : 'Staff'} · {row.actionName}</p>
+                        </article>)}
+                    </div>}
+                    {!assignments.length && !publicAssignments.length ? (
                         <PageState status="empty" title="Chưa có phân công" />
                     ) : (
                         <div className="v2-staffing-assignment-list">
@@ -382,6 +394,7 @@ export default function ActivityStaffingPanel({
                                     {!readOnly &&
                                         !busy &&
                                         data.isPublished &&
+                                        assignment.canSubmit === true &&
                                         assignment.status !== 'REMOVED' &&
                                         String(assignment.userId) === String(user?.id) && (
                                             <button
@@ -400,10 +413,11 @@ export default function ActivityStaffingPanel({
                                             <summary>Lượt thực hiện ({assignment.completions.length})</summary>
                                             {assignment.completions.map((completion) => (
                                                 <div className="v2-staffing-row" key={completion.id}>
-                                                    <span>
+                                                    <div>
                                                         {completion.occurrenceLabel} · {label(completion.status)}
                                                         {completion.evidence && <p>{completion.evidence}</p>}
-                                                    </span>
+                                                        {completion.resources?.filter((resource) => /^https?:\/\//i.test(resource.url)).map((resource) => <p key={resource.id}><a href={resource.url} target="_blank" rel="noopener noreferrer">{resource.title}</a></p>)}
+                                                    </div>
                                                     {!readOnly &&
                                                         approved &&
                                                         user?.id != null &&
@@ -494,7 +508,7 @@ export default function ActivityStaffingPanel({
                                 <h3>{position.actionName}</h3>
                                 <p>
                                     {position.assignmentKind === 'HOST' ? 'Host' : 'Staff hỗ trợ'} ·{' '}
-                                    {position.filledCount}/{position.capacity} vị trí đã nhận
+                                    {position.filledCount}/{position.capacity} vị trí đã duyệt
                                 </p>
                                 <p>
                                     {Number.isFinite(position.rawXpPerOccurrence)
@@ -503,8 +517,11 @@ export default function ActivityStaffingPanel({
                                 </p>
                                 {position.myAssignmentId ? (
                                     <p className="v2-staffing-notice">Bạn đã nhận vị trí này.</p>
+                                ) : position.myApplication?.status === 'PENDING' ? (
+                                    <p role="status">Đơn của bạn đang chờ duyệt. Chưa có phân công hoặc Xperience Point.</p>
                                 ) : (
                                     <>
+                                        {position.myApplication?.status === 'REJECTED' && <p>Đơn chưa được duyệt: {position.myApplication.reason}</p>}
                                         <button
                                             type="button"
                                             className="v2-button v2-button--primary"
@@ -512,6 +529,7 @@ export default function ActivityStaffingPanel({
                                                 readOnly ||
                                                 busy ||
                                                 !approved ||
+                                                recruitment.applicationWorkflow !== 'APPROVAL_REQUIRED_V1' ||
                                                 recruitment.status !== 'OPEN' ||
                                                 position.canJoin !== true
                                             }
@@ -519,20 +537,50 @@ export default function ActivityStaffingPanel({
                                                 mutate(
                                                     `recruitment/positions/${encodeURIComponent(position.id)}/join`,
                                                     { expectedVersion: data.version },
-                                                    'Đã nhận vị trí và tạo phân công; chưa có Xperience Point chính thức.',
+                                                    'Đã gửi đơn chờ duyệt. Phân công chỉ được tạo sau khi đơn được duyệt; chưa cộng Xperience Point.',
                                                 )
                                             }
                                         >
-                                            Tham gia vị trí
+                                            {position.myApplication?.status === 'REJECTED' ? 'Gửi lại đơn' : 'Đăng ký vị trí'}
                                         </button>
                                         {position.joinBlockReason && <p>{position.joinBlockReason}</p>}
+                                        {recruitment.applicationWorkflow !== 'APPROVAL_REQUIRED_V1' && <p>Máy chủ chưa hỗ trợ đăng ký chờ duyệt.</p>}
                                     </>
                                 )}
                             </article>
                         ))}
                     </div>
+                    {(data.applications || []).length > 0 && <section>
+                        <h3>{canReview ? 'Đơn đăng ký nhân sự' : 'Đơn đăng ký của bạn'}</h3>
+                        <div className="v2-staffing-assignment-list">
+                            {data.applications.map((application) => <article key={application.id}>
+                                <h4>{application.displayName}</h4>
+                                <p>{recruitment.positions.find((position) => position.id === application.positionId)?.actionName || 'Vị trí đã lưu'} · {({ PENDING: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Từ chối' })[application.status]}</p>
+                                {application.reason && <p>Lý do: {application.reason}</p>}
+                                {canReview && application.canReview === true && <button type="button" className="v2-button" disabled={busy} onClick={() => { setReviewing(application); setError(''); }}>Duyệt đơn</button>}
+                            </article>)}
+                        </div>
+                    </section>}
                 </>
             )}
+            {reviewing && <V2Modal title="Duyệt đơn đăng ký nhân sự" onClose={() => !busy && setReviewing(null)}>
+                <form className="v2-staffing-form" onSubmit={(event) => {
+                    event.preventDefault();
+                    const fields = Object.fromEntries(new FormData(event.currentTarget));
+                    mutate(`recruitment/applications/${encodeURIComponent(reviewing.id)}/review`,
+                        { ...fields, expectedVersion: data.version, applicationVersion: reviewing.version },
+                        fields.decision === 'APPROVED' ? 'Đã duyệt đơn và tạo phân công. Chưa cộng Xperience Point.' : 'Đã từ chối đơn.');
+                }}>
+                    <p>{reviewing.displayName} · {recruitment?.positions.find((position) => position.id === reviewing.positionId)?.actionName}</p>
+                    <p>Máy chủ kiểm tra lại quyền duyệt, điều kiện ứng viên và số chỗ. Duyệt đơn tạo phân công; hoàn thành và XP cần quy trình riêng.</p>
+                    <fieldset disabled={busy}>
+                        <StaffingField label="Quyết định"><select name="decision" required><option value="APPROVED">Duyệt</option><option value="REJECTED">Từ chối</option></select></StaffingField>
+                        <StaffingField label="Lý do (bắt buộc khi từ chối)"><textarea name="reason" maxLength={2000} rows={3} /></StaffingField>
+                        {error && <><p role="alert">{error}</p><button type="button" className="v2-button" onClick={() => setRetry((value) => value + 1)}>Tải lại dữ liệu</button></>}
+                        <button className="v2-button v2-button--primary">{busy ? 'Đang lưu…' : 'Xác nhận quyết định'}</button>
+                    </fieldset>
+                </form>
+            </V2Modal>}
             {editing && (
                 <RecruitmentEditor
                     data={data}
@@ -645,7 +693,9 @@ export default function ActivityStaffingPanel({
                         className="v2-staffing-form"
                         onSubmit={(event) => {
                             event.preventDefault();
-                            const fields = Object.fromEntries(new FormData(event.currentTarget));
+                            const form = new FormData(event.currentTarget);
+                            const fields = Object.fromEntries(form);
+                            fields.resourceIds = form.getAll('resourceIds');
                             const action = data.actions.find(
                                 (row) => String(row.id) === String(submitting.actionRuleId),
                             );
@@ -674,7 +724,12 @@ export default function ActivityStaffingPanel({
                             <StaffingField label="Minh chứng">
                                 <textarea name="evidence" required maxLength={4000} rows={5} placeholder="Công việc đã làm, kết quả, đường dẫn tài nguyên để đối chiếu" />
                             </StaffingField>
-                            <p>API hiện lưu nội dung và đường dẫn minh chứng. Chưa hỗ trợ đính kèm tệp cho lượt thực hiện này.</p>
+                            {data.availableEvidenceResources?.length > 0 && <fieldset><legend>Đính kèm tài nguyên hoạt động (tối đa 10)</legend>
+                                {data.availableEvidenceResources.map((resource) => <label className="v2-staffing-checkbox" key={resource.id}>
+                                    <input type="checkbox" name="resourceIds" value={resource.id} />{resource.title}
+                                </label>)}
+                            </fieldset>}
+                            <p>Chọn tài nguyên đã lưu của hoạt động hoặc ghi đường dẫn đối chiếu trong nội dung minh chứng.</p>
                             <p>
                                 ATTENDANCE là khai báo thủ công có minh chứng, cần người có quyền xác minh độc lập;
                                 không thay cho QR check-in.
