@@ -233,3 +233,10 @@
         padding: 20px;
     }
 }
+
+@media (min-width: 601px) and (max-width: 1100px) {
+    .v2-activity-profile-actions > .v2-club-navigation-links {
+        margin-left: 0;
+        width: 100%;
+    }
+}

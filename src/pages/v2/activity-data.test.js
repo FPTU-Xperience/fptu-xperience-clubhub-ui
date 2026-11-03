@@ -1,3 +1,5 @@
+import { mapMyActivitySchedule } from './activity-data.js';
+import { loadStudentActivitySchedule } from '../../services/student-read-api.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { classifyActivityError, filterActivityFeed, mapActivityDetailItem, mapActivityFeed, mapRecommendations, selectDiscoveryActivities } from './activity-data.js';
@@ -96,4 +98,30 @@ test('scope does not fabricate registration permission when the API denies or om
         }
         assert.equal(mapActivityDetailItem({ ...activity, isInternal, canRegister: true }).canRegister, true);
     }
+});
+
+test('personal schedule keeps registered cross-club sessions, deduplicates and excludes ended/cancelled items', () => {
+    const now = Date.parse('2026-11-03T00:00:00Z');
+    const row = { activityId: 4, clubId: 999, title: 'Public external club', activityStatus: 'Scheduled',
+        startTime: '2026-11-05T00:00:00Z', endTime: '2026-11-05T02:00:00Z' };
+    const rows = mapMyActivitySchedule([row, row, {...row, sessionId: 2},
+        {...row, activityId: 5, endTime: '2026-11-03T00:00:00Z'},
+        {...row, activityId: 6, activityStatus: 'Cancelled'},
+        {...row, activityId: 7, sessionStatus: 'CANCELLED'},
+        {...row, activityId: 8, startTime: 'invalid'}], now);
+    assert.deepEqual(rows.map(item => item.scheduleKey), ['4:legacy', '4:2']);
+    assert.equal(rows[0].clubId, '999');
+    assert.equal(rows[0].status, 'UPCOMING');
+});
+
+test('personal schedule loads every server page and propagates failures rather than inventing an empty calendar', async () => {
+    const calls = [];
+    const rows = await loadStudentActivitySchedule({request: async path => {
+        calls.push(path);
+        return {items: [{activityId: calls.length}], page: calls.length, totalPages: 2};
+    }});
+    assert.deepEqual(rows.map(item => item.activityId), [1, 2]);
+    assert.ok(calls[1].includes('page=2'));
+    await assert.rejects(loadStudentActivitySchedule({request: async () => ({items: [], page: 9, totalPages: 1})}));
+    await assert.rejects(loadStudentActivitySchedule({request: async () => {throw new Error('Unavailable');}}), /Unavailable/);
 });

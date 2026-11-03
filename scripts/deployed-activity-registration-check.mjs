@@ -58,12 +58,14 @@ try {
         const button = box('.v2-student-activity-actions button');
         return {titleHeight:title.height,lineHeight:parseFloat(getComputedStyle(el.querySelector('h1')).lineHeight),
           toolbarBelowFacts:actions.top >= facts.bottom,linksAligned:links.every(link => Math.abs(link.top-button.top)<2),
+          linksBelow:links.every(link => link.top>=button.bottom),
           overflow:document.documentElement.scrollWidth > innerWidth+1};
       });
       assert.equal(layout.toolbarBelowFacts,true,'Actions have a separate row below metadata');
       assert.equal(layout.overflow,false,'No horizontal overflow');
       if(width===1440) assert.ok(layout.titleHeight <= layout.lineHeight*1.2,'Title is not squeezed by action buttons');
-      if(width>=1024) assert.equal(layout.linksAligned,true,'Navigation aligns with the registration button');
+      if(width===1440) assert.equal(layout.linksAligned,true,'Navigation aligns with the registration button');
+      else assert.equal(layout.linksBelow,true,'Tablet/mobile navigation wraps onto its own row');
       await button.scrollIntoViewIfNeeded();
       if(canRegister) {
         await button.evaluate(el=>el.click());
