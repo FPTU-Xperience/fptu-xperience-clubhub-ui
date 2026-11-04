@@ -97,6 +97,13 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                         </section>
                         <div className="club-page-sidebar">
                             <section>
+                                <h3>Thông tin bổ sung</h3>
+                                <p>Địa điểm: {club.expectedLocation || 'Chưa cập nhật'}</p>
+                                <p>Sự kiện dự kiến: {club.majorEvents || 'Chưa cập nhật'}</p>
+                                <p>Thiết bị: {club.equipmentNeeds || 'Chưa cập nhật'}</p>
+                                <p>Cố vấn: {club.advisorNeeded === true || club.advisorNeeded === 'true' ? 'Cần hỗ trợ' : 'Chưa yêu cầu'}</p>
+                            </section>
+                            <section>
                                 <header>
                                     <h3>Liên hệ</h3>
                                 </header>

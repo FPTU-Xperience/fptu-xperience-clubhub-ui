@@ -14,6 +14,7 @@ import PersonalPageHeading from '../personal-pages/PersonalPageHeading';
 import { useAuth } from '../../../context/AuthContext';
 import { PERMISSIONS } from '../../../auth/permissions';
 import ClubRegistrationModal from './ClubRegistrationModal';
+import MyClubFormationApplications from './MyClubFormationApplications';
 import './MyClubsPage.scss';
 
 export default function MyClubsPage({ api, sessionKey }) {
@@ -21,9 +22,12 @@ export default function MyClubsPage({ api, sessionKey }) {
     const canRegister = hasPermission(PERMISSIONS.APPLY_FOR_CLUB);
     const [registrationOpen, setRegistrationOpen] = useState(false);
     const [registrationNotice, setRegistrationNotice] = useState('');
+    const [formationRevision, setFormationRevision] = useState(0);
+    const [revising, setRevising] = useState(null);
     useEffect(() => {
         setRegistrationOpen(false);
         setRegistrationNotice('');
+        setRevising(null);
     }, [sessionKey]);
     const { selection, pinnedClubs, togglePin } = usePinnedClubs();
     const applications = useMyMembershipApplications(api, sessionKey);
@@ -106,7 +110,7 @@ export default function MyClubsPage({ api, sessionKey }) {
                         {canRegister && (
                             <button type="button" className="v2-button v2-button--primary" onClick={() => {
                                 setRegistrationNotice('');
-                                setRegistrationOpen(true);
+                                setRevising(null); setRegistrationOpen(true);
                             }}>
                                 <Plus size={16} /> Đăng ký mở CLB
                             </button>
@@ -120,16 +124,20 @@ export default function MyClubsPage({ api, sessionKey }) {
             {registrationNotice && <p role="status">{registrationNotice}</p>}
             {canRegister && registrationOpen && (
                 <ClubRegistrationModal
-                    key={sessionKey}
+                    key={`${sessionKey}:${revising?.id || 'new'}`}
                     api={api}
                     user={user}
-                    onClose={() => setRegistrationOpen(false)}
+                    application={revising}
+                    onClose={() => { setRegistrationOpen(false); setRevising(null); }}
                     onCreated={() => {
                         setRegistrationOpen(false);
+                        setRevising(null);
+                        setFormationRevision(value => value + 1);
                         setRegistrationNotice('Đã gửi đơn đăng ký mở CLB. Đơn đang chờ xét duyệt.');
                     }}
                 />
             )}
+            {canRegister && <MyClubFormationApplications key={sessionKey} api={api} userId={user?.id} revision={formationRevision} onRevise={row => { setRevising(row); setRegistrationOpen(true); }} />}
             <PageState
                 status={selection.status}
                 onRetry={selection.retry}

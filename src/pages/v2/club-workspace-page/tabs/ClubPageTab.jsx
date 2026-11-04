@@ -163,6 +163,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setNotice('');
         try {
             const payload = { ...fields, expectedVersion: club.version };
+            if (Object.hasOwn(fields, 'advisorNeeded')) payload.advisorNeeded = fields.advisorNeeded === 'true';
             if (Object.hasOwn(fields, 'scheduleLabel')) {
                 payload.schedule = clubSchedulePayload(fields.scheduleLabel, semester);
                 delete payload.scheduleLabel;

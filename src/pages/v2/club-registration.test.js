@@ -5,14 +5,33 @@ import { buildClubRegistrationPayload } from './my-clubs-page/club-registration.
 function applicationData() {
     const data = new FormData();
     for (const [name, value] of Object.entries({
-        name: '  New Club  ', category: 'TECHNOLOGY', purpose: 'Learn', description: 'Build together',
-        founderFullName: 'Student', founderRole: 'Owner', founderEmail: 'student@example.edu',
-        founderPhone: '0912345678', founderOrganization: 'SE', mainActivities: 'Workshops',
-        venueSupport: 'SELF_MANAGED', fundingSupport: 'SELF_FUNDED',
-        activityFrequencyCount: '2', activityFrequencyUnit: 'MONTH', code: 'new_club', foundingMemberCount: '1',
-        foundingMembersCommitted: 'on', committedToRules: 'on', committedToResponsibility: 'on', committedToReporting: 'on',
-    })) data.set(name, value);
-    for (const [name, value] of [['memberName', 'Student'], ['memberEmail', 'student@example.edu'], ['memberOrganization', 'SE']])
+        name: '  New Club  ',
+        category: 'TECHNOLOGY',
+        purpose: 'Learn',
+        description: 'Build together',
+        founderFullName: 'Student',
+        founderRole: 'Owner',
+        founderEmail: 'student@example.edu',
+        founderPhone: '0912345678',
+        founderOrganization: 'SE',
+        mainActivities: 'Workshops',
+        venueSupport: 'SELF_MANAGED',
+        fundingSupport: 'SELF_FUNDED',
+        activityFrequencyCount: '2',
+        activityFrequencyUnit: 'MONTH',
+        code: 'new_club',
+        foundingMemberCount: '1',
+        foundingMembersCommitted: 'on',
+        committedToRules: 'on',
+        committedToResponsibility: 'on',
+        committedToReporting: 'on',
+    }))
+        data.set(name, value);
+    for (const [name, value] of [
+        ['memberName', 'Student'],
+        ['memberEmail', 'student@example.edu'],
+        ['memberOrganization', 'SE'],
+    ])
         data.append(name, value);
     return data;
 }
@@ -28,11 +47,36 @@ test('club opening submission normalizes the API payload and preserves founding 
     assert.equal(payload.code, 'NEW_CLUB');
     assert.equal(payload.activityFrequency, '2 lần mỗi tháng');
     assert.equal(payload.foundingMemberCount, 2);
-    assert.deepEqual(payload.foundingMembers[1], { fullName: 'Second Student', email: 'second@example.edu', organization: 'AI' });
-    assert.equal(payload.logoUrl, null);
-    assert.equal(payload.advisorNeeded, false);
+    assert.deepEqual(payload.foundingMembers[1], {
+        fullName: 'Second Student',
+        email: 'second@example.edu',
+        organization: 'AI',
+    });
+    for (const optional of [
+        'logoUrl',
+        'advisorNeeded',
+        'expectedLocation',
+        'expectedSchedule',
+        'majorEvents',
+        'equipmentNeeds',
+    ])
+        assert.equal(Object.hasOwn(payload, optional), false);
     assert.equal(payload.committedToReporting, true);
     assert.ok(!('memberName' in payload));
+});
+test('Viết tắt is the canonical club code and optional form data is not submitted', () => {
+    const data = applicationData();
+    data.set('code', '  my-club_26  ');
+    data.set('logoUrl', 'https://example.test/old.png');
+    data.set('equipmentNeeds', 'Do not submit');
+    const payload = buildClubRegistrationPayload(data);
+    assert.equal(payload.code, 'MY-CLUB_26');
+    assert.equal(Object.hasOwn(payload, 'logoUrl'), false);
+    assert.equal(Object.hasOwn(payload, 'equipmentNeeds'), false);
+    for (const code of ['', 'a', 'bad code', 'x'.repeat(21)]) {
+        data.set('code', code);
+        assert.throws(() => buildClubRegistrationPayload(data), /Viết tắt/);
+    }
 });
 
 test('club opening keeps the declared V1 member count separate from the detailed member list', () => {

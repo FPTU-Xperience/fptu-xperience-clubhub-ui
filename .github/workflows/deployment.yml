@@ -1,6 +1,9 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
+        paths: [.github/workflows/deployment.yml]
     workflow_dispatch:
 
 permissions:
@@ -52,6 +55,17 @@ jobs:
 
             - name: Validate attendance sessions in browser
               run: node scripts/attendance-browser-check.mjs
+
+            - name: Validate club formation and approved workspace in browser
+              run: node scripts/club-formation-browser-check.mjs
+
+            - name: Save club formation screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: club-formation
+                  path: TestResults/formation
+                  if-no-files-found: ignore
 
             - name: Save attendance screenshots
               if: always()
@@ -127,6 +141,17 @@ jobs:
 
             - name: Verify deployed attendance with isolated API traffic
               run: node scripts/deployed-attendance-check.mjs
+
+            - name: Verify deployed club formation with isolated API traffic
+              run: node scripts/deployed-club-formation-check.mjs
+
+            - name: Save deployed formation screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-club-formation
+                  path: TestResults/formation-online
+                  if-no-files-found: ignore
 
             - name: Save deployed attendance screenshots
               if: always()

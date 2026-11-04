@@ -30,7 +30,7 @@ export default function ClubPageInfoModal({ club: sourceClub, saving, error, onC
             active = false;
         };
     }, [api]);
-    const [draft, setDraft] = useState(() => Object.fromEntries(fields.map(({ name }) => [name, club[name] ?? ''])));
+    const [draft, setDraft] = useState(() => Object.fromEntries(fields.map(({ name }) => [name, String(club[name] ?? (name === 'advisorNeeded' ? false : ''))])));
     const [activeTab, setActiveTab] = useState(tabs[0].id);
     const [validation, setValidation] = useState('');
     const controls = useRef({});
@@ -135,6 +135,7 @@ export default function ClubPageInfoModal({ club: sourceClub, saving, error, onC
                                         const props = {
                                             id: `club-page-${name}`,
                                             name,
+                                            'aria-label': label,
                                             value: draft[name],
                                             disabled: saving,
                                             ref: (node) => {

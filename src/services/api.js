@@ -313,16 +313,18 @@ class ApiService {
         return this.request('/api/clubs/applications/me');
     }
 
-    async createClubApplication(data) {
+    async createClubApplication(data, key) {
         return this.request('/api/clubs/applications', {
             method: 'POST',
+            ...(key ? { headers: { 'Idempotency-Key': key } } : {}),
             body: JSON.stringify(data),
         });
     }
 
-    async updateClubApplication(id, data) {
+    async updateClubApplication(id, data, key) {
         return this.request(`/api/clubs/applications/${id}`, {
             method: 'PUT',
+            ...(key ? { headers: { 'Idempotency-Key': key } } : {}),
             body: JSON.stringify(data),
         });
     }
