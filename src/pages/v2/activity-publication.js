@@ -1,3 +1,4 @@
+import { clubCapability } from '../../services/club-capabilities.js';
 // Approval allows execution; publication independently controls discovery visibility.
 export function activityPublication(raw = {}) {
     return {
@@ -21,7 +22,7 @@ export function canManageActivityPublication(activity, access) {
         activity.publicationVersion > 0 &&
         (Array.isArray(access?.permissions)
             ? access.permissions.includes('activity.publish')
-            : access?.isManager === true)
+            : clubCapability(access, 'event.content.write'))
     );
 }
 export async function saveActivityPublication(api, activity, isPublished, idempotencyKey) {

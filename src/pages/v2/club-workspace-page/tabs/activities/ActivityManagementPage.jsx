@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../../../services/club-capabilities';
 import { PublicActivityProfile } from '../../../activities-page/ActivityDetailPage';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -52,9 +53,13 @@ const coreFields = (activity) => ({
 
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
     const { user, clubAccess } = useAuth();
+    const scope = clubAccess?.find(item => String(item.clubId) === String(workspace.clubId));
+    const canContent = manager || clubCapability(scope, 'event.content.write');
+    const canStaff = manager || clubCapability(scope, 'event.staff.assign');
+    const specialist = canContent || canStaff;
     const location = useLocation();
     const [tab, setTab] = useState('overview');
-    const result = useActivityDetail(api, sessionKey, activityId, !manager, manager ? 0 : tab);
+    const result = useActivityDetail(api, sessionKey, activityId, !specialist, specialist ? 0 : tab);
     const activity = result.data;
     const [coreDraft, setCoreDraft] = useState(null);
     const [editorDraft, setEditorDraft] = useState(null);
@@ -230,7 +235,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
     };
     if (activity && String(activity.clubId) !== String(workspace.clubId))
         return <PageState status="forbidden" title="Bạn không có quyền quản lý hoạt động này" />;
-    if (result.status !== 'populated' && !(activity && !manager && result.status === 'loading'))
+    if (result.status !== 'populated' && !(activity && !specialist && result.status === 'loading'))
         return (
             <PageState
                 status={result.status}
@@ -238,7 +243,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 title={result.status === 'not-found' ? 'Không tìm thấy hoạt động' : undefined}
             />
         );
-    if (!manager) return (
+    if (!specialist) return (
         <div className="v2-activity-management-page">
             <Link className="v2-text-link" to={`${base}/activities${location.search}`}>← Danh sách hoạt động</Link>
             <PublicActivityProfile key={`${sessionKey}:${activity.id}`} activeTab={tab} onTabChange={setTab} refreshing={result.status === 'loading'} workspaceRead activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
@@ -289,7 +294,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                     <ActivityProfileLayout
                         activity={displayed}
                         preview={Boolean(coverUrl || coreDraft)}
-                        tabs={tabs}
+                        tabs={tabs.filter(([key]) => key !== 'attendance' || manager)}
                         tab={tab}
                         onTabChange={setTab}
                         actions={
@@ -314,7 +319,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                         setEditorDraft({ ...(coreDraft || coreFields(activity)) });
                                         setTab('overview');
                                     }}
-                                    disabled={busy || Boolean(activity.sourceApplicationId)}
+                                    disabled={!canContent || busy || Boolean(activity.sourceApplicationId)}
                                 >
                                     <Pencil size={15} />
                                     Chỉnh sửa
@@ -322,8 +327,8 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                             </>
                         }
                         beforeTabs={
-                            <><ActivityVisibilityControl api={api} activity={activity}
-                                disabled={busy || Boolean(coreDraft || editorDraft)} onSaved={() => result.retry()} />
+                            <>{manager && <ActivityVisibilityControl api={api} activity={activity}
+                                disabled={busy || Boolean(coreDraft || editorDraft)} onSaved={() => result.retry()} />}
                             <ActivityPublicationControl
                                 api={api}
                                 activity={activity}
@@ -342,7 +347,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                     setError('');
                                     setCoverOpen(true);
                                 }}
-                                disabled={busy}
+                                disabled={busy || !canContent}
                             >
                                 <Camera size={15} />
                                 Đổi ảnh bìa
@@ -379,11 +384,11 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                             <ActivityStaffingPanel
                                 activityId={activity.id}
                                 mode={tab}
-                                manager
+                                manager={manager}
                                 onChanged={result.retry}
                             />
                         )}
-                        {tab === 'attendance' && (
+                        {manager && tab === 'attendance' && (
                             <div className="v2-activity-profile-panel">
                                 <ActivitySessionManagement key={`${sessionKey}:${activity.id}`} activity={activity} onChanged={result.retry} />
                             </div>

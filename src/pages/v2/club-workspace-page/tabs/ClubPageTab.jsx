@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../../services/club-capabilities';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
@@ -26,7 +27,7 @@ function useImagePreview(file, savedUrl) {
 
 export default function ClubPageTab({ manager = false, workspace }) {
     const clubId = workspace?.clubId;
-    const { api, user } = useAuth();
+    const { api, user, clubAccess } = useAuth();
     const { semester } = useWorkspaceSemester();
     const [clubRecord, setClub] = useState(null);
     const club = useEntityMedia('club', clubRecord);
@@ -42,6 +43,9 @@ export default function ClubPageTab({ manager = false, workspace }) {
     const requestVersion = useRef(0);
     const logo = useImagePreview(editor === 'logo' ? imageFile : null, club?.logoUrl);
     const cover = useImagePreview(editor === 'cover' ? imageFile : null, club?.coverImageUrl);
+    const scope = clubAccess?.find(item => String(item.clubId) === String(workspace?.clubId));
+    const canText = manager || clubCapability(scope, 'club.profile.write');
+    const canMedia = manager || clubCapability(scope, 'club.media.write');
     const imageEditor = editor === 'logo' || editor === 'cover';
     const previewClub = club ? { ...club, ...profileDraft } : null;
 
@@ -92,7 +96,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
     );
 
     const openEditor = (section) => {
-        if (!manager || saving) return;
+        if (!(section === 'logo' || section === 'cover' ? canMedia : canText) || saving) return;
         setImageFile(null);
         setModalError('');
         setNotice('');
@@ -106,7 +110,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
     };
     const saveImage = async (event, selectedFile = imageFile) => {
         event.preventDefault();
-        if (!manager || saving || !selectedFile || !imageEditor) return;
+        if (!canMedia || saving || !selectedFile || !imageEditor) return;
         const version = requestVersion.current;
         const field = editor === 'logo' ? 'logoUrl' : 'coverImageUrl';
         const label = editor === 'logo' ? 'logo' : 'ảnh bìa';
@@ -141,7 +145,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
         }
     };
     const previewInfo = (fields) => {
-        if (!manager || saving || !club) return;
+        if (!canText || saving || !club) return;
         setProfileDraft(fields);
         setEditor(null);
         setError('');
@@ -155,7 +159,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setNotice('');
     };
     const saveInfo = async () => {
-        if (!manager || saving || !club || !profileDraft) return;
+        if (!canText || saving || !club || !profileDraft) return;
         const fields = profileDraft;
         const version = requestVersion.current;
         setSaving(true);
@@ -222,12 +226,13 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     club={{ ...previewClub, name: previewClub.name || workspace?.name }}
                     logo={logo}
                     cover={cover}
-                    manager={manager}
+                    manager={canText}
+                    canMedia={canMedia}
                     disabled={saving}
                     onEdit={openEditor}
                 />
             )}
-            {manager && profileDraft && (
+            {canText && profileDraft && (
                 <div className="club-page-pending" aria-busy={saving}>
                     <div role="status">
                         <strong>Bản xem trước chưa lưu</strong>
@@ -248,7 +253,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     </div>
                 </div>
             )}
-            {manager && club && imageEditor && (
+            {canMedia && club && imageEditor && (
                 <ClubPageImageModal
                     kind={editor}
                     clubName={club.name || workspace?.name || workspace?.clubName}
@@ -266,7 +271,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     onSave={saveImage}
                 />
             )}
-            {manager && club && editor && !imageEditor && (
+            {canText && club && editor && !imageEditor && (
                 <ClubPageInfoModal
                     api={api}
                     club={previewClub}

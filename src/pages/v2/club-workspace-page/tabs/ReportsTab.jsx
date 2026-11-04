@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../../services/club-capabilities';
 import { useListQuery } from '../../use-list-query';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { workspaceSemesterQuery, workspaceSemesterKey } from '../workspace-semester-data';
@@ -28,7 +29,7 @@ export default function ReportsTab({ workspace, readOnly = false }) {
     const location = useLocation();
     const clubId = workspace?.clubId;
     const { api, clubAccess } = useAuth();
-    const canCreate = clubAccess.some((access) => String(access.clubId) === String(clubId) && access.isManager);
+    const canCreate = clubAccess.some((access) => String(access.clubId) === String(clubId) && clubCapability(access, 'club.reports.draft.write'));
     const { semester } = useWorkspaceSemester();
     useEffect(() => {
         setChoosingTemplate(false);

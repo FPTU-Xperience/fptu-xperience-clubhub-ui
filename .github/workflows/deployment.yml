@@ -53,6 +53,9 @@ jobs:
             - name: Validate attendance sessions in browser
               run: node scripts/attendance-browser-check.mjs
 
+            - name: Validate live governance components in browser
+              run: node scripts/governance-browser-check.mjs
+
             - name: Validate credit wallet and rewards in browser
               run: node scripts/credit-rewards-browser-check.mjs
 
@@ -163,6 +166,9 @@ jobs:
 
             - name: Verify deployed club formation with isolated API traffic
               run: node scripts/deployed-club-formation-check.mjs
+
+            - name: Verify deployed governance with isolated API traffic
+              run: node scripts/deployed-governance-check.mjs
 
             - name: Verify deployed cancellation and club roles with isolated API traffic
               run: node scripts/deployed-registration-roles-check.mjs

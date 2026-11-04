@@ -1,3 +1,4 @@
+import { clubDraftReport, clubLeadership, clubSubmitReport } from '../../../services/club-capabilities';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, FileText, Plus, Save, Send, Trash2, Upload } from 'lucide-react';
@@ -166,8 +167,10 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
     useEffect(() => {
         setXpSnapshot(null);
     }, [xpScopeKey]);
-    const managerClubs = clubAccess.filter((item) => item.isManager);
-    const manager = managerClubs.some((item) => String(item.clubId) === String(draft.clubId));
+    const managerClubs = clubAccess.filter((item) => clubDraftReport(item, draft));
+    const scope = managerClubs.find((item) => String(item.clubId) === String(draft.clubId));
+    const manager = Boolean(scope) && (!editing || clubLeadership(scope) || String(original?.createdByUserId) === String(user?.id));
+    const canSubmit = clubSubmitReport(scope, draft);
     const reportBase = base ? `${base}/reports` : '/v2/reports';
     const backTo = editing ? `${reportBase}/${reportId}` : base ? `${base}/reports` : '/v2/my-clubs';
     const template = REPORT_TEMPLATES.find((item) => item.reportType === draft.reportType);
@@ -295,7 +298,7 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
         return '';
     };
     const save = async (submit) => {
-        if (lock.current) return;
+        if (lock.current || submit && !canSubmit) return;
         const validation = validate();
         if (validation) {
             setError(validation);
@@ -783,7 +786,7 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
                                     <button
                                         className="v2-button v2-button--primary"
                                         type="button"
-                                        disabled={busy}
+                                        disabled={busy || !canSubmit}
                                         onClick={() => save(true)}
                                     >
                                         <Send size={16} /> Lưu và nộp

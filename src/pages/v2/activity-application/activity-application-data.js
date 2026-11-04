@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../services/club-capabilities.js';
 export const ACTION_ROLES = [
     ['Participant', 'Người tham gia', 1],
     ['Contributor', 'Người đóng góp', 1.6],
@@ -68,7 +69,7 @@ export function applicationEstimate(draft) {
 export function applicationPermission(access, permission) {
     if (!access) return false;
     if (Array.isArray(access.permissions)) return access.permissions.includes(permission);
-    return Boolean(access.isManager); // Compatibility until scoped capabilities are returned by Clubs API.
+    return clubCapability(access, 'event.registrations.manage');
 }
 export function validateApplication(draft, now = Date.now(), throughStage = 3) {
     if (!Number.isSafeInteger(Number(draft.clubId)) || Number(draft.clubId) <= 0) return 'CLB không hợp lệ.';

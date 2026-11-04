@@ -295,8 +295,8 @@ export default function ActivityStaffingPanel({
     const caps = data.capabilities || {};
     const approved = data.applicationStatus === 'APPROVED';
     const recruitment = data.recruitment;
-    const canRecruit = manager && !readOnly && approved && caps.canManageRecruitment === true;
-    const canAssign = manager && !readOnly && approved && caps.canManageAssignments === true;
+    const canRecruit = !readOnly && approved && caps.canManageRecruitment === true;
+    const canAssign = !readOnly && approved && caps.canManageAssignments === true;
     const canReview = !readOnly && approved && caps.canReviewApplications === true;
     const publicAssignments = (data.publicAssignments || []).filter(
         (row) => !assignments.some((own) => own.id === row.id),

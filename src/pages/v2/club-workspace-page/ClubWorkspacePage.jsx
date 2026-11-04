@@ -1,3 +1,4 @@
+import { clubLeadership, clubRoleSummary } from '../../../services/club-capabilities';
 import {
     WorkspaceSemesterProvider,
     WorkspaceSemesterSelect,
@@ -29,7 +30,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
     const { clubCode: routeClubCode } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const manager = !observation && access?.isManager === true;
+    const manager = !observation && clubLeadership(access);
     const semesterSelection = useWorkspaceSemesterSelection(
         sessionKey,
         result.clubId,
@@ -71,7 +72,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
             </div>
         );
     const canViewDeclarations = canViewClubDeclarations(manager, result.workspace, observation);
-    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer);
+    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer, observation ? null : access);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
     if (observation && relativePath === 'club-page') return <Navigate to={base} replace />;
     if (relativePath === 'attendance') return <Navigate to={`${base}/activities`} replace />;
@@ -90,7 +91,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                 <WorkspaceLeftRail
                     workspace={{
                         ...result.workspace,
-                        ...(access ? { displayRole: access.isManager ? 'CLUB_OWNER' : access.isTreasurer ? 'TREASURER' : 'MEMBER' } : {}),
+                        ...(access ? { displayRole: access.isManager ? 'CLUB_OWNER' : clubLeadership(access) ? 'VICE_PRESIDENT' : access.isTreasurer ? 'TREASURER' : 'MEMBER' } : {}),
                         pendingApplications: dashboard.data?.pendingApplications ?? null,
                         ongoingActivityCount: dashboard.data?.ongoingActivityCount ?? null,
                     }}
@@ -100,6 +101,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     observation={observation}
                     canViewDeclarations={canViewDeclarations}
                     treasurer={treasurer}
+                    access={observation ? null : access}
                     onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
                 />
                 <main className="v2-workspace-main">
@@ -114,7 +116,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                         </div>
                         <div>
                             <span className={`v2-workspace-role ${manager ? 'is-manager' : ''}`}>
-                                {observation ? 'CTSV · Chỉ xem' : manager ? 'Chủ nhiệm' : 'Thành viên'}
+                                {observation ? 'CTSV · Chỉ xem' : clubRoleSummary(access)}
                             </span>
                             <WorkspaceSemesterSelect />
                         </div>

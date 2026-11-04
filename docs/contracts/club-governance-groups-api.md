@@ -1,6 +1,15 @@
 # Club governance groups API — BE implementation contract
 
-Implement Status: Not Yet
+## Implementation update — 2026-11-05
+
+The older source audit below is historical. The approved API checkout implements governance groups, current-semester assignments, immutable revisions/member history/reports, separate vice nominations and ownership-transfer safeguards. ClubHub and CTSV Admin now use these real endpoints. See [execution evidence](../issue-validation/2026-11-04-queue-rescan.md). Source/tests do not establish production acceptance.
+
+Implemented catalog contains ten specialist permissions for club profile/media, event content/staff/proposals, recruitment, own report drafts and finance read/draft/submit. `club.declarations.process` remains unavailable under its separate contract; it cannot be selected as a group grant. Current ownership remains the existing protected manager assignment, while effective vice appointments are separate CTSV decisions. Legacy treasury roles remain explicit historical duties and are not imported into group assignments.
+
+Actual writes use term/club versions, stable idempotency keys and current authority checks. Report submission additionally checks source revision and leadership digest, capturing legacy treasury and formal leadership without activating grants. Final release gates include full SQL CI and consumer rollout before ClubService activation.
+
+
+Implement Status: Implemented in approved source for the scope below; release verification pending
 
 Status Scope: Backend implementation
 

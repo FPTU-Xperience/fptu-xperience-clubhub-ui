@@ -19,7 +19,7 @@ function EditButton({ label, onClick, disabled }) {
     );
 }
 
-export default function ClubPagePreview({ club, logo, cover, manager, onEdit, disabled = false }) {
+export default function ClubPagePreview({ club, logo, cover, manager, canMedia = manager, onEdit, disabled = false }) {
     return (
         <article className="club-page-preview" aria-label="Xem trước trang CLB">
             <div className="club-page-preview-heading">
@@ -35,7 +35,7 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                             label={`Banner ${club.name}`}
                         />
                     )}
-                    {manager && (
+                    {canMedia && (
                         <button
                             className="club-page-change-cover"
                             type="button"
@@ -56,7 +56,7 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                                     (club.name || 'CLB').slice(0, 2).toUpperCase()
                                 )}
                             </div>
-                            {manager && (
+                            {canMedia && (
                                 <button
                                     className="club-page-change-logo"
                                     type="button"
