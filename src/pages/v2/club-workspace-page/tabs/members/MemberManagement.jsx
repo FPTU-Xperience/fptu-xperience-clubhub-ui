@@ -9,6 +9,7 @@ import WorkspaceTabLayout from '../WorkspaceTabLayout';
 import InviteMemberModal from './InviteMemberModal';
 import { projectOwnMemberProfile, useProfile } from '../../../profile-data';
 import ClubRolesInfo from './ClubRolesInfo';
+import ClubRoleManagement from './ClubRoleManagement';
 import ClubGovernancePreview from './governance/ClubGovernancePreview';
 import { CLUB_MEMBER_ROLES, clubMemberRoleLabel as roleLabel } from './club-member-roles';
 import './MemberManagement.scss';
@@ -210,6 +211,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                             }}
                         />
                     )}
+                    <ClubRoleManagement clubId={clubId} readOnly={readOnly} onChanged={refresh} />
                     <div className="v2-member-switch" aria-label="Quản lý cộng đồng">
                         <button
                             type="button"

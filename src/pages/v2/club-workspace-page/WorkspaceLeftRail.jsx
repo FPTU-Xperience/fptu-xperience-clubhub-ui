@@ -37,9 +37,10 @@ export const workspaceSections = [
     ['club-page', 'Trang CLB', Home, 'manager'],
 ];
 
-export function getWorkspaceSections(manager, observation = false, canViewDeclarations = manager) {
+export function getWorkspaceSections(manager, observation = false, canViewDeclarations = manager, treasurer = false) {
     return workspaceSections.filter((section) => {
         if (section[3] === 'declarations') return !observation && canViewDeclarations;
+        if (section[0] === 'finance') return observation || manager || treasurer;
         return observation ? section[0] !== 'club-page' : !section[3] || manager;
     });
 }
@@ -77,10 +78,11 @@ export default function WorkspaceLeftRail({
     onClubChange,
     observation = false,
     canViewDeclarations = manager,
+    treasurer = false,
 }) {
     const { user, api, logout } = useAuth();
     const media = usePersonalMedia();
-    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations);
+    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer);
     const [visibleSectionCount, setVisibleSectionCount] = useState(4);
     useEffect(() => {
         const compact = window.matchMedia('(max-width: 480px)');

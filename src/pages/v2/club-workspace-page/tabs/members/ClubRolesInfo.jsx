@@ -9,6 +9,7 @@ export function ClubRolesInfoModal({ onClose }) {
         <div className="v2-club-role-info">
             <V2Modal title="Vai trò, trách nhiệm và quyền hạn" onClose={onClose} wide>
                 <p>
+                    Bảng này mô tả trách nhiệm dự kiến, không cấp quyền. Hiện máy chủ hỗ trợ chủ nhiệm, thủ quỹ và thành viên; các vai trò mở rộng chưa thể gán tại đây.{' '}
                     Với trải nghiệm tự khai, Chủ tịch và Phó chủ tịch mặc định có quyền đọc, duyệt tại CLB và chuyển lên
                     CTSV. Các vai trò khác cần được tick quyền “Xử lý trải nghiệm tự khai trong CLB” trong mục Trải
                     nghiệm tự khai → Phân quyền; bảng dưới chỉ mô tả quyền mặc định.

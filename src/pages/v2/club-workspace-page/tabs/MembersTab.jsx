@@ -1,6 +1,7 @@
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import MemberManagement from './members/MemberManagement';
 import ClubRolesInfo from './members/ClubRolesInfo';
+import ClubRoleManagement from './members/ClubRoleManagement';
 
 const initials = (name = '') =>
     name
@@ -21,7 +22,7 @@ export default function MembersTab({ manager = false, dashboard, workspace, read
     if (manager || readOnly)
         return <MemberManagement key={clubId} clubId={clubId} dashboard={dashboard} readOnly={readOnly} />;
     return (
-        <WorkspaceTabLayout
+        <><ClubRoleManagement clubId={clubId} readOnly onChanged={dashboard.retry} /><WorkspaceTabLayout
             title="Thành viên CLB"
             description={
                 count == null
@@ -88,6 +89,6 @@ export default function MembersTab({ manager = false, dashboard, workspace, read
                     )}
                 </>
             )}
-        </WorkspaceTabLayout>
+        </WorkspaceTabLayout></>
     );
 }

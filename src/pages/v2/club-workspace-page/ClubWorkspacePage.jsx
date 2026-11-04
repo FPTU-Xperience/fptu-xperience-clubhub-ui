@@ -16,6 +16,7 @@ import ReportDetailPage from '../report-detail-page/ReportDetailPage';
 import ReportEditorPage from '../report-detail-page/ReportEditorPage';
 import { canViewClubDeclarations } from './tabs/student-declarations/club-declarations-data';
 import './ClubWorkspacePage.scss';
+import { useAuth } from '../../../context/AuthContext';
 export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     const { clubCode: routeClubCode } = useParams();
     const result = useClubWorkspace(api, sessionKey, routeClubCode);
@@ -23,10 +24,12 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
 }
 
 export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation = false }) {
+    const access = useAuth()?.clubAccess?.find(item => String(item.clubId) === String(result.clubId));
+    const treasurer = !observation && access?.isTreasurer === true;
     const { clubCode: routeClubCode } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const manager = !observation && result.workspace?.role === 'MANAGER';
+    const manager = !observation && access?.isManager === true;
     const semesterSelection = useWorkspaceSemesterSelection(
         sessionKey,
         result.clubId,
@@ -68,7 +71,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
             </div>
         );
     const canViewDeclarations = canViewClubDeclarations(manager, result.workspace, observation);
-    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations);
+    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
     if (observation && relativePath === 'club-page') return <Navigate to={base} replace />;
     if (relativePath === 'attendance') return <Navigate to={`${base}/activities`} replace />;
@@ -87,6 +90,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                 <WorkspaceLeftRail
                     workspace={{
                         ...result.workspace,
+                        ...(access ? { displayRole: access.isManager ? 'CLUB_OWNER' : access.isTreasurer ? 'TREASURER' : 'MEMBER' } : {}),
                         pendingApplications: dashboard.data?.pendingApplications ?? null,
                         ongoingActivityCount: dashboard.data?.ongoingActivityCount ?? null,
                     }}
@@ -95,6 +99,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     manager={manager}
                     observation={observation}
                     canViewDeclarations={canViewDeclarations}
+                    treasurer={treasurer}
                     onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
                 />
                 <main className="v2-workspace-main">

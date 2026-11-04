@@ -1,6 +1,9 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
+        paths: [.github/workflows/deployment.yml]
     workflow_dispatch:
 
 permissions:
@@ -55,6 +58,17 @@ jobs:
 
             - name: Validate club formation and approved workspace in browser
               run: node scripts/club-formation-browser-check.mjs
+
+            - name: Validate cancellation and club roles in browser
+              run: node scripts/registration-roles-browser-check.mjs
+
+            - name: Save cancellation and roles screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: registration-and-roles
+                  path: TestResults/registration-roles
+                  if-no-files-found: ignore
 
             - name: Save club formation screenshots
               if: always()
@@ -141,6 +155,17 @@ jobs:
 
             - name: Verify deployed club formation with isolated API traffic
               run: node scripts/deployed-club-formation-check.mjs
+
+            - name: Verify deployed cancellation and club roles with isolated API traffic
+              run: node scripts/deployed-registration-roles-check.mjs
+
+            - name: Save deployed cancellation and roles screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-registration-and-roles
+                  path: TestResults/registration-roles-online
+                  if-no-files-found: ignore
 
             - name: Save deployed formation screenshots
               if: always()

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { api, session } from '../services/api';
 import { observeSession } from '../services/session-client.js';
 import { hasPermission as userHasPermission, ROLES } from '../auth/permissions';
@@ -52,7 +52,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(!AUTH_BYPASS_ENABLED);
   const [authError, setAuthError] = useState('');
 
+  const accessSequence = useRef(0);
   const loadClubAccess = useCallback(async (actor) => {
+    const ticket = ++accessSequence.current;
     const sessionId = session.read()?.id;
     if (!canLoadClubAccess(actor)) {
       setClubAccess([]);
@@ -61,12 +63,12 @@ export function AuthProvider({ children }) {
 
     try {
       const access = await api.getMyClubAccess();
-      if (session.read()?.id !== sessionId) return [];
+      if (session.read()?.id !== sessionId || ticket !== accessSequence.current) return [];
       const normalizedAccess = Array.isArray(access) ? access : [];
       setClubAccess(normalizedAccess);
       return normalizedAccess;
     } catch {
-      if (session.read()?.id === sessionId) setClubAccess([]);
+      if (session.read()?.id === sessionId && ticket === accessSequence.current) setClubAccess([]);
       return [];
     }
   }, []);
@@ -153,6 +155,12 @@ export function AuthProvider({ children }) {
   }, [clubAccess, user]);
 
   const refreshClubAccess = useCallback(() => loadClubAccess(user), [loadClubAccess, user]);
+  useEffect(() => {
+    if (!user?.id || AUTH_BYPASS_ENABLED) return undefined;
+    const refresh = () => { if (document.visibilityState === 'visible') loadClubAccess(user); };
+    window.addEventListener('focus', refresh); document.addEventListener('visibilitychange', refresh);
+    return () => { window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
+  }, [user?.id, loadClubAccess]);
 
   return (
     <AuthContext.Provider value={{
