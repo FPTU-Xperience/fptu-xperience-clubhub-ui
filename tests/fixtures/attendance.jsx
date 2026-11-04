@@ -20,6 +20,7 @@ const api = {
 const activity = {
     id: 1,
     clubId: 1,
+    isInternal: new URLSearchParams(location.search).get('public') !== 'true',
     startTime: '2026-11-01T00:00:00Z',
     endTime: '2026-12-01T00:00:00Z',
     location: 'Hall',

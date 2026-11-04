@@ -38,18 +38,19 @@ export function validateSessions(value, activityId, student = false) {
         throw new Error('Máy chủ chưa trả về danh sách phiên điểm danh hợp lệ.');
     return value;
 }
-export function validateAttendanceRoster(value, activityId, sessionId) {
+export function validateAttendanceRoster(value, activityId, sessionId, registeredUsers = false) {
     if (
         String(value?.activityId) !== String(activityId) ||
         value.sessionId !== sessionId ||
         !guid(value.sessionVersion) ||
+        (registeredUsers && value.identityKind !== 'REGISTERED_USER') ||
         !Array.isArray(value.items) ||
         !Number.isSafeInteger(value.totalPages) ||
         value.totalPages < 0 ||
         value.items.some(
             (row) =>
-                !Number.isSafeInteger(row.memberId) ||
-                row.memberId < 1 ||
+                (!registeredUsers && (!Number.isSafeInteger(row.memberId) || row.memberId < 1)) ||
+                (registeredUsers && row.memberId != null) ||
                 !Number.isSafeInteger(row.userId) ||
                 row.userId < 1 ||
                 (row.attendance &&
@@ -57,7 +58,7 @@ export function validateAttendanceRoster(value, activityId, sessionId) {
                         row.attendance.sessionId !== sessionId ||
                         !guid(row.attendance.version))),
         ) ||
-        new Set(value.items.map((row) => row.memberId)).size !== value.items.length ||
+        (!registeredUsers && new Set(value.items.map((row) => row.memberId)).size !== value.items.length) ||
         new Set(value.items.map((row) => row.userId)).size !== value.items.length
     )
         throw new Error('Danh sách điểm danh không khớp phiên đang xem.');

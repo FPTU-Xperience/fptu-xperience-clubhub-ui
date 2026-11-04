@@ -124,6 +124,10 @@ function SessionForm({ activity, session, busy, error, onSave }) {
 
 function SessionRoster({ activity, session, revision }) {
     const { api, user } = useAuth();
+    const registeredUsers = activity.isInternal === false;
+    const endpoint = registeredUsers
+        ? `/api/clubs/${encodeURIComponent(activity.clubId)}/activities/${encodeURIComponent(activity.id)}/sessions/${session.id}/registered-attendance`
+        : `/api/clubs/${encodeURIComponent(activity.clubId)}/activities/${encodeURIComponent(activity.id)}/attendance`;
     const [page, setPage] = useState(1),
         [search, setSearch] = useState(''),
         [retry, setRetry] = useState(0),
@@ -144,11 +148,11 @@ function SessionRoster({ activity, session, revision }) {
         lock.current = false;
         const query = new URLSearchParams({ sessionId: session.id, page, pageSize: 20, search });
         api.request(
-            `/api/clubs/${encodeURIComponent(activity.clubId)}/activities/${encodeURIComponent(activity.id)}/attendance?${query}`,
+            `${endpoint}?${query}`,
         )
             .then((data) => {
                 if (generation.current !== ticket) return;
-                setState({ data: validateAttendanceRoster(data, activity.id, session.id) });
+                setState({ data: validateAttendanceRoster(data, activity.id, session.id, registeredUsers) });
             })
             .catch((issue) => {
                 if (generation.current === ticket) setState({ error: issue });
@@ -156,18 +160,18 @@ function SessionRoster({ activity, session, revision }) {
         return () => {
             generation.current++;
         };
-    }, [api, user?.id, activity.id, activity.clubId, session.id, session.version, page, search, retry, revision]);
+    }, [api, user?.id, activity.id, activity.clubId, session.id, session.version, page, search, retry, revision, endpoint, registeredUsers]);
     const save = async (event) => {
         event.preventDefault();
         if (lock.current) return;
         const fields = Object.fromEntries(new FormData(event.currentTarget));
         const body = {
-            sessionId: session.id,
+            ...(!registeredUsers && { sessionId: session.id }),
             expectedSessionVersion: state.data.sessionVersion,
             reason: fields.reason.trim(),
             items: [
                 {
-                    memberId: editing.memberId,
+                    ...(registeredUsers ? { userId: editing.userId } : { memberId: editing.memberId }),
                     status: fields.status,
                     note: fields.note.trim() || null,
                     expectedVersion: editing.attendance?.version ?? null,
@@ -192,7 +196,7 @@ function SessionRoster({ activity, session, revision }) {
         setError('');
         try {
             const result = await api.request(
-                `/api/clubs/${encodeURIComponent(activity.clubId)}/activities/${encodeURIComponent(activity.id)}/attendance`,
+                endpoint,
                 {
                     method: 'PUT',
                     headers: { 'Idempotency-Key': keys.current.get(fingerprint) },
@@ -216,9 +220,9 @@ function SessionRoster({ activity, session, revision }) {
     };
     return (
         <section>
-            <h3>Điểm danh thành viên CLB theo phiên</h3>
+            <h3>{registeredUsers ? 'Điểm danh người đã đăng ký theo phiên' : 'Điểm danh thành viên CLB theo phiên'}</h3>
             <p>
-                Danh sách này theo danh sách thành viên CLB. Xác minh thủ công cần quyền riêng; không được tự xác minh
+                {registeredUsers ? 'Danh sách này gồm người đang đăng ký sự kiện công khai.' : 'Danh sách này theo danh sách thành viên CLB.'} Xác minh thủ công cần quyền riêng; không được tự xác minh
                 hoặc sửa lượt đã xác minh.
             </p>
             <label>
@@ -247,7 +251,7 @@ function SessionRoster({ activity, session, revision }) {
                     )}
                     <div className="v2-session-list">
                         {state.data.items.map((row) => (
-                            <article key={row.memberId}>
+                            <article key={row.userId}>
                                 <h4>{row.fullName}</h4>
                                 <p>
                                     {row.attendance

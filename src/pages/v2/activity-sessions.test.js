@@ -30,6 +30,14 @@ test('roster rejects stale or foreign records before enabling manual attendance'
     ])
         assert.throws(() => validateAttendanceRoster({ ...value, ...patch }, 4, 2));
 });
+test('public attendance requires explicit registered-user identities without a fabricated membership ID', () => {
+    const value = { activityId: 4, sessionId: 2, sessionVersion: version, totalPages: 1,
+        identityKind: 'REGISTERED_USER', items: [{ userId: 104, attendance: null }] };
+    assert.equal(validateAttendanceRoster(value, 4, 2, true), value);
+    assert.throws(() => validateAttendanceRoster(value, 4, 2));
+    assert.throws(() => validateAttendanceRoster({ ...value, identityKind: undefined }, 4, 2, true));
+    assert.throws(() => validateAttendanceRoster({ ...value, items: [{ userId: 104, memberId: 104 }] }, 4, 2, true));
+});
 const draft = () => ({
     startAt: '2026-11-15T14:00',
     endAt: '2026-11-15T16:00',

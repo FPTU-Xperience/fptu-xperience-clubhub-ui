@@ -35,7 +35,7 @@ try {
     }
     browser = await chromium.launch({ args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
     fs.mkdirSync('TestResults/attendance', { recursive: true });
-    for (const width of [1440, 390]) {
+    for (const { width, registeredUsers } of [1440, 390].flatMap((width) => [{ width, registeredUsers: false }, { width, registeredUsers: true }])) {
         const context = await browser.newContext({
             viewport: { width, height: 1000 },
             geolocation: { latitude: 10, longitude: 106, accuracy: 20 },
@@ -142,15 +142,17 @@ try {
                         totalPages: 1,
                         totalItems: 1,
                     });
-                if (path.endsWith('/attendance')) {
+                if (path.endsWith('/attendance') || path.endsWith('/registered-attendance')) {
+                    assert.equal(path.endsWith('/registered-attendance'), registeredUsers);
                     assert.equal(url.searchParams.get('sessionId'), '1');
                     return send({
                         activityId: 1,
                         sessionId: 1,
                         sessionVersion,
+                        ...(registeredUsers && { identityKind: 'REGISTERED_USER' }),
                         capabilities: { canVerify: true },
                         items: [104, 105, 100].map((id, index) => ({
-                            memberId: index + 1,
+                            ...(!registeredUsers && { memberId: index + 1 }),
                             userId: id,
                             fullName: id === 100 ? 'Manager' : `Student ${id}`,
                             isRegistered: true,
@@ -184,11 +186,13 @@ try {
                 activityVersion = versions[1];
                 return send({ activityId: 1, activityVersion, items: [session()], total: 1 });
             }
-            if (path.endsWith('/attendance')) {
+            if (path.endsWith('/attendance') || path.endsWith('/registered-attendance')) {
+                assert.equal(path.endsWith('/registered-attendance'), registeredUsers);
                 manualWrites++;
-                assert.equal(body.sessionId, 1);
+                assert.equal(body.sessionId, registeredUsers ? undefined : 1);
                 assert.equal(body.expectedSessionVersion, sessionVersion);
-                assert.equal(body.items[0].memberId, 2);
+                assert.equal(body.items[0].memberId, registeredUsers ? undefined : 2);
+                assert.equal(body.items[0].userId, registeredUsers ? 105 : undefined);
                 assert.equal(body.items[0].expectedVersion, null);
                 assert.ok(body.reason);
                 if (conflict) {
@@ -249,7 +253,7 @@ try {
             }
             throw new Error('Unexpected attendance mutation: ' + path);
         });
-        await page.goto('http://127.0.0.1:4183/tests/fixtures/attendance.html', {
+        await page.goto(`http://127.0.0.1:4183/tests/fixtures/attendance.html?public=${registeredUsers}`, {
             waitUntil: 'domcontentloaded',
             timeout: 120000,
         });
@@ -292,6 +296,7 @@ try {
         console.log('manual saved', width);
         await page.getByRole('button', { name: 'Vai sinh viên A', exact: true }).click();
         await page.getByRole('button', { name: 'Điểm danh phiên', exact: true }).click();
+        if (!registeredUsers) {
         await page.evaluate(() => {
             window.__originalQrMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
             navigator.mediaDevices.getUserMedia = async () => { throw new DOMException('Denied', 'NotAllowedError'); };
@@ -314,6 +319,9 @@ try {
         await page.getByText('Đã đọc mã QR.', { exact: false }).waitFor();
         assert.equal(await page.getByLabel('Mã xác thực phiên', { exact: true }).inputValue(), 'signed-current-fixture');
         assert.equal(checkIns, 0, 'A decoded QR still requires explicit confirmation');
+        } else {
+            await page.getByLabel('Mã xác thực phiên', { exact: true }).fill('signed-current-fixture');
+        }
         await page.getByLabel('Mã xác thực phiên', { exact: true }).fill('expired');
         await page.getByRole('button', { name: 'Lấy vị trí hiện tại', exact: true }).click();
         await page.getByText('Đã lấy vị trí;', { exact: false }).waitFor();
