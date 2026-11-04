@@ -53,6 +53,17 @@ jobs:
             - name: Validate attendance sessions in browser
               run: node scripts/attendance-browser-check.mjs
 
+            - name: Validate credit wallet and rewards in browser
+              run: node scripts/credit-rewards-browser-check.mjs
+
+            - name: Save credit wallet and rewards screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: credit-rewards
+                  path: TestResults/credit
+                  if-no-files-found: ignore
+
             - name: Validate club formation and approved workspace in browser
               run: node scripts/club-formation-browser-check.mjs
 

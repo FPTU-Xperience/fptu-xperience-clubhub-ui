@@ -47,6 +47,7 @@ import {
 import { paletteColorCss } from '../../../../components/media/color-palette';
 import { buildGiftSections, readGiftPopularity, giftCategory } from '../../profile-page/gift-sections';
 import './GiftsTab.scss';
+import ServerClubRewards from './ServerClubRewards';
 import '../../../../components/v2/activity-card/ActivityCard.scss';
 import '../../../../components/v2/common/CountBadge.scss';
 
@@ -125,7 +126,11 @@ function GiftPreview({ reward }) {
     );
 }
 
-export default function GiftsTab({ workspace, manager: managerInput = false, dashboard, readOnly = false }) {
+export default function GiftsTab(props) {
+    return <ServerClubRewards {...props} />;
+}
+
+export function PreviewGiftsTab({ workspace, manager: managerInput = false, dashboard, readOnly = false }) {
     const manager = managerInput && !readOnly;
     const { user } = useAuth();
     const clubId = workspace?.clubId;
