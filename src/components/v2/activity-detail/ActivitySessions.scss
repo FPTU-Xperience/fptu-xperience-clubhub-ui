@@ -37,6 +37,25 @@
         border-radius: 8px;
     }
 }
+.v2-attendance-qr {
+    display: block;
+    width: 360px;
+    max-width: 100%;
+    height: auto;
+    background: white;
+}
+.v2-attendance-scanner {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    video {
+        width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+        background: #111827;
+        border-radius: 8px;
+    }
+}
 .v2-session-form {
     display: grid;
     gap: 16px;

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import V2Modal from '../common/modal/V2Modal';
+import { AttendanceQrInput } from './AttendanceQr';
 import {
     attendanceError,
     checkInPayload,
@@ -216,6 +217,7 @@ export default function StudentSessionSources({ api, activityId, onChanged }) {
                                 {sessionDate(selected.startTimeUtc)} · {selected.location}
                             </p>
                             <p>Dùng mã xác thực hiện tại do người tổ chức cung cấp. Mã máy chủ hết hạn sau 30 giây.</p>
+                            <AttendanceQrInput key={`${identity}:${selected.id}`} activityId={activityId} sessionId={selected.id} onCode={setChallenge} />
                             <label>
                                 Mã xác thực phiên
                                 <textarea

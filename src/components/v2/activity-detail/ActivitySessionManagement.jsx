@@ -14,6 +14,7 @@ import {
     validateAttendanceRoster,
 } from '../../../services/activity-sessions';
 import { formatAttendanceStatus } from '../../../locales/vi';
+import { AttendanceQrDisplay } from './AttendanceQr';
 import './ActivitySessions.scss';
 
 function SessionForm({ activity, session, busy, error, onSave }) {
@@ -569,6 +570,7 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
                     {challenge && (
                         <div>
                             <h3>Mã xác thực phiên #{challenge.sessionId}</h3>
+                            <AttendanceQrDisplay activityId={activity.id} challenge={challenge} />
                             <label>
                                 Mã do máy chủ cấp
                                 <textarea

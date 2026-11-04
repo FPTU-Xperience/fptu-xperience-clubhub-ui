@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { spawn } from 'node:child_process';
+import qr from 'qrcode';
+import { attendanceQrPayload } from '../src/services/attendance-qr.js';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const server = spawn(
     'node',
@@ -31,13 +33,13 @@ try {
         } catch {}
         await new Promise((resolve) => setTimeout(resolve, 500));
     }
-    browser = await chromium.launch();
+    browser = await chromium.launch({ args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
     fs.mkdirSync('TestResults/attendance', { recursive: true });
     for (const width of [1440, 390]) {
         const context = await browser.newContext({
             viewport: { width, height: 1000 },
             geolocation: { latitude: 10, longitude: 106, accuracy: 20 },
-            permissions: ['geolocation'],
+            permissions: ['geolocation', 'camera'],
         });
         const page = await context.newPage();
         page.setDefaultTimeout(20000);
@@ -271,6 +273,10 @@ try {
         await page.getByLabel('Mã do máy chủ cấp', { exact: true }).waitFor();
         await page.getByLabel('Mã do máy chủ cấp', { exact: true }).waitFor({ state: 'hidden' });
         assert.equal(challenges, 1, 'No automatic challenge polling');
+        await page.getByRole('button', { name: 'Lấy mã xác thực phiên #1', exact: true }).click();
+        const qrImage = page.getByAltText('Mã QR điểm danh phiên 1', { exact: true });
+        await qrImage.waitFor();
+        const encodedQr = Buffer.from((await qrImage.getAttribute('src')).split(',')[1], 'base64');
         await page.getByRole('button', { name: 'Xem điểm danh phiên #1', exact: true }).click();
         await page.getByRole('button', { name: 'Ghi điểm danh · Student 105', exact: true }).click();
         await page.getByLabel('Lý do xác minh', { exact: true }).fill('Verified in person');
@@ -286,6 +292,28 @@ try {
         console.log('manual saved', width);
         await page.getByRole('button', { name: 'Vai sinh viên A', exact: true }).click();
         await page.getByRole('button', { name: 'Điểm danh phiên', exact: true }).click();
+        await page.evaluate(() => {
+            window.__originalQrMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+            navigator.mediaDevices.getUserMedia = async () => { throw new DOMException('Denied', 'NotAllowedError'); };
+        });
+        await page.getByRole('button', { name: 'Quét mã QR bằng camera', exact: true }).click();
+        await page.getByRole('alert').filter({ hasText: 'Chưa được cấp quyền camera' }).waitFor();
+        await page.evaluate(() => { navigator.mediaDevices.getUserMedia = window.__originalQrMedia; });
+        await page.getByRole('button', { name: 'Quét mã QR bằng camera', exact: true }).click();
+        await page.waitForFunction(() => document.querySelector('video')?.srcObject?.active);
+        await page.evaluate(() => { window.__qrTracks = document.querySelector('video').srcObject.getTracks(); });
+        await page.getByRole('button', { name: 'Dừng camera', exact: true }).click();
+        assert.equal(await page.evaluate(() => window.__qrTracks.every((track) => track.readyState === 'ended')), true);
+        const wrongQr = await qr.toBuffer(attendanceQrPayload(2, {
+            sessionId: 1, challenge: 'signed-current-fixture', expiresAt: new Date(Date.now() + 30000).toISOString(),
+        }));
+        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'other-session.png', mimeType: 'image/png', buffer: wrongQr });
+        await page.getByRole('alert').filter({ hasText: 'không thuộc phiên' }).waitFor();
+        assert.equal(checkIns, 0, 'Scanning never sends attendance');
+        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'current-session.png', mimeType: 'image/png', buffer: encodedQr });
+        await page.getByText('Đã đọc mã QR.', { exact: false }).waitFor();
+        assert.equal(await page.getByLabel('Mã xác thực phiên', { exact: true }).inputValue(), 'signed-current-fixture');
+        assert.equal(checkIns, 0, 'A decoded QR still requires explicit confirmation');
         await page.getByLabel('Mã xác thực phiên', { exact: true }).fill('expired');
         await page.getByRole('button', { name: 'Lấy vị trí hiện tại', exact: true }).click();
         await page.getByText('Đã lấy vị trí;', { exact: false }).waitFor();
@@ -342,7 +370,7 @@ try {
         await context.close();
     }
     console.log(
-        'ATTENDANCE_BROWSER_OK: actual manager/student components at 1440/390; create, expired challenge/no polling, manual conflict/reload, scoped versions, GPS check-in, duplicate guard, verified reload, stale account, close/cancel and deferred-source gate. API traffic isolated.',
+        'ATTENDANCE_BROWSER_OK: actual manager/student components at 1440/390; real QR image roundtrip, wrong-session rejection, denied camera and stopped tracks, no automatic check-in; create, expired challenge/no polling, manual conflict/reload, scoped versions, GPS check-in, duplicate guard, verified reload, stale account, close/cancel and deferred-source gate. API traffic isolated.',
     );
 } finally {
     await browser?.close();

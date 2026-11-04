@@ -13,10 +13,12 @@
         "test:club-page": "node scripts/club-page-smoke.mjs"
     },
     "dependencies": {
+        "@zxing/browser": "0.2.1",
         "driver.js": "1.10.2",
         "framer-motion": "^10.16.0",
         "imagetracerjs": "1.2.6",
         "lucide-react": "^1.25.0",
+        "qrcode": "1.5.4",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-pdf": "^10.4.1",
