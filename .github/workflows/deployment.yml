@@ -187,3 +187,5 @@ jobs:
 # Validate extracted notification component accessibility.
 
 # Run the isolated activity fixture with the production React transform.
+
+# Validate attendance onboarding fixture profile version in this release.

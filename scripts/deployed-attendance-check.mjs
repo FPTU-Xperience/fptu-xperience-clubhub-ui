@@ -66,6 +66,7 @@ try {
             if (path === '/api/users/me/profile')
                 return send({
                     userId: 104,
+                    version: 'isolated-profile-version',
                     profile: { interests: [] },
                     personal: {},
                     academic: {},
