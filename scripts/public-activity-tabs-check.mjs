@@ -38,7 +38,7 @@ try {
             if (path.endsWith('/resources')) { counts.resources++; return fulfill({ items: [], availability: 'AVAILABLE', resourceCapabilities: { supportedKinds: ['DOCUMENT', 'MEDIA'], canManage: false, canUpload: false } }); }
             if (path.endsWith('/staffing')) { counts.staffing++; return fulfill({ activityId: 1, version: 1, actions: [], assignments: [], recruitment: null, capabilities: {}, applicationStatus: 'APPROVED', isPublished: true }); }
             if (path.endsWith('/my-attendance')) { counts.attendance++; return fulfill({ items: [], total: 0 }); }
-            if (path.endsWith('/sessions')) { counts.sessions++; return fulfill({ items: [], totalPages: 0 }); }
+            if (path.endsWith('/sessions')) { counts.sessions++; return fulfill({ activityId: 1, items: [], totalPages: 0 }); }
             if (path.endsWith('/participants') && request.method() === 'POST') {
                 counts.register++;
                 assert.deepEqual(request.postDataJSON(), {});

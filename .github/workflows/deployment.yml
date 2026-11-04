@@ -1,6 +1,9 @@
 name: Deploy to Cloudflare Pages
 
 on:
+    push:
+        branches: [fix/approved-issues-20261103]
+        paths: [.github/workflows/deployment.yml]
     workflow_dispatch:
 
 permissions:
@@ -49,6 +52,17 @@ jobs:
 
             - name: Validate recruitment approval and evidence in browser
               run: node scripts/staffing-browser-check.mjs
+
+            - name: Validate attendance sessions in browser
+              run: node scripts/attendance-browser-check.mjs
+
+            - name: Save attendance screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: attendance-sessions
+                  path: TestResults/attendance
+                  if-no-files-found: ignore
 
             - name: Save staffing screenshots
               if: always()
@@ -113,6 +127,17 @@ jobs:
 
             - name: Verify deployed staffing approval and evidence with isolated API traffic
               run: node scripts/deployed-staffing-check.mjs
+
+            - name: Verify deployed attendance with isolated API traffic
+              run: node scripts/deployed-attendance-check.mjs
+
+            - name: Save deployed attendance screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-attendance
+                  path: TestResults/attendance-online
+                  if-no-files-found: ignore
 
             - name: Save deployed staffing screenshots
               if: always()

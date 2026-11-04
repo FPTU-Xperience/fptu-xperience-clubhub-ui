@@ -9,7 +9,7 @@ import PageState from '../../../../../components/v2/PageState';
 import ActivityProfileLayout, {
     ActivityOverview,
 } from '../../../../../components/v2/activity-detail/ActivityProfileLayout';
-import ActivityAttendance from '../../../../../components/v2/activity-detail/ActivityAttendance';
+import ActivitySessionManagement from '../../../../../components/v2/activity-detail/ActivitySessionManagement';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
@@ -385,7 +385,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                         )}
                         {tab === 'attendance' && (
                             <div className="v2-activity-profile-panel">
-                                <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager />
+                                <ActivitySessionManagement key={`${sessionKey}:${activity.id}`} activity={activity} onChanged={result.retry} />
                             </div>
                         )}
                     </ActivityProfileLayout>

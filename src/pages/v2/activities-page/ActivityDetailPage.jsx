@@ -53,6 +53,7 @@ export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onC
                         key={`sessions:${sessionKey}:${activity.id}`}
                         api={api}
                         activityId={activity.id}
+                        onChanged={onChanged}
                     />
                 </div>
             )}
