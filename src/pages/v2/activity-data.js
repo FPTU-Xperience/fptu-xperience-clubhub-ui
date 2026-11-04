@@ -27,6 +27,8 @@ export function mapActivityDetailItem(raw = {}) {
         id: String(raw.id),
         canRegister: raw.canRegister === true,
         isRegistered: raw.isRegistered === true,
+        canCancelRegistration: raw.canCancelRegistration === true,
+        registrationVersion: typeof raw.registrationVersion === 'string' ? raw.registrationVersion : null,
         isEligible: raw.isEligible === true,
         isInternal: typeof raw.isInternal === 'boolean' ? raw.isInternal : null,
         version: typeof raw.version === 'string' ? raw.version : null,
