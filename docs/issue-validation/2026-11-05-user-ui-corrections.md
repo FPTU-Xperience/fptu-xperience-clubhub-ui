@@ -45,7 +45,7 @@ Local port rule: use only the existing `http://localhost:5173` dev server. Do no
 - Request: load recruitment and staffing/assignments from the club's actual events.
 - Include events with direct assignments even when no recruitment notice exists. Keep recruitment/application/assignment actions attached to their real event and current actor's permissions.
 - Respect club, semester, pagination and private-event boundaries. Distinguish empty data from failed/unavailable sources.
-- Status: QUEUED. Current `QuestsTab` reads only the recruitment listing, so events with direct assignments alone can be absent. Audit/implement this after preceding items.
+- Status: source implementation and focused checks completed; release pending. `QuestsTab` now composes the complete authorized event and recruitment lists with real per-event staffing data, using bounded parallel reads. It includes direct assignments without recruitment notices, filters current-account assignments unless the server grants management capability, and opens the existing event recruitment/assignment panels. Actor/club/semester changes reset the view. Partial failures remain visible instead of becoming an empty-success state. Three source tests and actual-application browser checks at 1440px/390px passed on localhost:5173; browser test API traffic is isolated.
 
 ## Continuation rule
 

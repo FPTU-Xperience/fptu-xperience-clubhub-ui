@@ -47,7 +47,7 @@ test('production workspace stays V2-local and does not consume demo state', () =
     assert.doesNotMatch(application, /api\.createActivity\(|api\.createReport\(|localStorage/);
     assert.match(members, /v2-preview-members/);
     assert.match(members, /approvedMembers/);
-    assert.match(members, /if \(manager \|\| readOnly \|\| recruit\)\s+return <MemberManagement/);
+    assert.match(members, /if \(manager \|\| readOnly \|\| recruit\)\s+return\s*(?:\(\s*)?<MemberManagement/);
     assert.match(members, /readOnly={readOnly}/);
     assert.doesNotMatch(members, /react-router-dom|to=|\/clubs\//);
     const management = readFileSync(

@@ -184,6 +184,17 @@ jobs:
             - name: Verify deployed governance with isolated API traffic
               run: node scripts/deployed-governance-check.mjs
 
+            - name: Verify deployed event recruitment and assignments with isolated API traffic
+              run: node scripts/deployed-event-tasks-check.mjs
+
+            - name: Save event task screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: event-tasks
+                  path: TestResults/event-tasks
+                  if-no-files-found: ignore
+
             - name: Verify deployed cancellation and club roles with isolated API traffic
               run: node scripts/deployed-registration-roles-check.mjs
 
