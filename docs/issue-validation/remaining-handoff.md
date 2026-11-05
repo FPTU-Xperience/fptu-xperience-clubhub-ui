@@ -2,7 +2,7 @@
 
 ## Current release — 2026-11-05 (supersedes the historical open statuses below)
 
-**Latest user corrections are still in progress:** [ordered UI correction checklist](2026-11-05-user-ui-corrections.md). Items 1–2 are released; display names, member spacing, old governance presentation/removal of the standalone role section, and event-derived tasks remain open. The completed original queue below does not mean these later corrections are finished.
+**Latest user corrections are complete:** [ordered UI correction checklist and final release evidence](2026-11-05-user-ui-corrections.md#final-release-evidence--2026-11-05). All six corrections are implemented, committed, pushed and deployed: restored rewards UI, personal/club points tabs, current display names, member spacing, reused governance UI/removal of the standalone role section, and event-derived recruitment/assignments. UI `749d152` deployment `42039951286` and API ClubService deployment `42007447193` succeeded. Full checks: 375 UI tests, 1,060 API tests, production build, CI and independent final deployed browser checks at 1440px/390px passed. Local browser work uses only existing localhost:5173; this rule was saved in memory. Browser fixtures are isolated and do not establish real-account acceptance.
 
 UI correction after user review: [restore the established rewards layout and separate club/personal XP views](2026-11-05-rewards-points-ui-restoration.md). Real credit integration must preserve the existing presentation. Managers have two points tabs; spendable credit is separate from achievement XP.
 
