@@ -167,6 +167,9 @@ jobs:
             - name: Verify deployed club formation with isolated API traffic
               run: node scripts/deployed-club-formation-check.mjs
 
+            - name: Verify deployed wallet and redemption with isolated API traffic
+              run: node scripts/deployed-credit-rewards-check.mjs
+
             - name: Verify deployed governance with isolated API traffic
               run: node scripts/deployed-governance-check.mjs
 
