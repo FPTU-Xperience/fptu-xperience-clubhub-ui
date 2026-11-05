@@ -2,6 +2,8 @@
 
 ## Current release — 2026-11-05 (supersedes the historical open statuses below)
 
+**Latest user corrections are still in progress:** [ordered UI correction checklist](2026-11-05-user-ui-corrections.md). Items 1–2 are released; display names, member spacing, old governance presentation/removal of the standalone role section, and event-derived tasks remain open. The completed original queue below does not mean these later corrections are finished.
+
 UI correction after user review: [restore the established rewards layout and separate club/personal XP views](2026-11-05-rewards-points-ui-restoration.md). Real credit integration must preserve the existing presentation. Managers have two points tabs; spendable credit is separate from achievement XP.
 
 The approved queue is implemented, tested, committed, pushed and deployed across API, ClubHub UI and Admin UI. [Final source, CI, deployment and online evidence](2026-11-04-queue-rescan.md#final-release-evidence--2026-11-05) records exact revisions and limits.
