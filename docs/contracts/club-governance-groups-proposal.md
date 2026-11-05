@@ -1,6 +1,9 @@
 # Đề xuất BQL CLB theo học kỳ và phân quyền theo group
 
-Implement Status: Not Yet
+Implementation update 2026-11-05: retained decisions now have real governance API and ClubHub/CTSV UI, with full SQL CI and final online fixture validation. See [current contract](club-governance-groups-api.md) and [release evidence](../issue-validation/2026-11-04-queue-rescan.md). The historical source audit below describes the earlier preview; it is not the current implementation status. Declaration processing remains a separate unavailable contract.
+
+
+Implement Status: Implemented and deployed for the supported specialist/leadership scope (2026-11-05)
 
 Status Scope: Backend implementation of retained product decisions
 

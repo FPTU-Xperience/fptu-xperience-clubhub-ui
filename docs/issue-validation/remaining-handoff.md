@@ -1,5 +1,19 @@
 # FPTU-Xperience — remaining issues and new-chat handoff
 
+## Current release — 2026-11-05 (supersedes the historical open statuses below)
+
+The approved queue is implemented, tested, committed, pushed and deployed across API, ClubHub UI and Admin UI. [Final source, CI, deployment and online evidence](2026-11-04-queue-rescan.md#final-release-evidence--2026-11-05) records exact revisions and limits.
+
+- C06: real QR image/camera/file UX and registered-public-user manual attendance implemented. User explicitly retained blocking until an approved scoring policy exists; deferred scoring is a settled product rule, not queued work.
+- C08: real club credit wallet, immutable verified-XP delta bridge, redemption/ownership/debt and graphs implemented. One verified XP becomes one credit of the same club; XP/radar is never spent. Reversals preserve debt/history and block further redemption, including free items.
+- A03/A06: authoritative campus/inspection source integrated, current actor/campus and stale scope checks retained. Roster identity and approved membership are real source data. Major/cohort without an authoritative source stay explicitly unavailable.
+- C12: actual semester governance groups, multiple assignments/permission union, immutable history and report snapshots, scoped specialist operations, independent CTSV vice decisions and protected ownership transfer implemented. Legacy treasury duty is reconciled with group duty and its two-person limit. Declaration processing remains outside this implemented specialist catalog and is not granted by a preview checkbox.
+- UI deployment 41956419733 / source `537fa59`; Admin 41955136997 / source `20cd2bc`; API product source `ae9e871` with successful ordered recovery rollout 41955930054. All consumers updated before ClubService. Original manual-only API workflow restored at `a32a86e`.
+- Validation: 1,058 full SQL API tests, 330 UI tests, 130 Admin tests; final independent online browser rerun passed at desktop/mobile. API health 200, expected entry assets 200, protected routes 401, trusted localhost rules rechecked. Synthetic browser API traffic was fully isolated; real-account acceptance is not claimed.
+
+The remainder is historical handoff context. It does not reopen settled choices or represent current queue status.
+
+
 Audited 2026-11-03 against current remote branches. Read this file and linked issue validation evidence before implementing. This is a handoff, not proof that remaining code has been implemented.
 
 ## Continue instruction
@@ -93,5 +107,6 @@ Status: implemented/deployed for the supported cancellation contract on 2026-11-
 - No messages to other people, no unsolicited account activation, no fake data/persistence.
 - Keep issue-scoped commits and durable validation notes. Continue sequentially; ask only for actual missing product decisions, with evidence/options, while progressing independent work.
 
-## Exact next-chat prompt
-Continue implementing FPTU-Xperience from docs/issue-validation/remaining-handoff.md on ClubHub UI branch fix/approved-issues-20261103. C03/C07 release evidence is in 2026-11-04-c03-c07.md; C04 Admin release evidence is in 2026-11-04-c04.md. C06 supported session flow is deployed with evidence in 2026-11-04-c06.md; retain its explicit incomplete boundaries. Continue down the remaining list: C08 authoritative reward contract remains blocked. C10+A04+A05 was resumed and deployed; see 2026-11-04-c10-a04-a05.md. Preserve required-only creation with Viết tắt as canonical club code, optional profile completion in approved workspace and selected-manager/campus/version contracts. C02 cancellation and C12 supported role restoration are deployed; see 2026-11-04-c02-c12.md and preserve their contracts. Audit A03 next, then A06; extended/custom/multiple role support is still open. Do not restart the C06 implementation or create another planning pass. Re-read remote heads and API AGENTS.md. Commit/push/deploy/test are authorized. The earlier C10+A04+A05 parked status is superseded by the completed 2026-11-04 release. Preserve original activity club-link positions, 12px registration spacing, persisted registered state, schedule, no list registration button and no session polling. Include the appended event cancellation addon after existing issues: keep “Đã đăng ký”; clicking opens a confirmation modal, with cancellation only on confirmation and successful API persistence. Use existing workflows only. Do not claim local execution or authenticated live acceptance without evidence.
+## Continuation after the completed release
+
+Do not restart implementation of the completed queue or re-ask its settled policy decisions. Read the current-release section and final evidence first. Product source, CI, deployment, remote parity and real-account acceptance remain separate evidence categories. Future real-account acceptance needs an explicitly authorized student/CTSV session; do not enable accounts or invent credentials. Preserve the required-only club creation form plus Viết tắt/code, canonical semester/campus authority, approved scoring gate, event registration/cancellation behavior, scoped governance and the real XP/credit ledger boundaries. API `AGENTS.md` and existing-workflow-only constraints remain applicable to future work.

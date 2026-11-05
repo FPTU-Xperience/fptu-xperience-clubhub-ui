@@ -6,10 +6,10 @@ The older source audit below is historical. The approved API checkout implements
 
 Implemented catalog contains ten specialist permissions for club profile/media, event content/staff/proposals, recruitment, own report drafts and finance read/draft/submit. `club.declarations.process` remains unavailable under its separate contract; it cannot be selected as a group grant. Current ownership remains the existing protected manager assignment, while effective vice appointments are separate CTSV decisions. Legacy treasury roles remain explicit historical duties and are not imported into group assignments.
 
-Actual writes use term/club versions, stable idempotency keys and current authority checks. Report submission additionally checks source revision and leadership digest, capturing legacy treasury and formal leadership without activating grants. Final release gates include full SQL CI and consumer rollout before ClubService activation.
+Actual writes use term/club versions, stable idempotency keys and current authority checks. Report submission additionally checks source revision and leadership digest, capturing legacy treasury and formal leadership without activating grants. Full SQL CI and ordered consumer rollout before ClubService activation passed; final online evidence is recorded in the execution note.
 
 
-Implement Status: Implemented in approved source for the scope below; release verification pending
+Implement Status: Implemented and deployed for the scope below (2026-11-05)
 
 Status Scope: Backend implementation
 
