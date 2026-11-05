@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import qr from 'qrcode';
+import { attendanceQrPayload } from '../src/services/attendance-qr.js';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.ATTENDANCE_BASE_URL || 'https://fptux-clubhub-ui.pages.dev';
 const browser = await chromium.launch();
@@ -133,6 +135,13 @@ try {
         };
         await open();
         await page.getByRole('button', { name: 'Điểm danh phiên', exact: true }).click();
+        const image = await qr.toBuffer(attendanceQrPayload(4, {
+            sessionId: 1, challenge: 'signed-isolated-fixture', expiresAt: new Date(Date.now() + 300000).toISOString(),
+        }), { width: 360, margin: 4, errorCorrectionLevel: 'M' });
+        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'session.png', mimeType: 'image/png', buffer: image });
+        await page.getByText('Đã đọc mã QR.', { exact: false }).waitFor();
+        assert.equal(await page.getByLabel('Mã xác thực phiên', { exact: true }).inputValue(), 'signed-isolated-fixture');
+        assert.equal(checkIns, 0, 'QR images require explicit confirmation');
         await page.getByLabel('Mã xác thực phiên', { exact: true }).fill('expired');
         await page.getByRole('button', { name: 'Lấy vị trí hiện tại', exact: true }).click();
         await page.getByText('Đã lấy vị trí;', { exact: false }).waitFor();
@@ -156,7 +165,7 @@ try {
         await context.close();
     }
     console.log(
-        'DEPLOYED_ATTENDANCE_OK: actual deployed student UI 1440/390, GPS, expired token, duplicate guard and verified reload; API traffic isolated, no real account acceptance.',
+        'DEPLOYED_ATTENDANCE_OK: actual deployed student UI 1440/390, real QR image decode without automatic check-in, GPS, expired token, duplicate guard and verified reload; API traffic isolated, no real account acceptance.',
     );
 } finally {
     await browser.close();

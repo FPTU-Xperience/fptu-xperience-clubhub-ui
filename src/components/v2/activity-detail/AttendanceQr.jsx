@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { attendanceQrPayload, readAttendanceQr } from '../../../services/attendance-qr';
+import { decodeAttendanceQrImage } from '../../../services/attendance-qr-image';
 
 export function AttendanceQrDisplay({ activityId, challenge }) {
     const [image, setImage] = useState(null);
@@ -68,11 +69,10 @@ export function AttendanceQrInput({ activityId, sessionId, onCode }) {
         const ticket = generation.current, url = URL.createObjectURL(file);
         fileUrl.current = url;
         try {
-            const { BrowserQRCodeReader } = await import('@zxing/browser');
             if (generation.current !== ticket) return;
-            const result = await new BrowserQRCodeReader().decodeFromImageUrl(url);
+            const text = await decodeAttendanceQrImage(url);
             if (generation.current !== ticket) return;
-            receive(result.getText());
+            receive(text);
         } catch (issue) {
             if (generation.current === ticket)
                 setError(issue.name === 'NotFoundException' ? 'Không tìm thấy QR trong ảnh. Chọn ảnh rõ hơn hoặc nhập mã.' : issue.message);

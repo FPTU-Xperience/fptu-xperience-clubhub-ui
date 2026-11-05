@@ -315,6 +315,14 @@ try {
         await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'other-session.png', mimeType: 'image/png', buffer: wrongQr });
         await page.getByRole('alert').filter({ hasText: 'không thuộc phiên' }).waitFor();
         assert.equal(checkIns, 0, 'Scanning never sends attendance');
+        // This payload consistently exposes the detector's alignment-pattern
+        // failure. The image fallback must still pass normal session validation.
+        const alignmentQr = await qr.toBuffer(attendanceQrPayload(1, {
+            sessionId: 1, challenge: 'signed-current-fixture', expiresAt: '2026-11-05T13:48:26.265Z',
+        }), { width: 360, margin: 4, errorCorrectionLevel: 'M' });
+        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'exported-session.png', mimeType: 'image/png', buffer: alignmentQr });
+        await page.getByRole('alert').filter({ hasText: 'Mã QR đã hết hạn' }).waitFor();
+        assert.equal(checkIns, 0, 'Exported QR fallback never sends attendance');
         await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'current-session.png', mimeType: 'image/png', buffer: encodedQr });
         await page.getByText('Đã đọc mã QR.', { exact: false }).waitFor();
         assert.equal(await page.getByLabel('Mã xác thực phiên', { exact: true }).inputValue(), 'signed-current-fixture');
