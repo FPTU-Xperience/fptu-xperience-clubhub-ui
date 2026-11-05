@@ -29,7 +29,7 @@ User instruction: record all comments, then fix them sequentially. Implement dir
 
 - Request: fix spacing in the Member tab.
 - Normalize separation between sections, tabs, filters, member rows and action groups; keep desktop/mobile layouts usable.
-- Status: DRAFT. Local stylesheet edits exist; review them against the retained layout after item 5. Do not count changes to the soon-to-be-removed standalone role section as the final spacing fix.
+- Status: source implementation completed; release/final layout review pending. Member sections use a consistent 24px gap; tabs no longer add a second bottom gap, action rows/pagination have explicit spacing, and header actions wrap. Existing role/registration browser regressions passed at 1440px/390px. Final visual review will use the retained member/governance layout after item 5; no spacing changes to the removed standalone role section are included.
 
 ## 5. Ban quản lý — reuse old UI; remove standalone role section
 
