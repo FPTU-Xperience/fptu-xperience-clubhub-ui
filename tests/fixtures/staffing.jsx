@@ -12,9 +12,9 @@ const api = { async request(path, options) {
 function Fixture() {
     const [actor, setActor] = useState('student');
     const [mode, setMode] = useState('recruitment');
-    window.__TAB_TEST_AUTH__ = { api, user: { id: actor === 'student' ? 100 : 200 } };
+    window.__TAB_TEST_AUTH__ = { api, user: { id: actor === 'student' ? 100 : actor === 'specialist' ? 300 : 200 } };
     return <main className="v2-app"><button onClick={() => setActor(actor === 'student' ? 'manager' : 'student')}>Đổi vai kiểm thử</button>
-        <button onClick={() => setMode(mode === 'recruitment' ? 'assignments' : 'recruitment')}>Đổi nội dung kiểm thử</button>
+        <button onClick={() => setActor('specialist')}>Vai chuyên môn sự kiện</button><button onClick={() => setMode(mode === 'recruitment' ? 'assignments' : 'recruitment')}>Đổi nội dung kiểm thử</button>
         <ActivityStaffingPanel key={actor + mode} activityId={1} manager={actor === 'manager'} mode={mode} /></main>;
 }
 createRoot(document.getElementById('root')).render(<Fixture />);

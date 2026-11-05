@@ -286,7 +286,7 @@ export default function ActivityStaffingPanel({
     if (loading) return <PageState status="loading" />;
     if (!data) return <PageState status="error" description={error} onRetry={() => setRetry((value) => value + 1)} />;
     const assignments =
-        manager || data.capabilities?.canVerify === true
+        manager || data.capabilities?.canManageAssignments === true || data.capabilities?.canVerify === true
             ? data.assignments
             : data.assignments.filter(
                   (assignment) =>

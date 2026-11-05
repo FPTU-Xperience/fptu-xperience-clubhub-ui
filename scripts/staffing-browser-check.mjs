@@ -23,9 +23,9 @@ try {
             const actor = await page.evaluate(() => window.__TAB_TEST_AUTH__.user.id);
             const send = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
             if (req.method() === 'GET') return send({ activityId: 1, version, applicationStatus: 'APPROVED', isPublished: true,
-                capabilities: { canReviewApplications: actor === 200, canVerify: actor === 200 },
+                capabilities: { canManageAssignments: actor === 300, canReviewApplications: actor === 200, canVerify: actor === 200 },
                 actions: [{ id: 2, name: 'Hỗ trợ workshop', verificationMethod: 'WORK_REVIEW' }],
-                assignments: assignment ? [{ ...assignment, completions: completion ? [{ ...completion, canVerify: actor === 200 }] : [] }] : [],
+                assignments: assignment ? [{ ...assignment, canRemove: actor === 300, completions: completion ? [{ ...completion, canVerify: actor === 200 }] : [] }] : [],
                 publicAssignments: [{ id: 'public-host', displayName: 'Host công khai', actionName: 'Điều phối', assignmentKind: 'HOST' }],
                 applications: application ? [{ ...application, canReview: actor === 200 && application.status === 'PENDING' }] : [],
                 availableEvidenceResources: [{ id: ids.resource, title: 'Kết quả workshop', kind: 'DOCUMENT' }],
@@ -91,6 +91,10 @@ try {
         await page.screenshot({ path: `TestResults/staffing/flow-${width}.png`, fullPage: true });
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
         assert.deepEqual(errors, []);
+        await page.getByRole('button', { name: 'Vai chuyên môn sự kiện', exact: true }).click();
+        await page.getByRole('button', { name: 'Gỡ phân công', exact: true }).waitFor();
+        assert.equal(await page.getByRole('button', { name: 'Xác minh hoàn thành', exact: true }).count(), 0);
+        await page.getByRole('button', { name: 'Đổi vai kiểm thử', exact: true }).click();
         // Older servers must not silently invoke the immediate-assignment join contract.
         workflow = undefined; application = null; assignment = null;
         await page.reload(); await page.getByRole('button', { name: 'Đăng ký vị trí', exact: true }).waitFor();
