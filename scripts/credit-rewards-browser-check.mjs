@@ -234,6 +234,12 @@ try {
         await page.getByRole('button', { name: 'Tạo quà', exact: true }).click();
         await page.getByLabel('Tên quà', { exact: true }).fill('Scheduled palette');
         await page.getByLabel('Giá credit', { exact: true }).fill('20');
+        await page.getByRole('checkbox', { name: 'Miễn phí', exact: true }).check();
+        assert.equal(await page.getByLabel('Giá credit', { exact: true }).inputValue(), '0');
+        await page.getByRole('checkbox', { name: 'Miễn phí', exact: true }).uncheck();
+        assert.equal(await page.getByLabel('Giá credit', { exact: true }).inputValue(), '20');
+        await page.getByText('XEM TRƯỚC', { exact: true }).waitFor();
+        await page.screenshot({ path: `TestResults/credit/editor-${width}.png`, fullPage: true });
         await page.getByRole('button', { name: 'Lưu thay đổi', exact: true }).evaluate((button) => {
             button.click();
             button.click();

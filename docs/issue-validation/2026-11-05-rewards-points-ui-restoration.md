@@ -2,6 +2,8 @@
 
 User correction: integrating real data must retain the established rewards presentation. Restore the grouped catalog, search, sorting, gift cards, original avatar/cover/shape preview components and side detail panel. Retain canonical server catalog, inventory, credit wallet and all version/idempotency checks. Remove the unreachable local sample catalog from the production gifts module.
 
+The create/edit dialog also restores the original type cards, input/preview columns, free-price toggle, avatar/shape/cover preview and modal footer, reusing `CreateGiftModal.scss`. Save/upload still use the implemented API. Unsupported physical fulfillment, automatic gift rules and hot flags remain explicitly unavailable rather than saving local-only settings.
+
 The manager's Points & achievements page now has **Tính điểm CLB** and **Điểm cá nhân trong CLB** tabs. Ordinary members see only their own club points. The manager view uses the existing `/api/clubs/{clubId}/experience-statistics?semesterId=...` verified net ledger projection and the approved-policy status. It does not create a new scoring policy or assign arbitrary points.
 
 The personal view shows approved XP in the selected semester, approved lifetime XP in this club and the separate spendable credit balance. It reads the complete self contribution pagination before computing totals, isolates club/actor/semester, excludes revoked XP and non-authoritative legacy declarations, and keeps revoked records visible in the history. The credit graph and debit/reversal ledger remain available under an expandable wallet section. No wallet/graph request is made in observation mode.

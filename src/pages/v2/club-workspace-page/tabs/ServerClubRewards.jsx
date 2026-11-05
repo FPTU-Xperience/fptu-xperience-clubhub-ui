@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import V2Modal from '../../../../components/v2/common/modal/V2Modal';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import GiftCatalogView from './GiftCatalogView';
+import ServerGiftEditor from './ServerGiftEditor';
 import {
     cosmeticInventory,
     creditGuid,
@@ -226,6 +227,8 @@ export default function ServerClubRewards({ workspace, manager: managerInput = f
 }
 
 function RewardModal({ modal, busy, error, wallet, owned, catalog, api, clubId, onSave, onClose }) {
+    const formId = useId(),
+        editor = ['create', 'edit'].includes(modal.kind);
     const row = modal.reward;
     const [label, setLabel] = useState(row?.label || ''),
         [description, setDescription] = useState(row?.description || ''),
@@ -310,114 +313,53 @@ function RewardModal({ modal, busy, error, wallet, owned, catalog, api, clubId, 
         redeem: 'Xác nhận đổi quà',
     }[modal.kind];
     return (
-        <V2Modal title={title} onClose={onClose}>
-            <form className="v2-session-form" onSubmit={submit}>
+        <V2Modal
+            title={title}
+            onClose={onClose}
+            wide={editor}
+            className={editor ? 'v2-create-gift-modal' : ''}
+            footer={
+                editor ? (
+                    <>
+                        <button className="v2-button" type="button" onClick={onClose} disabled={busy || uploading}>
+                            Hủy
+                        </button>
+                        <button
+                            className="v2-button v2-button--primary"
+                            type="submit"
+                            form={formId}
+                            disabled={busy || uploading}
+                        >
+                            {busy || uploading ? 'Đang xử lý…' : 'Lưu thay đổi'}
+                        </button>
+                    </>
+                ) : undefined
+            }
+        >
+            <form id={formId} className={editor ? 'v2-create-gift-form' : 'v2-session-form'} onSubmit={submit}>
                 <fieldset disabled={busy || uploading}>
                     {row && <h3>{row.label}</h3>}
                     {['create', 'edit'].includes(modal.kind) && (
-                        <>
-                            <label>
-                                Tên quà
-                                <input
-                                    required
-                                    maxLength={80}
-                                    value={label}
-                                    onChange={(event) => setLabel(event.target.value)}
-                                />
-                            </label>
-                            <label>
-                                Mô tả
-                                <textarea
-                                    maxLength={2000}
-                                    value={description}
-                                    onChange={(event) => setDescription(event.target.value)}
-                                />
-                            </label>
-                            <label>
-                                Loại quà
-                                <select value={kind} onChange={(event) => setKind(event.target.value)}>
-                                    <option value="COLOR">Bộ màu</option>
-                                    <option value="SHAPE">Shape cover</option>
-                                    <option value="FRAME">Khung avatar</option>
-                                    <option value="BUNDLE">Bộ màu + shape</option>
-                                </select>
-                            </label>
-                            <label>
-                                Giá credit
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    max="100000"
-                                    step="1"
-                                    value={price}
-                                    onChange={(event) => setPrice(event.target.value)}
-                                />
-                            </label>
-                            {kind === 'COLOR' &&
-                                Object.entries({
-                                    background: 'Màu nền',
-                                    secondary: 'Màu phụ',
-                                    accent: 'Màu nhấn',
-                                    ink: 'Màu chữ',
-                                }).map(([key, name]) => (
-                                    <label key={key}>
-                                        {name}
-                                        <input
-                                            type="color"
-                                            value={palette[key]}
-                                            onChange={(event) =>
-                                                setPalette((value) => ({ ...value, [key]: event.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                ))}
-                            {['SHAPE', 'FRAME'].includes(kind) && (
-                                <>
-                                    <label>
-                                        Ảnh quà PNG, JPEG hoặc WebP
-                                        <input
-                                            type="file"
-                                            accept="image/png,image/jpeg,image/webp"
-                                            onChange={(event) => upload(event.target.files?.[0])}
-                                        />
-                                    </label>
-                                    {assetUrl && (
-                                        <img
-                                            src={assetUrl}
-                                            alt="Ảnh quà đã tải"
-                                            style={{ width: 160, maxWidth: '100%' }}
-                                        />
-                                    )}
-                                </>
-                            )}
-                            {kind === 'BUNDLE' && (
-                                <>
-                                    {[
-                                        ['COLOR', colorId, setColorId, 'Bộ màu trong combo'],
-                                        ['SHAPE', shapeId, setShapeId, 'Shape trong combo'],
-                                    ].map(([type, value, setValue, name]) => (
-                                        <label key={type}>
-                                            {name}
-                                            <select
-                                                required
-                                                value={value}
-                                                onChange={(event) => setValue(event.target.value)}
-                                            >
-                                                <option value="">Chọn vật phẩm của CLB</option>
-                                                {grants
-                                                    .filter((grant) => grant.kind === type)
-                                                    .map((grant) => (
-                                                        <option key={grant.cosmeticId} value={grant.cosmeticId}>
-                                                            {grant.label}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        </label>
-                                    ))}
-                                </>
-                            )}
-                        </>
+                        <ServerGiftEditor
+                            editing={!!row}
+                            label={label}
+                            setLabel={setLabel}
+                            description={description}
+                            setDescription={setDescription}
+                            kind={kind}
+                            setKind={setKind}
+                            price={price}
+                            setPrice={setPrice}
+                            palette={palette}
+                            setPalette={setPalette}
+                            assetUrl={assetUrl}
+                            upload={upload}
+                            grants={grants}
+                            colorId={colorId}
+                            setColorId={setColorId}
+                            shapeId={shapeId}
+                            setShapeId={setShapeId}
+                        />
                     )}
                     {modal.kind === 'publish' && (
                         <>
@@ -473,18 +415,20 @@ function RewardModal({ modal, busy, error, wallet, owned, catalog, api, clubId, 
                         </>
                     )}
                     {(localError || error) && <p role="alert">{localError || error}</p>}
-                    <div className="reward-actions">
-                        <button className="v2-button" type="button" onClick={onClose}>
-                            Giữ nguyên
-                        </button>
-                        <button className="v2-button v2-button--primary" type="submit">
-                            {busy || uploading
-                                ? 'Đang xử lý…'
-                                : modal.kind === 'redeem'
-                                  ? 'Xác nhận đổi quà'
-                                  : 'Lưu thay đổi'}
-                        </button>
-                    </div>
+                    {!editor && (
+                        <div className="reward-actions">
+                            <button className="v2-button" type="button" onClick={onClose}>
+                                Giữ nguyên
+                            </button>
+                            <button className="v2-button v2-button--primary" type="submit">
+                                {busy || uploading
+                                    ? 'Đang xử lý…'
+                                    : modal.kind === 'redeem'
+                                      ? 'Xác nhận đổi quà'
+                                      : 'Lưu thay đổi'}
+                            </button>
+                        </div>
+                    )}
                 </fieldset>
             </form>
         </V2Modal>
