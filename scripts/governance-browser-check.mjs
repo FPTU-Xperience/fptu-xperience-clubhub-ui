@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createServer } from 'vite';
-const { chromium } = await import(
-    process.env.PLAYWRIGHT_MODULE || 'playwright'
-);
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const id = (n) => '11111111-1111-4111-8111-' + String(n).padStart(12, '0');
 const period = id(1);
 const fixture = `import React,{useState} from 'react';import{createRoot}from'react-dom/client';import{MemoryRouter}from'react-router-dom';import Gov from '/src/pages/v2/club-workspace-page/tabs/members/governance/ClubGovernance.jsx';import{WorkspaceSemesterProvider}from'/src/pages/v2/club-workspace-page/WorkspaceSemesterContext.jsx';import '/src/styles/index.scss';import '/src/pages/v2/V2App.scss';const api={request:async(path,options={})=>{const r=await fetch('/__governance'+path,{...options,headers:{...options.headers,'X-Test-Actor':String(window.__actor)}});const v=await r.json();if(!r.ok)throw Object.assign(new Error(v.message),{status:r.status});return v;}};function App(){const[actor,setActor]=useState(100),[readOnly,setReadOnly]=useState(false);window.__actor=actor;window.__TAB_TEST_AUTH__={user:{id:actor},api,refreshClubAccess:async()=>{}};return <MemoryRouter><WorkspaceSemesterProvider value={{semester:{id:'${period}',code:'FA26',label:'Fall 2026'}}}><main style={{padding:16,maxWidth:1100,margin:'auto'}}><button onClick={()=>setActor(200)}>Đổi tài khoản</button><button onClick={()=>setReadOnly(true)}>Chế độ quan sát</button><Gov clubId={1} readOnly={readOnly}/></main></WorkspaceSemesterProvider></MemoryRouter>}createRoot(document.getElementById('root')).render(<App/>);`;
@@ -18,11 +16,7 @@ const server = await createServer({
             },
             load(name) {
                 if (name === '/__gov-virtual.jsx') return fixture;
-                if (
-                    name
-                        .replaceAll('\\', '/')
-                        .endsWith('/context/AuthContext.jsx')
-                )
+                if (name.replaceAll('\\', '/').endsWith('/context/AuthContext.jsx'))
                     return 'export const useAuth=()=>window.__TAB_TEST_AUTH__;';
             },
             configureServer(vite) {
@@ -56,6 +50,7 @@ try {
             writes = 0,
             assignments = [];
         const snapshots = [];
+        let currentName = 'Thành viên QA';
         const groups = () => [
             {
                 id: id(2),
@@ -181,9 +176,7 @@ try {
                     clubId: 1,
                     actorId: actor,
                     version: 'CLUB_GROUPS_V1',
-                    permissions: [
-                        { code: 'event.content.write', delegable: true },
-                    ],
+                    permissions: [{ code: 'event.content.write', delegable: true }],
                     presets: [
                         {
                             code: 'CONTENT',
@@ -226,6 +219,7 @@ try {
                         },
                     ],
                     configuration: config(),
+                    currentMemberNames: assignments.length ? [{ userId: 104, displayName: currentName }] : [],
                     capabilities: {
                         canConfigure: actor === 100,
                         canReadHistory: true,
@@ -242,8 +236,7 @@ try {
                         },
                     ]),
                 );
-            if (path.endsWith('/report-submissions'))
-                return ok(paged(snapshots));
+            if (path.endsWith('/report-submissions')) return ok(paged(snapshots));
             if (path.endsWith('/report-submissions/' + id(500)))
                 return ok({
                     clubId: 1,
@@ -251,31 +244,16 @@ try {
                     submission: snapshots[0],
                 });
             if (path.endsWith('/history')) return ok(paged([]));
-            if (path.endsWith('/leadership-nominations'))
-                return ok({ ...paged([]), clubVersion: id(5) });
+            if (path.endsWith('/leadership-nominations')) return ok({ ...paged([]), clubVersion: id(5) });
             throw new Error('Unexpected API ' + path);
         });
         await page.goto('http://127.0.0.1:4189/__gov');
-        await page
-            .getByRole('button', { name: 'Thêm/chuyển người', exact: true })
-            .click();
-        await page
-            .getByRole('dialog')
-            .locator('select')
-            .first()
-            .selectOption('7');
-        await page
-            .getByLabel('Lý do', { exact: true })
-            .fill('Phân công nội dung');
-        await page
-            .getByRole('button', { name: 'Xác nhận', exact: true })
-            .click();
-        await page
-            .getByRole('button', { name: 'Gỡ Thành viên QA', exact: true })
-            .waitFor();
-        await page
-            .getByRole('button', { name: 'Báo cáo BQL', exact: true })
-            .click();
+        await page.getByRole('button', { name: 'Thêm/chuyển người', exact: true }).click();
+        await page.getByRole('dialog').locator('select').first().selectOption('7');
+        await page.getByLabel('Lý do', { exact: true }).fill('Phân công nội dung');
+        await page.getByRole('button', { name: 'Xác nhận', exact: true }).click();
+        await page.getByRole('button', { name: 'Gỡ Thành viên QA', exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Báo cáo BQL', exact: true }).click();
         await page
             .getByRole('button', {
                 name: 'Kiểm tra và nộp báo cáo',
@@ -284,28 +262,21 @@ try {
             .click();
         assert.match(await page.getByRole('dialog').innerText(), /Thủ quỹ cũ/);
         await page.getByLabel('Lý do', { exact: true }).fill('Nộp bản chụp');
-        await page
-            .getByRole('button', { name: 'Nộp bản chụp BQL', exact: true })
-            .click();
-        await page
-            .getByRole('button', { name: 'Xem bản chụp #1', exact: true })
-            .click();
+        await page.getByRole('button', { name: 'Nộp bản chụp BQL', exact: true }).click();
+        await page.getByRole('button', { name: 'Xem bản chụp #1', exact: true }).click();
         await page
             .getByRole('dialog')
             .getByText(/Duty Thủ quỹ cũ/)
             .waitFor();
-        await page
-            .getByRole('dialog')
-            .getByRole('button', { name: /Đóng/ })
-            .first()
-            .click();
+        await page.getByRole('dialog').getByRole('button', { name: /Đóng/ }).first().click();
         assert.equal(writes, 2);
-        await page
-            .getByRole('button', { name: 'Đổi tài khoản', exact: true })
-            .click();
-        await page
-            .getByRole('button', { name: 'Tải lại BQL', exact: true })
-            .waitFor();
+        currentName = 'Tên hiển thị mới';
+        await page.getByRole('button', { name: 'Nhóm và phân công', exact: true }).click();
+        await page.getByRole('button', { name: 'Tải lại BQL', exact: true }).click();
+        await page.getByRole('button', { name: 'Gỡ Tên hiển thị mới', exact: true }).waitFor();
+        assert.equal(assignments[0].displayName, 'Thành viên QA', 'Live names never rewrite the captured assignment');
+        await page.getByRole('button', { name: 'Đổi tài khoản', exact: true }).click();
+        await page.getByRole('button', { name: 'Tải lại BQL', exact: true }).waitFor();
         assert.equal(
             await page
                 .getByRole('button', {
@@ -319,25 +290,15 @@ try {
             path: `TestResults/governance/readonly-${width}.png`,
             fullPage: true,
         });
-        assert.equal(
-            await page.evaluate(
-                () => document.documentElement.scrollWidth > innerWidth + 1,
-            ),
-            false,
-        );
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
         assert.deepEqual(errors, []);
         await page.close();
-        console.log(
-            `Governance ${width}: assignment, immutable report preview, legacy duty and actor boundary passed`,
-        );
+        console.log(`Governance ${width}: assignment, immutable report preview, legacy duty and actor boundary passed`);
     }
 } catch (error) {
     console.error(error);
     process.exitCode = 1;
 } finally {
     await browser?.close();
-    await Promise.race([
-        server.close(),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
-    ]);
+    await Promise.race([server.close(), new Promise((resolve) => setTimeout(resolve, 2000))]);
 }

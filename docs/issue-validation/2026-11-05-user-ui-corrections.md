@@ -23,7 +23,7 @@ User instruction: record all comments, then fix them sequentially. Implement dir
 - Request: the screenshot's member/treasurer list shows a username such as `mr28042005`; use the current profile display name.
 - Apply the requirement to the member/governance UI retained after item 5 removes the standalone role section.
 - Preserve immutable historical snapshots and protected role authorization. Do not rewrite membership/audit history just to update presentation names.
-- Status: IN PROGRESS, not released. A draft API role-reader projection and two targeted passing tests exist in the API worktree; the retained governance surfaces still need to be checked before this item can be marked complete.
+- Status: source implementation and focused checks completed; release pending. The role reader uses live profile names; the governance term returns a separate current-name projection for visible assignees/leaders. UI cards/actions use that projection while persisted configurations/reports retain their historical names. Four targeted API tests, six focused UI tests and governance browser checks at 1440px/390px passed. Final full CI/deployment remains pending.
 
 ## 4. Member tab spacing
 
