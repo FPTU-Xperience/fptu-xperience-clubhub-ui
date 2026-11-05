@@ -80,6 +80,48 @@
         }
     }
 }
+.club-governance.club-governance-preview {
+    padding: 0;
+    border: 0;
+    gap: 22px;
+    > header h3 {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+    > header p {
+        color: #71839a;
+        font-size: 13px;
+    }
+    .governance-group {
+        gap: 0;
+    }
+    > nav {
+        justify-content: flex-end;
+        gap: 8px;
+        margin: 0;
+    }
+    .governance-group > header {
+        justify-content: flex-start;
+    }
+    .governance-group > header > div:nth-child(2) {
+        min-width: 0;
+    }
+    .governance-person-row > span:nth-child(2) {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+    .governance-group footer {
+        flex-wrap: wrap;
+    }
+    .governance-group .governance-muted {
+        color: #7d8da1;
+        font-size: 12px;
+    }
+    .governance-person-actions button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
 .governance-form {
     display: grid;
     gap: 16px;

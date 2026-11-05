@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import { History as HistoryIcon, FileText, Users, ShieldCheck, Plus } from 'lucide-react';
 import { useAuth } from '../../../../../../context/AuthContext';
 import { useWorkspaceSemester } from '../../../WorkspaceSemesterContext';
 import V2Modal from '../../../../../../components/v2/common/modal/V2Modal';
@@ -17,6 +18,8 @@ import {
     governanceTerm,
 } from '../../../../../../services/club-governance';
 import './ClubGovernance.scss';
+import './ClubGovernancePreview.scss';
+import GovernanceGroupCards from './GovernanceGroupCards';
 
 function useGovernanceQuery(defaults) {
     const [params, setParams] = useSearchParams();
@@ -172,7 +175,7 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
     };
     if (state.error)
         return (
-            <section className="club-governance">
+            <section className="club-governance club-governance-preview">
                 <h3>Ban quản lý</h3>
                 <p role="alert">{state.error}</p>
                 <button className="v2-button" onClick={reload}>
@@ -186,8 +189,49 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
         ...group,
         assignments: group.assignments.map(presentMember),
     }));
+    const people = new Map();
+    const cardGroups = groups
+        .filter((group) => !group.archived)
+        .map((group) => {
+            const leaders =
+                group.presetCode === 'CLUB_OWNER'
+                    ? state.term.leadership.owners.map(presentMember)
+                    : group.presetCode === 'VICE_PRESIDENT'
+                      ? state.term.leadership.vicePresidents.map(presentMember)
+                      : group.assignments;
+            leaders.forEach((member) =>
+                people.set(String(member.userId), { id: String(member.userId), name: member.displayName }),
+            );
+            return {
+                ...group,
+                memberIds: leaders.map((member) => String(member.userId)),
+                permissions: group.permissionCodes,
+                canNominate:
+                    group.presetCode === 'CLUB_OWNER'
+                        ? state.catalog.capabilities.canTransferOwner
+                        : state.catalog.capabilities.canNominateVice,
+                nominationLabel: group.presetCode === 'CLUB_OWNER' ? 'Đề nghị chuyển giao' : 'Đề nghị bổ nhiệm',
+            };
+        });
+    const cardMembers = [...people.values()];
+    const groupAction = (action) => {
+        const group = groups.find((item) => item.id === action.groupId);
+        const member = group?.assignments.find((item) => String(item.userId) === String(action.memberId));
+        if (action.type === 'saveGroup') return open({ kind: group ? 'edit' : 'create', group });
+        if (action.type === 'assign') return open({ kind: 'assign', group });
+        if (action.type === 'remove') return member && open({ kind: 'remove', group, member });
+        if (action.type === 'deleteGroup') return open({ kind: 'archive', group });
+        if (action.type === 'transfer') {
+            const target = groups.find((item) => !item.protected && !item.archived && item.id !== group.id);
+            return target && member && open({ kind: 'assign', group: target, fromGroup: group, member });
+        }
+        if (action.type === 'nominate')
+            return group.presetCode === 'CLUB_OWNER'
+                ? open({ kind: 'transfer' })
+                : open({ kind: 'nominate', clubVersion: state.term.clubVersion });
+    };
     return (
-        <section className="club-governance" aria-label="Ban quản lý CLB">
+        <section className="club-governance club-governance-preview" aria-label="Ban quản lý CLB">
             <header>
                 <div>
                     <h3>Ban quản lý</h3>
@@ -202,17 +246,13 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
             </header>
             {notice && <p role="status">{notice}</p>}
             {error && !modal && <p role="alert">{error}</p>}
-            <p>
-                Báo cáo BQL là bản chụp theo học kỳ; việc nộp báo cáo không cấp hoặc thu hồi quyền. Chức vụ Chủ nhiệm và
-                Phó chủ nhiệm dùng quy trình CTSV riêng.
-            </p>
-            <nav aria-label="Nội dung BQL">
+            <nav className="governance-toolbar-actions" aria-label="Nội dung BQL">
                 {[
-                    ['groups', 'Nhóm và phân công'],
-                    ['history', 'Lịch sử'],
-                    ['reports', 'Báo cáo BQL'],
-                    ['leadership', 'Đề nghị lãnh đạo'],
-                ].map(([id, label]) => (
+                    ['groups', 'Nhóm và phân công', Users],
+                    ['history', 'Lịch sử', HistoryIcon],
+                    ['reports', 'Báo cáo BQL', FileText],
+                    ['leadership', 'Đề nghị lãnh đạo', ShieldCheck],
+                ].map(([id, label, Icon]) => (
                     <button
                         className="v2-button"
                         key={id}
@@ -220,9 +260,18 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
                         disabled={busy}
                         onClick={() => setSection(id)}
                     >
-                        {label}
+                        <Icon size={16} /> {label}
                     </button>
                 ))}
+                {canConfigure && initialized && (
+                    <button
+                        className="v2-button v2-button--primary"
+                        disabled={busy}
+                        onClick={() => open({ kind: 'create' })}
+                    >
+                        <Plus size={16} /> Tạo nhóm
+                    </button>
+                )}
             </nav>
             {section === 'groups' && (
                 <>
@@ -246,111 +295,13 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
                                 {period.label || state.term.semesterCode} · Bản lưu #{state.term.sequence}
                                 {!canConfigure ? ' · Chỉ xem' : ''}
                             </p>
-                            <div className="governance-groups">
-                                {groups
-                                    .filter((group) => !group.archived)
-                                    .map((group) => {
-                                        const leaders =
-                                            group.presetCode === 'CLUB_OWNER'
-                                                ? state.term.leadership.owners.map(presentMember)
-                                                : group.presetCode === 'VICE_PRESIDENT'
-                                                  ? state.term.leadership.vicePresidents.map(presentMember)
-                                                  : group.assignments;
-                                        return (
-                                            <article key={group.id}>
-                                                <header>
-                                                    <h4>{group.name}</h4>
-                                                    <span>
-                                                        {group.protected
-                                                            ? 'Chức vụ được bảo vệ'
-                                                            : `${group.assignments.length} phân công`}
-                                                    </span>
-                                                </header>
-                                                {group.description && <p>{group.description}</p>}
-                                                {group.protected ? (
-                                                    <p>
-                                                        Lãnh đạo hiện tại theo bổ nhiệm đã duyệt. Xem bản chụp báo cáo
-                                                        để đối chiếu lãnh đạo tại lúc nộp.
-                                                    </p>
-                                                ) : (
-                                                    <p>
-                                                        {group.permissionCodes
-                                                            .map((code) => CLUB_CAPABILITY_LABELS[code])
-                                                            .join(' · ') || 'Chưa có quyền chuyên môn.'}
-                                                    </p>
-                                                )}
-                                                <ul>
-                                                    {leaders.map((member) => (
-                                                        <li key={member.id || member.appointmentId || member.userId}>
-                                                            {member.displayName || `Tài khoản ${member.userId}`}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                                {!leaders.length && <p>Chưa có người được phân công.</p>}
-                                                {!group.protected && canConfigure && (
-                                                    <div className="governance-actions">
-                                                        <button
-                                                            className="v2-button"
-                                                            onClick={() =>
-                                                                open({
-                                                                    kind: 'assign',
-                                                                    group,
-                                                                })
-                                                            }
-                                                        >
-                                                            Thêm/chuyển người
-                                                        </button>
-                                                        <button
-                                                            className="v2-button"
-                                                            onClick={() =>
-                                                                open({
-                                                                    kind: 'edit',
-                                                                    group,
-                                                                })
-                                                            }
-                                                        >
-                                                            Sửa nhóm
-                                                        </button>
-                                                        <button
-                                                            className="v2-button"
-                                                            onClick={() =>
-                                                                open({
-                                                                    kind: 'archive',
-                                                                    group,
-                                                                })
-                                                            }
-                                                        >
-                                                            Ngừng nhóm
-                                                        </button>
-                                                        {group.assignments.map((member) => (
-                                                            <button
-                                                                className="v2-button"
-                                                                key={member.id}
-                                                                onClick={() =>
-                                                                    open({
-                                                                        kind: 'remove',
-                                                                        group,
-                                                                        member,
-                                                                    })
-                                                                }
-                                                            >
-                                                                Gỡ {member.displayName}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </article>
-                                        );
-                                    })}
-                            </div>
-                            {canConfigure && (
-                                <button
-                                    className="v2-button v2-button--primary"
-                                    onClick={() => open({ kind: 'create' })}
-                                >
-                                    Tạo nhóm
-                                </button>
-                            )}
+                            <GovernanceGroupCards
+                                groups={cardGroups}
+                                members={cardMembers}
+                                permissionLabels={CLUB_CAPABILITY_LABELS}
+                                editable={canConfigure && !busy}
+                                onAction={groupAction}
+                            />
                             {state.term.reportNeedsUpdate && (
                                 <p role="status">
                                     Phân công hoặc lãnh đạo đã thay đổi sau báo cáo gần nhất. Có thể nộp bản bổ sung sau
@@ -801,8 +752,8 @@ function GovernanceModal({
         [preset, setPreset] = useState(modal.group?.presetCode || 'CUSTOM'),
         [codes, setCodes] = useState(modal.group?.permissionCodes || []);
     const [reason, setReason] = useState(''),
-        [memberId, setMemberId] = useState(''),
-        [sourceGroup, setSourceGroup] = useState('');
+        [memberId, setMemberId] = useState(modal.member ? String(modal.member.membershipId) : ''),
+        [sourceGroup, setSourceGroup] = useState(modal.fromGroup?.id || '');
     const [query, setQuery] = useState(''),
         [page, setPage] = useState(1),
         [members, setMembers] = useState({});
@@ -920,7 +871,7 @@ function GovernanceModal({
         });
     };
     return (
-        <V2Modal title={titles[modal.kind]} onClose={onClose}>
+        <V2Modal title={titles[modal.kind]} onClose={onClose} wide className="governance-modal">
             <form className="governance-form" onSubmit={submit}>
                 <fieldset disabled={busy}>
                     {['create', 'edit'].includes(modal.kind) && (

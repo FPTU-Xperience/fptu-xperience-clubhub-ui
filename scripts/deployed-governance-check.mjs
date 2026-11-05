@@ -1,12 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const { chromium } = await import(
-    process.env.PLAYWRIGHT_MODULE || 'playwright'
-);
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const id = (n) => '11111111-1111-4111-8111-' + String(n).padStart(12, '0');
 const period = id(1);
-const base =
-    process.env.GOVERNANCE_BASE_URL || 'https://fptux-clubhub-ui.pages.dev';
+const base = process.env.GOVERNANCE_BASE_URL || 'https://fptux-clubhub-ui.pages.dev';
 const browser = await chromium.launch();
 const v = [
     '11111111-1111-4111-8111-111111111111',
@@ -171,9 +168,7 @@ try {
                         clubId: 1,
                         actorId: actor,
                         version: 'CLUB_GROUPS_V1',
-                        permissions: [
-                            { code: 'event.content.write', delegable: true },
-                        ],
+                        permissions: [{ code: 'event.content.write', delegable: true }],
                         presets: [
                             {
                                 code: 'CONTENT',
@@ -205,9 +200,7 @@ try {
                         sequence: version,
                         leadershipDigest: 'a'.repeat(64),
                         leadership: {
-                            owners: [
-                                { userId: 100, displayName: 'Chủ nhiệm QA' },
-                            ],
+                            owners: [{ userId: 100, displayName: 'Chủ nhiệm QA' }],
                             vicePresidents: [],
                         },
                         legacyTreasurers: [
@@ -234,8 +227,7 @@ try {
                             },
                         ]),
                     );
-                if (path.endsWith('/report-submissions'))
-                    return ok(paged(snapshots));
+                if (path.endsWith('/report-submissions')) return ok(paged(snapshots));
                 if (path.endsWith('/report-submissions/' + id(500)))
                     return ok({
                         clubId: 1,
@@ -243,8 +235,7 @@ try {
                         submission: snapshots[0],
                     });
                 if (path.endsWith('/history')) return ok(paged([]));
-                if (path.endsWith('/leadership-nominations'))
-                    return ok({ ...paged([]), clubVersion: id(5) });
+                if (path.endsWith('/leadership-nominations')) return ok({ ...paged([]), clubVersion: id(5) });
                 throw new Error('Unexpected governance route ' + path);
             }
             if (req.method() !== 'GET') {
@@ -316,9 +307,7 @@ try {
                     isRegistered: registered,
                     canRegister: !registered,
                     canCancelRegistration: registered,
-                    registrationVersion: registered
-                        ? registrationVersion
-                        : null,
+                    registrationVersion: registered ? registrationVersion : null,
                     isEligible: true,
                     nextAction: 'VIEW',
                     startTime: '2027-11-15T05:30:00Z',
@@ -344,11 +333,7 @@ try {
                         isTreasurer: actor === 104 && role === 'TREASURER',
                     },
                 ]);
-            if (
-                path === '/api/clubs/me/memberships' ||
-                path === '/api/clubs/1/memberships'
-            )
-                return send([]);
+            if (path === '/api/clubs/me/memberships' || path === '/api/clubs/1/memberships') return send([]);
             if (path === '/api/clubs/1')
                 return send({
                     id: 1,
@@ -398,10 +383,8 @@ try {
                             displayName: 'Student A',
                             role,
                             version: memberVersion,
-                            canAssignTreasurer:
-                                actor === 100 && role === 'MEMBER',
-                            canRevokeTreasurer:
-                                actor === 100 && role === 'TREASURER',
+                            canAssignTreasurer: actor === 100 && role === 'MEMBER',
+                            canRevokeTreasurer: actor === 100 && role === 'TREASURER',
                         },
                     ],
                 });
@@ -434,26 +417,12 @@ try {
         await page.goto(base + '/v2/my-clubs/TEST/members?tab=governance', {
             waitUntil: 'domcontentloaded',
         });
-        await page
-            .getByRole('button', { name: 'Thêm/chuyển người', exact: true })
-            .click();
-        await page
-            .getByRole('dialog')
-            .locator('select')
-            .first()
-            .selectOption('7');
-        await page
-            .getByLabel('Lý do', { exact: true })
-            .fill('Phân công nội dung');
-        await page
-            .getByRole('button', { name: 'Xác nhận', exact: true })
-            .click();
-        await page
-            .getByRole('button', { name: 'Gỡ Thành viên QA', exact: true })
-            .waitFor();
-        await page
-            .getByRole('button', { name: 'Báo cáo BQL', exact: true })
-            .click();
+        await page.getByRole('button', { name: 'Thêm người', exact: true }).click();
+        await page.getByRole('dialog').locator('select').first().selectOption('7');
+        await page.getByLabel('Lý do', { exact: true }).fill('Phân công nội dung');
+        await page.getByRole('button', { name: 'Xác nhận', exact: true }).click();
+        await page.getByRole('button', { name: 'Gỡ Thành viên QA khỏi Content', exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Báo cáo BQL', exact: true }).click();
         await page
             .getByRole('button', {
                 name: 'Kiểm tra và nộp báo cáo',
@@ -462,30 +431,20 @@ try {
             .click();
         assert.match(await page.getByRole('dialog').innerText(), /Thủ quỹ cũ/);
         await page.getByLabel('Lý do', { exact: true }).fill('Nộp bản chụp');
-        await page
-            .getByRole('button', { name: 'Nộp bản chụp BQL', exact: true })
-            .click();
-        await page
-            .getByRole('button', { name: 'Xem bản chụp #1', exact: true })
-            .click();
+        await page.getByRole('button', { name: 'Nộp bản chụp BQL', exact: true }).click();
+        await page.getByRole('button', { name: 'Xem bản chụp #1', exact: true }).click();
         await page
             .getByRole('dialog')
             .getByText(/Duty Thủ quỹ cũ/)
             .waitFor();
-        await page
-            .getByRole('dialog')
-            .getByRole('button', { name: /Đóng/ })
-            .first()
-            .click();
+        await page.getByRole('dialog').getByRole('button', { name: /Đóng/ }).first().click();
 
         assert.equal(writes, 2);
         actor = 104;
         await page.goto(base + '/v2/my-clubs/TEST/members?tab=governance', {
             waitUntil: 'domcontentloaded',
         });
-        await page
-            .getByRole('heading', { name: 'Ban quản lý', exact: true })
-            .waitFor();
+        await page.getByRole('heading', { name: 'Ban quản lý', exact: true }).waitFor();
         assert.equal(
             await page
                 .getByRole('button', {
@@ -496,19 +455,11 @@ try {
             0,
         );
         await page.screenshot({
-            path:
-                'TestResults/registration-roles-online/governance-' +
-                width +
-                '.png',
+            path: 'TestResults/registration-roles-online/governance-' + width + '.png',
             fullPage: true,
         });
         assert.deepEqual(errors, []);
-        assert.equal(
-            await page.evaluate(
-                () => document.documentElement.scrollWidth <= innerWidth + 1,
-            ),
-            true,
-        );
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
         await page.close();
         console.log('ONLINE_GOVERNANCE_OK ' + width);
     }

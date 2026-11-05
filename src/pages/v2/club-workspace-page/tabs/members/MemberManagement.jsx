@@ -9,7 +9,6 @@ import WorkspaceTabLayout from '../WorkspaceTabLayout';
 import InviteMemberModal from './InviteMemberModal';
 import { projectOwnMemberProfile, useProfile } from '../../../profile-data';
 import ClubRolesInfo from './ClubRolesInfo';
-import ClubRoleManagement from './ClubRoleManagement';
 import ClubGovernance from './governance/ClubGovernance';
 import { CLUB_MEMBER_ROLES, clubMemberRoleLabel as roleLabel } from './club-member-roles';
 import './MemberManagement.scss';
@@ -62,15 +61,17 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
         const timer = setTimeout(
             async () => {
                 const results = await Promise.allSettled([
-                    recruitmentOnly ? Promise.resolve(null) : api.getClubMembers(clubId, {
-                        search,
-                        role,
-                        status: 'Approved',
-                        page,
-                        pageSize: 10,
-                        sortBy: 'name',
-                        sortDirection: 'asc',
-                    }),
+                    recruitmentOnly
+                        ? Promise.resolve(null)
+                        : api.getClubMembers(clubId, {
+                              search,
+                              role,
+                              status: 'Approved',
+                              page,
+                              pageSize: 10,
+                              sortBy: 'name',
+                              sortDirection: 'asc',
+                          }),
                     api.getClubMemberships(clubId),
                 ]);
                 if (!active) return;
@@ -212,17 +213,18 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
                             }}
                         />
                     )}
-                    {!recruitmentOnly && <ClubRoleManagement clubId={clubId} readOnly={readOnly} onChanged={refresh} />}
                     <div className="v2-member-switch" aria-label="Quản lý cộng đồng">
-                        {!recruitmentOnly && <button
-                            type="button"
-                            className="v2-button"
-                            aria-pressed={tab === 'members'}
-                            onClick={() => setTab('members')}
-                        >
-                            Quản lý thành viên
-                        </button>}
-                        {(
+                        {!recruitmentOnly && (
+                            <button
+                                type="button"
+                                className="v2-button"
+                                aria-pressed={tab === 'members'}
+                                onClick={() => setTab('members')}
+                            >
+                                Quản lý thành viên
+                            </button>
+                        )}
+                        {
                             <button
                                 type="button"
                                 className="v2-button"
@@ -231,7 +233,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
                             >
                                 Ban quản lý
                             </button>
-                        )}
+                        }
                         <button
                             type="button"
                             className="v2-button"
@@ -241,7 +243,14 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
                             Quản lý đơn <CountBadge count={pending?.length} label="đơn chờ duyệt" />
                         </button>
                     </div>
-                    {tab === 'governance' && <ClubGovernance key={`${user?.id}:${clubId}:${semester?.id}`} clubId={clubId} readOnly={readOnly || recruitmentOnly} onChanged={refresh} />}
+                    {tab === 'governance' && (
+                        <ClubGovernance
+                            key={`${user?.id}:${clubId}:${semester?.id}`}
+                            clubId={clubId}
+                            readOnly={readOnly || recruitmentOnly}
+                            onChanged={refresh}
+                        />
+                    )}
                     {notice && (
                         <p className="v2-member-notice" role="status">
                             {notice}

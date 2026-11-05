@@ -2,6 +2,8 @@
 
 User instruction: record all comments, then fix them sequentially. Implement directly in repository source against implemented API contracts. Do not inject UI/DOM fixes, substitute mock persistence for real data, or replace an established UI when integrating its data.
 
+Local port rule: use only the existing `http://localhost:5173` dev server. Do not start additional local fixture, preview or development ports. Run subsequent local browser checks against this server; do not spawn test servers on 418x/419x/5174/etc.
+
 ## 1. Kho quà — restore the existing UI
 
 - Request: the data-integrity integration replaced the UI without approval; restore the existing presentation.
@@ -36,7 +38,7 @@ User instruction: record all comments, then fix them sequentially. Implement dir
 - Request: reuse the existing Ban quản lý UI rather than the new presentation; remove the entire **Vai trò trong CLB** section shown in the screenshot, including its separate treasurer rows/reload block.
 - Existing presentation reference: `ClubGovernancePreview.jsx` and `ClubGovernancePreview.scss`. Reuse its presentation with canonical governance API state/actions; do not reactivate its localStorage preview state, demo members or fake permissions.
 - Preserve current groups, multi-group assignments, protected leadership, scoped capabilities, revisions/history and report snapshots.
-- Status: QUEUED. No completed restoration/removal claimed.
+- Status: source implementation and focused checks completed; release pending. The old preview and production board now share the same `GovernanceGroupCards` presentation and established stylesheet, with the production component supplying server data/actions. The standalone role section is removed from manager and member pages. Thirteen focused governance tests passed; actual application checks on localhost:5173 passed at 1440px/390px for assignments, immutable reports, read-only actors, member spacing and removal of the old section. Browser contract checks intercept test API traffic; no DOM fixes or local preview state are injected into the product.
 
 ## 6. Nhiệm vụ & đóng góp — aggregate event recruitment and assignments
 

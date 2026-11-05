@@ -248,11 +248,11 @@ try {
             throw new Error('Unexpected API ' + path);
         });
         await page.goto('http://127.0.0.1:4189/__gov');
-        await page.getByRole('button', { name: 'Thêm/chuyển người', exact: true }).click();
+        await page.getByRole('button', { name: 'Thêm người', exact: true }).click();
         await page.getByRole('dialog').locator('select').first().selectOption('7');
         await page.getByLabel('Lý do', { exact: true }).fill('Phân công nội dung');
         await page.getByRole('button', { name: 'Xác nhận', exact: true }).click();
-        await page.getByRole('button', { name: 'Gỡ Thành viên QA', exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Gỡ Thành viên QA khỏi Content', exact: true }).waitFor();
         await page.getByRole('button', { name: 'Báo cáo BQL', exact: true }).click();
         await page
             .getByRole('button', {
@@ -273,7 +273,7 @@ try {
         currentName = 'Tên hiển thị mới';
         await page.getByRole('button', { name: 'Nhóm và phân công', exact: true }).click();
         await page.getByRole('button', { name: 'Tải lại BQL', exact: true }).click();
-        await page.getByRole('button', { name: 'Gỡ Tên hiển thị mới', exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Gỡ Tên hiển thị mới khỏi Content', exact: true }).waitFor();
         assert.equal(assignments[0].displayName, 'Thành viên QA', 'Live names never rewrite the captured assignment');
         await page.getByRole('button', { name: 'Đổi tài khoản', exact: true }).click();
         await page.getByRole('button', { name: 'Tải lại BQL', exact: true }).waitFor();

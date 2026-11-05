@@ -181,41 +181,25 @@ try {
         });
         actor = 100;
         await page.goto(base + '/v2/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
-        await page.getByRole('button', { name: 'Gán thủ quỹ · Student A', exact: true }).click();
-        await page.getByLabel('Lý do thay đổi vai trò', { exact: true }).fill('Assign financial responsibility');
-        await page.getByRole('button', { name: 'Xác nhận vai trò', exact: true }).evaluate((el) => {
-            el.click();
-            el.click();
-        });
-        await page.getByRole('button', { name: 'Thu hồi thủ quỹ · Student A', exact: true }).waitFor();
-        assert.equal(roleWrites, 1);
-        actor = 104;
-        await page.goto(base + '/v2/my-clubs/TEST/finance', { waitUntil: 'domcontentloaded' });
-        await page.getByRole('heading', { name: 'Tài chính', exact: true }).first().waitFor();
-        actor = 100;
-        await page.goto(base + '/v2/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
-        await page.reload();
-        await page.getByRole('button', { name: 'Thu hồi thủ quỹ · Student A', exact: true }).click();
-        await page.getByLabel('Lý do thay đổi vai trò', { exact: true }).fill('Revoke financial responsibility');
-        await page.getByRole('button', { name: 'Xác nhận vai trò', exact: true }).click();
-        await page.getByRole('button', { name: 'Gán thủ quỹ · Student A', exact: true }).waitFor();
-        assert.equal(roleWrites, 2);
-        actor = 104;
-        await page.goto(base + '/v2/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
-        await page
-            .getByText('Chế độ chỉ xem. Bạn không có thao tác gán/thu hồi vai trò tại đây.', { exact: true })
-            .waitFor();
-        assert.equal(await page.getByRole('button', { name: 'Gán thủ quỹ · Student A', exact: true }).count(), 0);
+        await page.getByRole('heading', { name: 'Thành viên CLB', exact: true }).waitFor();
+        await page.getByRole('button', { name: 'Ban quản lý', exact: true }).waitFor();
+        assert.equal(await page.locator('.v2-club-roles').count(), 0);
+        assert.equal(await page.getByRole('heading', { name: 'Vai trò trong CLB', exact: true }).count(), 0);
         await page.screenshot({
-            path: 'TestResults/registration-roles-online/roles-readonly-' + width + '.png',
+            path: 'TestResults/registration-roles-online/member-layout-' + width + '.png',
             fullPage: true,
         });
+        actor = 104;
+        await page.goto(base + '/v2/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
+        await page.getByRole('heading', { name: 'Thành viên CLB', exact: true }).waitFor();
+        assert.equal(await page.locator('.v2-club-roles').count(), 0);
+        assert.equal(roleWrites, 0);
         assert.deepEqual(errors, []);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
         await page.close();
     }
     console.log(
-        'DEPLOYED_REGISTRATION_ROLES_OK: actual deployed cancellation confirm/keep/duplicate/reload and workspace role assign/revoke/persist/read-only at 1440/390. API isolated; no real account acceptance.',
+        'DEPLOYED_REGISTRATION_ROLES_OK: actual deployed cancellation confirm/keep/duplicate/reload and member layout without the removed standalone role section at 1440/390. API isolated; no real account acceptance.',
     );
 } finally {
     await browser.close();
