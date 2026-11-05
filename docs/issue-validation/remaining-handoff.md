@@ -2,6 +2,8 @@
 
 ## Current release — 2026-11-05 (supersedes the historical open statuses below)
 
+UI correction after user review: [restore the established rewards layout and separate club/personal XP views](2026-11-05-rewards-points-ui-restoration.md). Real credit integration must preserve the existing presentation. Managers have two points tabs; spendable credit is separate from achievement XP.
+
 The approved queue is implemented, tested, committed, pushed and deployed across API, ClubHub UI and Admin UI. [Final source, CI, deployment and online evidence](2026-11-04-queue-rescan.md#final-release-evidence--2026-11-05) records exact revisions and limits.
 
 - C06: real QR image/camera/file UX and registered-public-user manual attendance implemented. User explicitly retained blocking until an approved scoring policy exists; deferred scoring is a settled product rule, not queued work.
