@@ -111,7 +111,7 @@ export default function Header({ title, onMenuClick }) {
     const handleLogout = async () => {
         setShowProfileMenu(false);
         await logout();
-        navigate('/login');
+        navigate('/v2', { replace: true });
     };
 
     return (

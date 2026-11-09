@@ -3,23 +3,6 @@ import { usePublicMediaRevision } from '../../services/use-public-media-revision
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 const text = (value, fallback = '') => String(value ?? fallback);
-const viteEnv = import.meta.env || {};
-export const isMyClubsMockEnabled = viteEnv.DEV && viteEnv.VITE_MOCK_MY_CLUBS === 'true';
-
-const mockSelection = [
-    {
-        clubId: 1, clubCode: 'fcode', name: 'F-Code', role: 'MANAGER', pendingApplications: 3,
-        upcomingActivity: { title: 'Code Camp: Build for Campus', startTime: '2026-09-28T08:30:00+07:00', location: 'Innovation Lab' },
-    },
-    {
-        clubId: 2, clubCode: 'fstyle', name: 'F-Style', role: 'MEMBER',
-        upcomingActivity: { title: 'Creative Portfolio Workshop', startTime: '2026-10-02T18:00:00+07:00', location: 'Phòng Studio A' },
-    },
-];
-const mockApplications = [
-    { applicationId: 'mock-application-1', club: { clubId: 'fmelody', clubCode: 'FMELODY', name: 'F-Melody' }, reason: 'Mình muốn tham gia ban truyền thông.', status: 'PENDING', canWithdraw: true },
-];
-
 export function classifyMyClubsError(error) {
     if (error?.status === 401) return 'unauthorized';
     if (error?.status === 403) return 'forbidden';
@@ -50,6 +33,8 @@ export function mapMyClubSelection(value) {
                 coverImageUrl: text(raw.coverImageUrl || raw.coverUrl),
                 role,
                 displayRole: text(raw.displayRole, role === 'MANAGER' ? 'CLUB_OWNER' : 'MEMBER'),
+                ...(Array.isArray(raw.studentDeclarationPermissions) ? { studentDeclarationPermissions: raw.studentDeclarationPermissions.filter((id)=>['club.declarations.process'].includes(id)) } : {}),
+                ...(typeof raw.canViewStudentDeclarations === 'boolean' ? { canViewStudentDeclarations: raw.canViewStudentDeclarations } : {}),
                 workspacePath: `/v2/my-clubs/${encodeURIComponent(clubCode)}`,
                 upcomingActivity: activity?.title && activity?.startTime
                     ? { title: text(activity.title), startTime: text(activity.startTime), location: text(activity.location) }
@@ -87,14 +72,14 @@ export function visibleSentApplications(applications, now = Date.now()) {
     });
 }
 
-function useRequest(loader, mapper, sessionKey) {
+function useRequest(loader, mapper, sessionKey, keepPrevious = true) {
     const mediaRevision = usePublicMediaRevision('club');
     const gate = useRef(createRequestGate());
     const [version, setVersion] = useState(0);
     const [result, setResult] = useState({ status: 'loading', data: [] });
     useEffect(() => {
         const id = gate.current.next();
-        setResult((current) => current.sessionKey === sessionKey && current.status === 'populated'
+        setResult((current) => keepPrevious && current.sessionKey === sessionKey && current.status === 'populated'
             ? current : { sessionKey, status: 'loading', data: [] });
         Promise.resolve().then(loader).then((value) => {
             if (!gate.current.isCurrent(id)) return;
@@ -104,13 +89,13 @@ function useRequest(loader, mapper, sessionKey) {
             if (gate.current.isCurrent(id)) setResult({ sessionKey, status: classifyMyClubsError(error), data: [], error });
         });
         return () => gate.current.invalidate();
-    }, [loader, mapper, sessionKey, version, mediaRevision]);
+    }, [loader, mapper, sessionKey, version, mediaRevision, keepPrevious]);
     return { ...(result.sessionKey === sessionKey ? result : { status: 'loading', data: [] }), retry: () => setVersion((item) => item + 1) };
 }
 
 export function useMyClubSelection(api, sessionKey) {
     return useRequest(
-        useCallback(() => (isMyClubsMockEnabled ? mockSelection : api.getMyClubSelection()), [api]),
+        useCallback(() => api.getMyClubSelection(), [api]),
         useCallback(mapMyClubSelection, []),
         sessionKey,
     );
@@ -118,8 +103,17 @@ export function useMyClubSelection(api, sessionKey) {
 
 export function useMyMembershipApplications(api, sessionKey) {
     return useRequest(
-        useCallback(() => (isMyClubsMockEnabled ? mockApplications : api.getMyMembershipApplications()), [api]),
+        useCallback(() => api.getMyMembershipApplications(), [api]),
         useCallback(mapMyMembershipApplications, []),
         sessionKey,
+    );
+}
+
+export function useMyApprovedMemberships(api, sessionKey) {
+    return useRequest(
+        useCallback(() => api.getMyMemberships(), [api]),
+        useCallback((value) => rows(value).filter((membership) => String(membership.status).toUpperCase() === 'APPROVED'), []),
+        sessionKey,
+        false,
     );
 }

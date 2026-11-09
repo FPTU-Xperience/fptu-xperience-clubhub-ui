@@ -97,7 +97,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             saving ||
             event.button !== 0 ||
             (tab !== 'shape' && tab !== 'text') ||
-            (tab === 'shape' && shape === 'none') ||
+            (tab === 'shape' && (shape === 'none' || shapeTransform.hidden)) ||
             (tab === 'text' && !coverText.visible)
         )
             return;
@@ -243,8 +243,25 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             }}
             wide
             className="v2-cover-modal"
+            footer={
+                <>
+                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
+                        Hủy
+                    </button>
+                    <button
+                        type="submit"
+                        form={`${tabId}-form`}
+                        className="v2-button v2-button--primary"
+                        disabled={
+                            saving || syncing || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)
+                        }
+                    >
+                        {saving ? 'Đang lưu…' : 'Lưu ảnh bìa'}
+                    </button>
+                </>
+            }
         >
-            <form onSubmit={submit} className="v2-cover-form">
+            <form id={`${tabId}-form`} onSubmit={submit} className="v2-cover-form">
                 <div className="v2-cover-editor-heading">
                     <div
                         className={`v2-cover-preview${(tab === 'shape' && shape !== 'none') || (tab === 'text' && coverText.visible) ? ' is-positioning' : ''}`}
@@ -268,12 +285,17 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             shapeTransform={shapeTransform}
                             shapeHsl={shapeHsl}
                             shapeUsePalette={shapeUsePalette}
-                            shapeAssetUrl={syncAsset && syncAsset.asset === selectedShape?.assetUrl ? syncAsset.vector : ''}
+                            shapeAssetUrl={
+                                syncAsset && syncAsset.asset === selectedShape?.assetUrl ? syncAsset.vector : ''
+                            }
                             coverText={coverText}
                             selectedParagraphId={selectedParagraphId}
                             textInteractive={tab === 'text'}
                         />
                     </div>
+                    <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
+                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
                     <p className="v2-cover-preview-note">
                         Xem trước toàn bộ ảnh bìa · Đề xuất 1200 × 300px (4:1) · Cùng bố cục với trang cá nhân.
                     </p>
@@ -416,7 +438,10 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                     setShapeHsl(normalizeShapeHsl(shapes.find((item) => item.id === next)?.hsl));
                                 },
                             })}
-                            <p className="v2-cover-preview-note">
+                            <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
+                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
+                    <p className="v2-cover-preview-note">
                                 Stamp là lớp ảnh độc lập. Kéo trên ảnh xem trước để di chuyển; dùng thanh điều chỉnh để
                                 xoay và scale. Nền không thay đổi khi chỉnh stamp.
                             </p>
@@ -467,7 +492,10 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             {shapes.find((item) => item.id === shape)?.assetUrl && (
                                 <ShapeHslControls value={shapeHsl} onChange={setShapeHsl} disabled={saving} />
                             )}
-                            <p className="v2-cover-preview-note">
+                            <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
+                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
+                    <p className="v2-cover-preview-note">
                                 CLB có thể thêm shape riêng bằng PNG hoặc SVG tối đa 5 MB tại Kho quà.
                             </p>
                         </>
@@ -501,20 +529,6 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         {error}
                     </p>
                 )}
-                <footer>
-                    <button type="button" className="v2-button" disabled={saving || syncing} onClick={onClose}>
-                        Hủy
-                    </button>
-                    <button
-                        type="submit"
-                        className="v2-button v2-button--primary"
-                        disabled={
-                            saving || syncing || !changed || !unlocked || (mode === 'upload' && !file && !savedImage)
-                        }
-                    >
-                        {saving ? 'Đang lưu…' : 'Lưu ảnh bìa'}
-                    </button>
-                </footer>
             </form>
         </V2Modal>
     );

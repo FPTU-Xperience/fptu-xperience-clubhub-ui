@@ -44,7 +44,7 @@ export default function CoverImageModal({
     const positioning =
         mode === 'graphic' &&
         !busy &&
-        ((tab === 'shape' && design.decoration !== 'none') || (tab === 'text' && design.visible));
+        ((tab === 'shape' && design.decoration !== 'none' && !design.shapeHidden) || (tab === 'text' && design.visible));
     const finishDrag = () => {
         drag.current = null;
     };
@@ -171,6 +171,9 @@ export default function CoverImageModal({
                         }
                         compact
                     />
+                    <button type="button" className="v2-button" aria-pressed={design.shapeHidden === true} disabled={busy || mode !== 'graphic' || design.decoration === 'none'} onClick={() => setDesign((current) => ({ ...current, shapeHidden: !current.shapeHidden }))}>
+                        {design.shapeHidden ? 'Hiện shape' : 'Ẩn shape'}
+                    </button>
                     <MediaEditorTabs
                         id={id}
                         items={[

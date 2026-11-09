@@ -9,6 +9,19 @@ const succeeded = (result) => result?.status === 'fulfilled';
 export const isOngoingWorkspaceActivity = (activity) =>
     ['SCHEDULED', 'UPCOMING', 'LIVE'].includes(String(activity.status).toUpperCase());
 
+export function workspaceActivityStatus(activity, now = Date.now()) {
+    const state = String(activity.status).toUpperCase();
+    if (!['SCHEDULED', 'UPCOMING', 'LIVE'].includes(state)) return state;
+    if (['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(activity.timeline?.status))
+        return activity.timeline.status;
+    const end = Date.parse(activity.endTimeUtc || activity.endTime || '');
+    const start = Date.parse(activity.startTimeUtc || activity.startTime || '');
+    if (Number.isFinite(end) && end <= now) return 'COMPLETED';
+    if (Number.isFinite(start) && Number.isFinite(end) && start <= now) return 'LIVE';
+    if (Number.isFinite(start) && start > now) return 'UPCOMING';
+    return state;
+}
+
 export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) {
     const [club, activities, memberships, reports] = results;
     const clubData = succeeded(club) ? club.value : null;
@@ -29,13 +42,14 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
     const upcomingActivities = activeActivities
         ?.filter(
             (activity) =>
-                String(activity.status).toUpperCase() === 'SCHEDULED' &&
-                Number.isFinite(Date.parse(activity.startTimeUtc || activity.startTime)) &&
-                Date.parse(activity.startTimeUtc || activity.startTime) >= now,
+                workspaceActivityStatus(activity, now) === 'UPCOMING' &&
+                Number.isFinite(Date.parse(activity.timeline?.startTimeUtc || activity.startTimeUtc || activity.startTime)) &&
+                Date.parse(activity.timeline?.startTimeUtc || activity.startTimeUtc || activity.startTime) >= now,
         )
         .sort(
             (left, right) =>
-                Date.parse(left.startTimeUtc || left.startTime) - Date.parse(right.startTimeUtc || right.startTime),
+                Date.parse(left.timeline?.startTimeUtc || left.startTimeUtc || left.startTime) -
+                Date.parse(right.timeline?.startTimeUtc || right.startTimeUtc || right.startTime),
         );
     const upcomingActivity = upcomingActivities?.[0];
     const approvedMembers = Array.isArray(clubData?.members)
@@ -57,17 +71,20 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
             : null,
         isRecruiting: typeof clubData?.isRecruiting === 'boolean' ? clubData.isRecruiting : null,
         activityCount: activeActivities?.length ?? null,
-        ongoingActivityCount: activeActivities?.filter(isOngoingWorkspaceActivity).length ?? null,
+        ongoingActivityCount:
+            activeActivities?.filter((activity) => isOngoingWorkspaceActivity({ status: workspaceActivityStatus(activity, now) })).length ?? null,
         activities:
             activeActivities?.map((activity) => ({
                 ...activityPublication(activity),
                 id: activity.id,
+                isInternal: typeof activity.isInternal === 'boolean' ? activity.isInternal : null,
                 clubId: activity.clubId,
                 title: activity.title,
                 description: activity.description,
                 location: activity.location,
-                startTime: activity.startTimeUtc || activity.startTime,
-                status: String(activity.status).toUpperCase(),
+                startTime: activity.timeline?.startTimeUtc || activity.startTimeUtc || activity.startTime,
+                endTime: activity.timeline?.endTimeUtc || activity.endTimeUtc || activity.endTime,
+                status: workspaceActivityStatus(activity, now),
                 coverImageUrl: activity.coverImageUrl || '',
             })) || null,
         upcomingCount: upcomingActivities?.length ?? null,
@@ -87,7 +104,7 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
         upcomingActivity: upcomingActivity
             ? {
                   title: upcomingActivity.title,
-                  startTime: upcomingActivity.startTimeUtc || upcomingActivity.startTime,
+                  startTime: upcomingActivity.timeline?.startTimeUtc || upcomingActivity.startTimeUtc || upcomingActivity.startTime,
                   location: upcomingActivity.location,
               }
             : null,

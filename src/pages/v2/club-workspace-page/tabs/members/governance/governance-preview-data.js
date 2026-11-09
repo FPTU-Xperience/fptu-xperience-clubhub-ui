@@ -1,5 +1,7 @@
 // UI rehearsal only. Never used by AuthContext or live API authorization.
+import { DECLARATION_PERMISSIONS } from '../../student-declarations/club-declaration-permissions.js';
 export const PREVIEW_PERMISSIONS = [
+    ...DECLARATION_PERMISSIONS.map((permission)=>({...permission,area:'Trải nghiệm tự khai'})),
     { id: 'club.profile.write', label: 'Chỉnh sửa trang CLB', area: 'Nội dung' },
     { id: 'club.media.write', label: 'Cập nhật ảnh CLB', area: 'Nội dung' },
     { id: 'event.content.write', label: 'Chỉnh sửa nội dung sự kiện', area: 'Sự kiện' },

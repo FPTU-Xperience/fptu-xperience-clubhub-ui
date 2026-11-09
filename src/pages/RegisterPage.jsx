@@ -289,7 +289,7 @@ export default function RegisterPage() {
           >
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Đã có tài khoản?{' '}
-              <Link to="/login" className="font-medium" style={{ color: 'var(--theme-accent)' }}>
+              <Link to="/v2" className="font-medium" style={{ color: 'var(--theme-accent)' }}>
                 Đăng nhập
               </Link>
             </p>

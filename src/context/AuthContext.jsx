@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { api, session } from '../services/api';
+import { observeSession } from '../services/session-client.js';
 import { hasPermission as userHasPermission, ROLES } from '../auth/permissions';
 import { PersonalMediaProvider } from '../components/media/PersonalMediaContext';
 
@@ -35,6 +36,7 @@ function toAuthUser(summary) {
     username: summary.username,
     name: summary.fullName,
     email: summary.email,
+    campusCode: summary.campusCode || '',
     roles: summary.roles,
     isActive: summary.isActive,
     isLocked: summary.isLocked,
@@ -48,8 +50,12 @@ export function AuthProvider({ children }) {
   const [clubAccess, setClubAccess] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(AUTH_BYPASS_ENABLED);
   const [loading, setLoading] = useState(!AUTH_BYPASS_ENABLED);
+  const [authError, setAuthError] = useState('');
 
+  const accessSequence = useRef(0);
   const loadClubAccess = useCallback(async (actor) => {
+    const ticket = ++accessSequence.current;
+    const sessionId = session.read()?.id;
     if (!canLoadClubAccess(actor)) {
       setClubAccess([]);
       return [];
@@ -57,63 +63,49 @@ export function AuthProvider({ children }) {
 
     try {
       const access = await api.getMyClubAccess();
+      if (session.read()?.id !== sessionId || ticket !== accessSequence.current) return [];
       const normalizedAccess = Array.isArray(access) ? access : [];
       setClubAccess(normalizedAccess);
       return normalizedAccess;
     } catch {
-      setClubAccess([]);
+      if (session.read()?.id === sessionId && ticket === accessSequence.current) setClubAccess([]);
       return [];
     }
   }, []);
 
-  // Initialize from stored tokens on mount
   useEffect(() => {
-    const initAuth = async () => {
-      if (AUTH_BYPASS_ENABLED) {
-        return;
-      }
-
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        try {
-          const currentUser = toAuthUser(await api.getCurrentUser());
+    if (AUTH_BYPASS_ENABLED) return undefined;
+    return observeSession(session, {
+      loadUser: () => api.getCurrentUser(),
+      onUser: (actor, pending) => {
+        const currentUser = actor ? toAuthUser(actor) : null;
+        setUser(currentUser);
+        setIsAuthenticated(Boolean(currentUser));
+        setLoading(pending);
+        setClubAccess([]);
+        if (currentUser) {
+          setAuthError('');
           localStorage.setItem('user', JSON.stringify(currentUser));
-          setUser(currentUser);
-          setIsAuthenticated(true);
-          await loadClubAccess(currentUser);
-        } catch (e) {
-          api.clearTokens();
-          localStorage.removeItem('user');
-          setClubAccess([]);
-          setUser(null);
-          setIsAuthenticated(false);
+          loadClubAccess(currentUser);
         }
-      } else {
-        localStorage.removeItem('user');
-      }
-      setLoading(false);
-    };
-
-    initAuth();
+      },
+      onError: (error) => setAuthError(error?.message || 'Không thể xác minh tài khoản sau đăng nhập. Vui lòng thử lại.'),
+    });
   }, [loadClubAccess]);
 
-  const login = useCallback(async (email) => {
+  const login = useCallback(async (email, password) => {
     if (AUTH_BYPASS_ENABLED) return BYPASS_USER;
 
     try {
-      const response = await api.login(email);
+      const response = await api.login(email, password);
       const userData = toAuthUser(response.user);
 
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      setIsAuthenticated(true);
-      await loadClubAccess(userData);
       return userData;
     } catch (error) {
       console.error('Email login failed:', error);
       throw error;
     }
-  }, [loadClubAccess]);
+  }, []);
 
   const loginWithGoogle = useCallback(async (credential) => {
     if (AUTH_BYPASS_ENABLED) return BYPASS_USER;
@@ -123,32 +115,17 @@ export function AuthProvider({ children }) {
 
       const userData = toAuthUser(response.user);
 
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      setIsAuthenticated(true);
-      await loadClubAccess(userData);
-
       return userData;
     } catch (error) {
       console.error('Google login failed:', error);
       throw error;
     }
-  }, [loadClubAccess]);
+  }, []);
 
   const logout = useCallback(async () => {
     if (AUTH_BYPASS_ENABLED) return;
 
-    try {
-      await api.logout();
-    } catch (e) {
-      // Ignore logout API errors
-    } finally {
-      api.clearTokens();
-      localStorage.removeItem('user');
-      setUser(null);
-      setClubAccess([]);
-      setIsAuthenticated(false);
-    }
+    await api.logout();
   }, []);
 
   const updateProfile = useCallback((updates) => {
@@ -178,6 +155,12 @@ export function AuthProvider({ children }) {
   }, [clubAccess, user]);
 
   const refreshClubAccess = useCallback(() => loadClubAccess(user), [loadClubAccess, user]);
+  useEffect(() => {
+    if (!user?.id || AUTH_BYPASS_ENABLED) return undefined;
+    const refresh = () => { if (document.visibilityState === 'visible') loadClubAccess(user); };
+    window.addEventListener('focus', refresh); document.addEventListener('visibilitychange', refresh);
+    return () => { window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
+  }, [user?.id, loadClubAccess]);
 
   return (
     <AuthContext.Provider value={{
@@ -185,6 +168,7 @@ export function AuthProvider({ children }) {
       clubAccess,
       isAuthenticated,
       loading,
+      authError,
       login,
       loginWithGoogle,
       logout,

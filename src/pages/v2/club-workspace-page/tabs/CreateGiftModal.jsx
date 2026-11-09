@@ -351,7 +351,7 @@ export default function CreateGiftModal({
                                         onChange={(event) => setCost(event.target.value)}
                                         required
                                     />
-                                    <span className="v2-gift-price-unit">XP</span>
+                                    <span className="v2-gift-price-unit">Xperience Point</span>
                                     <label className="v2-gift-free-toggle">
                                         <input
                                             type="checkbox"

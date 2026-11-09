@@ -5,6 +5,9 @@ export function validateStaffing(value, activityId) {
         value.version < 1 ||
         !Array.isArray(value.actions) ||
         !Array.isArray(value.assignments) ||
+        (value.publicAssignments != null && !Array.isArray(value.publicAssignments)) ||
+        (value.applications != null && !Array.isArray(value.applications)) ||
+        (value.availableEvidenceResources != null && !Array.isArray(value.availableEvidenceResources)) ||
         (value.recruitment != null && !Array.isArray(value.recruitment.positions)) ||
         (value.eligibleAssignees != null && !Array.isArray(value.eligibleAssignees)) ||
         value.assignments.some((assignment) => assignment.completions != null && !Array.isArray(assignment.completions))
@@ -24,6 +27,18 @@ export async function mutateActivityStaffing(api, activityId, path, body, key, m
         headers: { 'Idempotency-Key': key },
         body: JSON.stringify(body),
     });
+}
+export function validateStaffingMutationReceipt(value, activityId, previousVersion) {
+    if (
+        !value ||
+        typeof value.id !== 'string' ||
+        !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value.id) ||
+        (value.activityId != null && String(value.activityId) !== String(activityId)) ||
+        !Number.isSafeInteger(value.version) ||
+        value.version <= previousVersion
+    )
+        throw new Error('Máy chủ chưa xác nhận thay đổi. Vui lòng tải lại trước khi thử tiếp.');
+    return value;
 }
 export function recruitmentPayload(draft, actions) {
     if (!draft.title.trim()) throw new Error('Nhập tên nhiệm vụ tuyển dụng.');

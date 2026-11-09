@@ -144,7 +144,7 @@ export default function SystemAdminProfile({ user }) {
             className={`edit-button ${editing ? "is-editing" : ""}`}
             onClick={toggleEdit}
             disabled={saving || user?.roles?.includes("SYSTEM_ADMIN")}
-            title={user?.roles?.includes("SYSTEM_ADMIN") ? "API hiện chưa hỗ trợ tự chỉnh sửa hồ sơ quản trị hệ thống." : undefined}
+            title={user?.roles?.includes("SYSTEM_ADMIN") ? "Chưa thể chỉnh sửa hồ sơ quản trị hệ thống." : undefined}
           >
             {editing ? <Check size={16} /> : <Pencil size={16} />}
             {saving

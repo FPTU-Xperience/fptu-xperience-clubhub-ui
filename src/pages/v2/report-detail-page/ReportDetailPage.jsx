@@ -555,7 +555,7 @@ export default function ReportDetailPage({ api, reportId: scopedId, workspace, b
     const access = reportDetailAccess(report, user, clubAccess, readOnly);
     const ownClub = clubAccess.find((item) => String(item.clubId) === String(report?.clubId));
     const backTo = base
-        ? `${base}/reports`
+        ? `${base}/reports${window.location.search}`
         : ownClub?.clubCode
           ? `/v2/my-clubs/${encodeURIComponent(ownClub.clubCode)}/reports`
           : '/v2/my-clubs';

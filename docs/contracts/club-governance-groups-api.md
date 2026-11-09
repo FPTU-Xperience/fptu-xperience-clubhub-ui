@@ -1,6 +1,15 @@
 # Club governance groups API — BE implementation contract
 
-Implement Status: Not Yet
+## Implementation update — 2026-11-05
+
+The older source audit below is historical. The approved API checkout implements governance groups, current-semester assignments, immutable revisions/member history/reports, separate vice nominations and ownership-transfer safeguards. ClubHub and CTSV Admin now use these real endpoints. See [execution evidence](../issue-validation/2026-11-04-queue-rescan.md). Source/tests do not establish production acceptance.
+
+Implemented catalog contains ten specialist permissions for club profile/media, event content/staff/proposals, recruitment, own report drafts and finance read/draft/submit. `club.declarations.process` remains unavailable under its separate contract; it cannot be selected as a group grant. Current ownership remains the existing protected manager assignment, while effective vice appointments are separate CTSV decisions. Legacy treasury roles remain explicit historical duties and are not imported into group assignments.
+
+Actual writes use term/club versions, stable idempotency keys and current authority checks. Report submission additionally checks source revision and leadership digest, capturing legacy treasury and formal leadership without activating grants. Full SQL CI and ordered consumer rollout before ClubService activation passed; final online evidence is recorded in the execution note.
+
+
+Implement Status: Implemented and deployed for the scope below (2026-11-05)
 
 Status Scope: Backend implementation
 
@@ -16,6 +25,14 @@ The specification below preserves its original proposed scope. Older dated route
 
 
 Canonical D06 contract, 2026-10-12. **Proposed: no governance group/report/history/vice nomination routes exist in API main `80818266`.** Remote main and local HEAD were checked and matched on this date. This replaces the retired `club-member-roles-api.md` single-primary-role proposal. [Product decisions](club-governance-groups-proposal.md), [conventions](api-contract-conventions.md), [current audit](contract-lifecycle-audit.md).
+
+## Unified declaration processing — 2026-10-22
+
+One permission: **Xử lý trải nghiệm tự khai trong CLB**, ID `club.declarations.process`, covers reading records/private evidence, club review/requesting changes and forwarding an endorsed record to CTSV. President/vice president in the current club receive it automatically. Every other role requires the explicit unified grant in `studentDeclarationPermissions`; obsolete `canViewStudentDeclarations` and split read/review/submit grants do not grant processing. Leadership administers grants, with two checked/locked rows and one checkbox for each other role. Processing rights do not grant unrelated management permissions. Observation mode stays blocked; server authorization remains authoritative.
+
+Production has no permission policy persistence, club review or forwarding API. The UI exposes this boundary and keeps real writes disabled. Temporary checkbox choices never grant actual rights. Club endorsement is separate from final CTSV approval and never posts official Xperience Point. Existing declaration reads and private evidence downloads retain server scope checks.
+
+See [personal experience contract](personal-experience-api.md) for pending adapter shapes and the final CTSV decision boundary.
 
 ## Binding decisions and UI boundary
 

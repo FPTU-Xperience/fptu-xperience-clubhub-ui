@@ -4,7 +4,6 @@ import Layout from './components/Layout';
 import { PERMISSIONS } from './auth/permissions';
 
 // Pages
-import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ClubsPage from './pages/ClubsPage';
 import ClubMembersPage from './pages/ClubMembersPage';
@@ -36,7 +35,7 @@ function ProtectedRoute({ children, permission }) {
     }
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/v2" replace />;
     }
 
     if (permission && !hasPermission(permission)) {
@@ -55,37 +54,11 @@ function LayoutRoute({ children, title, permission }) {
     );
 }
 
-// Auth Route (redirect if already logged in)
-function AuthRoute({ children }) {
-    const { isAuthenticated, loading } = useAuth();
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-canvas text-ink flex items-center justify-center">
-                <div className="cyber-spinner mx-auto" />
-            </div>
-        );
-    }
-
-    if (isAuthenticated) {
-        return <Navigate to="/dashboard" replace />;
-    }
-
-    return children;
-}
-
 export default function App() {
     return (
         <Routes>
             {/* Auth Routes */}
-            <Route
-                path="/login"
-                element={
-                    <AuthRoute>
-                        <LoginPage />
-                    </AuthRoute>
-                }
-            />
+            <Route path="/login" element={<Navigate to="/v2" replace />} />
 
             {/* Protected Routes with Layout */}
             <Route

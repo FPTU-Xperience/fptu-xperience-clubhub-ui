@@ -1,5 +1,7 @@
 # Cover cosmetics and club point redemption
 
+> Wallet/redemption design — 2026-10-27: the proposed [BE student contract](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB schema](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) own the new real wallet, atomic debit/grant, receipt and inventory persistence. Existing browser sample credits/ownership are never migration input for real balances or grants.
+
 Implement Status: Not Yet
 
 Status Scope: Backend implementation

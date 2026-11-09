@@ -1,6 +1,10 @@
+> Current reconciliation — 2026-10-26: [API/UI integration and remaining obligations](main-api-ui-reconciliation-2026-10-26.md) supersedes older absence/browser-only claims for the capabilities listed there. The earlier audit/checklists below are historical; source integration and live acceptance remain separate.
+
 # Self profile and club member projection
 
 Archived on 2026-10-19. See [current lifecycle and remaining obligations](../contract-lifecycle-audit.md). The original text below records its dated scope; newer source evidence takes precedence.
+
+> Student persistence design — 2026-10-27: the proposed [BE student contract](../../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB schema](../../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) define server onboarding completion, `student-preferences`, declared vs official academic data, and the single preferences/profile interest owner. These new requirements are not implemented by the existing canonical profile endpoint.
 
 Implement Status: Cancel
 

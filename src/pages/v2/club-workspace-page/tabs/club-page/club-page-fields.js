@@ -14,6 +14,10 @@ export const CLUB_PAGE_FIELDS = [
     { name: 'contactEmail', label: 'Email liên hệ', type: 'email', maxLength: 255 },
     { name: 'contactPhone', label: 'Số điện thoại', type: 'tel', maxLength: 20 },
     { name: 'scheduleLabel', label: 'Lịch sinh hoạt', maxLength: 500, multiline: true },
+    { name: 'expectedLocation', label: 'Địa điểm sinh hoạt', maxLength: 500 },
+    { name: 'majorEvents', label: 'Sự kiện lớn dự kiến', maxLength: 2000, multiline: true },
+    { name: 'equipmentNeeds', label: 'Thiết bị cần thiết', maxLength: 1000, multiline: true },
+    { name: 'advisorNeeded', label: 'Nhu cầu cố vấn', options: { false: 'Chưa cần cố vấn', true: 'Cần cố vấn hoặc người hướng dẫn' } },
 ];
 
 export const CLUB_PAGE_TABS = [
@@ -21,4 +25,5 @@ export const CLUB_PAGE_TABS = [
     { id: 'description', label: 'Giới thiệu', fields: ['description'] },
     { id: 'contact', label: 'Liên hệ', fields: ['contactEmail', 'contactPhone'] },
     { id: 'schedule', label: 'Lịch sinh hoạt', fields: ['scheduleLabel'] },
+    { id: 'additional', label: 'Thông tin bổ sung', fields: ['expectedLocation', 'majorEvents', 'equipmentNeeds', 'advisorNeeded'] },
 ];

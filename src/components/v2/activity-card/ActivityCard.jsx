@@ -52,6 +52,7 @@ export default function ActivityCard({ activity: input, onOpen, variant = 'poste
                 <div className="v2-event-info">
                     <div className="v2-event-organizer">
                         <span>{activity.clubName || 'Hoạt động CLB'}</span>
+                        {activity.isInternal === true && <span className="v2-event-status">Nội bộ CLB</span>}
                         {schedule && <span className={`v2-event-status is-${tone}`}>{label}</span>}
                     </div>
                     <h3>{activity.title}</h3>

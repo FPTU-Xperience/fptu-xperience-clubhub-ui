@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../../services/club-capabilities';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
@@ -8,6 +9,7 @@ import ClubPageImageModal from './club-page/ClubPageImageModal';
 import './ClubPageTab.scss';
 import { useEntityMedia } from '../../../../components/media/EntityMediaContext';
 import { subscribePublicMediaSaved } from '../../../../services/public-media-sync';
+import { clubSchedulePayload } from './club-page/club-schedule-data';
 
 function useImagePreview(file, savedUrl) {
     const [preview, setPreview] = useState(null);
@@ -25,7 +27,7 @@ function useImagePreview(file, savedUrl) {
 
 export default function ClubPageTab({ manager = false, workspace }) {
     const clubId = workspace?.clubId;
-    const { api, user } = useAuth();
+    const { api, user, clubAccess } = useAuth();
     const { semester } = useWorkspaceSemester();
     const [clubRecord, setClub] = useState(null);
     const club = useEntityMedia('club', clubRecord);
@@ -41,6 +43,9 @@ export default function ClubPageTab({ manager = false, workspace }) {
     const requestVersion = useRef(0);
     const logo = useImagePreview(editor === 'logo' ? imageFile : null, club?.logoUrl);
     const cover = useImagePreview(editor === 'cover' ? imageFile : null, club?.coverImageUrl);
+    const scope = clubAccess?.find(item => String(item.clubId) === String(workspace?.clubId));
+    const canText = manager || clubCapability(scope, 'club.profile.write');
+    const canMedia = manager || clubCapability(scope, 'club.media.write');
     const imageEditor = editor === 'logo' || editor === 'cover';
     const previewClub = club ? { ...club, ...profileDraft } : null;
 
@@ -74,16 +79,24 @@ export default function ClubPageTab({ manager = false, workspace }) {
         };
     }, [api, clubId, attempt, semester?.id]);
 
-    useEffect(() => subscribePublicMediaSaved('club', (signal) => {
-        if (signal.id !== String(clubId)) return;
-        const version = requestVersion.current;
-        api.getClub(clubId).then((data) => {
-            if (version === requestVersion.current) setClub(data);
-        }).catch(() => { /* Retain the acknowledged media and current editor on refresh failure. */ });
-    }), [api, clubId]);
+    useEffect(
+        () =>
+            subscribePublicMediaSaved('club', (signal) => {
+                if (signal.id !== String(clubId)) return;
+                const version = requestVersion.current;
+                api.getClub(clubId)
+                    .then((data) => {
+                        if (version === requestVersion.current) setClub(data);
+                    })
+                    .catch(() => {
+                        /* Retain the acknowledged media and current editor on refresh failure. */
+                    });
+            }),
+        [api, clubId],
+    );
 
     const openEditor = (section) => {
-        if (!manager || saving) return;
+        if (!(section === 'logo' || section === 'cover' ? canMedia : canText) || saving) return;
         setImageFile(null);
         setModalError('');
         setNotice('');
@@ -97,7 +110,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
     };
     const saveImage = async (event, selectedFile = imageFile) => {
         event.preventDefault();
-        if (!manager || saving || !selectedFile || !imageEditor) return;
+        if (!canMedia || saving || !selectedFile || !imageEditor) return;
         const version = requestVersion.current;
         const field = editor === 'logo' ? 'logoUrl' : 'coverImageUrl';
         const label = editor === 'logo' ? 'logo' : 'ảnh bìa';
@@ -118,7 +131,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
             setImageFile(null);
             setEditor(null);
             setNotice(`Đã cập nhật ${label} CLB.`);
-            return url;
+            return updated[field];
         } catch (issue) {
             if (version !== requestVersion.current) return;
             setModalError(
@@ -126,12 +139,13 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     ? 'Máy chủ chưa hỗ trợ lưu ảnh CLB. Ảnh đã chọn được giữ để bạn thử lại.'
                     : issue?.message || 'Không thể lưu ảnh. Vui lòng thử lại.',
             );
+            throw issue;
         } finally {
             if (version === requestVersion.current) setSaving(false);
         }
     };
     const previewInfo = (fields) => {
-        if (!manager || saving || !club) return;
+        if (!canText || saving || !club) return;
         setProfileDraft(fields);
         setEditor(null);
         setError('');
@@ -145,15 +159,20 @@ export default function ClubPageTab({ manager = false, workspace }) {
         setNotice('');
     };
     const saveInfo = async () => {
-        if (!manager || saving || !club || !profileDraft) return;
+        if (!canText || saving || !club || !profileDraft) return;
         const fields = profileDraft;
         const version = requestVersion.current;
         setSaving(true);
         setError('');
         setNotice('');
         try {
-            const changed = Object.fromEntries(Object.entries(fields).filter(([key, value]) => value !== (club[key] ?? '')));
-            const updated = await api.updateClubPublicProfile(clubId, { ...changed, expectedVersion: club.version });
+            const payload = { ...fields, expectedVersion: club.version };
+            if (Object.hasOwn(fields, 'advisorNeeded')) payload.advisorNeeded = fields.advisorNeeded === 'true';
+            if (Object.hasOwn(fields, 'scheduleLabel')) {
+                payload.schedule = clubSchedulePayload(fields.scheduleLabel, semester);
+                delete payload.scheduleLabel;
+            }
+            const updated = await api.updateClubPublicProfile(clubId, payload);
             if (version !== requestVersion.current) return;
             setClub((current) => ({ ...current, ...fields, ...(updated || {}) }));
             setProfileDraft(null);
@@ -207,12 +226,13 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     club={{ ...previewClub, name: previewClub.name || workspace?.name }}
                     logo={logo}
                     cover={cover}
-                    manager={manager}
+                    manager={canText}
+                    canMedia={canMedia}
                     disabled={saving}
                     onEdit={openEditor}
                 />
             )}
-            {manager && profileDraft && (
+            {canText && profileDraft && (
                 <div className="club-page-pending" aria-busy={saving}>
                     <div role="status">
                         <strong>Bản xem trước chưa lưu</strong>
@@ -233,7 +253,7 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     </div>
                 </div>
             )}
-            {manager && club && imageEditor && (
+            {canMedia && club && imageEditor && (
                 <ClubPageImageModal
                     kind={editor}
                     clubName={club.name || workspace?.name || workspace?.clubName}
@@ -251,8 +271,9 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     onSave={saveImage}
                 />
             )}
-            {manager && club && editor && !imageEditor && (
+            {canText && club && editor && !imageEditor && (
                 <ClubPageInfoModal
+                    api={api}
                     club={previewClub}
                     saving={saving}
                     error={modalError}

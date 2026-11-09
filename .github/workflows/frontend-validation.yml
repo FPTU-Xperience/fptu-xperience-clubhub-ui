@@ -1,0 +1,30 @@
+name: Frontend validation
+
+on:
+  push:
+    branches: [cuongnk21/integrate-api-email-login]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Unit and contract tests
+        run: node --test src/pages/v2/*.test.js src/services/*.test.js tests/*.test.js
+      - name: Production build
+        run: npm run build
+      - name: Club and profile render smoke tests
+        run: npm run test:club-page
+      - name: Route render smoke tests
+        run: npm run test:demo:routes

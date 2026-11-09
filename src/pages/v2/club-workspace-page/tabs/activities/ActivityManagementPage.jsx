@@ -1,18 +1,21 @@
+import { clubCapability } from '../../../../../services/club-capabilities';
+import { PublicActivityProfile } from '../../../activities-page/ActivityDetailPage';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../../../context/AuthContext';
 import { Camera, Eye, Pencil } from 'lucide-react';
 import { useActivityDetail } from '../../../activity-data';
+import ActivityVisibilityControl from './ActivityVisibilityControl';
 import PageState from '../../../../../components/v2/PageState';
 import ActivityProfileLayout, {
     ActivityOverview,
 } from '../../../../../components/v2/activity-detail/ActivityProfileLayout';
-import ActivityAttendance from '../../../../../components/v2/activity-detail/ActivityAttendance';
-import ActivitySessionsPanel from '../../../../../components/v2/activity-detail/ActivitySessionsPanel';
+import ActivitySessionManagement from '../../../../../components/v2/activity-detail/ActivitySessionManagement';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import CoverImageModal from '../../../../../components/media/CoverImageModal';
 import ActivityResourceEditor from './ActivityResourceEditor';
 import { saveActivityResource } from '../../../../../services/activity-resources';
+import ActivityResourceManagement from '../../../../../components/v2/activity-detail/ActivityResourceManagement';
 import ActivityPublicationControl from './ActivityPublicationControl';
 import ActivityStaffingPanel from '../../../../../components/v2/activity-detail/ActivityStaffingPanel';
 import './ActivityEditing.scss';
@@ -24,7 +27,6 @@ const tabs = [
     ['assignments', 'Phân công'],
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh'],
-    ['sessions', 'Buổi hoạt động'],
 ];
 const localDateTime = (value) => {
     const date = new Date(value || '');
@@ -51,9 +53,14 @@ const coreFields = (activity) => ({
 
 export default function ActivityManagementPage({ api, sessionKey, activityId, workspace, manager, base }) {
     const { user, clubAccess } = useAuth();
-    const result = useActivityDetail(api, sessionKey, manager ? activityId : null, true);
-    const activity = result.data;
+    const scope = clubAccess?.find(item => String(item.clubId) === String(workspace.clubId));
+    const canContent = manager || clubCapability(scope, 'event.content.write');
+    const canStaff = manager || clubCapability(scope, 'event.staff.assign');
+    const specialist = canContent || canStaff;
+    const location = useLocation();
     const [tab, setTab] = useState('overview');
+    const result = useActivityDetail(api, sessionKey, activityId, !specialist, specialist ? 0 : tab);
+    const activity = result.data;
     const [coreDraft, setCoreDraft] = useState(null);
     const [editorDraft, setEditorDraft] = useState(null);
     const editing = editorDraft !== null;
@@ -127,7 +134,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
     };
     const saveCore = async (event) => {
         event.preventDefault();
-        if (busy || !coreDraft) return;
+        if (busy || !coreDraft || activity.sourceApplicationId) return;
         const values = coreDraft;
         if (![values.title, values.description, values.location].every((value) => value.trim())) {
             setError('Vui lòng nhập tên, địa điểm và mô tả hoạt động.');
@@ -171,13 +178,13 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         setNotice('');
         try {
             const url = await api.uploadPublicImage(selectedFile, 'activity-cover', activity.id);
-            await api.updateActivityCoverImage(activity.id, url, activity.version);
+            const updated = await api.updateActivityCoverImage(activity.id, url, activity.version);
             if (alive.current) {
                 setCoverOpen(false);
                 setCoverFile(null);
                 setNotice('Đã lưu ảnh bìa.');
                 result.retry();
-                return url;
+                return updated.coverImageUrl;
             }
         } catch (issue) {
             if (alive.current)
@@ -186,6 +193,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                         ? 'Máy chủ chưa hỗ trợ lưu ảnh bìa hoạt động. Ảnh mới chưa được lưu.'
                         : issue.message || 'Không thể lưu ảnh bìa.',
                 );
+            throw issue;
         } finally {
             if (alive.current) setBusy(false);
         }
@@ -194,7 +202,11 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
         if (
             busy ||
             !activity.resourceCapabilities.canManage ||
-            (rows.some((row) => row.file) && !activity.resourceCapabilities.canUpload)
+            rows.some(
+                (row) =>
+                    !activity.resourceCapabilities.supportedKinds.includes(row.kind) ||
+                    (row.file && !activity.resourceCapabilities.canUpload),
+            )
         )
             return;
         setBusy(true);
@@ -221,9 +233,9 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
             }
         }
     };
-    if (!manager || (activity && String(activity.clubId) !== String(workspace.clubId)))
+    if (activity && String(activity.clubId) !== String(workspace.clubId))
         return <PageState status="forbidden" title="Bạn không có quyền quản lý hoạt động này" />;
-    if (result.status !== 'populated')
+    if (result.status !== 'populated' && !(activity && !specialist && result.status === 'loading'))
         return (
             <PageState
                 status={result.status}
@@ -231,6 +243,12 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                 title={result.status === 'not-found' ? 'Không tìm thấy hoạt động' : undefined}
             />
         );
+    if (!specialist) return (
+        <div className="v2-activity-management-page">
+            <Link className="v2-text-link" to={`${base}/activities${location.search}`}>← Danh sách hoạt động</Link>
+            <PublicActivityProfile key={`${sessionKey}:${activity.id}`} activeTab={tab} onTabChange={setTab} refreshing={result.status === 'loading'} workspaceRead activity={activity} clubCode={workspace.clubCode} sessionKey={sessionKey} api={api} onChanged={result.retry} />
+        </div>
+    );
     const displayed = {
         ...activity,
         ...(coreDraft || {}),
@@ -250,7 +268,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
             activity.resourceCapabilities.canUpload);
     return (
         <div className="v2-activity-management-page">
-            <Link className="v2-text-link" to={`${base}/activities`}>
+            <Link className="v2-text-link" to={`${base}/activities${location.search}`}>
                 ← Danh sách hoạt động
             </Link>
             {notice && (
@@ -276,7 +294,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                     <ActivityProfileLayout
                         activity={displayed}
                         preview={Boolean(coverUrl || coreDraft)}
-                        tabs={tabs}
+                        tabs={tabs.filter(([key]) => key !== 'attendance' || manager)}
                         tab={tab}
                         onTabChange={setTab}
                         actions={
@@ -301,7 +319,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                         setEditorDraft({ ...(coreDraft || coreFields(activity)) });
                                         setTab('overview');
                                     }}
-                                    disabled={busy}
+                                    disabled={!canContent || busy || Boolean(activity.sourceApplicationId)}
                                 >
                                     <Pencil size={15} />
                                     Chỉnh sửa
@@ -309,6 +327,8 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                             </>
                         }
                         beforeTabs={
+                            <>{manager && <ActivityVisibilityControl api={api} activity={activity}
+                                disabled={busy || Boolean(coreDraft || editorDraft)} onSaved={() => result.retry()} />}
                             <ActivityPublicationControl
                                 api={api}
                                 activity={activity}
@@ -317,6 +337,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                 hasUnsavedContent={Boolean(coreDraft || editorDraft || coverFile || drafts.length)}
                                 onSaved={() => result.retry()}
                             />
+                            </>
                         }
                         coverAction={
                             <button
@@ -326,7 +347,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                     setError('');
                                     setCoverOpen(true);
                                 }}
-                                disabled={busy}
+                                disabled={busy || !canContent}
                             >
                                 <Camera size={15} />
                                 Đổi ảnh bìa
@@ -335,32 +356,43 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                     >
                         {tab === 'overview' && <ActivityOverview activity={displayed} />}
                         {['documents', 'media'].includes(tab) && (
-                            <ActivityResourceEditor
-                                key={tab}
-                                kind={tab === 'documents' ? 'DOCUMENT' : 'MEDIA'}
-                                resources={activity.resources}
-                                drafts={drafts}
-                                onAdd={addDrafts}
-                                onRemove={removeDraft}
-                                onSave={saveResources}
-                                canSave={canSaveResources}
-                                busy={busy}
-                            />
+                            <>
+                                <ActivityResourceEditor
+                                    key={tab}
+                                    kind={tab === 'documents' ? 'DOCUMENT' : 'MEDIA'}
+                                    resources={activity.resources}
+                                    drafts={drafts}
+                                    onAdd={addDrafts}
+                                    onRemove={removeDraft}
+                                    onSave={saveResources}
+                                    canSave={canSaveResources}
+                                    capabilities={activity.resourceCapabilities}
+                                    busy={busy}
+                                />
+                                {activity.resourceCapabilities.canManage && (
+                                    <ActivityResourceManagement
+                                        key={activity.id}
+                                        api={api}
+                                        activityId={activity.id}
+                                        resources={activity.resources}
+                                        onChanged={result.retry}
+                                    />
+                                )}
+                            </>
                         )}
                         {['assignments', 'recruitment'].includes(tab) && (
                             <ActivityStaffingPanel
                                 activityId={activity.id}
                                 mode={tab}
-                                manager
+                                manager={manager}
                                 onChanged={result.retry}
                             />
                         )}
-                        {tab === 'attendance' && (
+                        {manager && tab === 'attendance' && (
                             <div className="v2-activity-profile-panel">
-                                <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager />
+                                <ActivitySessionManagement key={`${sessionKey}:${activity.id}`} activity={activity} onChanged={result.retry} />
                             </div>
                         )}
-                        {tab === 'sessions' && <ActivitySessionsPanel key={`${sessionKey}:${activity.id}`} api={api} activity={activity} readOnly={!manager} onChanged={result.retry} />}
                     </ActivityProfileLayout>
                     {coreDraft && (
                         <div className="v2-activity-preview-pending" aria-busy={busy}>

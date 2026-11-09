@@ -227,7 +227,7 @@ export function ClubHome() {
         <>
             <PageHeading
                 eyebrow={`${term === 'FA26' ? 'FALL 2026' : 'SUMMER 2026'} / ${club.name.toUpperCase()}`}
-                title={`Chào ${actor.name.split(' ').slice(-1)[0]}, ${manager ? 'cùng dẫn dắt nhé.' : 'hôm nay có gì mới?'}`}
+                title={`Chào ${actor.name.trim()}, ${manager ? 'cùng dẫn dắt nhé.' : 'hôm nay có gì mới?'}`}
                 description={
                     manager
                         ? 'Một góc nhìn rõ ràng về cộng đồng bạn đang xây dựng.'

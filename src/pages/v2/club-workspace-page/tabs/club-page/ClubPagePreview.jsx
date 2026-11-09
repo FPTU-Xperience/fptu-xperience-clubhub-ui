@@ -19,7 +19,7 @@ function EditButton({ label, onClick, disabled }) {
     );
 }
 
-export default function ClubPagePreview({ club, logo, cover, manager, onEdit, disabled = false }) {
+export default function ClubPagePreview({ club, logo, cover, manager, canMedia = manager, onEdit, disabled = false }) {
     return (
         <article className="club-page-preview" aria-label="Xem trước trang CLB">
             <div className="club-page-preview-heading">
@@ -35,7 +35,7 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                             label={`Banner ${club.name}`}
                         />
                     )}
-                    {manager && (
+                    {canMedia && (
                         <button
                             className="club-page-change-cover"
                             type="button"
@@ -56,7 +56,7 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                                     (club.name || 'CLB').slice(0, 2).toUpperCase()
                                 )}
                             </div>
-                            {manager && (
+                            {canMedia && (
                                 <button
                                     className="club-page-change-logo"
                                     type="button"
@@ -96,6 +96,13 @@ export default function ClubPagePreview({ club, logo, cover, manager, onEdit, di
                             </p>
                         </section>
                         <div className="club-page-sidebar">
+                            <section>
+                                <h3>Thông tin bổ sung</h3>
+                                <p>Địa điểm: {club.expectedLocation || 'Chưa cập nhật'}</p>
+                                <p>Sự kiện dự kiến: {club.majorEvents || 'Chưa cập nhật'}</p>
+                                <p>Thiết bị: {club.equipmentNeeds || 'Chưa cập nhật'}</p>
+                                <p>Cố vấn: {club.advisorNeeded === true || club.advisorNeeded === 'true' ? 'Cần hỗ trợ' : 'Chưa yêu cầu'}</p>
+                            </section>
                             <section>
                                 <header>
                                     <h3>Liên hệ</h3>

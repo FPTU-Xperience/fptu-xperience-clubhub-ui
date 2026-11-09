@@ -1,3 +1,4 @@
+import { clubLeadership, clubRoleSummary } from '../../../services/club-capabilities';
 import {
     WorkspaceSemesterProvider,
     WorkspaceSemesterSelect,
@@ -14,7 +15,9 @@ import ActivityManagementPage from './tabs/activities/ActivityManagementPage';
 import WorkspaceHome from './WorkspaceHome';
 import ReportDetailPage from '../report-detail-page/ReportDetailPage';
 import ReportEditorPage from '../report-detail-page/ReportEditorPage';
+import { canViewClubDeclarations } from './tabs/student-declarations/club-declarations-data';
 import './ClubWorkspacePage.scss';
+import { useAuth } from '../../../context/AuthContext';
 export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
     const { clubCode: routeClubCode } = useParams();
     const result = useClubWorkspace(api, sessionKey, routeClubCode);
@@ -22,11 +25,18 @@ export default function ClubWorkspacePage({ api, sessionKey, viewer }) {
 }
 
 export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation = false }) {
+    const access = useAuth()?.clubAccess?.find(item => String(item.clubId) === String(result.clubId));
+    const treasurer = !observation && access?.isTreasurer === true;
     const { clubCode: routeClubCode } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const manager = !observation && result.workspace?.role === 'MANAGER';
-    const semesterSelection = useWorkspaceSemesterSelection(sessionKey, result.clubId, result.workspace?.semesters);
+    const manager = !observation && clubLeadership(access);
+    const semesterSelection = useWorkspaceSemesterSelection(
+        sessionKey,
+        result.clubId,
+        result.workspace?.semesters,
+        api,
+    );
     // Refresh shared summaries when entering activities or the member roster.
     const dashboardRefreshKey = /\/(activities|members)\/?$/.test(location.pathname) ? location.key : null;
     const dashboard = useWorkspaceDashboard(
@@ -61,7 +71,8 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                 )}
             </div>
         );
-    const availableSections = getWorkspaceSections(manager, observation);
+    const canViewDeclarations = canViewClubDeclarations(manager, result.workspace, observation);
+    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer, observation ? null : access);
     const relativePath = location.pathname.slice(base.length).split('/').filter(Boolean)[0] || '';
     if (observation && relativePath === 'club-page') return <Navigate to={base} replace />;
     if (relativePath === 'attendance') return <Navigate to={`${base}/activities`} replace />;
@@ -80,6 +91,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                 <WorkspaceLeftRail
                     workspace={{
                         ...result.workspace,
+                        ...(access ? { displayRole: access.isManager ? 'CLUB_OWNER' : clubLeadership(access) ? 'VICE_PRESIDENT' : access.isTreasurer ? 'TREASURER' : 'MEMBER' } : {}),
                         pendingApplications: dashboard.data?.pendingApplications ?? null,
                         ongoingActivityCount: dashboard.data?.ongoingActivityCount ?? null,
                     }}
@@ -87,6 +99,9 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     base={base}
                     manager={manager}
                     observation={observation}
+                    canViewDeclarations={canViewDeclarations}
+                    treasurer={treasurer}
+                    access={observation ? null : access}
                     onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
                 />
                 <main className="v2-workspace-main">
@@ -101,14 +116,28 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                         </div>
                         <div>
                             <span className={`v2-workspace-role ${manager ? 'is-manager' : ''}`}>
-                                {observation ? 'CTSV · Chỉ xem' : manager ? 'Chủ nhiệm' : 'Thành viên'}
+                                {observation ? 'CTSV · Chỉ xem' : clubRoleSummary(access)}
                             </span>
                             <WorkspaceSemesterSelect />
                         </div>
                     </header>
                     <div className="v2-workspace-content">
-                        {reportCreate || reportEditId ? (
-                            <ReportEditorPage key={`${sessionKey}:${result.clubId}:${reportEditId || 'create'}:${location.search}`} api={api} sessionKey={sessionKey} workspace={result.workspace} base={base} semester={semesterSelection.semester} reportId={reportEditId} readOnly={observation} />
+                        {relativePath === 'student-declarations' && !canViewDeclarations ? (
+                            <PageState
+                                status="forbidden"
+                                description="Chỉ BQL được cấp quyền trong CLB mới có thể mở trải nghiệm của sinh viên."
+                            />
+                        ) : reportCreate || reportEditId ? (
+                            <ReportEditorPage
+                                key={`${sessionKey}:${result.clubId}:${reportEditId || 'create'}:${location.search}`}
+                                api={api}
+                                sessionKey={sessionKey}
+                                workspace={result.workspace}
+                                base={base}
+                                semester={semesterSelection.semester}
+                                reportId={reportEditId}
+                                readOnly={observation}
+                            />
                         ) : reportDetailId ? (
                             <ReportDetailPage
                                 key={`${sessionKey}:${result.clubId}:${reportDetailId}`}

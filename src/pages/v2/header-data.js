@@ -56,6 +56,21 @@ export function createHeaderRequestGate() {
     };
 }
 
+// Share an in-flight preload across StrictMode and rail remounts. Cache only briefly.
+const notificationRequests = new WeakMap();
+export function loadHeaderNotifications(api, sessionKey, refresh = false) {
+    if (typeof api?.getNotifications !== 'function') return Promise.reject({ status: 404 });
+    let cache = notificationRequests.get(api);
+    if (!cache) { cache = new Map(); notificationRequests.set(api, cache); }
+    const existing = cache.get(sessionKey);
+    if (existing && (!refresh || existing.pending) && (existing.pending || Date.now() - existing.createdAt < 30000)) return existing.promise;
+    const entry = { pending: true, createdAt: Date.now() };
+    entry.promise = Promise.resolve().then(() => api.getNotifications(false)).finally(() => { entry.pending = false; });
+    cache.set(sessionKey, entry);
+    entry.promise.catch(() => { if (cache.get(sessionKey) === entry) cache.delete(sessionKey); });
+    return entry.promise;
+}
+
 export function useHeaderNotifications(api, sessionKey) {
     const gateRef = useRef(null);
     if (!gateRef.current) gateRef.current = createHeaderRequestGate();
@@ -70,32 +85,30 @@ export function useHeaderNotifications(api, sessionKey) {
     }, [sessionKey]);
 
     useEffect(() => {
-        if (!isOpen || !sessionKey) return undefined;
+        if (!sessionKey) return undefined;
         const request = gateRef.current.next(sessionKey);
-        setResult({ status: 'loading', data: [], error: null });
+        setResult({ sessionKey, status: 'loading', data: [], error: null });
         Promise.resolve()
             .then(() => {
-                if (typeof api?.getNotifications !== 'function') {
-                    return Promise.reject({ status: 404 });
-                }
-                return api.getNotifications(false);
+                return loadHeaderNotifications(api, sessionKey, version > 0);
             })
             .then((value) => {
                 if (!gateRef.current.isCurrent(request, sessionKey)) return;
                 const data = selectHeaderNotifications(value);
-                setResult({ status: data.length ? 'populated' : 'empty', data, error: null });
+                setResult({ sessionKey, status: data.length ? 'populated' : 'empty', data, error: null });
             })
             .catch((error) => {
                 if (!gateRef.current.isCurrent(request, sessionKey)) return;
-                setResult({ status: classifyHeaderNotificationError(error), data: [], error });
+                setResult({ sessionKey, status: classifyHeaderNotificationError(error), data: [], error });
             });
         return () => gateRef.current.invalidate();
-    }, [api, isOpen, sessionKey, version]);
+    }, [api, sessionKey, version]);
 
     const open = useCallback(() => setIsOpen(true), []);
     const close = useCallback(() => setIsOpen(false), []);
     const retry = useCallback(() => setVersion((current) => current + 1), []);
-    const unreadCount = useMemo(() => result.data.filter((item) => !item.isRead).length, [result.data]);
+    const current = result.sessionKey === sessionKey ? result : { status: sessionKey ? 'loading' : 'unauthorized', data: [], error: null };
+    const unreadCount = current.data.filter((item) => !item.isRead).length;
 
-    return { ...result, isOpen, open, close, retry, unreadCount };
+    return { ...current, isOpen, open, close, retry, unreadCount };
 }

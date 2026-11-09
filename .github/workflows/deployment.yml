@@ -23,26 +23,135 @@ jobs:
               run: npm ci
 
             - name: Build Frontend
-              run: npm run build
+              run: |
+                  node --test src/pages/v2/*.test.js src/services/*.test.js tests/*.test.js
+                  npm run build
               env:
                   VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
                   VITE_GOOGLE_CLIENT_ID: ${{ secrets.CLUBHUB_GOOGLE_CLIENT_ID }}
+                  VITE_ADMIN_APP_URL: ${{ vars.VITE_ADMIN_APP_URL || 'https://fptux-admin-ui.pages.dev' }}
+                  VITE_STAFF_SSO_ENABLED: ${{ vars.VITE_STAFF_SSO_ENABLED || 'true' }}
+                  VITE_LOGIN_ACCOUNT_SHORTCUTS: ${{ vars.VITE_LOGIN_ACCOUNT_SHORTCUTS || 'false' }}
                   VITE_R2_BUCKET_NAME: ${{ vars.VITE_R2_BUCKET_NAME || 'fptux-cloud-storage' }}
                   VITE_R2_S3_ENDPOINT: ${{ vars.VITE_R2_S3_ENDPOINT || 'https://c2e463013aa669515ae4e2c54843c4ae.r2.cloudflarestorage.com' }}
                   VITE_R2_PUBLIC_BASE_URL: ${{ vars.VITE_R2_PUBLIC_BASE_URL || 'https://pub-3092f35e8d664b8caf203e269232769a.r2.dev' }}
 
-            - name: Set selected branch as Cloudflare production branch
+            - name: Install browser validation dependencies
+              run: |
+                  npm install --no-save --package-lock=false playwright
+                  npx playwright install --with-deps chromium
+
+            - name: Validate notification layout in browser
+              run: node scripts/notification-visual-check.mjs
+
+            - name: Validate public tab refresh and registration in browser
+              run: node scripts/public-activity-tabs-check.mjs
+
+            - name: Validate recruitment approval and evidence in browser
+              run: node scripts/staffing-browser-check.mjs
+
+            - name: Validate attendance sessions in browser
+              run: node scripts/attendance-browser-check.mjs
+
+            - name: Validate live governance components in browser
+              run: node scripts/governance-browser-check.mjs
+
+            - name: Validate credit wallet and rewards in browser
+              run: node scripts/credit-rewards-browser-check.mjs
+
+            - name: Validate club and personal points in browser
+              run: node scripts/club-points-browser-check.mjs
+
+            - name: Save club and personal points screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: club-and-personal-points
+                  path: TestResults/club-points
+                  if-no-files-found: ignore
+
+            - name: Save credit wallet and rewards screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: credit-rewards
+                  path: TestResults/credit
+                  if-no-files-found: ignore
+
+            - name: Validate club formation and approved workspace in browser
+              run: node scripts/club-formation-browser-check.mjs
+
+            - name: Validate cancellation and club roles in browser
+              run: node scripts/registration-roles-browser-check.mjs
+
+            - name: Save cancellation and roles screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: registration-and-roles
+                  path: TestResults/registration-roles
+                  if-no-files-found: ignore
+
+            - name: Save club formation screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: club-formation
+                  path: TestResults/formation
+                  if-no-files-found: ignore
+
+            - name: Save attendance screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: attendance-sessions
+                  path: TestResults/attendance
+                  if-no-files-found: ignore
+
+            - name: Save staffing screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: staffing-approval-and-evidence
+                  path: TestResults/staffing
+                  if-no-files-found: ignore
+
+            - name: Validate built activity layout and registration-to-schedule flow
+              run: node scripts/deployed-activity-registration-check.mjs
+              env:
+                  ACTIVITY_PREVIEW: 'true'
+
+            - name: Save public activity screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: public-activity-tab-screenshots
+                  path: TestResults/public-tabs
+                  if-no-files-found: ignore
+
+            - name: Save notification screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: notification-layout-screenshots
+                  path: TestResults/notifications
+                  if-no-files-found: ignore
+
+            - name: Resolve configured Cloudflare production branch
+              id: deployment
               env:
                   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOYMENT_TOKEN }}
                   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   PROJECT_NAME: fptux-clubhub-ui
-                  PRODUCTION_BRANCH: ${{ github.ref_name }}
               run: |
-                  curl --fail-with-body --silent --show-error --request PATCH \
+                  set -euo pipefail
+                  branch="$(curl --fail --silent --show-error \
                     "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}" \
                     --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-                    --header "Content-Type: application/json" \
-                    --data "{\"production_branch\":\"${PRODUCTION_BRANCH}\"}"
+                    | jq -er 'select(.success == true) | .result.production_branch | select(type == "string" and length > 0)')"
+                  [[ "${branch}" =~ ^[a-zA-Z0-9_./-]+$ ]]
+                  git check-ref-format --branch "${branch}" >/dev/null
+                  printf 'branch=%s\n' "${branch}" >> "${GITHUB_OUTPUT}"
 
             - name: Deploy to Cloudflare Pages
               uses: cloudflare/wrangler-action@v3
@@ -52,4 +161,114 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_DEPLOYMENT_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   gitHubToken: ${{ github.token }}
-                  command: pages deploy ./dist --project-name=${{ env.PROJECT_NAME }} --branch=${{ github.ref_name }} --commit-dirty=true
+                  command: pages deploy ./dist --project-name=${{ env.PROJECT_NAME }} --branch=${{ steps.deployment.outputs.branch }} --commit-dirty=true
+
+            - name: Restore browser validation dependency after Wrangler installation
+              run: npm install --no-save --package-lock=false playwright
+
+            - name: Verify deployed activity registration rendering with isolated API traffic
+              run: node scripts/deployed-activity-registration-check.mjs
+
+            - name: Verify deployed staffing approval and evidence with isolated API traffic
+              run: node scripts/deployed-staffing-check.mjs
+
+            - name: Verify deployed attendance with isolated API traffic
+              run: node scripts/deployed-attendance-check.mjs
+
+            - name: Verify deployed club formation with isolated API traffic
+              run: node scripts/deployed-club-formation-check.mjs
+
+            - name: Verify deployed wallet and redemption with isolated API traffic
+              run: node scripts/deployed-credit-rewards-check.mjs
+
+            - name: Verify deployed governance with isolated API traffic
+              run: node scripts/deployed-governance-check.mjs
+
+            - name: Verify deployed event recruitment and assignments with isolated API traffic
+              run: node scripts/deployed-event-tasks-check.mjs
+
+            - name: Save event task screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: event-tasks
+                  path: TestResults/event-tasks
+                  if-no-files-found: ignore
+
+            - name: Verify deployed cancellation and club roles with isolated API traffic
+              run: node scripts/deployed-registration-roles-check.mjs
+
+            - name: Save deployed cancellation and roles screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-registration-and-roles
+                  path: TestResults/registration-roles-online
+                  if-no-files-found: ignore
+
+            - name: Save deployed formation screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-club-formation
+                  path: TestResults/formation-online
+                  if-no-files-found: ignore
+
+            - name: Save deployed attendance screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-attendance
+                  path: TestResults/attendance-online
+                  if-no-files-found: ignore
+
+            - name: Save deployed staffing screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployed-staffing-approval-and-evidence
+                  path: TestResults/staffing-online
+                  if-no-files-found: ignore
+
+            - name: Save activity layout screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: activity-layout-and-schedule
+                  path: TestResults/deployed-registration
+
+            - name: Verify production assets and API health
+              run: |
+                  node --input-type=module <<'NODE'
+                  import fs from 'node:fs';
+                  import assert from 'node:assert/strict';
+                  import { createHash } from 'node:crypto';
+                  const base = 'https://fptux-clubhub-ui.pages.dev';
+                  const built = fs.readFileSync('dist/index.html', 'utf8');
+                  const asset = built.match(/src="([^"]+\.js)"/)?.[1];
+                  assert.ok(asset, 'Built entry script exists');
+                  let live;
+                  for (let attempt = 0; attempt < 12; attempt++) {
+                    const response = await fetch(base + '/?verification=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
+                    assert.equal(response.status, 200);
+                    live = await response.text();
+                    if (live.includes(asset)) break;
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                  }
+                  assert.ok(live.includes(asset), 'Production serves the newly built entry script');
+                  const response = await fetch(new URL(asset, base));
+                  assert.equal(response.status, 200);
+                  const hash = data => createHash('sha256').update(data).digest('hex');
+                  assert.equal(hash(Buffer.from(await response.arrayBuffer())), hash(fs.readFileSync('dist/' + asset.replace(/^\//, ''))));
+                  const health = await fetch('https://clubreporthub.duckdns.org/health');
+                  assert.equal(health.status, 200);
+                  console.log('ONLINE_SMOKE_OK: production entry and bundle match this build; API health 200');
+                  NODE
+
+# Validate the notification source revision in this release.
+
+# Validate extracted notification component accessibility.
+
+# Run the isolated activity fixture with the production React transform.
+
+# Validate attendance onboarding fixture profile version in this release.

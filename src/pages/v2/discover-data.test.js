@@ -183,7 +183,9 @@ test('production left rail is V2-local, production-routed, and accessible', () =
     assert.match(rail, /'\/v2\/my-schedule'/);
     assert.match(rail, /aria-controls="v2-left-rail-personal-nav"/);
     assert.match(accountSection, /event\.key === 'Escape'/);
-    assert.match(accountSection, /aria-label="Đóng thông báo"/);
+    assert.match(accountSection, /<NotificationPopover/);
+    const notificationPanel = readFileSync(new URL('../../components/v2/common/leftrail/NotificationPopover.jsx', import.meta.url), 'utf8');
+    assert.match(notificationPanel, /aria-label="Đóng thông báo"/);
     assert.match(rail, /onLogout/);
     assert.doesNotMatch(rail, /DemoContext|NotificationContext|fixture|\/v2\/demo/);
     assert.doesNotMatch(rail, /className="[^"]*dx-/);

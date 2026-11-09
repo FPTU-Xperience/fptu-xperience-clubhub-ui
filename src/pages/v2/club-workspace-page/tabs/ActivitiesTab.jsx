@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import DirectoryPagination from '../../../../components/v2/directory-pagination/DirectoryPagination';
+import { useListQuery } from '../../use-list-query';
+import { useMemo } from 'react';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -14,12 +16,15 @@ import WorkspaceTabLayout from './WorkspaceTabLayout';
 import { sortActivitiesNewestFirst } from '../../activity-data';
 
 export default function ActivitiesTab({ manager = false, readOnly = false, dashboard, workspace }) {
+    const [list, setList] = useListQuery({ query: '', status: 'ALL', page: 1 });
+    const { query, status, page } = list;
+    const setQuery = (value) => setList('query', value);
+    const setStatus = (value) => setList('status', value);
+    const setPage = (value) => setList('page', value);
     const clubId = workspace?.clubId;
     const { clubAccess } = useAuth();
     const { semester } = useWorkspaceSemester();
     const navigate = useNavigate();
-    const [query, setQuery] = useState('');
-    const [status, setStatus] = useState('ALL');
     const activities = dashboard.data?.activities || [];
     const visibleActivities = useMemo(
         () =>
@@ -56,6 +61,9 @@ export default function ActivitiesTab({ manager = false, readOnly = false, dashb
             'activity.create',
         );
 
+    const totalPages = Math.max(1, Math.ceil(visibleActivities.length / 12));
+    const currentPage = Math.min(page, totalPages);
+    const pageItems = visibleActivities.slice((currentPage - 1) * 12, currentPage * 12);
     return (
         <>
             <WorkspaceTabLayout
@@ -117,21 +125,22 @@ export default function ActivitiesTab({ manager = false, readOnly = false, dashb
                                 {visibleActivities.length} hoạt động{status !== 'ALL' || query ? ' phù hợp' : ''}
                             </p>
                             {visibleActivities.length ? (
+                                <div>
                                 <div className="v2-event-grid">
-                                    {visibleActivities.map((record) => (
+                                    {pageItems.map((record) => (
                                         <ActivityCard
                                             key={record.id}
                                             activity={{ ...record, clubName: workspace.name }}
                                             publicationLabel={manager ? record.isPublished === true ? 'Đã công khai' : record.isPublished === false || record.sourceApplicationId ? 'Chưa công khai' : 'Chưa đồng bộ xuất bản' : undefined}
                                             onOpen={(activity) =>
                                                 navigate(
-                                                    manager
-                                                        ? `/v2/my-clubs/${encodeURIComponent(workspace.clubCode)}/activities/${activity.id}`
-                                                        : `/v2/activities/${activity.id}`,
+                                                    `${window.location.pathname.replace(/\/$/, '')}/${activity.id}${window.location.search}`,
                                                 )
                                             }
                                         />
                                     ))}
+                                </div>
+                                <DirectoryPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
                                 </div>
                             ) : (
                                 <div>

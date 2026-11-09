@@ -1,17 +1,23 @@
 import { formatErrorMessage, vi } from '../locales/vi';
 import { putImageWithIntent, validateImageUpload } from './media-upload';
-import { applicationsFromMemberships, selectionFromClubAccess } from './my-clubs-adapter';
+import { selectionFromClubAccess } from './my-clubs-adapter';
 import { publishPublicMediaSaved } from './public-media-sync';
 import { createEntityMediaStore } from './entity-media-store.js';
+import { confirmedImageAttachment } from './media-attachment.js';
+import { createSessionClient } from './session-client.js';
+import { verifyBrowserLogin } from './browser-session.js';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000').replace(/\/+$/, '');
-// Keep API failures in-page during local UI work. Production always preserves the login redirect.
-const AUTH_BYPASS_ENABLED = import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH === 'true';
+export const session = createSessionClient({ baseUrl: API_BASE_URL });
 
 class ApiService {
     constructor() {
         this.baseUrl = API_BASE_URL;
         this.media = createEntityMediaStore();
+        let sessionId = session.read()?.id;
+        session.subscribe(record => {
+            if (record?.id !== sessionId) { this.media.reset(); sessionId = record?.id; }
+        });
     }
 
     buildUrl(endpoint) {
@@ -23,7 +29,7 @@ class ApiService {
     }
 
     getToken() {
-        return localStorage.getItem('accessToken');
+        return session.read()?.accessToken || null;
     }
 
     setToken(token) {
@@ -36,8 +42,7 @@ class ApiService {
 
     clearTokens() {
         this.media.reset();
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        session.clear();
     }
 
     async parseResponse(response) {
@@ -90,12 +95,13 @@ class ApiService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(url, {
+        const anonymous = ['/api/auth/google', '/api/auth/email-login', '/api/auth/sso/redeem'].includes(endpoint);
+        const response = await session.authFetch(url, {
             ...options,
             headers,
-        });
+        }, { anonymous });
 
-        if (endpoint === '/api/auth/google' || endpoint === '/api/auth/dev-login') {
+        if (endpoint === '/api/auth/google' || endpoint === '/api/auth/email-login') {
             if (!response.ok) {
                 const authError = new Error(await this.getErrorMessage(response, { isAuthRequest: true }));
                 authError.status = response.status;
@@ -103,34 +109,13 @@ class ApiService {
             }
         }
 
-        if (response.status === 401) {
-            // Try to refresh token
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-                const newToken = await this.refresh(refreshToken);
-                if (newToken) {
-                    headers['Authorization'] = `Bearer ${newToken}`;
-                    const retryResponse = await fetch(url, { ...options, headers });
-                    if (retryResponse.ok) {
-                        return this.parseResponse(retryResponse);
-                    }
-                }
-            }
-            // Clear tokens and redirect to login, unless the local UI bypass owns the session.
-            this.clearTokens();
-            if (!AUTH_BYPASS_ENABLED) window.location.href = '/login';
-            const authError = new Error(vi.errors.unauthorized);
-            authError.status = 401;
-            throw authError;
-        }
-
         if (!response.ok) {
+            const problem = await response.clone().json().catch(() => null);
             const requestError = new Error(await this.getErrorMessage(response));
             requestError.status = response.status;
-            const payload = await this.parseResponse(response).catch(() => null);
-            requestError.code = payload?.code;
-            requestError.errors = payload?.errors;
-            requestError.traceId = payload?.traceId;
+            if (typeof problem?.code === 'string') requestError.code = problem.code;
+            requestError.errors = problem?.errors;
+            requestError.traceId = problem?.traceId;
             throw requestError;
         }
 
@@ -138,65 +123,38 @@ class ApiService {
     }
 
     // Auth endpoints
-    async login(email) {
-        const data = await this.request('/api/auth/dev-login', {
-            method: 'POST',
-            body: JSON.stringify({ email: (email || '').trim() }),
+    async login(email, password) {
+        return session.authenticate(async () => {
+            const version = session.version();
+            const data = await this.request('/api/auth/email-login', {
+                method: 'POST',
+                body: JSON.stringify({ email: (email || '').trim(), password }),
+            });
+            this.media.reset();
+            session.acceptLogin(await verifyBrowserLogin(session, data), version);
+            return data;
         });
-        this.media.reset();
-        this.setToken(data.accessToken);
-        if (data.refreshToken) {
-            this.setRefreshToken(data.refreshToken);
-        }
-        return data;
     }
 
     async loginWithGoogle(credential) {
-        const data = await this.request('/api/auth/google', {
-            method: 'POST',
-            body: JSON.stringify({ credential }),
+        return session.authenticate(async () => {
+            const version = session.version();
+            const data = await this.request('/api/auth/google', {
+                method: 'POST',
+                body: JSON.stringify({ credential }),
+            });
+            this.media.reset();
+            session.acceptLogin(await verifyBrowserLogin(session, data), version);
+            return data;
         });
-        this.media.reset();
-        this.setToken(data.accessToken);
-        if (data.refreshToken) {
-            this.setRefreshToken(data.refreshToken);
-        }
-        return data;
     }
     async refresh(refreshToken) {
-        try {
-            const response = await fetch(this.buildUrl('/api/auth/refresh'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken }),
-            });
-            if (response.ok) {
-                const data = await response.json();
-                this.setToken(data.accessToken);
-                if (data.refreshToken) {
-                    this.setRefreshToken(data.refreshToken);
-                }
-                return data.accessToken;
-            }
-        } catch (e) {
-            console.error('Refresh failed:', e);
-        }
-        return null;
+        return session.refresh();
     }
 
     async logout() {
-        try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-                await this.request('/api/auth/logout', {
-                    method: 'POST',
-                    body: JSON.stringify({ refreshToken }),
-                });
-            }
-        } catch (e) {
-            // Ignore logout errors
-        }
-        this.clearTokens();
+        this.media.reset();
+        await session.logout();
     }
 
     // User administration endpoints
@@ -359,6 +317,7 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify(images),
         });
+        confirmedImageAttachment(updated, images);
         return this.acknowledgeMedia('club', clubId, images, updated, ticket);
     }
 
@@ -376,6 +335,7 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify({ coverImageUrl, expectedVersion }),
         });
+        confirmedImageAttachment(updated, { coverImageUrl });
         return this.acknowledgeMedia('activity', activityId, { coverImageUrl }, updated, ticket);
     }
 
@@ -395,12 +355,13 @@ class ApiService {
     }
 
     async getMyMembershipApplications() {
-        const [memberships, clubs] = await Promise.all([this.getMyMemberships(), this.getClubs()]);
-        return applicationsFromMemberships(memberships, clubs);
+        return this.request('/api/clubs/me/membership-applications');
     }
 
     async withdrawMyMembershipApplication(applicationId) {
-        return this.request(`/api/clubs/me/membership-applications/${applicationId}/withdraw`, { method: 'POST' });
+        return this.request(`/api/clubs/me/membership-applications/${encodeURIComponent(applicationId)}/withdraw`, {
+            method: 'POST', headers: { 'Idempotency-Key': crypto.randomUUID() },
+        });
     }
 
     async getMyClubAccess() {
@@ -426,16 +387,18 @@ class ApiService {
         return this.request('/api/clubs/applications/me');
     }
 
-    async createClubApplication(data) {
+    async createClubApplication(data, key) {
         return this.request('/api/clubs/applications', {
             method: 'POST',
+            ...(key ? { headers: { 'Idempotency-Key': key } } : {}),
             body: JSON.stringify(data),
         });
     }
 
-    async updateClubApplication(id, data) {
+    async updateClubApplication(id, data, key) {
         return this.request(`/api/clubs/applications/${id}`, {
             method: 'PUT',
+            ...(key ? { headers: { 'Idempotency-Key': key } } : {}),
             body: JSON.stringify(data),
         });
     }
@@ -492,10 +455,16 @@ class ApiService {
         return this.request(`/api/clubs/${encodeURIComponent(clubId)}/eligible-members?${query}`);
     }
 
-    async inviteClubMember(clubId, student, semesterId) {
+    async inviteClubMember(clubId, student, semesterId, expectedRosterVersion) {
         return this.request(`/api/clubs/${encodeURIComponent(clubId)}/members`, {
             method: 'POST',
-            body: JSON.stringify({ userId: Number(student.userId), fullName: student.fullName, role: 'CLUB_MEMBER', semesterId }),
+            body: JSON.stringify({
+                userId: Number(student.userId),
+                fullName: student.fullName,
+                role: 'CLUB_MEMBER',
+                semesterId,
+                ...(expectedRosterVersion ? { expectedRosterVersion } : {}),
+            }),
         });
     }
 
@@ -593,7 +562,7 @@ class ApiService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(url, {
+        const response = await session.authFetch(url, {
             method: 'POST',
             headers,
             body: formData,
@@ -617,7 +586,7 @@ class ApiService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(url, {
+        const response = await session.authFetch(url, {
             method: 'PUT',
             headers,
             body: formData,
@@ -645,7 +614,7 @@ class ApiService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(url, {
+        const response = await session.authFetch(url, {
             method: 'GET',
             headers,
         });
@@ -697,9 +666,11 @@ class ApiService {
     }
 
     async downloadReportAttachment(reportId, attachmentId, fileName) {
-        const url = this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`);
+        const url = this.buildUrl(
+            `/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}/download`,
+        );
         const token = this.getToken();
-        const response = await fetch(url, {
+        const response = await session.authFetch(url, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!response.ok) {
@@ -721,7 +692,7 @@ class ApiService {
         const formData = new FormData();
         formData.append('file', file);
         const token = this.getToken();
-        const response = await fetch(this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/upload`), {
+        const response = await session.authFetch(this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/upload`), {
             method: 'POST',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
             body: formData,
@@ -734,10 +705,46 @@ class ApiService {
         return this.parseResponse(response);
     }
 
-    async deleteReportAttachment(reportId, attachmentId) {
-        return this.request(`/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`, {
-            method: 'DELETE',
+    async uploadContributionEvidence(file, key) {
+        const form = new FormData();
+        form.append('file', file);
+        const token = this.getToken();
+        const response = await session.authFetch(this.buildUrl('/api/contributions/evidence'), {
+            method: 'POST',
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'Idempotency-Key': key },
+            body: form,
         });
+        if (!response.ok) {
+            const issue = new Error(await this.getErrorMessage(response));
+            issue.status = response.status;
+            throw issue;
+        }
+        return this.parseResponse(response);
+    }
+
+    async downloadContributionEvidence(id, name = 'minh-chung') {
+        const token = this.getToken();
+        const response = await session.authFetch(this.buildUrl(`/api/contributions/evidence/${encodeURIComponent(id)}/download`), {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!response.ok) throw new Error(await this.getErrorMessage(response));
+        const url = URL.createObjectURL(await response.blob());
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    async deleteReportAttachment(reportId, attachmentId) {
+        return this.request(
+            `/api/reports/${encodeURIComponent(reportId)}/attachments/${encodeURIComponent(attachmentId)}`,
+            {
+                method: 'DELETE',
+            },
+        );
     }
 
     // Activity endpoints
@@ -747,7 +754,9 @@ class ApiService {
         if (hasClubId && (!Number.isSafeInteger(numericClubId) || numericClubId <= 0)) {
             throw new TypeError('Activity clubId must be a positive numeric club ID.');
         }
-        const filters = new URLSearchParams(Object.entries(params).filter(([, value]) => value != null && value !== ''));
+        const filters = new URLSearchParams(
+            Object.entries(params).filter(([, value]) => value != null && value !== ''),
+        );
         if (hasClubId) filters.set('clubId', String(numericClubId));
         const query = filters.size ? `?${filters}` : '';
         return this.readMedia('activity', `/api/activities${query}`);
@@ -757,7 +766,7 @@ class ApiService {
         return this.readMedia('activity', `/api/activities/${id}`);
     }
 
-    // Proposed action/XP application contract; never fall back to direct activity creation.
+    // Proposed action/Xperience Point application contract; never fall back to direct activity creation.
     async getActivityApplication(id) {
         return this.request(`/api/activity-applications/${encodeURIComponent(id)}`);
     }
@@ -975,7 +984,7 @@ class ApiService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(url, {
+        const response = await session.authFetch(url, {
             method: 'GET',
             headers,
         });
@@ -1039,7 +1048,7 @@ class ApiService {
             headers.Authorization = `Bearer ${token}`;
         }
 
-        const response = await fetch(url, { headers });
+        const response = await session.authFetch(url, { headers });
 
         // Log safe diagnostics
         console.log('[Preview] GET', url);

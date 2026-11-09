@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../services/club-capabilities.js';
 export const ACTION_ROLES = [
     ['Participant', 'Người tham gia', 1],
     ['Contributor', 'Người đóng góp', 1.6],
@@ -41,6 +42,7 @@ export const newApplication = (clubId, period = '') => ({
     endTime: '',
     scale: 'Club',
     independentActionsConfirmed: false,
+    isInternal: true,
     actions: [
         newAction({ name: 'Check-in', expectedPeople: 100, maxAwardCount: 100, verificationMethod: 'ATTENDANCE' }),
         newAction({ name: 'Staff supporting', contributionRole: 'Organizer', expectedPeople: 10, maxAwardCount: 10 }),
@@ -67,7 +69,7 @@ export function applicationEstimate(draft) {
 export function applicationPermission(access, permission) {
     if (!access) return false;
     if (Array.isArray(access.permissions)) return access.permissions.includes(permission);
-    return Boolean(access.isManager); // Compatibility until scoped capabilities are returned by Clubs API.
+    return clubCapability(access, 'event.registrations.manage');
 }
 export function validateApplication(draft, now = Date.now(), throughStage = 3) {
     if (!Number.isSafeInteger(Number(draft.clubId)) || Number(draft.clubId) <= 0) return 'CLB không hợp lệ.';
@@ -113,9 +115,9 @@ export function validateApplication(draft, now = Date.now(), throughStage = 3) {
         !Number.isFinite(applicationEstimate(draft).rawXp) ||
         applicationEstimate(draft).rawXp > Number.MAX_SAFE_INTEGER
     )
-        return 'Tổng XP vượt giới hạn tính toán. Vui lòng giảm số lượng hoặc điểm nền.';
+        return 'Tổng Xperience Point vượt giới hạn tính toán. Vui lòng giảm số lượng hoặc điểm nền.';
     if (!draft.independentActionsConfirmed)
-        return 'Xác nhận các action đại diện phần việc độc lập để tránh cộng trùng XP.';
+        return 'Xác nhận các action đại diện phần việc độc lập để tránh cộng trùng Xperience Point.';
     if (throughStage === 1) return '';
     if (draft.recruitment.enabled) {
         if (
@@ -134,7 +136,7 @@ export function validateApplication(draft, now = Date.now(), throughStage = 3) {
     return '';
 }
 // Return the owning step so both step navigation and final submit validate the same draft.
-export function applicationValidationIssue(draft, throughStage = 3, now = Date.now()) {
+export function applicationValidationIssue(draft, throughStage = 3, now = Date.now(), requireObjective = false) {
     for (let stage = 0; stage <= Math.min(throughStage, 2); stage++) {
         const message = validateApplication(draft, now, stage);
         if (message) {
@@ -155,6 +157,9 @@ export function applicationValidationIssue(draft, throughStage = 3, now = Date.n
             }
             return { message, stage, field };
         }
+        if (stage === 0 && requireObjective && !draft.objective.trim()) {
+            return { message: 'Vui lòng nhập mục tiêu hoạt động trước khi gửi duyệt.', stage, field: 'objective' };
+        }
     }
     return null;
 }
@@ -170,6 +175,7 @@ export function applicationPayload(draft) {
         endTimeUtc: activityTimeUtc(draft.endTime),
         scale: draft.scale,
         independentActionsConfirmed: draft.independentActionsConfirmed,
+        isInternal: draft.isInternal !== false,
         actions: draft.actions.map((action) => ({
             clientId: action.clientId,
             name: action.name.trim(),

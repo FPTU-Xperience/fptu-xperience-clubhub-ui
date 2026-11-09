@@ -37,14 +37,10 @@ export default function ClubPageImageModal({
     const submit = async (event) => {
         event.preventDefault();
         if (busy) return;
-        if (cover || tab === 'image') {
-            await onSave(event);
-            return;
-        }
         setGenerating(true);
         setGenerateError('');
         try {
-            const generated = await createInitialsLogoFile(initials, design);
+            const generated = cover || tab === 'image' ? file : await createInitialsLogoFile(initials, design);
             await onSave(event, generated);
         } catch (issue) {
             setGenerateError(issue.message || 'Không thể tạo logo mặc định.');

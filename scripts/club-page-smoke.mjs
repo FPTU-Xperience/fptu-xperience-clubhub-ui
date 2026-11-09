@@ -98,7 +98,7 @@ try {
             await assert.rejects(() => clientApi.updateClubPublicImages(7, {}));
             await assert.rejects(() => clientApi.updateActivityCoverImage(1, 'https://example.com/cover.png'));
             assert.equal(events.length, 0);
-            clientApi.request = async () => ({ saved: true });
+            clientApi.request = async (_path, options) => ({ version: 'saved-version', ...JSON.parse(options.body) });
             await clientApi.updateClubPublicImages(7, {});
             await clientApi.updateActivityCoverImage(1, 'https://example.com/cover.png');
             assert.deepEqual(
@@ -129,7 +129,7 @@ try {
             const eventCount = events.length;
             const oldAccountSave = clientApi.updateClubPublicImages(7, { logoUrl: 'old-account' });
             clientApi.media.reset();
-            finish({ saved: true });
+            finish({ version: 'old-version', logoUrl: 'https://example.com/old-account.png' });
             await oldAccountSave;
             assert.equal(events.length, eventCount);
             assert.equal(clientApi.media.select('club', { id: 7 }).logoUrl, undefined);
@@ -199,16 +199,18 @@ try {
         data: { memberCount: 1, publicLeaders: [{ name: 'Chủ nhiệm công khai', role: 'Chủ nhiệm' }] },
         retry: noop,
     };
-    const publicMembers = render(Members, { manager: false, dashboard, workspace: { clubId: 7 } });
+    const renderMembers = (manager) =>
+        renderToStaticMarkup(
+            React.createElement(
+                StaticRouter,
+                { location: '/v2/my-clubs/C7/members' },
+                React.createElement(AuthProvider, null, React.createElement(Members, { manager, dashboard, workspace: { clubId: 7 } })),
+            ),
+        );
+    const publicMembers = renderMembers(false);
     assert.ok(publicMembers.includes('Chủ nhiệm công khai'));
     assert.ok(!publicMembers.includes('Quản lý thành viên') && !publicMembers.includes('Quản lý đơn'));
-    const managedMembers = renderToStaticMarkup(
-        React.createElement(
-            AuthProvider,
-            null,
-            React.createElement(Members, { manager: true, dashboard, workspace: { clubId: 7 } }),
-        ),
-    );
+    const managedMembers = renderMembers(true);
     assert.ok(managedMembers.includes('Quản lý thành viên') && managedMembers.includes('Quản lý đơn'));
     assert.ok(managedMembers.includes('Thêm thành viên'));
     assert.ok(managedMembers.includes('Xem trách nhiệm và quyền hạn của các vai trò'));
@@ -252,8 +254,8 @@ try {
         const html = render(Info, { club, saving: false, error: 'Lỗi lưu mẫu', onClose: noop, onPreview: noop });
         assert.ok(!html.includes('type="file"'), 'information dialog must not include image uploads');
         for (const field of CLUB_PAGE_FIELDS) assert.ok(html.includes(`name="${field.name}"`));
-        assert.equal((html.match(/role="tab"/g) || []).length, 4);
-        assert.equal((html.match(/role="tabpanel"/g) || []).length, 4);
+        assert.equal((html.match(/role="tab"/g) || []).length, CLUB_PAGE_TABS.length);
+        assert.equal((html.match(/role="tabpanel"/g) || []).length, CLUB_PAGE_TABS.length);
         assert.equal((html.match(/aria-selected="true"/g) || []).length, 1);
         for (const tab of CLUB_PAGE_TABS) {
             assert.ok(html.includes(`aria-controls="club-page-panel-${tab.id}"`));

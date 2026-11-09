@@ -5,12 +5,13 @@ import { normalizeShapeHsl } from './cover-design.js';
 import { normalizeSvgPalette } from './svg-palette.js';
 import { rewardLifecycle } from './reward-lifecycle.js';
 import { recordGiftClaim } from './gift-sections.js';
+import { serverCosmeticDefinitions, serverCosmeticInventory } from '../../../services/server-cosmetics-cache.js';
 
 export function getCoverColors(storage = globalThis.localStorage) {
-    return [...COVER_COLORS, ...readClubGifts(storage).filter((gift) => gift.kind === 'color')];
+    return [...COVER_COLORS, ...serverCosmeticDefinitions('color'), ...readClubGifts(storage).filter((gift) => gift.kind === 'color')];
 }
 export function getAvatarFrames(storage = globalThis.localStorage) {
-    return [...AVATAR_FRAMES, ...readClubGifts(storage).filter((gift) => gift.kind === 'frame')];
+    return [...AVATAR_FRAMES, ...serverCosmeticDefinitions('frame'), ...readClubGifts(storage).filter((gift) => gift.kind === 'frame')];
 }
 
 export const COVER_COLORS = [
@@ -160,6 +161,7 @@ export function readClubShapes(storage = globalThis.localStorage) {
 export function getCoverShapes(storage = globalThis.localStorage) {
     return [
         ...COVER_SHAPES,
+        ...serverCosmeticDefinitions('shape'),
         ...FPT_DEV_COMBOS.map((combo) => ({ ...combo, id: combo.shapeId, kind: 'shape' })),
         ...readClubShapes(storage),
     ];
@@ -219,6 +221,7 @@ export const COVER_REWARDS = [...FPT_DEV_COMBOS, ...AVATAR_FRAME_REWARDS];
 const identity = (user) => (user?.id === undefined || user?.id === null ? '' : String(user.id));
 export const cosmeticsStorageKey = (user) => (identity(user) ? `clubhub:v2:cover-rewards:${identity(user)}` : null);
 export function readCoverInventory(user, storage = globalThis.localStorage) {
+    if (import.meta.env?.PROD) return serverCosmeticInventory(user?.id);
     const key = cosmeticsStorageKey(user);
     if (!key) return { owned: [], wallets: {} };
     try {

@@ -1,5 +1,8 @@
+import { activityWorkspacePath } from '../../../services/activity-club-navigation';
+import StudentActivityActions from '../../../components/v2/activity-detail/StudentActivityActions';
+import { useMyClubSelection, useMyApprovedMemberships } from '../my-clubs-data';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { useActivityDetail } from '../activity-data';
 import { isActivityPublic } from '../activity-publication';
 import { useClubDirectory } from '../discover-data';
@@ -12,8 +15,7 @@ import '../../../components/v2/activity-card/ActivityCard.scss';
 import './ActivityDetailPage.scss';
 import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLinks';
 import ActivityStaffingPanel from '../../../components/v2/activity-detail/ActivityStaffingPanel';
-import StudentActivityActions from '../../../components/v2/activity-detail/StudentActivityActions';
-import ActivitySessionsPanel from '../../../components/v2/activity-detail/ActivitySessionsPanel';
+import StudentSessionSources from '../../../components/v2/activity-detail/StudentSessionSources';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -22,56 +24,75 @@ const tabs = [
     ['assignments', 'Phân công'],
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh của tôi'],
-    ['sessions', 'Buổi & đóng góp'],
 ];
-function PublicActivityProfile({ activity, clubCode, sessionKey, api, onChanged }) {
-    const [tab, setTab] = useState('overview');
-    const resources = publicActivityResources(activity.resources);
-    const clubLink = <ClubNavigationLinks clubCode={clubCode} />;
+export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onChanged, workspaceRead = false, activeTab, onTabChange, refreshing = false }) {
+    const [localTab, setLocalTab] = useState('overview');
+    const tab = activeTab ?? localTab;
+    const setTab = onTabChange ?? setLocalTab;
+    const resources = workspaceRead ? activity.resources : publicActivityResources(activity.resources);
+    const membership = useMyClubSelection(api, sessionKey);
+    const approvedMemberships = useMyApprovedMemberships(api, sessionKey);
+    const workspacePath = activityWorkspacePath(activity.clubId, membership, approvedMemberships);
+    const clubLink = <ClubNavigationLinks clubCode={clubCode} workspacePath={workspacePath} />;
     return (
-        <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink}>
-            {tab === 'overview' && <>
-                <ActivityOverview activity={activity} clubLink={clubLink} />
-                <StudentActivityActions api={api} activity={activity} onChanged={onChanged} />
-            </>}
+        <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink} registrationActions={<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}>
+            {refreshing ? <PageState status="loading" /> : <>
+            {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
             {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
-            {['assignments', 'recruitment'].includes(tab) && <ActivityStaffingPanel activityId={activity.id} mode={tab} />}
+            {['media', 'documents'].includes(tab) && activity.resourceAvailability !== 'AVAILABLE' && (
+                <p role="status">Chưa tải được nguồn tài nguyên hoặc bạn chưa có quyền xem.</p>
+            )}
+            {['assignments', 'recruitment'].includes(tab) && (
+                <ActivityStaffingPanel key={`${sessionKey}:${activity.id}:${tab}`} activityId={activity.id} mode={tab} />
+            )}
             {tab === 'attendance' && (
                 <div className="v2-activity-profile-panel">
                     <ActivityAttendance key={`${sessionKey}:${activity.id}`} activity={activity} manager={false} />
+                    <StudentSessionSources
+                        key={`sessions:${sessionKey}:${activity.id}`}
+                        api={api}
+                        activityId={activity.id}
+                        onChanged={onChanged}
+                    />
                 </div>
             )}
-            {tab === 'sessions' && <ActivitySessionsPanel key={`${sessionKey}:${activity.id}`} api={api} activity={activity} student readOnly onChanged={onChanged} />}
+            </>}
         </ActivityProfileLayout>
     );
 }
 
 export default function ActivityDetailPage({ api, sessionKey }) {
     const { activityId } = useParams();
-    const result = useActivityDetail(api, sessionKey, activityId);
+    const location = useLocation();
+    const [selection, setSelection] = useState({ activityId, tab: 'overview' });
+    const tab = selection.activityId === activityId ? selection.tab : 'overview';
+    const result = useActivityDetail(api, sessionKey, activityId, true, tab);
     const activity = result.data;
     const directory = useClubDirectory(api, sessionKey);
     const clubCode =
-        activity?.clubCode || directory.data?.find((club) => String(club.id) === activity?.clubId)?.code || '';
+        directory.data?.find((club) => String(club.id) === String(activity?.clubId))?.code || activity?.clubCode || '';
     return (
         <div className="v2-public-content v2-activity-detail-page">
-            <Link className="v2-text-link" to="/v2/activities">
+            <Link className="v2-text-link" to={`/v2/activities${location.search}`}>
                 ← Quay lại hoạt động
             </Link>
-            {result.status === 'populated' && !isActivityPublic(activity) ? (
+            {activity && !isActivityPublic(activity) ? (
                 <PageState
                     status="not-found"
                     title="Hoạt động chưa công khai"
                     description="Hoạt động này chưa được xuất bản hoặc đã được ẩn."
                 />
-            ) : result.status === 'populated' ? (
+            ) : activity ? (
                 <PublicActivityProfile
                     key={`${sessionKey}:${activity.id}`}
                     activity={activity}
                     clubCode={clubCode}
                     sessionKey={sessionKey}
                     api={api}
+                    activeTab={tab}
+                    onTabChange={(next) => setSelection({ activityId, tab: next })}
+                    refreshing={result.status === 'loading'}
                     onChanged={result.retry}
                 />
             ) : (

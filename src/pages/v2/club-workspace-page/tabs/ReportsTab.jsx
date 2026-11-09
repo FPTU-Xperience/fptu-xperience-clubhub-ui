@@ -1,3 +1,5 @@
+import { clubCapability } from '../../../../services/club-capabilities';
+import { useListQuery } from '../../use-list-query';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
 import { workspaceSemesterQuery, workspaceSemesterKey } from '../workspace-semester-data';
 import { useCallback, useEffect, useState } from 'react';
@@ -21,15 +23,16 @@ const statusLabel = (status) =>
     })[status] || status;
 
 export default function ReportsTab({ workspace, readOnly = false }) {
-    const [page, setPage] = useState(1);
+    const [list, setList] = useListQuery({ page: 1 });
+    const { page } = list;
+    const setPage = (value) => setList('page', value);
     const [choosingTemplate, setChoosingTemplate] = useState(false);
     const location = useLocation();
     const clubId = workspace?.clubId;
     const { api, clubAccess } = useAuth();
-    const canCreate = clubAccess.some((access) => String(access.clubId) === String(clubId) && access.isManager);
+    const canCreate = clubAccess.some((access) => String(access.clubId) === String(clubId) && clubCapability(access, 'club.reports.draft.write'));
     const { semester } = useWorkspaceSemester();
     useEffect(() => {
-        setPage(1);
         setChoosingTemplate(false);
     }, [clubId, semester]);
     const load = useCallback(
@@ -102,7 +105,7 @@ export default function ReportsTab({ workspace, readOnly = false }) {
                                         {report.dueDate ? new Date(report.dueDate).toLocaleDateString('vi-VN') : '—'}
                                     </em>
                                     <Link
-                                        to={`${location.pathname.replace(/\/$/, '')}/${encodeURIComponent(report.id)}`}
+                                        to={`${location.pathname.replace(/\/$/, '')}/${encodeURIComponent(report.id)}${location.search}`}
                                         aria-label={`Xem báo cáo ${report.id}`}
                                     >
                                         <ArrowUpRight size={18} />

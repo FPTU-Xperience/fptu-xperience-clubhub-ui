@@ -27,15 +27,22 @@ import AffairsClubWorkspace from './affairs-page/AffairsClubWorkspace';
 import ClubGovernancePreview from './club-workspace-page/tabs/members/governance/ClubGovernancePreview';
 import ReportDetailPage from './report-detail-page/ReportDetailPage';
 import ReportEditorPage from './report-detail-page/ReportEditorPage';
+import PersonalExperiencePage from './personal-experience/PersonalExperiencePage';
 import './V2App.scss';
 import '../../components/v2/experience/ExperienceOperations.scss';
 import { PinnedClubsProvider } from './pinned-clubs';
+import GuidedHelp from '../../components/guided-help/GuidedHelp';
+import { clubGuidePlan } from '../../components/guided-help/guide-plans';
+import { campusLabel } from './profile-options';
+import usePublicGuide from '../../components/guided-help/usePublicGuide';
+import { isAffairsViewer } from './affairs-access';
 const DemoApp = lazy(() => import('./DemoApp'));
 
 function AuthenticatedV2App() {
     const { user, logout, clubAccess, api } = useAuth();
     const location = useLocation();
     const sessionKey = user?.id || user?.email || 'anonymous';
+    const publicGuide = usePublicGuide(sessionKey, !isAffairsViewer(user));
     const { profileImages, profileResult } = usePersonalMedia();
 
     if (location.pathname.startsWith('/v2/demo')) {
@@ -54,12 +61,12 @@ function AuthenticatedV2App() {
     return (
         <EntityMediaProvider api={api}>
         <PinnedClubsProvider key={sessionKey} api={api} accountKey={sessionKey}>
-            <div className={`v2-app${workspace ? ' v2-app--workspace' : ''}${directory ? ' v2-app--directory' : ''}`}>
+            <div data-guide-route={location.pathname + location.search} className={`v2-app${workspace ? ' v2-app--workspace' : ''}${directory ? ' v2-app--directory' : ''}`}>
                 <a className="v2-skip-link" href="#v2-main">
                     Đến nội dung chính
                 </a>
                 {!workspace && (
-                    <LeftRail user={user} profile={profileResult.data?.profile} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} />
+                    <LeftRail user={user} profile={profileResult.data?.profile} avatarUrl={profileImages.images.avatar} onLogout={logout} api={api} onStartGuide={publicGuide.start} />
                 )}
                 <main id="v2-main" className="v2-main">
                     <Routes>
@@ -72,7 +79,7 @@ function AuthenticatedV2App() {
                             <Route path="admin" element={<AffairsPage section="admin" />} />
                             <Route path="*" element={<Navigate to="/v2/clubs" replace />} />
                         </Route>
-                        <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} />} />
+                        <Route index element={<DiscoverPage api={api} sessionKey={sessionKey} campus={campusLabel(user?.campusCode) || 'FPTU'} />} />
                         <Route path="clubs" element={<AllClubsPage api={api} sessionKey={sessionKey} />} />
                         <Route path="activities" element={<ActivitiesPage api={api} sessionKey={sessionKey} />} />
                         <Route
@@ -80,6 +87,7 @@ function AuthenticatedV2App() {
                             element={<ActivityDetailPage api={api} sessionKey={sessionKey} />}
                         />
                         <Route path="my-clubs" element={<MyClubsPage api={api} sessionKey={sessionKey} />} />
+                        <Route path="personal-experience" element={<PersonalExperiencePage key={sessionKey} api={api} user={user} clubAccess={clubAccess} />} />
                         <Route path="reports/:reportId" element={<div className="v2-public-content"><ReportDetailPage key={`${sessionKey}:${location.pathname}`} api={api} sessionKey={sessionKey} /></div>} />
                         <Route path="reports/create" element={<div className="v2-public-content"><ReportEditorPage key={`${sessionKey}:${location.pathname}:${location.search}`} api={api} sessionKey={sessionKey} /></div>} />
                         <Route path="reports/:reportId/edit" element={<div className="v2-public-content"><ReportEditorPage key={`${sessionKey}:${location.pathname}`} api={api} sessionKey={sessionKey} /></div>} />
@@ -108,6 +116,8 @@ function AuthenticatedV2App() {
                     </Routes>
                 </main>
                 {!workspace && <Footer />}
+                {workspace && <GuidedHelp plan={clubGuidePlan(location.pathname)} routeKey={location.pathname + location.search} accountKey={sessionKey} />}
+                {publicGuide.notice && <p className="web-guide-notice web-guide-public-notice" role="status">{publicGuide.notice}</p>}
             </div>
         </PinnedClubsProvider>
         </EntityMediaProvider>

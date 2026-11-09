@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageState from '../../../components/v2/PageState';
@@ -6,15 +6,29 @@ import MyClubCard from '../../../components/v2/my-clubs/MyClubCard';
 import MyMembershipApplications from '../../../components/v2/my-clubs/MyMembershipApplications';
 import {
     APPLICATION_RESULT_WINDOW_MS,
-    isMyClubsMockEnabled,
     useMyMembershipApplications,
     visibleSentApplications,
 } from '../my-clubs-data';
 import { usePinnedClubs } from '../pinned-clubs';
 import PersonalPageHeading from '../personal-pages/PersonalPageHeading';
+import { useAuth } from '../../../context/AuthContext';
+import { PERMISSIONS } from '../../../auth/permissions';
+import ClubRegistrationModal from './ClubRegistrationModal';
+import MyClubFormationApplications from './MyClubFormationApplications';
 import './MyClubsPage.scss';
 
 export default function MyClubsPage({ api, sessionKey }) {
+    const { user, hasPermission } = useAuth();
+    const canRegister = hasPermission(PERMISSIONS.APPLY_FOR_CLUB);
+    const [registrationOpen, setRegistrationOpen] = useState(false);
+    const [registrationNotice, setRegistrationNotice] = useState('');
+    const [formationRevision, setFormationRevision] = useState(0);
+    const [revising, setRevising] = useState(null);
+    useEffect(() => {
+        setRegistrationOpen(false);
+        setRegistrationNotice('');
+        setRevising(null);
+    }, [sessionKey]);
     const { selection, pinnedClubs, togglePin } = usePinnedClubs();
     const applications = useMyMembershipApplications(api, sessionKey);
     const [now, setNow] = useState(Date.now);
@@ -34,7 +48,6 @@ export default function MyClubsPage({ api, sessionKey }) {
     }, [applications.data, now]);
     const [withdrawingId, setWithdrawingId] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
-    const [mockWithdrawnIds, setMockWithdrawnIds] = useState([]);
     const navigate = useNavigate();
     const [acceptingId, setAcceptingId] = useState('');
     const [invitationError, setInvitationError] = useState('');
@@ -78,14 +91,9 @@ export default function MyClubsPage({ api, sessionKey }) {
         setWithdrawingId(applicationId);
         setWithdrawError('');
         try {
-            if (isMyClubsMockEnabled) {
-                await new Promise((resolve) => setTimeout(resolve, 350));
-                setMockWithdrawnIds((ids) => [...ids, applicationId]);
-            } else {
-                await api.withdrawMyMembershipApplication(applicationId);
-                applications.retry();
-                selection.retry();
-            }
+            await api.withdrawMyMembershipApplication(applicationId);
+            applications.retry();
+            selection.retry();
         } catch {
             setWithdrawError('Không thể rút đơn lúc này. Bạn có thể thử lại.');
         } finally {
@@ -98,11 +106,38 @@ export default function MyClubsPage({ api, sessionKey }) {
                 title="Câu lạc bộ của tôi"
                 description="Mỗi cộng đồng, một phần trong hành trình của bạn."
                 action={
-                    <Link className="v2-button" to="/v2/clubs">
-                        Khám phá thêm <ArrowUpRight size={16} />
-                    </Link>
+                    <div className="v2-my-clubs-heading-actions">
+                        {canRegister && (
+                            <button type="button" className="v2-button v2-button--primary" onClick={() => {
+                                setRegistrationNotice('');
+                                setRevising(null); setRegistrationOpen(true);
+                            }}>
+                                <Plus size={16} /> Đăng ký mở CLB
+                            </button>
+                        )}
+                        <Link className="v2-button" to="/v2/clubs">
+                            Khám phá thêm <ArrowUpRight size={16} />
+                        </Link>
+                    </div>
                 }
             />
+            {registrationNotice && <p role="status">{registrationNotice}</p>}
+            {canRegister && registrationOpen && (
+                <ClubRegistrationModal
+                    key={`${sessionKey}:${revising?.id || 'new'}`}
+                    api={api}
+                    user={user}
+                    application={revising}
+                    onClose={() => { setRegistrationOpen(false); setRevising(null); }}
+                    onCreated={() => {
+                        setRegistrationOpen(false);
+                        setRevising(null);
+                        setFormationRevision(value => value + 1);
+                        setRegistrationNotice('Đã gửi đơn đăng ký mở CLB. Đơn đang chờ xét duyệt.');
+                    }}
+                />
+            )}
+            {canRegister && <MyClubFormationApplications key={sessionKey} api={api} userId={user?.id} revision={formationRevision} onRevise={row => { setRevising(row); setRegistrationOpen(true); }} />}
             <PageState
                 status={selection.status}
                 onRetry={selection.retry}
@@ -131,9 +166,7 @@ export default function MyClubsPage({ api, sessionKey }) {
                 description={applications.status === 'empty' ? 'Bạn chưa có đơn tham gia nào.' : undefined}
             >
                 <MyMembershipApplications
-                    applications={visibleSentApplications(applications.data, now).filter(
-                        (application) => !mockWithdrawnIds.includes(application.applicationId),
-                    )}
+                    applications={visibleSentApplications(applications.data, now)}
                     withdrawingId={withdrawingId}
                     onWithdraw={withdraw}
                     acceptingId={acceptingId}

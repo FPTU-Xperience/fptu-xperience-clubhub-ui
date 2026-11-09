@@ -403,7 +403,7 @@ export function Points() {
                 <div>
                     <h3>Điểm rõ ràng. Đóng góp có ý nghĩa.</h3>
                     <p>
-                        Điểm ở đây là dữ liệu minh họa, chưa áp dụng công thức XP hay chỉ số 6+1 chính thức. Bạn luôn
+                        Điểm ở đây là dữ liệu minh họa, chưa áp dụng công thức Xperience Point hay chỉ số 6+1 chính thức. Bạn luôn
                         xem được lý do và người xác nhận từng lần ghi nhận.
                     </p>
                 </div>

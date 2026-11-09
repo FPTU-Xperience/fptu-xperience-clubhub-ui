@@ -33,7 +33,7 @@ test('review controls preserve the existing manager and final-review stages', ()
 });
 
 test('uploaded authors can submit but do not gain manager editing rights', () => {
-    const access = reportDetailAccess({ ...report, contentSource: 'UPLOADED_FILE' }, author, []);
+    const access = reportDetailAccess({ ...report, contentSource: 'UPLOADED_FILE' }, author, [{clubId: 7, isApprovedMember: true}]);
     assert.equal(access.submit, true);
     assert.equal(access.edit, false);
     assert.equal(access.attachments, false);

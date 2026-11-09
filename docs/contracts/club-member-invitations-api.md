@@ -1,3 +1,5 @@
+> Current reconciliation — 2026-10-26: [API/UI integration and remaining obligations](main-api-ui-reconciliation-2026-10-26.md) supersedes older absence/browser-only claims for the capabilities listed there. The earlier audit/checklists below are historical; source integration and live acceptance remain separate.
+
 # Club member invitations and CTSV semester roster
 
 Implement Status: Not Yet
