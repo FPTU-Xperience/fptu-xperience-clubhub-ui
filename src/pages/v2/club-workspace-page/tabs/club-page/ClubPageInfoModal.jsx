@@ -10,6 +10,7 @@ export default function ClubPageInfoModal({ club: sourceClub, saving, error, onC
     const { semester } = useWorkspaceSemester();
     const club = {
         ...sourceClub,
+        advisorNeeded: sourceClub.advisorNeeded ?? false,
         scheduleLabel: persistedClubScheduleLabel(sourceClub.schedule, semester) || sourceClub.scheduleLabel,
     };
     const [categories, setCategories] = useState(null);
@@ -30,7 +31,7 @@ export default function ClubPageInfoModal({ club: sourceClub, saving, error, onC
             active = false;
         };
     }, [api]);
-    const [draft, setDraft] = useState(() => Object.fromEntries(fields.map(({ name }) => [name, String(club[name] ?? (name === 'advisorNeeded' ? false : ''))])));
+    const [draft, setDraft] = useState(() => Object.fromEntries(fields.map(({ name }) => [name, String(club[name] ?? '')])));
     const [activeTab, setActiveTab] = useState(tabs[0].id);
     const [validation, setValidation] = useState('');
     const controls = useRef({});
