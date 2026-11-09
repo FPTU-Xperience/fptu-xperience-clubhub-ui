@@ -40,6 +40,16 @@ const draft = () => ({
     endTime: '2026-11-01T12:00',
     independentActionsConfirmed: true,
 });
+test('the objective is optional for draft saves and required before submission', () => {
+    const data = { ...draft(), objective: '   ' };
+    assert.equal(applicationValidationIssue(data, 3, now), null);
+    assert.deepEqual(applicationValidationIssue(data, 3, now, true), {
+        message: 'Vui lòng nhập mục tiêu hoạt động trước khi gửi duyệt.',
+        stage: 0,
+        field: 'objective',
+    });
+    assert.equal(applicationValidationIssue({ ...data, objective: 'Mục tiêu' }, 3, now, true), null);
+});
 test('action budget matches agreed 7100 example and never applies tier base twice', () => {
     const data = draft();
     assert.equal(validateApplication(data, now), '');

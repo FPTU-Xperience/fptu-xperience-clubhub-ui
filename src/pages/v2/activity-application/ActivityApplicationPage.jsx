@@ -200,7 +200,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
     const changeRecruitment = (key, value) => change('recruitment', { ...draft.recruitment, [key]: value });
     const save = async (submit) => {
         if (lock.current || readOnly || !canEdit || (submit && !canSubmit)) return;
-        const validation = applicationValidationIssue(draft);
+        const validation = applicationValidationIssue(draft, undefined, undefined, submit);
         if (validation) {
             setError(validation.message);
             setValidationIssue(validation);
@@ -418,7 +418,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 onChange={(v) => change('location', v)}
                             />
                             <Field
-                                label="Mục tiêu"
+                                label="Mục tiêu (bắt buộc khi gửi duyệt)"
                                 name="objective"
                                 value={draft.objective}
                                 maxLength={2000}

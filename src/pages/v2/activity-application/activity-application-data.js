@@ -136,7 +136,7 @@ export function validateApplication(draft, now = Date.now(), throughStage = 3) {
     return '';
 }
 // Return the owning step so both step navigation and final submit validate the same draft.
-export function applicationValidationIssue(draft, throughStage = 3, now = Date.now()) {
+export function applicationValidationIssue(draft, throughStage = 3, now = Date.now(), requireObjective = false) {
     for (let stage = 0; stage <= Math.min(throughStage, 2); stage++) {
         const message = validateApplication(draft, now, stage);
         if (message) {
@@ -156,6 +156,9 @@ export function applicationValidationIssue(draft, throughStage = 3, now = Date.n
                             : 'endTime';
             }
             return { message, stage, field };
+        }
+        if (stage === 0 && requireObjective && !draft.objective.trim()) {
+            return { message: 'Vui lòng nhập mục tiêu hoạt động trước khi gửi duyệt.', stage, field: 'objective' };
         }
     }
     return null;
