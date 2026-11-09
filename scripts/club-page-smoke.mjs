@@ -98,7 +98,7 @@ try {
             await assert.rejects(() => clientApi.updateClubPublicImages(7, {}));
             await assert.rejects(() => clientApi.updateActivityCoverImage(1, 'https://example.com/cover.png'));
             assert.equal(events.length, 0);
-            clientApi.request = async () => ({ saved: true });
+            clientApi.request = async (_path, options) => ({ version: 'saved-version', ...JSON.parse(options.body) });
             await clientApi.updateClubPublicImages(7, {});
             await clientApi.updateActivityCoverImage(1, 'https://example.com/cover.png');
             assert.deepEqual(
@@ -129,7 +129,7 @@ try {
             const eventCount = events.length;
             const oldAccountSave = clientApi.updateClubPublicImages(7, { logoUrl: 'old-account' });
             clientApi.media.reset();
-            finish({ saved: true });
+            finish({ version: 'old-version', logoUrl: 'https://example.com/old-account.png' });
             await oldAccountSave;
             assert.equal(events.length, eventCount);
             assert.equal(clientApi.media.select('club', { id: 7 }).logoUrl, undefined);

@@ -3,6 +3,12 @@ import { mapActivityResources } from '../../components/v2/activity-detail/activi
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 import { activityPublication, isActivityPublic } from './activity-publication.js';
 import { resolveActivityContactPoint } from './activity-contact-point.js';
+import {
+    loadStudentActivityFeed,
+    loadStudentActivitySchedule,
+    loadStudentActivityDetail,
+    loadStudentRecommendations,
+} from '../../services/student-read-api.js';
 
 export function classifyActivityError(error) {
     if (error?.status === 403) return 'forbidden';
@@ -12,17 +18,21 @@ export function classifyActivityError(error) {
 
 export function mapActivityDetailItem(raw = {}) {
     const legacyStatus = String(raw.status || '').toUpperCase();
-    const status = legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
+    const status = legacyStatus === 'SCHEDULED' && raw.timeline?.status
+        ? raw.timeline.status
+        : legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
     if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(status)) return null;
     return {
         ...activityPublication(raw),
-        version: raw.version,
-        nextSessionId: raw.nextSessionId,
-        sessionVersion: raw.sessionVersion,
-        canRegister: raw.canRegister === true,
-        semesterId: raw.semesterId,
-        policyVersion: raw.policyVersion,
         id: String(raw.id),
+        canRegister: raw.canRegister === true,
+        isRegistered: raw.isRegistered === true,
+        canCancelRegistration: raw.canCancelRegistration === true,
+        registrationVersion: typeof raw.registrationVersion === 'string' ? raw.registrationVersion : null,
+        isEligible: raw.isEligible === true,
+        isInternal: typeof raw.isInternal === 'boolean' ? raw.isInternal : null,
+        version: typeof raw.version === 'string' ? raw.version : null,
+        resourceAvailability: raw.resourceAvailability || 'UNCONFIGURED',
         clubId: String(raw.clubId || ''),
         clubCode: String(raw.clubCode || raw.code || ''),
         clubName: String(raw.clubName || 'CLB'),
@@ -30,10 +40,13 @@ export function mapActivityDetailItem(raw = {}) {
         description: String(raw.description || ''),
         contactPoint: resolveActivityContactPoint(raw),
         coverImageUrl: String(raw.coverImageUrl || ''),
-        startTime: raw.startTime || raw.startTimeUtc || '',
-        endTime: raw.endTime || raw.endTimeUtc || '',
+        startTime: raw.timeline?.startTimeUtc || raw.startTime || raw.startTimeUtc || '',
+        endTime: raw.timeline?.endTimeUtc || raw.endTime || raw.endTimeUtc || '',
         resources: mapActivityResources(raw.resources),
         resourceCapabilities: {
+            supportedKinds: Array.isArray(raw.resourceCapabilities?.supportedKinds)
+                ? raw.resourceCapabilities.supportedKinds
+                : [],
             canManage: raw.resourceCapabilities?.canManage === true,
             canUpload: raw.resourceCapabilities?.canUpload === true,
         },
@@ -48,27 +61,31 @@ export function mapActivityFeedItem(raw = {}) {
     return item && isActivityPublic(item) && ['UPCOMING', 'LIVE'].includes(item.status) ? item : null;
 }
 
-export function useActivityDetail(api, sessionKey, activityId, management = false) {
+export function useActivityDetail(api, sessionKey, activityId, student = false, refreshKey = 0) {
     const mediaRevision = usePublicMediaRevision('activity');
-    const identity = `${sessionKey}:${activityId}:${management}`;
+    const identity = `${sessionKey}:${activityId}:${student}`;
     const [version, setVersion] = useState(0);
-    const [result, setResult] = useState({ identity, status: 'loading', data: null });
+    const [result, setResult] = useState({ identity, refreshKey, status: 'loading', data: null });
     useEffect(() => {
         let active = true;
         const id = Number(activityId);
         if (!Number.isSafeInteger(id) || id <= 0) {
-            setResult({ identity, status: 'not-found', data: null });
+            setResult({ identity, refreshKey, status: 'not-found', data: null });
             return undefined;
         }
-        setResult({ identity, status: 'loading', data: null });
+        setResult((previous) => ({
+            identity, refreshKey, status: 'loading',
+            data: previous.identity === identity ? previous.data : null,
+        }));
         Promise.resolve()
-            .then(() => management ? api.getActivity(id) : api.getStudentActivity(id))
+            .then(() => (student ? loadStudentActivityDetail(api, id) : api.getActivity(id)))
             .then(
                 (raw) => {
                     const activity = mapActivityDetailItem(raw);
                     if (active)
                         setResult({
                             identity,
+                            refreshKey,
                             status: activity && Number(activity.id) === id ? 'populated' : 'not-found',
                             data: activity && Number(activity.id) === id ? activity : null,
                         });
@@ -77,6 +94,7 @@ export function useActivityDetail(api, sessionKey, activityId, management = fals
                     if (active)
                         setResult({
                             identity,
+                            refreshKey,
                             status: error?.status === 404 ? 'not-found' : classifyActivityError(error),
                             data: null,
                         });
@@ -85,8 +103,10 @@ export function useActivityDetail(api, sessionKey, activityId, management = fals
         return () => {
             active = false;
         };
-    }, [api, activityId, management, sessionKey, version, mediaRevision]);
-    const current = result.identity === identity ? result : { status: 'loading', data: null };
+    }, [api, activityId, sessionKey, version, mediaRevision, student, refreshKey]);
+    const current = result.identity === identity && result.refreshKey === refreshKey ? result : {
+        status: 'loading', data: result.identity === identity ? result.data : null,
+    };
     return { ...current, retry: () => setVersion((value) => value + 1) };
 }
 
@@ -112,6 +132,15 @@ export function mapRecommendations(value) {
         .filter((row) => Number.isInteger(row.rank) && row.rank > 0 && row.activity)
         .sort((a, b) => a.rank - b.rank)
         .filter((row, index, list) => list.findIndex((item) => item.activity.id === row.activity.id) === index)
+        .slice(0, 6);
+}
+
+// Discovery includes live and non-registerable activities too. Recommendations
+// only order the authorized feed; they never determine its availability or scope.
+export function selectDiscoveryActivities(feed, recommendations, status = 'ALL') {
+    const ranks = new Map(recommendations.map(({ activity, rank }) => [activity.id, rank]));
+    return filterActivityFeed(feed, '', status)
+        .sort((left, right) => (ranks.get(left.id) ?? Number.MAX_SAFE_INTEGER) - (ranks.get(right.id) ?? Number.MAX_SAFE_INTEGER))
         .slice(0, 6);
 }
 
@@ -154,7 +183,11 @@ function useActivityRequest(loader, mapper, sessionKey) {
             .then((value) => {
                 if (id !== request.current) return;
                 const data = mapper(value);
-                setResult({ status: data.length ? 'populated' : 'empty', data });
+                setResult({ status: data.length ? 'populated' : 'empty', data,
+                    metadata: typeof value?.mode === 'string' ? {
+                        mode: value.mode, personalizationAvailable: value.personalizationAvailable,
+                        personalizationUnavailableReason: value.personalizationUnavailableReason,
+                    } : null });
             })
             .catch((error) => {
                 if (id === request.current) setResult({ status: classifyActivityError(error), data: [], error });
@@ -166,28 +199,42 @@ function useActivityRequest(loader, mapper, sessionKey) {
     return { ...result, retry: () => setVersion((value) => value + 1) };
 }
 
-export async function loadStudentActivityFeed(api, clubId) {
-    const items = [];
-    let scopeVersion;
-    for (let page = 1; ; page++) {
-        const response = await api.getStudentActivities({ ...(clubId ? { clubId } : {}), page, pageSize: 100 });
-        if (!Array.isArray(response?.items) || !Number.isSafeInteger(response.totalPages) || response.totalPages < 0)
-            throw new Error('Máy chủ trả về trang hoạt động không hợp lệ.');
-        if (scopeVersion !== undefined && response.scopeVersion !== scopeVersion)
-            throw new Error('Quyền xem hoạt động đã thay đổi. Vui lòng tải lại.');
-        scopeVersion = response.scopeVersion;
-        items.push(...response.items);
-        if (page >= response.totalPages) return items;
-    }
-}
-
 export function useActivityFeed(api, sessionKey, clubId) {
     const loader = useCallback(() => loadStudentActivityFeed(api, clubId), [api, clubId]);
     const mapper = useCallback(mapActivityFeed, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }
 export function useRecommendedActivities(api, sessionKey) {
-    const loader = useCallback(() => api.getRecommendedActivities(), [api]);
+    const loader = useCallback(() => loadStudentRecommendations(api), [api]);
     const mapper = useCallback(mapRecommendations, []);
+    return useActivityRequest(loader, mapper, sessionKey);
+}
+
+export function mapMyActivitySchedule(rows, now = Date.now()) {
+    const seen = new Set();
+    return rows.filter(row => {
+        const key = `${row.activityId}:${row.sessionId ?? 'legacy'}`;
+        if (!row.activityId || seen.has(key) || !Number.isFinite(Date.parse(row.startTime)) ||
+            !(Date.parse(row.endTime) > now) ||
+            [row.activityStatus, row.sessionStatus].some(status => ['CANCELLED', 'COMPLETED'].includes(String(status).toUpperCase())))
+            return false;
+        seen.add(key);
+        return true;
+    }).map(row => ({
+        id: String(row.activityId),
+        scheduleKey: `${row.activityId}:${row.sessionId ?? 'legacy'}`,
+        title: row.title,
+        clubId: String(row.clubId),
+        clubName: row.clubName,
+        startTime: row.startTime,
+        endTime: row.endTime,
+        location: row.location,
+        status: Date.parse(row.startTime) > now ? 'UPCOMING' : 'LIVE',
+    })).sort((left, right) => Date.parse(left.startTime) - Date.parse(right.startTime));
+}
+
+export function useMyActivitySchedule(api, sessionKey) {
+    const loader = useCallback(() => loadStudentActivitySchedule(api), [api]);
+    const mapper = useCallback(mapMyActivitySchedule, []);
     return useActivityRequest(loader, mapper, sessionKey);
 }

@@ -1,6 +1,6 @@
 import { useWorkspaceSemester } from '../../../WorkspaceSemesterContext';
 import { useRef, useState } from 'react';
-import { Plus, ShieldCheck, Users, History, FileText, ArrowRightLeft, UserMinus, LockKeyhole } from 'lucide-react';
+import { Plus, History, FileText } from 'lucide-react';
 import GovernanceActionModal from './GovernanceActionModal';
 import GovernanceHistoryPanel from './GovernanceHistoryPanel';
 import GovernanceReportsPanel from './GovernanceReportsPanel';
@@ -15,6 +15,7 @@ import {
     readGovernancePreview,
 } from './governance-preview-data';
 import './ClubGovernancePreview.scss';
+import GovernanceGroupCards from './GovernanceGroupCards';
 
 export default function ClubGovernancePreview({ actorId, actorName = 'Người thực hiện', clubId }) {
     const key = previewStorageKey(actorId, clubId);
@@ -112,139 +113,15 @@ export default function ClubGovernancePreview({ actorId, actorName = 'Người t
                         ))}
                     </div>
                 )}
-                <div className="governance-groups">
-                    {period.groups.map((group) => (
-                        <article className={`governance-group${group.protected ? ' is-protected' : ''}`} key={group.id}>
-                            <header>
-                                <div className="governance-group-icon">
-                                    {group.protected ? <ShieldCheck size={20} /> : <Users size={20} />}
-                                </div>
-                                <div>
-                                    <h3>{group.name}</h3>
-                                    <small>
-                                        {group.memberIds.length} thành viên{' '}
-                                        {group.protected
-                                            ? group.memberIds.length
-                                                ? '· Vai trò lãnh đạo'
-                                                : '· Chờ bổ nhiệm qua CTSV'
-                                            : ''}
-                                    </small>
-                                </div>
-                                {editable && !group.protected && (
-                                    <button
-                                        type="button"
-                                        className="governance-text-button"
-                                        onClick={() => open({ type: 'saveGroup', groupId: group.id })}
-                                        aria-label={`Chỉnh sửa group ${group.name}`}
-                                    >
-                                        Chỉnh sửa
-                                    </button>
-                                )}
-                            </header>
-                            <p className="governance-group-description">
-                                {governanceDisplayText(group.description) || 'Chưa có mô tả nhiệm vụ.'}
-                            </p>
-                            <div className="governance-permission-tags">
-                                {group.protected ? (
-                                    <span>
-                                        <LockKeyhole size={12} /> Quyền lãnh đạo được bảo vệ
-                                    </span>
-                                ) : (
-                                    group.permissions.map((id) => (
-                                        <span key={id}>
-                                            {PREVIEW_PERMISSIONS.find((p) => p.id === id)?.label || id}
-                                        </span>
-                                    ))
-                                )}
-                                {!group.permissions.length && <small>Chưa chọn quyền chuyên môn</small>}
-                            </div>
-                            <div className="governance-group-people">
-                                {group.memberIds.map((id) => {
-                                    const member = PREVIEW_MEMBERS.find((m) => m.id === id);
-                                    return (
-                                        <div className="governance-person-row" key={id}>
-                                            <span className="governance-avatar">
-                                                {member.name
-                                                    .split(' ')
-                                                    .slice(-2)
-                                                    .map((s) => s[0])
-                                                    .join('')}
-                                            </span>
-                                            <span>
-                                                <strong>{member.name}</strong>
-                                                <small>{member.code}</small>
-                                            </span>
-                                            {editable && !group.protected && (
-                                                <div className="governance-person-actions">
-                                                    <button
-                                                        type="button"
-                                                        aria-label={`Luân chuyển ${member.name} từ ${group.name}`}
-                                                        title="Luân chuyển"
-                                                        onClick={() =>
-                                                            open({
-                                                                type: 'transfer',
-                                                                groupId: group.id,
-                                                                memberId: id,
-                                                            })
-                                                        }
-                                                    >
-                                                        <ArrowRightLeft size={15} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        aria-label={`Gỡ ${member.name} khỏi ${group.name}`}
-                                                        title="Gỡ phân công"
-                                                        onClick={() =>
-                                                            open({
-                                                                type: 'remove',
-                                                                groupId: group.id,
-                                                                memberId: id,
-                                                            })
-                                                        }
-                                                    >
-                                                        <UserMinus size={15} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                                {!group.memberIds.length && (
-                                    <p className="governance-muted">Chưa có người trong group.</p>
-                                )}
-                            </div>
-                            {editable && group.protected && (
-                                <footer>
-                                    <button
-                                        type="button"
-                                        className="governance-text-button"
-                                        onClick={() => open({ type: 'nominate', role: group.duty })}
-                                    >
-                                        Đề nghị bổ nhiệm
-                                    </button>
-                                </footer>
-                            )}
-                            {editable && !group.protected && (
-                                <footer>
-                                    <button
-                                        type="button"
-                                        className="governance-text-button"
-                                        onClick={() => open({ type: 'assign', groupId: group.id })}
-                                    >
-                                        <Plus size={15} /> Thêm người
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="governance-text-button governance-danger"
-                                        onClick={() => open({ type: 'deleteGroup', groupId: group.id })}
-                                    >
-                                        Giải thể group
-                                    </button>
-                                </footer>
-                            )}
-                        </article>
-                    ))}
-                </div>
+                <GovernanceGroupCards
+                    groups={period.groups}
+                    members={PREVIEW_MEMBERS}
+                    permissionLabels={Object.fromEntries(
+                        PREVIEW_PERMISSIONS.map((permission) => [permission.id, permission.label]),
+                    )}
+                    editable={editable}
+                    onAction={open}
+                />
             </>
             {panel && (
                 <V2Modal

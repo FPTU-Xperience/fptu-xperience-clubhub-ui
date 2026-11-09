@@ -1,3 +1,4 @@
+import { useListQuery } from '../../../use-list-query';
 import { useWorkspaceSemester } from '../../WorkspaceSemesterContext';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../../../context/AuthContext';
@@ -8,7 +9,7 @@ import WorkspaceTabLayout from '../WorkspaceTabLayout';
 import InviteMemberModal from './InviteMemberModal';
 import { mapMemberProfileDetail, projectOwnMemberProfile, useProfile } from '../../../profile-data';
 import ClubRolesInfo from './ClubRolesInfo';
-import ClubGovernancePreview from './governance/ClubGovernancePreview';
+import ClubGovernance from './governance/ClubGovernance';
 import { CLUB_MEMBER_ROLES, clubMemberRoleLabel as roleLabel } from './club-member-roles';
 import './MemberManagement.scss';
 
@@ -16,7 +17,14 @@ const dateLabel = (value) => (value ? new Date(value).toLocaleDateString('vi-VN'
 const statusLabel = { Approved: 'Đã duyệt', Pending: 'Chờ duyệt', Rejected: 'Đã từ chối' };
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 
-export default function MemberManagement({ clubId, dashboard, readOnly = false }) {
+export default function MemberManagement({ clubId, dashboard, readOnly = false, recruitmentOnly = false }) {
+    const [list, setList] = useListQuery({ tab: 'members', search: '', role: 'All', page: 1 });
+    const { search, role, page } = list;
+    const tab = recruitmentOnly && list.tab === 'members' ? 'applications' : list.tab;
+    const setTab = (value) => setList('tab', value);
+    const setSearch = (value) => setList('search', value);
+    const setRole = (value) => setList('role', value);
+    const setPage = (value) => setList('page', value);
     const { api, user } = useAuth();
     const { semester } = useWorkspaceSemester();
     useEffect(() => {
@@ -25,10 +33,6 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
         setError('');
     }, [semester?.id]);
     const ownProfile = useProfile(user, String(user?.id || ''), api);
-    const [tab, setTab] = useState('members');
-    const [search, setSearch] = useState('');
-    const [role, setRole] = useState('All');
-    const [page, setPage] = useState(1);
     const [version, setVersion] = useState(0);
     const [members, setMembers] = useState(null);
     const [applications, setApplications] = useState(null);
@@ -57,15 +61,17 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
         const timer = setTimeout(
             async () => {
                 const results = await Promise.allSettled([
-                    api.getClubMembers(clubId, {
-                        search,
-                        role,
-                        status: 'Approved',
-                        page,
-                        pageSize: 10,
-                        sortBy: 'name',
-                        sortDirection: 'asc',
-                    }),
+                    recruitmentOnly
+                        ? Promise.resolve(null)
+                        : api.getClubMembers(clubId, {
+                              search,
+                              role,
+                              status: 'Approved',
+                              page,
+                              pageSize: 10,
+                              sortBy: 'name',
+                              sortDirection: 'asc',
+                          }),
                     api.getClubMemberships(clubId),
                 ]);
                 if (!active) return;
@@ -85,7 +91,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
             active = false;
             clearTimeout(timer);
         };
-    }, [api, clubId, search, role, page, version]);
+    }, [api, clubId, search, role, page, version, recruitmentOnly]);
 
     const refresh = () => {
         setPage(1);
@@ -208,15 +214,17 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                         />
                     )}
                     <div className="v2-member-switch" aria-label="Quản lý cộng đồng">
-                        <button
-                            type="button"
-                            className="v2-button"
-                            aria-pressed={tab === 'members'}
-                            onClick={() => setTab('members')}
-                        >
-                            Quản lý thành viên
-                        </button>
-                        {!readOnly && import.meta.env.DEV && (
+                        {!recruitmentOnly && (
+                            <button
+                                type="button"
+                                className="v2-button"
+                                aria-pressed={tab === 'members'}
+                                onClick={() => setTab('members')}
+                            >
+                                Quản lý thành viên
+                            </button>
+                        )}
+                        {
                             <button
                                 type="button"
                                 className="v2-button"
@@ -225,7 +233,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                             >
                                 Ban quản lý
                             </button>
-                        )}
+                        }
                         <button
                             type="button"
                             className="v2-button"
@@ -235,12 +243,12 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false }
                             Quản lý đơn <CountBadge count={pending?.length} label="đơn chờ duyệt" />
                         </button>
                     </div>
-                    {!readOnly && tab === 'governance' && import.meta.env.DEV && user?.id && (
-                        <ClubGovernancePreview
-                            key={`${user.id}:${clubId}:${semester?.id}`}
-                            actorId={user.id}
-                            actorName={user.name}
+                    {tab === 'governance' && (
+                        <ClubGovernance
+                            key={`${user?.id}:${clubId}:${semester?.id}`}
                             clubId={clubId}
+                            readOnly={readOnly || recruitmentOnly}
+                            onChanged={refresh}
                         />
                     )}
                     {notice && (

@@ -7,8 +7,14 @@ import {
     validateActivityFile,
 } from '../../../../../components/v2/activity-detail/activity-resources-data';
 
-export default function ActivityResourceEditor({ kind, resources, drafts, onAdd, onRemove, onSave, canSave, busy }) {
+export default function ActivityResourceEditor({ kind, resources, drafts, onAdd, onRemove, onSave, canSave, busy, capabilities }) {
+    const canManage = capabilities?.canManage === true;
+    const canUpload = canManage && capabilities?.canUpload === true && capabilities.supportedKinds?.includes(kind);
+    const canLink = canManage && capabilities.supportedKinds?.includes('EMBED');
     const [linkOpen, setLinkOpen] = useState(false);
+    const [fileOpen, setFileOpen] = useState(false);
+    const [files, setFiles] = useState([]);
+    const [title, setTitle] = useState('');
     const [error, setError] = useState('');
     const [visibility, setVisibility] = useState(kind === 'DOCUMENT' ? 'CLUB' : 'PUBLIC');
     const visibleDrafts = drafts.filter((item) =>
@@ -24,11 +30,11 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                 title: file.name,
                 visibility,
             }));
-            onAdd(rows);
+            setFiles(rows);
         } catch (issue) {
+            setFiles([]);
             setError(issue.message);
         }
-        event.target.value = '';
     };
     const addLink = (event) => {
         event.preventDefault();
@@ -73,20 +79,9 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                         <option value="CLUB">Trong CLB</option>
                         <option value="PUBLIC">Công khai</option>
                     </select>
-                    <label className="v2-button v2-activity-resource-upload">
-                        <Upload size={15} />
-                        {kind === 'DOCUMENT' ? 'Thêm tài liệu' : 'Thêm media'}
-                        <input
-                            type="file"
-                            multiple
-                            accept={
-                                kind === 'DOCUMENT' ? '.pdf,.doc,.docx,.xls,.xlsx' : '.jpg,.jpeg,.png,.webp,.mp4,.webm'
-                            }
-                            aria-label={kind === 'DOCUMENT' ? 'Chọn tài liệu hoạt động' : 'Chọn media hoạt động'}
-                            onChange={selectFiles}
-                            disabled={busy}
-                        />
-                    </label>
+                    <button type="button" className="v2-button" disabled={busy || !canManage || !canUpload} onClick={() => { setFiles([]); setTitle(''); setError(''); setFileOpen(true); }}>
+                        <Upload size={15} /> {kind === 'DOCUMENT' ? 'Thêm tài liệu' : 'Thêm media'}
+                    </button>
                     {kind === 'MEDIA' && (
                         <button
                             className="v2-button"
@@ -95,7 +90,7 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                                 setError('');
                                 setLinkOpen(true);
                             }}
-                            disabled={busy}
+                            disabled={busy || !canLink}
                         >
                             <Link2 size={15} />
                             Thêm liên kết
@@ -146,6 +141,26 @@ export default function ActivityResourceEditor({ kind, resources, drafts, onAdd,
                         </button>
                     </div>
                 </>
+            )}
+            {!canManage && <p role="status">Bạn không có quyền thêm tài nguyên cho hoạt động này.</p>}
+            {canManage && !canUpload && <p role="status">Máy chủ chưa hỗ trợ tải tệp. Bạn có thể thêm liên kết media khi được cấp quyền.</p>}
+            {fileOpen && (
+                <V2Modal title={kind === 'DOCUMENT' ? 'Thêm tài liệu hoạt động' : 'Thêm media hoạt động'} onClose={() => setFileOpen(false)}>
+                    <form className="v2-activity-edit-form" onSubmit={(event) => {
+                        event.preventDefault();
+                        if (!files.length || !canManage || !canUpload) return;
+                        onAdd(files.map((row) => ({ ...row, visibility, title: files.length === 1 && title.trim() ? title.trim() : row.title })));
+                        setFileOpen(false); setFiles([]);
+                    }}>
+                        <label>Tệp đính kèm<input type="file" multiple required accept={kind === 'DOCUMENT' ? '.pdf,.doc,.docx,.xls,.xlsx' : '.jpg,.jpeg,.png,.webp,.mp4,.webm'} onChange={selectFiles} /></label>
+                        <label>Tiêu đề (cho một tệp)<input value={title} maxLength={160} onChange={(event) => setTitle(event.target.value)} /></label>
+                        <label>Phạm vi chia sẻ<select value={visibility} onChange={(event) => setVisibility(event.target.value)}><option value="CLUB">Trong CLB</option><option value="PUBLIC">Công khai</option></select></label>
+                        {files.map((row) => <p key={row.title}>{row.title}</p>)}
+                        <p>Tệp sẽ được xem trước. Chọn Lưu tài nguyên để tải lên và lưu vào hoạt động.</p>
+                        {error && <p role="alert">{error}</p>}
+                        <footer><button type="button" className="v2-button" onClick={() => setFileOpen(false)}>Hủy</button><button className="v2-button v2-button--primary" disabled={!files.length || !!error}>Thêm vào bản xem trước</button></footer>
+                    </form>
+                </V2Modal>
             )}
             {linkOpen && (
                 <V2Modal title="Thêm liên kết" onClose={() => setLinkOpen(false)}>

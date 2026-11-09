@@ -1,0 +1,48 @@
+.v2-club-task-page {
+    > header > button {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .v2-club-task-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin: 24px 0 18px;
+    }
+    .v2-club-task-detail {
+        display: grid;
+        gap: 20px;
+    }
+    .v2-club-task-detail > button {
+        justify-self: start;
+    }
+    .v2-club-task-detail h2 {
+        margin: 0;
+    }
+    .v2-club-task-detail .v2-club-task-filters {
+        margin: 0;
+    }
+    .v2-club-task-warning {
+        line-height: 1.7;
+        color: #9a3412;
+    }
+    .v2-club-recruitment-list > button {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+    .v2-club-task-kind {
+        color: #c2410c;
+        font-size: 11px;
+        margin-bottom: 8px;
+    }
+    @media (max-width: 650px) {
+        > header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        > header > button {
+            align-self: flex-start;
+        }
+    }
+}

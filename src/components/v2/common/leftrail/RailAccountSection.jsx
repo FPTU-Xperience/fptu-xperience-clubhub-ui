@@ -1,56 +1,28 @@
-import { Bell, ChevronDown, LogOut, Moon, Settings, Sun, UserRound, X } from 'lucide-react';
+import NotificationPopover from './NotificationPopover';
+import { getDisplayName } from '../../../../services/display-name';
+import { Bell, ChevronDown, CircleHelp, LogOut, Moon, Settings, Sun, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useHeaderNotifications } from '../../../../pages/v2/header-data';
 import ProfileAvatar from '../../../../pages/v2/profile-page/ProfileAvatar';
 import './LeftRail.scss';
-function NotificationContent({ status, data, retry }) {
-    if (status === 'loading') return <p className="v2-rail-notification-state">Đang tải thông báo...</p>;
-    if (status === 'empty') return <p className="v2-rail-notification-state">Bạn chưa có thông báo mới.</p>;
-    if (status === 'unavailable') return <p className="v2-rail-notification-state">Thông báo hiện chưa khả dụng.</p>;
-    if (status === 'forbidden')
-        return <p className="v2-rail-notification-state">Bạn không có quyền xem thông báo này.</p>;
-    if (status === 'unauthorized')
-        return <p className="v2-rail-notification-state">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>;
-    if (status === 'error') {
-        return (
-            <div className="v2-rail-notification-state">
-                <p>Không thể tải thông báo. Vui lòng thử lại.</p>
-                <button className="v2-rail-notification-retry" type="button" onClick={retry}>
-                    Thử lại
-                </button>
-            </div>
-        );
-    }
-    return (
-        <ul className="v2-rail-notification-list" aria-label="Danh sách thông báo">
-            {data.map((notification) => (
-                <li key={notification.id} className={notification.isRead ? 'is-read' : 'is-unread'}>
-                    <strong>{notification.title}</strong>
-                    <span>{notification.message}</span>
-                    <time dateTime={notification.createdAt}>{notification.createdAt}</time>
-                </li>
-            ))}
-        </ul>
-    );
-}
-
-export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api }) {
+export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
     const location = useLocation();
+    const navigate = useNavigate();
     const accountMenuRef = useRef(null);
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
     const { theme, toggleTheme } = useTheme();
     const sessionKey = user?.id || user?.email || null;
     const notifications = useHeaderNotifications(api, sessionKey);
-    const displayName = profile?.displayName || user?.name || user?.fullName || 'Sinh viên FPTU';
+    const displayName = getDisplayName(user, profile, 'Sinh viên FPTU');
     const secondaryIdentifier = user?.email || user?.studentCode || 'ClubHub';
     const avatar = user?.avatar || displayName.slice(0, 2).toUpperCase();
 
     useEffect(() => {
         notifications.close();
         setIsAccountMenuOpen(false);
-    }, [location.pathname, notifications.close]);
+    }, [location.pathname, location.search, notifications.close]);
 
     useEffect(() => {
         if (!notifications.isOpen && !isAccountMenuOpen) return undefined;
@@ -75,7 +47,8 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
 
     const signOut = async () => {
         notifications.close();
-        await onLogout?.();
+        if (location.pathname.startsWith('/v2/demo')) await onLogout?.();
+        else navigate('/logout');
     };
 
     return (
@@ -146,6 +119,14 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
                             <Link to="/v2/profile?tab=settings" role="menuitem">
                                 <Settings size={16} /> Cài đặt
                             </Link>
+                            {onStartGuide && (
+                                <button type="button" role="menuitem" onClick={() => {
+                                    setIsAccountMenuOpen(false);
+                                    onStartGuide();
+                                }}>
+                                    <CircleHelp size={16} /> Hướng dẫn sử dụng
+                                </button>
+                            )}
                             <button type="button" role="menuitem" onClick={toggleTheme}>
                                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} Chế độ tối{' '}
                                 <span>{theme === 'dark' ? 'Bật' : 'Tắt'}</span>
@@ -159,20 +140,7 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
             </div>
 
             {notifications.isOpen && (
-                <section
-                    id="v2-rail-notification-popover"
-                    className="v2-rail-notification-popover"
-                    role="dialog"
-                    aria-label="Thông báo"
-                >
-                    <div className="v2-rail-notification-heading">
-                        <h2>Thông báo</h2>
-                        <button type="button" onClick={notifications.close} aria-label="Đóng thông báo">
-                            <X size={17} />
-                        </button>
-                    </div>
-                    <NotificationContent {...notifications} />
-                </section>
+                <NotificationPopover {...notifications} onClose={notifications.close} />
             )}
         </>
     );

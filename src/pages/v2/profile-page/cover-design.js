@@ -36,7 +36,8 @@ export function normalizeCoverTransform(value = {}, fallback = DEFAULT_COVER_TRA
         if (!Number.isFinite(next[field]) || next[field] < min || next[field] > max)
             throw new Error('Vị trí hoặc kích thước shape không hợp lệ.');
     }
-    return { x: next.x, y: next.y, scale: next.scale, rotation: next.rotation };
+    if (next.hidden !== undefined && typeof next.hidden !== 'boolean') throw new Error('Trạng thái shape không hợp lệ.');
+    return { x: next.x, y: next.y, scale: next.scale, rotation: next.rotation, ...(next.hidden === undefined ? {} : { hidden: next.hidden }) };
 }
 
 export function normalizeShapeHsl(value = {}, fallback = DEFAULT_SHAPE_HSL) {

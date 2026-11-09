@@ -9,6 +9,7 @@ export const CLUB_ROLE_PERMISSION_COLUMNS = [
     { id: 'recruitment', label: 'Tuyển thành viên' },
     { id: 'reports', label: 'Biên bản & báo cáo' },
     { id: 'finance', label: 'Tài chính CLB' },
+    { id: 'declarationProcess', label: 'Xử lý trải nghiệm tự khai trong CLB' },
 ];
 
 const ROLE_PERMISSION_SCOPE = {
@@ -89,7 +90,7 @@ export const CLUB_MEMBER_ROLES = Object.freeze([
         group: 'Tài chính',
         supported: true,
         responsibilities: 'Theo dõi thu chi, quản lý chứng từ và phối hợp lập dự toán/quyết toán.',
-        permissions: 'Sử dụng nghiệp vụ tài chính dành cho thủ quỹ theo phân công và quyền backend.',
+        permissions: 'Quản lý tài chính CLB theo phân công.',
         limits: 'Không mặc định có quyền chủ nhiệm. Hiện mỗi CLB tối đa 2 thủ quỹ; chủ nhiệm không kiêm thủ quỹ.',
     },
     {

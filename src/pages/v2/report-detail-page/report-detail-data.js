@@ -1,18 +1,20 @@
+import { clubDraftReport, clubLeadership, clubSubmitReport } from '../../../services/club-capabilities.js';
 export function reportDetailAccess(report, user, clubAccess = [], readOnly = false) {
     if (!report || readOnly) return {};
     const status = String(report.status || '')
         .toUpperCase()
         .replace(/\s+/g, '');
-    const manager = clubAccess.some((access) => String(access.clubId) === String(report.clubId) && access.isManager);
+    const scope = clubAccess.find((access) => String(access.clubId) === String(report.clubId));
+    const manager = clubLeadership(scope);
     const author = user?.id != null && String(report.createdByUserId) === String(user.id);
     const reviewer = user?.roles?.some((role) => ['ADMIN', 'STUDENT_AFFAIRS_ADMIN'].includes(role));
     const uploaded = report.contentSource === 'UPLOADED_FILE' || Boolean(report.uploadedFile);
     const editable = ['DRAFT', 'REJECTED'].includes(status);
     const future = report.reportType === 'FUTURE_EVENT' || report.tag === 'FUTURE_EVENT';
     return {
-        edit: manager && editable,
-        attachments: manager && author && editable,
-        submit: author && (manager || uploaded) && editable,
+        edit: (manager || author && clubDraftReport(scope, report)) && editable,
+        attachments: author && (manager || clubDraftReport(scope, report)) && editable,
+        submit: author && (clubSubmitReport(scope, report) || uploaded && scope?.isApprovedMember === true && scope.capabilities == null) && editable,
         managerReview: manager && status === 'SUBMITTED' && (future || !author),
         finalReview: Boolean(reviewer && status === 'UNDERREVIEW'),
         export: Boolean(manager || reviewer),

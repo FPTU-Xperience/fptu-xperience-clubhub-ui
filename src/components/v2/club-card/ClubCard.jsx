@@ -1,13 +1,15 @@
 import { ArrowUpRight, CalendarDays } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Pill } from '../DiscoveryLayout';
 import ClubCardMedia, { ClubCardLogo } from './ClubCardMedia';
 import './ClubCard.scss';
 
 export default function ClubCard({ club }) {
+    const location = useLocation();
+    const destination = `${club.destination}${location.search}`;
     return (
         <article className="v2-club-card">
-            <Link to={club.destination} className="v2-art-link" aria-label={`Khám phá ${club.name}`}>
+            <Link to={destination} className="v2-art-link" aria-label={`Khám phá ${club.name}`}>
                 <ClubCardMedia club={club} showLogo={false} />
             </Link>
             <div className="v2-club-card-body">
@@ -36,7 +38,7 @@ export default function ClubCard({ club }) {
                 </p>
                 <div className="v2-card-footer">
                     <span>{club.code || club.clubCode || '—'}</span>
-                    <Link to={club.destination} className="v2-text-link">
+                    <Link to={destination} className="v2-text-link">
                         Khám phá <ArrowUpRight size={16} />
                     </Link>
                 </div>

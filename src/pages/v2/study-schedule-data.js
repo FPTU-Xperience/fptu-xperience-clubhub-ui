@@ -1,5 +1,3 @@
-export const STUDY_SCHEDULE_VERSION = 3;
-
 export const STUDY_DAYS = Object.freeze([
     { id: 'mon', label: 'Thứ Hai', shortLabel: 'T2' },
     { id: 'tue', label: 'Thứ Ba', shortLabel: 'T3' },
@@ -39,9 +37,6 @@ export const STUDY_SLOTS_3W = Object.freeze([
     { id: 'slot-7', label: '17:45–19:15' },
 ]);
 
-// Keep the previous constant name for 10W callers and legacy local records.
-export const STUDY_SLOTS = STUDY_SLOTS_10W;
-
 const validDays = new Set(STUDY_DAYS.map((day) => day.id));
 const validTerms = new Set(STUDY_TERMS.map((term) => term.id));
 const validBlocks = new Set(STUDY_BLOCKS.map((block) => block.id));
@@ -66,13 +61,6 @@ export function defaultStudyPeriod(date = new Date()) {
 
 export function formatStudyTerm({ year, term }) {
     return `${term}${String(year).slice(-2)}`;
-}
-
-export function studyScheduleStorageKey(user) {
-    const identity = user?.id ?? user?.email;
-    return identity === undefined || identity === null || identity === ''
-        ? null
-        : `clubhub:v2:study-schedule:${String(identity)}`;
 }
 
 export function studyPeriodKey(period) {
@@ -144,134 +132,6 @@ function normalizeEntry(value) {
     return { subject, room };
 }
 
-function normalizeStoredEntries(value, block) {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-    const entries = {};
-    for (const day of STUDY_DAYS) {
-        for (const slot of getStudySlots(block)) {
-            const key = slotKey(day.id, slot.id);
-            if (!value[key]) continue;
-            try {
-                entries[key] = normalizeEntry(value[key]);
-            } catch {
-                // Skip a damaged cell without hiding the rest of the schedule.
-            }
-        }
-    }
-    return entries;
-}
-
-function readRecord(user, storage) {
-    const key = studyScheduleStorageKey(user);
-    const empty = { schedules: {}, legacyEntries: null };
-    if (!key || !storage) return empty;
-    try {
-        const record = JSON.parse(storage.getItem(key));
-        if (
-            record?.version === STUDY_SCHEDULE_VERSION &&
-            record.schedules &&
-            typeof record.schedules === 'object' &&
-            !Array.isArray(record.schedules)
-        ) {
-            return { schedules: record.schedules, legacyEntries: record.legacyEntries ?? null };
-        }
-        if (
-            record?.version === 2 &&
-            record.schedules &&
-            typeof record.schedules === 'object' &&
-            !Array.isArray(record.schedules)
-        ) {
-            const schedules = {};
-            for (const [periodKey, oldEntries] of Object.entries(record.schedules)) {
-                const block = periodKey.split(':')[2];
-                if (!validBlocks.has(block)) continue;
-                const entries = normalizeStoredEntries(oldEntries, block);
-                schedules[periodKey] = Object.fromEntries(
-                    Array.from({ length: getStudyWeekCount(block) }, (_, index) => [String(index + 1), { ...entries }]),
-                );
-            }
-            return { schedules, legacyEntries: record.legacyEntries ?? null };
-        }
-        if (record?.version === 1) {
-            return { schedules: {}, legacyEntries: normalizeStoredEntries(record.entries, '10W') };
-        }
-    } catch {
-        // A corrupt local record behaves like an empty schedule.
-    }
-    return empty;
-}
-
-export function readStudySchedule(user, period, week, storage = globalThis.localStorage) {
-    const key = studyPeriodKey(period);
-    requireWeek(period.block, week);
-    return normalizeStoredEntries(readRecord(user, storage).schedules[key]?.[week], period.block);
-}
-
-export function readStudyPeriod(user, period, storage = globalThis.localStorage) {
-    studyPeriodKey(period);
-    return Array.from({ length: getStudyWeekCount(period.block) }, (_, index) => {
-        const week = index + 1;
-        return toStudyEntryList(readStudySchedule(user, period, week, storage), period.block).map((entry) => ({
-            week,
-            ...entry,
-        }));
-    }).flat();
-}
-
-export function readLegacyStudySchedule(user, storage = globalThis.localStorage) {
-    return normalizeStoredEntries(readRecord(user, storage).legacyEntries, '10W');
-}
-
-function writeRecord(user, record, storage) {
-    const key = studyScheduleStorageKey(user);
-    if (!key || !storage) throw new Error('Không thể lưu lịch học khi chưa có tài khoản.');
-    storage.setItem(key, JSON.stringify({ version: STUDY_SCHEDULE_VERSION, ...record }));
-}
-
-export function saveStudySlot(user, period, week, day, slotId, value, storage = globalThis.localStorage) {
-    const key = studyPeriodKey(period);
-    requireWeek(period.block, week);
-    requireSlot(period.block, day, slotId);
-    const entry = normalizeEntry(value);
-    const record = readRecord(user, storage);
-    const weeks = record.schedules[key] || {};
-    const entries = { ...normalizeStoredEntries(weeks[week], period.block), [slotKey(day, slotId)]: entry };
-    writeRecord(user, { ...record, schedules: { ...record.schedules, [key]: { ...weeks, [week]: entries } } }, storage);
-    return entries;
-}
-
-export function clearStudySlot(user, period, week, day, slotId, storage = globalThis.localStorage) {
-    const key = studyPeriodKey(period);
-    requireWeek(period.block, week);
-    requireSlot(period.block, day, slotId);
-    const record = readRecord(user, storage);
-    const weeks = record.schedules[key] || {};
-    const entries = { ...normalizeStoredEntries(weeks[week], period.block) };
-    delete entries[slotKey(day, slotId)];
-    writeRecord(user, { ...record, schedules: { ...record.schedules, [key]: { ...weeks, [week]: entries } } }, storage);
-    return entries;
-}
-
-export function importLegacyStudySchedule(user, period, storage = globalThis.localStorage) {
-    if (period?.block !== '10W') throw new Error('Lịch cũ chỉ dùng khung giờ của block 10W.');
-    const key = studyPeriodKey(period);
-    const record = readRecord(user, storage);
-    const legacyEntries = normalizeStoredEntries(record.legacyEntries, '10W');
-    if (!Object.keys(legacyEntries).length) throw new Error('Không có lịch cũ để chuyển.');
-    if (
-        Array.from({ length: 10 }, (_, index) => index + 1).some(
-            (week) => Object.keys(normalizeStoredEntries(record.schedules[key]?.[week], '10W')).length,
-        )
-    ) {
-        throw new Error('Học kỳ và block này đã có lịch. Hãy chọn một kỳ trống.');
-    }
-    const weeks = Object.fromEntries(
-        Array.from({ length: 10 }, (_, index) => [String(index + 1), { ...legacyEntries }]),
-    );
-    writeRecord(user, { ...record, schedules: { ...record.schedules, [key]: weeks }, legacyEntries: null }, storage);
-    return readStudyPeriod(user, period, storage);
-}
-
 export function normalizeStudyTemplate(entries, block) {
     if (
         !Array.isArray(entries) ||
@@ -288,33 +148,6 @@ export function normalizeStudyTemplate(entries, block) {
         seen.add(id);
         return { day: item.day, slotId: item.slotId, ...normalizeEntry(item) };
     });
-}
-
-export function bulkImportStudySchedule(user, period, entries, mode = 'skip', storage = globalThis.localStorage) {
-    const key = studyPeriodKey(period);
-    if (!['skip', 'replace'].includes(mode)) throw new Error('Cách xử lý ô trùng không hợp lệ.');
-    const normalized = normalizeStudyTemplate(entries, period.block);
-    const record = readRecord(user, storage);
-    const weeks = { ...record.schedules[key] };
-    let imported = 0;
-    let skipped = 0;
-    let replaced = 0;
-    for (let week = 1; week <= getStudyWeekCount(period.block); week += 1) {
-        const current = { ...normalizeStoredEntries(weeks[week], period.block) };
-        for (const item of normalized) {
-            const cell = slotKey(item.day, item.slotId);
-            if (current[cell] && mode === 'skip') {
-                skipped += 1;
-                continue;
-            }
-            if (current[cell]) replaced += 1;
-            else imported += 1;
-            current[cell] = { subject: item.subject, room: item.room };
-        }
-        weeks[week] = current;
-    }
-    writeRecord(user, { ...record, schedules: { ...record.schedules, [key]: weeks } }, storage);
-    return { imported, skipped, replaced, entries: readStudyPeriod(user, period, storage) };
 }
 
 export function getStudySlot(entries, day, slotId) {

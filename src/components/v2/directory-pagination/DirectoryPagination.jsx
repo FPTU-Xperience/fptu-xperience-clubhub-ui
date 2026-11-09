@@ -5,7 +5,7 @@ export default function DirectoryPagination({ currentPage, totalPages, onPageCha
     if (totalPages <= 1) return null;
 
     return (
-        <nav className="v2-directory-pagination" aria-label="Phân trang câu lạc bộ">
+        <nav className="v2-directory-pagination" aria-label="Phân trang danh sách">
             <button
                 type="button"
                 onClick={() => onPageChange(currentPage - 1)}

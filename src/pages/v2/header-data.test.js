@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+    loadHeaderNotifications,
     classifyHeaderNotificationError,
     createHeaderRequestGate,
     mapHeaderNotification,
@@ -65,4 +66,15 @@ test('header request gate rejects stale session or unmounted requests', () => {
     assert.equal(gate.isCurrent(second, 'student-b'), true);
     gate.invalidate();
     assert.equal(gate.isCurrent(second, 'student-b'), false);
+});
+
+test('preload shares in-flight requests, refresh fetches new data, and accounts do not share results', async () => {
+    let calls = 0;
+    const api = { getNotifications: async () => { calls++; return [{ id: calls }]; } };
+    const first = loadHeaderNotifications(api, 'a');
+    assert.equal(loadHeaderNotifications(api, 'a'), first);
+    await first; assert.equal(calls, 1);
+    await loadHeaderNotifications(api, 'a'); assert.equal(calls, 1);
+    await loadHeaderNotifications(api, 'a', true); assert.equal(calls, 2);
+    await loadHeaderNotifications(api, 'b'); assert.equal(calls, 3);
 });

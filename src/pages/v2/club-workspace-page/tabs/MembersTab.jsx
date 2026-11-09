@@ -1,3 +1,6 @@
+import { useAuth } from '../../../../context/AuthContext';
+import { clubCapability } from '../../../../services/club-capabilities';
+import ClubGovernance from './members/governance/ClubGovernance';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import MemberManagement from './members/MemberManagement';
 import ClubRolesInfo from './members/ClubRolesInfo';
@@ -14,12 +17,23 @@ const roleLabel = (role = '') => (String(role).toUpperCase().includes('TREASURER
 
 export default function MembersTab({ manager = false, dashboard, workspace, readOnly = false }) {
     const clubId = workspace?.clubId;
+    const { user, clubAccess } = useAuth();
+    const access = clubAccess?.find((item) => String(item.clubId) === String(clubId));
+    const recruit = !readOnly && clubCapability(access, 'club.members.recruit');
     const summary = dashboard.data;
     const count = summary?.memberCount;
     const members = manager ? summary?.approvedMembers : summary?.publicLeaders;
     const visibleMemberCount = members?.length ?? 0;
-    if (manager || readOnly)
-        return <MemberManagement key={clubId} clubId={clubId} dashboard={dashboard} readOnly={readOnly} />;
+    if (manager || readOnly || recruit)
+        return (
+            <MemberManagement
+                key={`${user?.id}:${clubId}:${manager}:${recruit}`}
+                clubId={clubId}
+                dashboard={dashboard}
+                readOnly={readOnly}
+                recruitmentOnly={!manager && recruit}
+            />
+        );
     return (
         <WorkspaceTabLayout
             title="Thành viên CLB"
@@ -34,7 +48,8 @@ export default function MembersTab({ manager = false, dashboard, workspace, read
             records={members || []}
         >
             {(records) => (
-                <>
+                <div className="v2-member-management">
+                    <ClubGovernance key={`${user?.id}:${clubId}`} clubId={clubId} readOnly />
                     {dashboard.status === 'loading' && (
                         <p className="v2-workspace-data-note" role="status">
                             Đang tải thành viên…
@@ -86,7 +101,7 @@ export default function MembersTab({ manager = false, dashboard, workspace, read
                             Trạng thái tuyển thành viên: {summary.isRecruiting ? 'Đang mở' : 'Đang đóng'}.
                         </p>
                     )}
-                </>
+                </div>
             )}
         </WorkspaceTabLayout>
     );

@@ -60,7 +60,7 @@ export default function ProfileCoverArt({
                 />
             )}
             <>
-                <g data-layer="shape" fill={secondary} transform={shapeStampTransform(layout)}>
+                <g data-layer="shape" display={layout.hidden ? 'none' : undefined} fill={secondary} transform={shapeStampTransform(layout)}>
                     {asset && (
                         <ShapeImage
                             assetUrl={asset}

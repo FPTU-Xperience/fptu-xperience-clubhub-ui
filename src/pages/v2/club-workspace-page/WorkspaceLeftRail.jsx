@@ -1,3 +1,4 @@
+import { clubCapability } from '../../../services/club-capabilities';
 import { useEffect, useId, useRef, useState } from 'react';
 import {
     ArrowLeft,
@@ -7,6 +8,7 @@ import {
     Check,
     ChevronDown,
     FileText,
+    FileCheck2,
     Flag,
     Gift,
     Home,
@@ -30,15 +32,20 @@ export const workspaceSections = [
     ['members', 'Thành viên', Users],
     ['points', 'Điểm & thành tích', Award],
     ['gifts', 'Kho quà', Gift],
+    ['student-declarations', 'Trải nghiệm tự khai', FileCheck2, 'declarations'],
     ['reports', 'Báo cáo', FileText, 'manager'],
     ['finance', 'Tài chính', Wallet, 'manager'],
     ['club-page', 'Trang CLB', Home, 'manager'],
 ];
 
-export function getWorkspaceSections(manager, observation = false) {
-    return workspaceSections.filter((section) =>
-        observation ? section[0] !== 'club-page' : !section[3] || manager,
-    );
+export function getWorkspaceSections(manager, observation = false, canViewDeclarations = manager, treasurer = false, access = null) {
+    return workspaceSections.filter((section) => {
+        if (section[3] === 'declarations') return !observation && canViewDeclarations;
+        if (section[0] === 'finance') return observation || manager || treasurer || clubCapability(access, 'club.finance.read');
+        if (!observation && section[0] === 'reports') return manager || clubCapability(access, 'club.reports.draft.write') || clubCapability(access, 'club.finance.draft.write');
+        if (!observation && section[0] === 'club-page') return manager || clubCapability(access, 'club.profile.write') || clubCapability(access, 'club.media.write');
+        return observation ? section[0] !== 'club-page' : !section[3] || manager;
+    });
 }
 
 function ClubIdentity({ club: input }) {
@@ -73,10 +80,13 @@ export default function WorkspaceLeftRail({
     manager,
     onClubChange,
     observation = false,
+    canViewDeclarations = manager,
+    treasurer = false,
+    access = null,
 }) {
     const { user, api, logout } = useAuth();
     const media = usePersonalMedia();
-    const availableSections = getWorkspaceSections(manager, observation);
+    const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer, access);
     const [visibleSectionCount, setVisibleSectionCount] = useState(4);
     useEffect(() => {
         const compact = window.matchMedia('(max-width: 480px)');

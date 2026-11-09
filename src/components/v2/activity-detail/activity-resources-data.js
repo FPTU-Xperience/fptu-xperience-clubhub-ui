@@ -72,6 +72,8 @@ export function mapActivityResources(raw) {
         return [
             {
                 id: String(item.id),
+                version: typeof item.version === 'string' ? item.version : '',
+                position: Number.isInteger(item.position) ? item.position : 0,
                 kind: item.kind,
                 title: String(item.title || item.fileName || 'Tài nguyên'),
                 url,

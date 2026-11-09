@@ -209,6 +209,56 @@
     width: 100%;
 }
 
+.v2-access-shortcuts {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin: 18px 0 4px;
+}
+.v2-access-shortcuts-label {
+    color: var(--v2-access-muted, #64748b);
+    font-size: 11px;
+    font-weight: 500;
+}
+.v2-access-shortcuts-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.v2-access-shortcuts-buttons > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    min-height: 36px;
+    padding: 8px 14px;
+    border: 1px solid var(--v2-access-line, #e2e8f0);
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.v2-access-shortcuts-buttons > button:hover:not(:disabled) {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #c2410c;
+}
+.v2-access-shortcuts-buttons > button:focus-visible {
+    outline: 3px solid #ffedd5;
+    outline-offset: 2px;
+    border-color: #fb923c;
+}
+.v2-access-shortcuts-buttons > button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 .v2-access-field {
     display: flex;
     flex-direction: column;
@@ -391,6 +441,69 @@
     height: 1px;
     background: #e2e8f0;
     flex: 1;
+}
+.v2-access-email-toggle {
+    width: 100%;
+    padding: 8px 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.15s;
+}
+.v2-access-email-toggle > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+.v2-access-email-toggle svg {
+    transition: transform 0.2s;
+}
+.v2-access-email-toggle[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+}
+.v2-access-email-toggle:hover:not(:disabled) {
+    color: #ea580c;
+}
+.v2-access-email-toggle:focus-visible {
+    outline: 2px solid #fb923c;
+    outline-offset: 3px;
+}
+.v2-access-shell.v2-access-login-page {
+    min-width: 0;
+}
+#v2-email-login[hidden] {
+    display: none;
+}
+#v2-email-login:not([hidden]) {
+    animation: v2-email-open 0.18s ease-out;
+}
+@keyframes v2-email-open {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 1060px) {
+    .v2-access-page .v2-access-login-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .v2-access-page .v2-access-login-story {
+        display: none;
+    }
+    .v2-access-page .v2-access-login-panel {
+        min-width: 0;
+        min-height: 100vh;
+        padding: 36px 24px;
+    }
+    .v2-access-page .v2-access-login-card {
+        min-width: 0;
+        width: 100%;
+        max-width: 410px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    #v2-email-login:not([hidden]) { animation: none; }
+    .v2-access-email-toggle svg { transition: none; }
 }
 
 .v2-access-login-note {

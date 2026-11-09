@@ -1,3 +1,5 @@
+import { usePersonalMedia } from '../../../components/media/PersonalMediaContext';
+import { getDisplayName } from '../../../services/display-name';
 import { ArrowRight, CalendarDays, Check, Home, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ActivityCard from '../../../components/v2/activity-card/ActivityCard';
@@ -43,7 +45,8 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                 Date.parse(a.startTime) - Date.parse(b.startTime),
         );
     const pending = summary?.pendingApplications;
-    const name = viewer?.name?.trim().split(/\s+/).at(-1) || 'bạn';
+    const media = usePersonalMedia();
+    const name = getDisplayName(viewer, media?.profileResult.data?.profile);
     return (
         <div className="workspace-home" aria-busy={loading}>
             <header className="workspace-home__heading">
@@ -95,9 +98,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                                         variant="schedule"
                                         onOpen={(item) =>
                                             navigate(
-                                                manager
-                                                    ? `${base}/activities/${encodeURIComponent(item.id)}`
-                                                    : `/v2/activities/${encodeURIComponent(item.id)}`,
+                                                `${base}/activities/${encodeURIComponent(item.id)}`,
                                             )
                                         }
                                     />

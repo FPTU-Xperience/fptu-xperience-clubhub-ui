@@ -75,7 +75,7 @@ export function ClubLogo({ club: input, hero = false }) {
     );
 }
 
-export function DiscoverHero() {
+export function DiscoverHero({ campus = 'FPTU' }) {
     return (
         <>
             <section className="v2-discovery-hero">
@@ -104,7 +104,7 @@ export function DiscoverHero() {
                         </div>
                         <div>
                             <strong>Mỗi cá tính, một nơi thuộc về.</strong>
-                            <small>Cộng đồng sinh viên FPTU Hồ Chí Minh</small>
+                            <small>Cộng đồng sinh viên {campus}</small>
                         </div>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ export function DiscoverHero() {
                             Belong.
                         </strong>
                         <div className="v2-discovery-ticket-line" />
-                        <small>FPTU XPERIENCE &nbsp; / &nbsp; FALL 2026</small>
+                        <small>FPTU XPERIENCE &nbsp; / &nbsp; YOUR CAMPUS COMMUNITY</small>
                     </div>
                     <div className="v2-discovery-floating-tag">
                         <Heart size={17} /> Những điều hay đang chờ bạn

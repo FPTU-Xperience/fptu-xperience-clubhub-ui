@@ -9,7 +9,7 @@ export default function AutoGiftRuleEditor({ rules, onChange, activities = [] })
             <div className="v2-auto-gift-heading">
                 <div>
                     <h3>Tự tặng khi kết thúc</h3>
-                    <p>Trao quà cho người tham gia hoặc theo thứ hạng đã chốt, không trừ XP.</p>
+                    <p>Trao quà cho người tham gia hoặc theo thứ hạng đã chốt, không trừ Xperience Point.</p>
                 </div>
                 <button
                     type="button"

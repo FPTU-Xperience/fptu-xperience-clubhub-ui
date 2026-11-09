@@ -51,7 +51,7 @@ export default function ActivityPublicationControl({ api, activity, access, busy
             if (alive.current) setPending(false);
         }
     };
-    if (confirmed.publicationStatus && confirmed.publicationStatus !== 'LEGACY') {
+    if (!confirmed.publicationVersion && !confirmed.sourceApplicationId && ['DRAFT', 'PUBLISHED', 'CLOSED'].includes(confirmed.publicationStatus)) {
         const operation = confirmed.publicationStatus === 'DRAFT' ? 'PUBLISH' : confirmed.publicationStatus === 'PUBLISHED' ? 'CLOSE' : null;
         const allowed = access?.isManager === true && (!Array.isArray(access.permissions) || access.permissions.includes('activity.publish'));
         return <section className="v2-activity-publication"><div><h2>Xuất bản & đăng ký</h2>

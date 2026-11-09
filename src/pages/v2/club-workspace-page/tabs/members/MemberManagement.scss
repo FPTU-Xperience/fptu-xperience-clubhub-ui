@@ -1,4 +1,18 @@
 .v2-member-management {
+    display: grid;
+    gap: 24px;
+    > .v2-member-switch {
+        margin: 0;
+    }
+    > section {
+        min-width: 0;
+    }
+    .v2-member-actions {
+        row-gap: 12px;
+    }
+    .v2-member-pagination {
+        margin-top: 20px;
+    }
     .v2-member-invite {
         display: grid;
         gap: 18px;
@@ -97,7 +111,7 @@
         gap: 10px;
     }
     .v2-member-switch {
-        margin-bottom: 24px;
+        margin-bottom: 0;
         gap: 6px;
         padding-bottom: 12px;
         border-bottom: 1px solid #dfe7f1;
@@ -376,7 +390,8 @@
 .v2-member-header-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 .v2-member-role-proposal {
     padding: 16px;

@@ -465,3 +465,14 @@ test('background image keeps independent shape ownership, layout and editable te
     assert.throws(() => saveProfile(user, { coverText: { fonts: { title: 'unknown' } } }, db), /Phông chữ/);
     assert.throws(() => saveProfile(user, { coverText: { title: 'x'.repeat(61) } }, db), /ký tự/);
 });
+
+test('hidden shape retains selected design and transform through a profile save', () => {
+    const db = storage();
+    const user = { id: 997, name: 'Nguyễn An' };
+    const transform = { x: 12, y: -8, scale: 85, rotation: 10, hidden: true };
+    saveProfile(user, { coverShape: 'petals', coverShapeTransform: transform }, db);
+    const profile = readProfile(user, db).profile;
+    assert.equal(profile.coverShape, 'petals');
+    assert.deepEqual(profile.coverShapeTransform, transform);
+    assert.throws(() => normalizeCoverTransform({ hidden: 'yes' }));
+});

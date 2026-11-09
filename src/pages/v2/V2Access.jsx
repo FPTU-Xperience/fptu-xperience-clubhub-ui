@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, LogIn, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronDown, LogIn, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import StudentOnboarding from '../../components/v2/student-onboarding/StudentOnboarding';
 import { useAuth } from '../../context/AuthContext';
 import { readOnboarding } from './onboarding';
 import { isAffairsViewer } from './affairs-access';
+import { session } from '../../services/api';
+import { bindGoogleSignIn } from '../../services/google-signin.js';
 
 import './V2Access.scss';
 
@@ -22,13 +24,17 @@ function LoadingScreen() {
 }
 
 function V2Login() {
-    const { login, loginWithGoogle } = useAuth();
+    const { login, loginWithGoogle, authError } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [emailExpanded, setEmailExpanded] = useState(false);
+    const shortcuts = import.meta.env.VITE_LOGIN_ACCOUNT_SHORTCUTS === 'true';
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [googleReady, setGoogleReady] = useState(false);
     const googleButtonRef = useRef(null);
+    const popupAuthEnd = useRef(null);
 
     const finishLogin = useCallback(
         async (action) => {
@@ -48,7 +54,15 @@ function V2Login() {
 
     const handleGoogleCredential = useCallback(
         (response) => {
-            if (response?.credential) finishLogin(() => loginWithGoogle(response.credential));
+            if (response?.credential)
+                finishLogin(async () => {
+                    try {
+                        return await loginWithGoogle(response.credential);
+                    } finally {
+                        popupAuthEnd.current?.();
+                        popupAuthEnd.current = null;
+                    }
+                });
         },
         [finishLogin, loginWithGoogle],
     );
@@ -56,14 +70,11 @@ function V2Login() {
     useEffect(() => {
         if (!GOOGLE_CLIENT_ID || !googleButtonRef.current) return undefined;
         let disposed = false;
+        let unbind;
         const initialise = () => {
             if (disposed || !googleButtonRef.current || !window.google?.accounts?.id) return;
-            window.google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
-                callback: handleGoogleCredential,
-                ux_mode: 'popup',
-                auto_select: false,
-            });
+            unbind?.();
+            unbind = bindGoogleSignIn(window.google.accounts.id, GOOGLE_CLIENT_ID, handleGoogleCredential);
             googleButtonRef.current.replaceChildren();
             window.google.accounts.id.renderButton(googleButtonRef.current, {
                 type: 'standard',
@@ -73,6 +84,10 @@ function V2Login() {
                 shape: 'rectangular',
                 logo_alignment: 'left',
                 width: Math.min(390, googleButtonRef.current.clientWidth || 390),
+                click_listener: () => {
+                    popupAuthEnd.current?.();
+                    popupAuthEnd.current = session.beginAuthentication();
+                },
             });
             setGoogleReady(true);
         };
@@ -83,6 +98,9 @@ function V2Login() {
                 ?.addEventListener('load', initialise);
         return () => {
             disposed = true;
+            unbind?.();
+            popupAuthEnd.current?.();
+            popupAuthEnd.current = null;
             document
                 .querySelector('script[src="https://accounts.google.com/gsi/client"]')
                 ?.removeEventListener('load', initialise);
@@ -96,11 +114,15 @@ function V2Login() {
             setError('Vui lòng nhập một địa chỉ email hợp lệ.');
             return;
         }
-        finishLogin(() => login(normalizedEmail));
+        if (!password) {
+            setError('Vui lòng nhập mật khẩu.');
+            return;
+        }
+        finishLogin(() => login(normalizedEmail, password));
     };
 
     return (
-        <div className="v2-access-shell v2-access-page">
+        <div className="v2-access-shell v2-access-page v2-access-login-page">
             <main className="v2-access-login-layout">
                 <section className="v2-access-login-story">
                     <a className="v2-access-brand" href="/v2" aria-label="ClubHub">
@@ -119,13 +141,7 @@ function V2Login() {
                         </h1>
                         <p>Khám phá câu lạc bộ, hoạt động và những người bạn cùng sở thích trong campus.</p>
                     </div>
-                    <div className="v2-access-login-proof">
-                        <Sparkles size={18} />
-                        <span>
-                            <strong>Một tài khoản FPTU</strong>
-                            <small>Cho toàn bộ hành trình trải nghiệm sinh viên</small>
-                        </span>
-                    </div>
+                    <div className="v2-access-login-proof"></div>
                 </section>
                 <section className="v2-access-login-panel" aria-labelledby="v2-login-title">
                     <div className="v2-access-login-card">
@@ -133,7 +149,7 @@ function V2Login() {
                             <LogIn size={24} />
                         </span>
                         <h2 id="v2-login-title">Chào mừng bạn</h2>
-                        <p>Đăng nhập bằng tài khoản trường để tiếp tục vào ClubHub.</p>
+                        <p>Đăng nhập bằng Google hoặc email và mật khẩu để tiếp tục vào ClubHub.</p>
                         {GOOGLE_CLIENT_ID ? (
                             <>
                                 <div
@@ -142,18 +158,55 @@ function V2Login() {
                                     aria-label="Đăng nhập bằng Google"
                                 />
                                 {!googleReady && <small>Đang tải đăng nhập Google...</small>}
-                                <div className="v2-access-login-divider">
-                                    <span>hoặc dùng email</span>
-                                </div>
                             </>
                         ) : (
-                            <div className="v2-access-login-divider">
-                                <span>Đăng nhập bằng email</span>
-                            </div>
+                            <small>Đăng nhập Google chưa sẵn sàng.</small>
                         )}
-                        <form onSubmit={submitEmail} noValidate>
+                        <button
+                            className="v2-access-login-divider v2-access-email-toggle"
+                            type="button"
+                            aria-expanded={emailExpanded}
+                            aria-controls="v2-email-login"
+                            disabled={busy}
+                            onClick={() => setEmailExpanded((expanded) => !expanded)}
+                        >
+                            <span>
+                                Hoặc dùng email <ChevronDown size={14} aria-hidden="true" />
+                            </span>
+                        </button>
+                        {(error || authError) && (
+                            <p className="v2-access-form-error" id="v2-login-error" role="alert">
+                                {error || authError}
+                            </p>
+                        )}
+                        <form id="v2-email-login" onSubmit={submitEmail} noValidate hidden={!emailExpanded}>
+                            {shortcuts && (
+                                <div className="v2-access-shortcuts">
+                                    <span className="v2-access-shortcuts-label">Điền nhanh email</span>
+                                    <div
+                                        className="v2-access-shortcuts-buttons"
+                                        role="group"
+                                        aria-label="Điền nhanh email"
+                                    >
+                                        <button
+                                            type="button"
+                                            disabled={busy}
+                                            onClick={() => setEmail('admin@fpt.edu.vn')}
+                                        >
+                                            Admin
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={busy}
+                                            onClick={() => setEmail('ctsv.an@fpt.edu.vn')}
+                                        >
+                                            CTSV
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <label className="v2-access-field">
-                                <span>Email FPTU</span>
+                                <span>Email tài khoản</span>
                                 <input
                                     type="email"
                                     autoComplete="email"
@@ -162,16 +215,24 @@ function V2Login() {
                                         setEmail(event.target.value);
                                         setError('');
                                     }}
-                                    placeholder="student@fpt.edu.vn"
+                                    placeholder="email@example.com"
                                     disabled={busy}
-                                    aria-describedby={error ? 'v2-login-error' : undefined}
+                                    aria-describedby={error || authError ? 'v2-login-error' : undefined}
                                 />
                             </label>
-                            {error && (
-                                <p className="v2-access-form-error" id="v2-login-error" role="alert">
-                                    {error}
-                                </p>
-                            )}
+                            <label className="v2-access-field" htmlFor="v2-password">
+                                <span>Mật khẩu</span>
+                                <input
+                                    id="v2-password"
+                                    type="password"
+                                    required
+                                    maxLength={128}
+                                    autoComplete="current-password"
+                                    value={password}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    disabled={busy}
+                                />
+                            </label>
                             <button className="v2-access-button primary full" type="submit" disabled={busy}>
                                 {busy ? 'Đang xác thực...' : 'Tiếp tục'} <ArrowRight size={17} />
                             </button>
@@ -187,17 +248,55 @@ function V2Login() {
 }
 
 export default function V2Access({ children }) {
-    const { user, isAuthenticated, loading } = useAuth();
-    const [preferences, setPreferences] = useState(undefined);
+    const { user, isAuthenticated, loading, api, logout } = useAuth();
+    const [state, setState] = useState(null);
+    const [attempt, setAttempt] = useState(0);
     const needsOnboarding = !isAffairsViewer(user);
+    const account = String(user?.id || '');
 
     useEffect(() => {
-        setPreferences(isAuthenticated && needsOnboarding ? readOnboarding(user) : null);
-    }, [isAuthenticated, user, needsOnboarding]);
+        let active = true;
+        setState(null);
+        if (isAuthenticated && needsOnboarding)
+            readOnboarding(user, api)
+                .then((value) => {
+                    if (active) setState({ ...value, account });
+                })
+                .catch((error) => {
+                    if (active) setState({ account, error });
+                });
+        return () => {
+            active = false;
+        };
+    }, [isAuthenticated, user, needsOnboarding, api, account, attempt]);
 
     if (loading) return <LoadingScreen />;
     if (!isAuthenticated) return <V2Login />;
-    if (needsOnboarding && preferences === undefined) return <LoadingScreen />;
-    if (needsOnboarding && !preferences) return <StudentOnboarding key={user?.id || user?.email} user={user} onComplete={setPreferences} />;
+    if (needsOnboarding && (!state || state.account !== account)) return <LoadingScreen />;
+    if (needsOnboarding && state.error)
+        return (
+            <div className="v2-access-shell v2-access-page">
+                <div className="v2-access-loading">
+                    <p role="alert">{state.error.message || 'Không thể tải hồ sơ onboarding.'}</p>
+                    <button type="button" className="v2-button" onClick={() => setAttempt((value) => value + 1)}>
+                        Thử lại
+                    </button>
+                    <button type="button" className="v2-button" onClick={logout}>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+        );
+    if (needsOnboarding && !state.preferences)
+        return (
+            <StudentOnboarding
+                key={account}
+                user={user}
+                snapshot={state.snapshot}
+                api={api}
+                onReload={() => setAttempt((value) => value + 1)}
+                onComplete={(preferences) => setState((current) => ({ ...current, preferences }))}
+            />
+        );
     return children;
 }

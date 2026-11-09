@@ -17,6 +17,7 @@ export default function ActivityProfileLayout({
     tab,
     onTabChange,
     actions,
+    registrationActions,
     coverAction,
     beforeTabs,
     children,
@@ -52,7 +53,7 @@ export default function ActivityProfileLayout({
                     <h1>{activity.title}</h1>
                     <p>{activity.clubName}</p>
                 </div>
-                <div className="v2-activity-profile-actions">{actions}</div>
+                {actions && <div className="v2-activity-profile-actions">{actions}</div>}
             </header>
             <div className="v2-activity-profile-quick-facts">
                 <span>
@@ -72,6 +73,7 @@ export default function ActivityProfileLayout({
                     {activity.location || 'Địa điểm đang cập nhật'}
                 </span>
             </div>
+            {registrationActions && <div className="v2-activity-profile-registration">{registrationActions}</div>}
             {beforeTabs}
             <nav className="v2-activity-profile-tabs" aria-label="Nội dung hoạt động">
                 {tabs.map(([id, text]) => (

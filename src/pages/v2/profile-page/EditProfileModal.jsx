@@ -18,8 +18,8 @@ const fields = [
     { name: 'skills', label: 'Kỹ năng', placeholder: 'Phân cách bằng dấu phẩy' },
     { name: 'interests', label: 'Sở thích', placeholder: 'Phân cách bằng dấu phẩy' },
     { name: 'dateOfBirth', label: 'Ngày sinh', placeholder: 'DD/MM/YYYY', inputMode: 'numeric', maxLength: 10 },
-    { name: 'phoneNumber', label: 'Số điện thoại', type: 'tel', maxLength: 16 },
-    { name: 'address', label: 'Địa chỉ', maxLength: 500 },
+    { name: 'phoneNumber', label: 'Số điện thoại', type: 'tel', maxLength: 20 },
+    { name: 'address', label: 'Địa chỉ', maxLength: 300 },
     { name: 'campus', label: 'Campus', options: true },
     { name: 'major', label: 'Ngành học', maxLength: 120 },
     { name: 'year', label: 'Khóa học', maxLength: 30 },
@@ -139,12 +139,19 @@ export default function EditProfileModal({ snapshot, onClose, onPreview }) {
                         {tab.id === 'personal' && (
                             <p>Thông tin cá nhân dùng khi đăng ký CLB. Chỉ bạn được chỉnh sửa hồ sơ của mình.</p>
                         )}
+                        {tab.id === 'academic' && (
+                            <p>
+                                Thông tin học vụ chỉ đọc từ tài khoản và roster học kỳ. Ngành/khóa học chỉ hiện khi có
+                                nguồn học vụ được xác nhận.
+                            </p>
+                        )}
                         <div className="v2-profile-edit-fields">
                             {fields
                                 .filter((field) => tab.fields.includes(field.name))
                                 .map(({ name, label, multiline, options, ...constraints }) => {
                                     const props = {
                                         ...constraints,
+                                        disabled: tab.id === 'academic',
                                         name,
                                         id: `profile-edit-${name}`,
                                         value: draft[name] || '',
