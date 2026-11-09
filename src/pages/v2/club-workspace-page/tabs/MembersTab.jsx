@@ -49,7 +49,7 @@ export default function MembersTab({ manager = false, dashboard, workspace, read
         >
             {(records) => (
                 <div className="v2-member-management">
-                    <ClubGovernance key={`${user?.id}:${clubId}`} clubId={clubId} readOnly />
+                    <ClubGovernance key={`${user?.id}:${clubId}`} clubId={clubId} readOnly={readOnly} />
                     {dashboard.status === 'loading' && (
                         <p className="v2-workspace-data-note" role="status">
                             Đang tải thành viên…

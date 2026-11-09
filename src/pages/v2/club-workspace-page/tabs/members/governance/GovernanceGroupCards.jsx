@@ -1,7 +1,14 @@
 import { Plus, ShieldCheck, Users, ArrowRightLeft, UserMinus, LockKeyhole } from 'lucide-react';
 
 // Shared presentation for the established board design; callers own data and persistence.
-export default function GovernanceGroupCards({ groups, members, permissionLabels, editable, onAction }) {
+export default function GovernanceGroupCards({
+    groups,
+    members,
+    permissionLabels,
+    editable,
+    manageGroupLeads = false,
+    onAction,
+}) {
     const canTransfer = groups.filter((group) => !group.protected).length > 1;
     return (
         <div className="governance-groups">
@@ -50,6 +57,7 @@ export default function GovernanceGroupCards({ groups, members, permissionLabels
                         {group.memberIds.map((id) => {
                             const member = members.find((person) => String(person.id) === String(id));
                             if (!member) return null;
+                            const isLead = String(group.leadId) === String(id);
                             return (
                                 <div className="governance-person-row" key={id}>
                                     <span className="governance-avatar">
@@ -62,21 +70,49 @@ export default function GovernanceGroupCards({ groups, members, permissionLabels
                                     </span>
                                     <span>
                                         <strong>{member.name}</strong>
+                                        {isLead && <small>Chủ nhiệm ban</small>}
                                         {member.code && <small>{member.code}</small>}
                                     </span>
-                                    {editable && !group.protected && (
+                                    {!group.protected && (editable || (group.canManageMembers && !isLead)) && (
                                         <div className="governance-person-actions">
-                                            <button
-                                                type="button"
-                                                disabled={!canTransfer}
-                                                aria-label={`Luân chuyển ${member.name} từ ${group.name}`}
-                                                title={canTransfer ? 'Luân chuyển' : 'Chưa có nhóm nhận'}
-                                                onClick={() =>
-                                                    onAction({ type: 'transfer', groupId: group.id, memberId: id })
-                                                }
-                                            >
-                                                <ArrowRightLeft size={15} />
-                                            </button>
+                                            {editable && (
+                                                <button
+                                                    type="button"
+                                                    disabled={!canTransfer}
+                                                    aria-label={`Luân chuyển ${member.name} từ ${group.name}`}
+                                                    title={canTransfer ? 'Luân chuyển' : 'Chưa có nhóm nhận'}
+                                                    onClick={() =>
+                                                        onAction({ type: 'transfer', groupId: group.id, memberId: id })
+                                                    }
+                                                >
+                                                    <ArrowRightLeft size={15} />
+                                                </button>
+                                            )}
+                                            {editable && manageGroupLeads && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        onAction({
+                                                            type: isLead ? 'clearLead' : 'setLead',
+                                                            groupId: group.id,
+                                                            memberId: id,
+                                                        })
+                                                    }
+                                                >
+                                                    {isLead ? 'Gỡ Chủ nhiệm ban' : 'Chỉ định Chủ nhiệm ban'}
+                                                </button>
+                                            )}
+                                            {manageGroupLeads && !isLead && (
+                                                <button
+                                                    type="button"
+                                                    aria-label={`Thay ${member.name} trong ${group.name}`}
+                                                    onClick={() =>
+                                                        onAction({ type: 'replace', groupId: group.id, memberId: id })
+                                                    }
+                                                >
+                                                    Thay người
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
                                                 aria-label={`Gỡ ${member.name} khỏi ${group.name}`}
@@ -105,7 +141,7 @@ export default function GovernanceGroupCards({ groups, members, permissionLabels
                             </button>
                         </footer>
                     )}
-                    {editable && !group.protected && (
+                    {(editable || group.canManageMembers) && !group.protected && (
                         <footer>
                             <button
                                 type="button"
@@ -114,13 +150,15 @@ export default function GovernanceGroupCards({ groups, members, permissionLabels
                             >
                                 <Plus size={15} /> Thêm người
                             </button>
-                            <button
-                                type="button"
-                                className="governance-text-button governance-danger"
-                                onClick={() => onAction({ type: 'deleteGroup', groupId: group.id })}
-                            >
-                                Giải thể group
-                            </button>
+                            {editable && (
+                                <button
+                                    type="button"
+                                    className="governance-text-button governance-danger"
+                                    onClick={() => onAction({ type: 'deleteGroup', groupId: group.id })}
+                                >
+                                    Giải thể group
+                                </button>
+                            )}
                         </footer>
                     )}
                 </article>

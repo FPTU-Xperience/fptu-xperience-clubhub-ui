@@ -63,6 +63,9 @@ const actions = {
     ASSIGNMENT_ADD: 'Thêm phân công',
     ASSIGNMENT_REMOVE: 'Gỡ phân công',
     ASSIGNMENT_TRANSFER: 'Chuyển nhóm',
+    ASSIGNMENT_REPLACE: 'Thay thành viên trong ban',
+    ASSIGNMENT_SET_LEAD: 'Chỉ định Chủ nhiệm ban',
+    ASSIGNMENT_CLEAR_LEAD: 'Gỡ Chủ nhiệm ban',
     LEGACY_ROLE_CHANGED: 'Đổi duty cũ',
     MEMBER_DEPARTED: 'Thành viên rời CLB',
     LEADERSHIP_NOMINATED: 'Đề nghị bổ nhiệm',
@@ -205,6 +208,8 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
             return {
                 ...group,
                 memberIds: leaders.map((member) => String(member.userId)),
+                leadId: leaders.find((member) => member.isGroupLead)?.userId,
+                canManageMembers: !readOnly && !busy && state.term.capabilities.manageableGroupIds?.includes(group.id) === true,
                 permissions: group.permissionCodes,
                 canNominate:
                     group.presetCode === 'CLUB_OWNER'
@@ -218,8 +223,11 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
         const group = groups.find((item) => item.id === action.groupId);
         const member = group?.assignments.find((item) => String(item.userId) === String(action.memberId));
         if (action.type === 'saveGroup') return open({ kind: group ? 'edit' : 'create', group });
-        if (action.type === 'assign') return open({ kind: 'assign', group });
+        if (action.type === 'assign') return open({ kind: 'assign', group, scoped: !canConfigure });
         if (action.type === 'remove') return member && open({ kind: 'remove', group, member });
+        if (action.type === 'replace') return member && open({ kind: 'replace', group, member, scoped: !canConfigure });
+        if (action.type === 'setLead' || action.type === 'clearLead')
+            return member && open({ kind: action.type, group, member });
         if (action.type === 'deleteGroup') return open({ kind: 'archive', group });
         if (action.type === 'transfer') {
             const target = groups.find((item) => !item.protected && !item.archived && item.id !== group.id);
@@ -293,13 +301,14 @@ export default function ClubGovernance({ clubId, readOnly = false, onChanged }) 
                         <>
                             <p>
                                 {period.label || state.term.semesterCode} · Bản lưu #{state.term.sequence}
-                                {!canConfigure ? ' · Chỉ xem' : ''}
+                                {!canConfigure && !cardGroups.some((group) => group.canManageMembers) ? ' · Chỉ xem' : ''}
                             </p>
                             <GovernanceGroupCards
                                 groups={cardGroups}
                                 members={cardMembers}
                                 permissionLabels={CLUB_CAPABILITY_LABELS}
                                 editable={canConfigure && !busy}
+                                manageGroupLeads
                                 onAction={groupAction}
                             />
                             {state.term.reportNeedsUpdate && (
@@ -752,12 +761,15 @@ function GovernanceModal({
         [preset, setPreset] = useState(modal.group?.presetCode || 'CUSTOM'),
         [codes, setCodes] = useState(modal.group?.permissionCodes || []);
     const [reason, setReason] = useState(''),
-        [memberId, setMemberId] = useState(modal.member ? String(modal.member.membershipId) : ''),
+        [memberId, setMemberId] = useState(modal.member && modal.kind !== 'replace' ? String(modal.member.membershipId) : ''),
         [sourceGroup, setSourceGroup] = useState(modal.fromGroup?.id || '');
     const [query, setQuery] = useState(''),
         [page, setPage] = useState(1),
         [members, setMembers] = useState({});
-    const choosing = ['assign', 'nominate', 'transfer'].includes(modal.kind);
+    const choosing = ['assign', 'replace', 'nominate', 'transfer'].includes(modal.kind);
+    const candidatePath = modal.scoped ? termPath : root;
+    const candidateGroupId = modal.scoped ? modal.group.id : null;
+    const candidateSemesterId = modal.scoped ? term.semesterId : null;
     useEffect(() => {
         let active = true;
         if (!choosing) return;
@@ -766,16 +778,17 @@ function GovernanceModal({
             () =>
                 api
                     .request(
-                        root +
+                        candidatePath +
                             '/eligible-members?' +
                             new URLSearchParams({
                                 page,
                                 pageSize: 20,
                                 search: query,
+                                ...(candidateGroupId ? { groupId: candidateGroupId } : {}),
                             }),
                     )
                     .then((value) => {
-                        const data = governancePage(value, clubId);
+                        const data = governancePage(value, clubId, candidateSemesterId);
                         if (
                             data.items.some(
                                 (m) =>
@@ -796,12 +809,15 @@ function GovernanceModal({
             active = false;
             clearTimeout(timer);
         };
-    }, [api, root, page, query, choosing]);
+    }, [api, candidatePath, candidateGroupId, candidateSemesterId, clubId, page, query, choosing]);
     const titles = {
         initialize: 'Khởi tạo BQL học kỳ',
         create: 'Tạo nhóm BQL',
         edit: 'Sửa nhóm BQL',
         assign: 'Thêm hoặc chuyển phân công',
+        replace: 'Thay thành viên trong ban',
+        setLead: 'Chỉ định Chủ nhiệm ban',
+        clearLead: 'Gỡ Chủ nhiệm ban',
         remove: 'Gỡ phân công',
         archive: 'Ngừng sử dụng nhóm',
         report: 'Kiểm tra bản chụp trước khi nộp',
@@ -835,10 +851,11 @@ function GovernanceModal({
             );
         if (modal.kind === 'archive')
             return onSave('archive', termPath + '/groups/' + modal.group.id + '/archive', 'POST', common);
-        if (modal.kind === 'remove')
-            return onSave('remove', termPath + '/assignment-changes', 'POST', {
+        const memberOperation = { remove: 'REMOVE', setLead: 'SET_LEAD', clearLead: 'CLEAR_LEAD' }[modal.kind];
+        if (memberOperation)
+            return onSave(modal.kind, termPath + '/assignment-changes', 'POST', {
                 ...common,
-                operation: 'REMOVE',
+                operation: memberOperation,
                 groupId: modal.group.id,
                 membershipIds: [modal.member.membershipId],
             });
@@ -864,10 +881,11 @@ function GovernanceModal({
             });
         return onSave('assign', termPath + '/assignment-changes', 'POST', {
             ...common,
-            operation: sourceGroup ? 'TRANSFER' : 'ADD',
+            operation: modal.kind === 'replace' ? 'REPLACE' : sourceGroup ? 'TRANSFER' : 'ADD',
             groupId: modal.group.id,
             membershipIds: [member.memberId],
             fromGroupId: sourceGroup || null,
+            ...(modal.kind === 'replace' ? { replaceMembershipId: modal.member.membershipId } : {}),
         });
     };
     return (
@@ -971,7 +989,7 @@ function GovernanceModal({
                                     setMemberId('');
                                 }}
                             />
-                            {modal.kind === 'assign' && (
+                            {modal.kind === 'assign' && !modal.scoped && (
                                 <label>
                                     Kiểu phân công
                                     <select value={sourceGroup} onChange={(e) => setSourceGroup(e.target.value)}>
@@ -999,6 +1017,9 @@ function GovernanceModal({
                             Gỡ {modal.member.displayName} khỏi {modal.group.name}. Các phân công khác của thành viên
                             được giữ lại.
                         </p>
+                    )}
+                    {['replace', 'setLead', 'clearLead'].includes(modal.kind) && (
+                        <p>{modal.member.displayName} · {modal.group.name}</p>
                     )}
                     {modal.kind === 'archive' && (
                         <p>

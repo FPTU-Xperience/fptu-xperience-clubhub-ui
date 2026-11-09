@@ -247,7 +247,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
                         <ClubGovernance
                             key={`${user?.id}:${clubId}:${semester?.id}`}
                             clubId={clubId}
-                            readOnly={readOnly || recruitmentOnly}
+                            readOnly={readOnly}
                             onChanged={refresh}
                         />
                     )}
