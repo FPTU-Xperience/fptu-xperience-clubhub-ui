@@ -2,6 +2,8 @@
 
 Archived on 2026-10-19. See [current lifecycle and remaining obligations](../contract-lifecycle-audit.md). The original text below records its dated scope; newer source evidence takes precedence.
 
+> Student data addendum — 2026-10-27: [BE contract](../../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB design](../../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) cover `student-preferences` onboarding, migration of existing schedules to `student-schedule`, and a new per-club student wallet/ledger with atomic redemption. They refine D02/D07/D08/D09; implementation status must be tracked separately from these proposed designs.
+
 Implement Status: Cancel
 
 Status Scope: Historical specification or source snapshot, superseded by the 2026-10-19 lifecycle audit; never a current implementation claim.

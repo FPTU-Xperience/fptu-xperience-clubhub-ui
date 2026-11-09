@@ -4,6 +4,8 @@
 
 Archived on 2026-10-19. See [current lifecycle and remaining obligations](../contract-lifecycle-audit.md). The original text below records its dated scope; newer source evidence takes precedence.
 
+> Student persistence design — 2026-10-27: the proposed [BE student contract](../../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB schema](../../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) define server onboarding completion, `student-preferences`, declared vs official academic data, and the single preferences/profile interest owner. These new requirements are not implemented by the existing canonical profile endpoint.
+
 Implement Status: Cancel
 
 Status Scope: Historical specification or source snapshot, superseded by the 2026-10-19 lifecycle audit; never a current implementation claim.
