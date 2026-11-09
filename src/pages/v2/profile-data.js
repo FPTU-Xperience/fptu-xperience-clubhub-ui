@@ -340,7 +340,7 @@ export function readProfileFromMemberships(user, memberships, storage = globalTh
 }
 
 export function projectOwnMemberProfile(member, user, snapshot) {
-    if (!snapshot || !user?.id || String(member.userId) !== String(user.id)) return member;
+    if (member.profileSource === 'user-profile' || !snapshot || !user?.id || String(member.userId) !== String(user.id)) return member;
     return {
         ...member,
         fullName: snapshot.profile.displayName,
