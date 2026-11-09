@@ -2,6 +2,8 @@
 
 # Self profile and club member projection
 
+> Student persistence design — 2026-10-27: the proposed [BE student contract](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB schema](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) define server onboarding completion, `student-preferences`, declared vs official academic data, and the single preferences/profile interest owner. These new requirements are not implemented by the existing canonical profile endpoint.
+
 Implement Status: Not Yet
 
 Status Scope: Backend implementation

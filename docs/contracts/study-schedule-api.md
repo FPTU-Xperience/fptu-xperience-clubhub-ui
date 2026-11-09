@@ -5,6 +5,8 @@ Implement Status: Implemented in backend source; frontend uses the API exclusive
 Source Review: 2026-10-27. Backend revision bbf736798c4109cdd29d879b538eaa279a07fa39.
 Source/test integration is separate from authenticated production acceptance and deployment configuration.
 
+Proposed persistence migration — 2026-10-27: [BE student contract](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB design](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) rename existing schedule tables to `student-schedule`/`student-schedule-cell` without losing data or adding a competing API. The schema rename is not implemented yet.
+
 ## Ownership and implementations
 
 - AuthService owns private study schedules: [StudyScheduleEndpoints](../../../fptu-xperience-clubhub-api/src/Services/AuthService/Endpoints/StudyScheduleEndpoints.cs).
@@ -42,7 +44,7 @@ Response fields:
 | Field | Meaning |
 | --- | --- |
 | year, term | Requested alias |
-| semesterId, semesterKey | Official semester GUID and code |
+| semesterKey, semesterId | Official semester GUID and code, respectively (current shared DTO naming) |
 | campusCode | Resolved authoritative campus |
 | version | Opaque GUID; use exactly as returned |
 | isActive, canWrite | Semester state and write eligibility |
@@ -84,8 +86,8 @@ GET root returns:
     "block10StartDate": "2026-08-31",
     "block3StartDate": "2026-11-09"
   },
-  "semesterKey": "<official semester code>",
-  "semesterId": "<official semester GUID>",
+  "semesterKey": "<official semester GUID>",
+  "semesterId": "<official semester code>",
   "campusCode": "HAN",
   "availability": "AVAILABLE",
   "canWrite": true,

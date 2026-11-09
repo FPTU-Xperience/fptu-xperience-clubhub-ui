@@ -1,5 +1,7 @@
 # Club tasks, contributions and credited points
 
+> Wallet design — 2026-10-27: use the proposed [BE student/wallet contract](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-consistency-v1.md) and [DB schema](../../../fptu-xperience-clubhub-api/docs/contracts/student-data-schema-v1.md) for wallet/ledger/receipt implementation. They refine D07: `/points/me` and `/wallet/me` share one lifetime balance; semester filters affect period counters only. No wallet implementation is claimed.
+
 Implement Status: Not Yet
 
 Status Scope: Backend implementation
