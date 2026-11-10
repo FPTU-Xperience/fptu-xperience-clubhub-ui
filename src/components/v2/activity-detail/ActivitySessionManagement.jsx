@@ -134,7 +134,6 @@ function SessionRoster({ activity, session, revision }) {
         [retry, setRetry] = useState(0),
         [state, setState] = useState({});
     const [editing, setEditing] = useState(null),
-        [booking, setBooking] = useState(null),
         [busy, setBusy] = useState(false),
         [error, setError] = useState(''),
         [notice, setNotice] = useState('');
@@ -145,7 +144,6 @@ function SessionRoster({ activity, session, revision }) {
         const ticket = ++generation.current;
         setState({});
         setEditing(null);
-        setBooking(null);
         setError('');
         setBusy(false);
         lock.current = false;
@@ -369,6 +367,7 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
         [error, setError] = useState(''),
         [notice, setNotice] = useState('');
     const [editing, setEditing] = useState(null),
+        [booking, setBooking] = useState(null),
         [decision, setDecision] = useState(null),
         [selected, setSelected] = useState(null),
         [challenge, setChallenge] = useState(null);
@@ -384,6 +383,7 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
         const ticket = ++generation.current;
         setState({});
         setEditing(null);
+        setBooking(null);
         setDecision(null);
         setChallenge(null);
         setError('');
