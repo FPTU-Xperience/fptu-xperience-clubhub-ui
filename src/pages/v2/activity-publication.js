@@ -8,6 +8,7 @@ export function activityPublication(raw = {}) {
         publicationVersion:
             Number.isSafeInteger(raw.publicationVersion) && raw.publicationVersion > 0 ? raw.publicationVersion : null,
         sourceApplicationId: raw.sourceApplicationId || null,
+        ...(raw.publishAtUtc ? { publishAtUtc: raw.publishAtUtc } : {}),
         publicationCapabilities: { canManage: raw.publicationCapabilities?.canManage === true },
     };
 }
@@ -30,18 +31,21 @@ export function canManageActivityPublication(activity, access) {
             : clubCapability(access, 'event.content.write'))
     );
 }
-export async function saveActivityPublication(api, activity, isPublished, idempotencyKey) {
+export async function saveActivityPublication(api, activity, isPublished, idempotencyKey, registrationWindow = {}) {
     const saved = await api.setActivityPublication(
         activity.id,
         {
             isPublished,
             expectedVersion: activity.publicationVersion,
+            ...registrationWindow,
         },
         idempotencyKey,
     );
     if (
         String(saved?.id) !== String(activity.id) ||
-        saved?.isPublished !== isPublished ||
+        saved?.isPublished !== (isPublished && !registrationWindow.publishAtUtc) ||
+        (registrationWindow.publishAtUtc
+            && Date.parse(saved?.publishAtUtc) !== Date.parse(registrationWindow.publishAtUtc)) ||
         !Number.isSafeInteger(saved.publicationVersion) ||
         saved.publicationVersion <= activity.publicationVersion
     )

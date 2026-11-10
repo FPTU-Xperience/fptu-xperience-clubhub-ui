@@ -2,6 +2,7 @@ import { usePublicMediaRevision } from '../../services/use-public-media-revision
 import { workspaceSemesterQuery, workspaceSemesterKey } from './club-workspace-page/workspace-semester-data.js';
 import { useEffect, useState } from 'react';
 import { activityPublication, isActivityPublic } from './activity-publication.js';
+import { activityTimeline } from './activity-timeline.js';
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 const succeeded = (result) => result?.status === 'fulfilled';
@@ -12,8 +13,9 @@ export const isOngoingWorkspaceActivity = (activity) =>
 export function workspaceActivityStatus(activity, now = Date.now()) {
     const state = String(activity.status).toUpperCase();
     if (!['SCHEDULED', 'UPCOMING', 'LIVE'].includes(state)) return state;
-    if (['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(activity.timeline?.status))
-        return activity.timeline.status;
+    const timeline = activityTimeline(activity, now);
+    if (['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(timeline.status))
+        return timeline.status;
     const end = Date.parse(activity.endTimeUtc || activity.endTime || '');
     const start = Date.parse(activity.startTimeUtc || activity.startTime || '');
     if (Number.isFinite(end) && end <= now) return 'COMPLETED';
@@ -43,13 +45,12 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
         ?.filter(
             (activity) =>
                 workspaceActivityStatus(activity, now) === 'UPCOMING' &&
-                Number.isFinite(Date.parse(activity.timeline?.startTimeUtc || activity.startTimeUtc || activity.startTime)) &&
-                Date.parse(activity.timeline?.startTimeUtc || activity.startTimeUtc || activity.startTime) >= now,
+                Date.parse(activityTimeline(activity, now).startTime) >= now,
         )
         .sort(
             (left, right) =>
-                Date.parse(left.timeline?.startTimeUtc || left.startTimeUtc || left.startTime) -
-                Date.parse(right.timeline?.startTimeUtc || right.startTimeUtc || right.startTime),
+                Date.parse(activityTimeline(left, now).startTime) -
+                Date.parse(activityTimeline(right, now).startTime),
         );
     const upcomingActivity = upcomingActivities?.[0];
     const approvedMembers = Array.isArray(clubData?.members)
@@ -82,8 +83,8 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
                 title: activity.title,
                 description: activity.description,
                 location: activity.location,
-                startTime: activity.timeline?.startTimeUtc || activity.startTimeUtc || activity.startTime,
-                endTime: activity.timeline?.endTimeUtc || activity.endTimeUtc || activity.endTime,
+                startTime: activityTimeline(activity, now).startTime,
+                endTime: activityTimeline(activity, now).endTime,
                 status: workspaceActivityStatus(activity, now),
                 coverImageUrl: activity.coverImageUrl || '',
             })) || null,
@@ -104,7 +105,7 @@ export function summarizeWorkspaceDashboard(results, manager, now = Date.now()) 
         upcomingActivity: upcomingActivity
             ? {
                   title: upcomingActivity.title,
-                  startTime: upcomingActivity.timeline?.startTimeUtc || upcomingActivity.startTimeUtc || upcomingActivity.startTime,
+                  startTime: activityTimeline(upcomingActivity, now).startTime,
                   location: upcomingActivity.location,
               }
             : null,

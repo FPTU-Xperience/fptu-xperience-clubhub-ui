@@ -27,7 +27,7 @@ import './CreateGiftModal.scss';
 const types = [
     { id: 'physical', label: 'Hiện vật', icon: Package, hint: 'Quà tặng và vật phẩm của CLB' },
     { id: 'frame', label: 'Khung avatar', icon: ScanFace, hint: 'Khung ảnh đại diện độc quyền' },
-    { id: 'shape', label: 'Shape', icon: Shapes, hint: 'Shape cho ảnh bìa' },
+    { id: 'shape', label: 'Badge', icon: Shapes, hint: 'Badge cho ảnh bìa' },
     { id: 'color', label: 'Bộ màu', icon: Palette, hint: 'Bảng màu độc quyền' },
 ];
 const colorFields = [
@@ -447,7 +447,7 @@ export default function CreateGiftModal({
                                             ? 'Đang xử lý và chuyển SVG…'
                                             : file?.name ||
                                               (kind === 'shape'
-                                                  ? 'Tải ảnh shape'
+                                                  ? 'Tải ảnh badge'
                                                   : kind === 'frame'
                                                     ? 'Tải thiết kế khung avatar'
                                                     : 'Thêm ảnh hiện vật')}

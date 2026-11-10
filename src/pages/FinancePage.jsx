@@ -397,7 +397,7 @@ export default function FinancePage() {
                                 )}
                                 {proposal.sourceReportId && (
                                     <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2 text-xs text-purple-200">
-                                        <span>Báo cáo sự kiện sắp tới kết hợp #{proposal.sourceReportId}</span>
+                                        <span>Kế hoạch mở hoạt động liên quan #{proposal.sourceReportId}</span>
                                         <button
                                             type="button"
                                             onClick={() => navigate(`/reports/${proposal.sourceReportId}`)}

@@ -81,7 +81,7 @@ export const vi = Object.freeze({
         SETTLED: 'Đã quyết toán',
     },
     reportTypes: {
-        CLUB_ACTIVITY: 'Báo cáo Hoạt động CLB',
+        CLUB_ACTIVITY: 'Báo cáo kết thúc hoạt động',
         CLUB_TERM_START: 'Báo cáo Đầu kỳ CLB',
         CLUB_TERM_END: 'Báo cáo Cuối kỳ CLB',
         QUARTERLY: 'Báo cáo quý',
@@ -89,7 +89,7 @@ export const vi = Object.freeze({
         SEMESTER: 'Báo cáo học kỳ',
         ANNUAL: 'Báo cáo năm',
         AD_HOC: 'Báo cáo đột xuất',
-        FUTURE_EVENT: 'Báo cáo sự kiện sắp tới',
+        FUTURE_EVENT: 'Kế hoạch mở hoạt động',
     },
     eventTypes: {
         'club.created': 'Tạo câu lạc bộ',

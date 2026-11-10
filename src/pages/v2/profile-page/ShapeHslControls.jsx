@@ -4,7 +4,7 @@ import './ShapeHslControls.scss';
 export default function ShapeHslControls({ value, onChange, disabled = false }) {
     return (
         <fieldset className="v2-shape-hsl-controls">
-            <legend>Màu ảnh shape · HSL</legend>
+            <legend>Màu ảnh badge · HSL</legend>
             {[
                 ['hue', 'Sắc độ (H)', -180, 180, '°'],
                 ['saturation', 'Độ bão hòa (S)', 0, 200, '%'],

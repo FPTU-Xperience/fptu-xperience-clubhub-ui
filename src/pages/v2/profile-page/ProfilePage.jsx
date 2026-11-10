@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ActivityCertificates, { useCertificateDisplay } from '../../../components/v2/activity-detail/ActivityCertificates';
 import {
     Award,
     BookOpen,
@@ -93,6 +94,7 @@ function Stat({ icon: Icon, label, value, note, hidden }) {
 }
 
 export default function ProfilePage({ user, sessionKey, api, profileImages, profileResult: result }) {
+    const certificateDisplay = useCertificateDisplay(api, sessionKey);
     const { images, error: imageError, saveImage } = profileImages;
     const [shared, setShared] = useState(false);
     const [tab, setTab] = useState('overview');
@@ -219,6 +221,12 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                     shapeUsePalette={data.profile.coverShapeUsePalette}
                     coverText={data.profile.coverText}
                 />
+                {certificateDisplay.data?.badgePng && <img
+                    src={`data:image/png;base64,${certificateDisplay.data.badgePng}`}
+                    alt="Badge hoạt động"
+                    style={{ position: 'absolute', left: `${certificateDisplay.data.badgeX}%`, top: `${certificateDisplay.data.badgeY}%`,
+                        width: `${certificateDisplay.data.badgeSize}%`, transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}
+                />}
                 {!shared && (
                     <button
                         className="v2-profile-cover-edit"
@@ -233,6 +241,11 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
             <section className="v2-profile-identity">
                 <div className="v2-profile-avatar-wrap">
                     <ProfileAvatar profile={data.profile} imageUrl={images.avatar} large />
+                    {certificateDisplay.data?.framePng && <img
+                        src={`data:image/png;base64,${certificateDisplay.data.framePng}`}
+                        alt="Khung avatar hoạt động"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
+                    />}
                     {!shared && (
                         <button
                             type="button"
@@ -361,6 +374,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                     </div>
                     {tab === 'overview' ? (
                         <>
+                            {!shared && <ActivityCertificates api={api} display={certificateDisplay} />}
                             <div className="v2-profile-stats">
                                 <Stat
                                     icon={Sparkles}

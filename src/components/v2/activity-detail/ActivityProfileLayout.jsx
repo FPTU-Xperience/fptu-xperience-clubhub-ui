@@ -112,6 +112,12 @@ export function ActivityOverview({ activity, clubLink }) {
                     <dd>{date(activity.startTime)}</dd>
                     <dt>Kết thúc</dt>
                     <dd>{date(activity.endTime)}</dd>
+                    {activity.nextSessionStartTime && (
+                        <>
+                            <dt>Phiên kế tiếp</dt>
+                            <dd>{date(activity.nextSessionStartTime)}</dd>
+                        </>
+                    )}
                     <dt>Địa điểm</dt>
                     <dd>{activity.location || 'Đang cập nhật'}</dd>
                     <dt>Đơn vị tổ chức</dt>

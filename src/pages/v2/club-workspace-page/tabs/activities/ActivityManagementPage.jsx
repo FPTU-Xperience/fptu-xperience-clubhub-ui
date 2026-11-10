@@ -17,6 +17,12 @@ import ActivityResourceEditor from './ActivityResourceEditor';
 import { saveActivityResource } from '../../../../../services/activity-resources';
 import ActivityResourceManagement from '../../../../../components/v2/activity-detail/ActivityResourceManagement';
 import ActivityPublicationControl from './ActivityPublicationControl';
+import ActivityRescheduleControl from './ActivityRescheduleControl';
+import ActivityRecap from '../../../../../components/v2/activity-detail/ActivityRecap';
+import ActivityClosingReport from '../../../../../components/v2/activity-detail/ActivityClosingReport';
+import ActivityFinalRoles from '../../../../../components/v2/activity-detail/ActivityFinalRoles';
+import CertificateDefinitions from '../../../../../components/v2/activity-detail/CertificateDefinitions';
+import CampusActivityOperations from '../../../../../components/v2/activity-detail/CampusActivityOperations';
 import ActivityStaffingPanel from '../../../../../components/v2/activity-detail/ActivityStaffingPanel';
 import './ActivityEditing.scss';
 
@@ -27,6 +33,7 @@ const tabs = [
     ['assignments', 'Phân công'],
     ['recruitment', 'Tuyển dụng'],
     ['attendance', 'Điểm danh'],
+    ['recap', 'Recap'],
 ];
 const localDateTime = (value) => {
     const date = new Date(value || '');
@@ -294,7 +301,9 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                     <ActivityProfileLayout
                         activity={displayed}
                         preview={Boolean(coverUrl || coreDraft)}
-                        tabs={tabs.filter(([key]) => key !== 'attendance' || manager)}
+                        tabs={tabs.filter(([key]) =>
+                            (key !== 'attendance' || manager) && (key !== 'recap' || activity.status === 'COMPLETED')
+                        )}
                         tab={tab}
                         onTabChange={setTab}
                         actions={
@@ -329,6 +338,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                         beforeTabs={
                             <>{manager && <ActivityVisibilityControl api={api} activity={activity}
                                 disabled={busy || Boolean(coreDraft || editorDraft)} onSaved={() => result.retry()} />}
+                            {manager && activity.sourceApplicationId && <ActivityRescheduleControl key={activity.id} api={api} activity={activity} />}
                             <ActivityPublicationControl
                                 api={api}
                                 activity={activity}
@@ -355,6 +365,15 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                         }
                     >
                         {tab === 'overview' && <ActivityOverview activity={displayed} />}
+                        {tab === 'overview' && manager && <CertificateDefinitions key={activity.id} api={api} activityId={activity.id} />}
+                        {tab === 'overview' && manager && <CampusActivityOperations key={`campus-${activity.id}`} api={api} activityId={activity.id} optional />}
+                        {tab === 'recap' && (
+                            <>
+                                <ActivityRecap key={activity.id} api={api} activityId={activity.id} />
+                                {manager && <ActivityClosingReport key={`report-${activity.id}`} api={api} activityId={activity.id} />}
+                                {manager && <ActivityFinalRoles key={`roles-${activity.id}`} api={api} activityId={activity.id} />}
+                            </>
+                        )}
                         {['documents', 'media'].includes(tab) && (
                             <>
                                 <ActivityResourceEditor

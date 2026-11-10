@@ -1,14 +1,14 @@
 export const REPORT_TEMPLATES = Object.freeze([
     {
         id: 'club-activity',
-        label: 'Báo cáo Hoạt động CLB',
+        label: 'Báo cáo kết thúc hoạt động',
         description: 'Tổng kết kết quả và minh chứng của một hoạt động.',
         reportType: 'CLUB_ACTIVITY',
         requiresActivity: true,
     },
     {
         id: 'create-activity',
-        label: 'Báo cáo Tạo hoạt động',
+        label: 'Kế hoạch mở hoạt động',
         description: 'Đề xuất tổ chức hoạt động mới của câu lạc bộ.',
         reportType: 'FUTURE_EVENT',
     },

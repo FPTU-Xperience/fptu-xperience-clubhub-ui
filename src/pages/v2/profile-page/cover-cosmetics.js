@@ -92,7 +92,7 @@ export const COVER_COLORS = [
     },
 ];
 export const COVER_SHAPES = [
-    { id: 'none', label: 'Không dùng shape', free: true },
+    { id: 'none', label: 'Không dùng badge', free: true },
     { id: 'petals', label: 'Cánh hoa', free: true },
     { id: 'ribbons', label: 'Dải chéo', free: true },
     { id: 'circles', label: 'Bong bóng', free: true },
@@ -189,12 +189,12 @@ export function publishClubShape(
         cost < 0 ||
         cost > 100000
     )
-        throw new Error('Vui lòng nhập tên shape và mức điểm hợp lệ.');
-    if (!isFrameAssetUrl(assetUrl)) throw new Error('Shape cần ảnh PNG hoặc SVG tối đa 5 MB.');
+        throw new Error('Vui lòng nhập tên badge và mức điểm hợp lệ.');
+    if (!isFrameAssetUrl(assetUrl)) throw new Error('Badge cần ảnh PNG hoặc SVG tối đa 5 MB.');
     const existing = editId
         ? readClubShapes(storage).find((item) => item.id === editId && String(item.clubId) === String(clubId))
         : null;
-    if (editId && !existing) throw new Error('Không tìm thấy shape của CLB để sửa.');
+    if (editId && !existing) throw new Error('Không tìm thấy badge của CLB để sửa.');
     const id = existing?.id || `club-${clubId}-${crypto.randomUUID()}`;
     const shape = {
         id,

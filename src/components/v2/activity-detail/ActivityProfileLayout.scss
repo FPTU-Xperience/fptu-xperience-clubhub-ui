@@ -239,3 +239,22 @@
 @media (max-width: 600px) {
     .v2-activity-profile-registration { margin-left: 8px; margin-right: 8px; }
 }
+.v2-activity-recap-form {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+    margin-bottom: 20px;
+
+    label {
+        display: grid;
+        width: 100%;
+        gap: 5px;
+    }
+
+    textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 8px;
+    }
+}

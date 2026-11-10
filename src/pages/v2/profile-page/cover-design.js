@@ -34,9 +34,9 @@ export function normalizeCoverTransform(value = {}, fallback = DEFAULT_COVER_TRA
         ['rotation', -180, 180],
     ]) {
         if (!Number.isFinite(next[field]) || next[field] < min || next[field] > max)
-            throw new Error('Vị trí hoặc kích thước shape không hợp lệ.');
+            throw new Error('Vị trí hoặc kích thước badge không hợp lệ.');
     }
-    if (next.hidden !== undefined && typeof next.hidden !== 'boolean') throw new Error('Trạng thái shape không hợp lệ.');
+    if (next.hidden !== undefined && typeof next.hidden !== 'boolean') throw new Error('Trạng thái badge không hợp lệ.');
     return { x: next.x, y: next.y, scale: next.scale, rotation: next.rotation, ...(next.hidden === undefined ? {} : { hidden: next.hidden }) };
 }
 
@@ -48,7 +48,7 @@ export function normalizeShapeHsl(value = {}, fallback = DEFAULT_SHAPE_HSL) {
         ['lightness', -100, 100],
     ]) {
         if (!Number.isFinite(next[key]) || next[key] < min || next[key] > max)
-            throw new Error('HSL của shape không hợp lệ.');
+            throw new Error('HSL của badge không hợp lệ.');
     }
     return { hue: next.hue, saturation: next.saturation, lightness: next.lightness };
 }

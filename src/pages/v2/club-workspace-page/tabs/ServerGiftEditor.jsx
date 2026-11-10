@@ -9,9 +9,9 @@ import './CreateGiftModal.scss';
 const types = [
     ['PHYSICAL', 'Hiện vật', Package, 'Chưa mở đổi hiện vật'],
     ['FRAME', 'Khung avatar', ScanFace, 'Khung ảnh đại diện độc quyền'],
-    ['SHAPE', 'Shape', Shapes, 'Shape cho ảnh bìa'],
+    ['SHAPE', 'Badge', Shapes, 'Badge cho ảnh bìa'],
     ['COLOR', 'Bộ màu', Palette, 'Bảng màu độc quyền'],
-    ['BUNDLE', 'Bộ màu + shape', Gift, 'Kết hợp vật phẩm của CLB'],
+    ['BUNDLE', 'Bộ màu + Badge', Gift, 'Kết hợp vật phẩm của CLB'],
 ];
 export default function ServerGiftEditor({
     editing,
@@ -146,7 +146,7 @@ export default function ServerGiftEditor({
                     {kind === 'BUNDLE' &&
                         [
                             ['COLOR', colorId, setColorId, 'Bộ màu trong combo'],
-                            ['SHAPE', shapeId, setShapeId, 'Shape trong combo'],
+                            ['SHAPE', shapeId, setShapeId, 'Badge trong bộ quà'],
                         ].map(([type, value, setValue, name]) => (
                             <label key={type}>
                                 {name}

@@ -237,20 +237,34 @@ test('workspace agenda and badge exclude elapsed schedules and show the current 
     assert.equal(summary.upcomingActivity.startTime, '2026-10-30T03:00:00Z');
 });
 
-test('workspace uses the authoritative next-session timeline instead of stale parent dates', () => {
+test('workspace keeps an activity live between sessions and preserves the parent dates', () => {
     const summary = summarizeWorkspaceDashboard([
         ok({}), ok([{ id: 1, status: 'Scheduled', startTimeUtc: '2026-09-15T03:00:00Z',
             endTimeUtc: '2026-09-15T04:00:00Z', timeline: { status: 'UPCOMING',
                 startTimeUtc: '2026-11-01T03:00:00Z', endTimeUtc: '2026-11-01T04:00:00Z' } }]),
         ok([]), ok([]),
     ], true, Date.parse('2026-10-29T03:00:00Z'));
-    assert.equal(summary.activities[0].status, 'UPCOMING');
-    assert.equal(summary.activities[0].startTime, '2026-11-01T03:00:00Z');
+    assert.equal(summary.activities[0].status, 'LIVE');
+    assert.equal(summary.activities[0].startTime, '2026-09-15T03:00:00Z');
     assert.equal(summary.ongoingActivityCount, 1);
-    assert.equal(summary.upcomingCount, 1);
+    assert.equal(summary.upcomingCount, 0);
+    const legacy = mapActivityDetailItem({
+        id: 1, status: 'Scheduled', startTimeUtc: '2026-10-28T03:00:00Z', endTimeUtc: '2026-11-01T04:00:00Z',
+        timeline: { status: 'UPCOMING', asOf: '2026-10-29T03:00:00Z', startTimeUtc: '2026-11-01T03:00:00Z' },
+    });
+    assert.equal(legacy.status, 'LIVE');
+    assert.equal(legacy.startTime, '2026-10-28T03:00:00Z');
+    assert.equal(legacy.nextSessionStartTime, '2026-11-01T03:00:00Z');
+    const afterLastSession = mapActivityDetailItem({
+        id: 1, status: 'Scheduled', startTimeUtc: '2026-10-29T01:00:00Z', endTimeUtc: '2026-10-29T04:00:00Z',
+        timeline: { status: 'COMPLETED', asOf: '2026-10-29T03:00:00Z' },
+    });
+    assert.equal(afterLastSession.status, 'LIVE');
     const detail = mapActivityDetailItem({ id: 1, status: 'Scheduled', timeline: {
         status: 'LIVE', startTimeUtc: '2026-10-29T02:00:00Z', endTimeUtc: '2026-10-29T04:00:00Z',
+        nextSessionStartTimeUtc: '2026-10-29T03:30:00Z',
     } });
     assert.equal(detail.status, 'LIVE');
     assert.equal(detail.startTime, '2026-10-29T02:00:00Z');
+    assert.equal(detail.nextSessionStartTime, '2026-10-29T03:30:00Z');
 });
