@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import V2Modal from '../common/modal/V2Modal';
+import ActivityBooking from './ActivityBooking';
 import {
     attendanceError,
     localSessionDate,
@@ -133,6 +134,7 @@ function SessionRoster({ activity, session, revision }) {
         [retry, setRetry] = useState(0),
         [state, setState] = useState({});
     const [editing, setEditing] = useState(null),
+        [booking, setBooking] = useState(null),
         [busy, setBusy] = useState(false),
         [error, setError] = useState(''),
         [notice, setNotice] = useState('');
@@ -143,6 +145,7 @@ function SessionRoster({ activity, session, revision }) {
         const ticket = ++generation.current;
         setState({});
         setEditing(null);
+        setBooking(null);
         setError('');
         setBusy(false);
         lock.current = false;
@@ -511,6 +514,11 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
                                     {sessionDate(row.attendancePolicy?.closesAt)}
                                 </p>
                                 <div className="v2-session-actions">
+                                    {row.mode === 'ONSITE' && (
+                                        <button className="v2-button" disabled={busy} onClick={() => setBooking(row)}>
+                                            Đặt địa điểm và thiết bị
+                                        </button>
+                                    )}
                                     <button
                                         className="v2-button"
                                         disabled={busy}
@@ -601,6 +609,15 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
                 </>
             )}
             {error && !editing && !decision && <p role="alert">{error}</p>}
+            {booking && (
+                <ActivityBooking key={booking.id} api={api} session={booking} onClose={() => setBooking(null)}
+                    onLocationChanged={() => {
+                        setBooking(null);
+                        setRevision((value) => value + 1);
+                        onChanged?.();
+                    }}
+                />
+            )}
             <button className="v2-button" disabled={busy} onClick={() => setRevision((value) => value + 1)}>
                 Tải lại phiên điểm danh
             </button>
