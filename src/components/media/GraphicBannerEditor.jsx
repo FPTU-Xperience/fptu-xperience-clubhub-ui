@@ -43,7 +43,7 @@ export default function GraphicBannerEditor({
         </div>
     );
     const cards = (items, selected, choose) => (
-        <div className="media-banner-options" role="group" aria-label={tab === 'shape' ? 'Shape trang trí' : 'Màu nền'}>
+        <div className="media-banner-options" role="group" aria-label={tab === 'shape' ? 'Badge trang trí' : 'Màu nền'}>
             {items.map((item) => (
                 <button
                     key={item.id}
@@ -91,10 +91,10 @@ export default function GraphicBannerEditor({
             )}
             {tab === 'shape' && (
                 <>
-                    <strong>Shape trang trí</strong>
+                    <strong>Badge trang trí</strong>
                     {cards(
                         [
-                            ['none', 'Không dùng shape'],
+                            ['none', 'Không dùng badge'],
                             ['circles', 'Vòng tròn'],
                             ['ribbons', 'Dải chéo'],
                             ['waves', 'Sóng'],

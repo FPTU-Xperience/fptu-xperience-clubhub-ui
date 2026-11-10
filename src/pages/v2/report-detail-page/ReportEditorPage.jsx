@@ -284,7 +284,7 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
             for (const item of details) {
                 if (!item.activityDate) return 'Vui lòng nhập ngày tổ chức cho hoạt động.';
                 if (future && (!item.location || !item.description))
-                    return 'Báo cáo Tạo hoạt động cần địa điểm và nội dung hoạt động.';
+                    return 'Nhập địa điểm và nội dung cho kế hoạch mở hoạt động.';
                 if (
                     [item.participantCount, item.targetParticipantCount, item.budgetSpent].some(
                         (value) => !Number.isFinite(value) || value < 0,

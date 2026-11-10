@@ -172,13 +172,13 @@ export default function CoverImageModal({
                         compact
                     />
                     <button type="button" className="v2-button" aria-pressed={design.shapeHidden === true} disabled={busy || mode !== 'graphic' || design.decoration === 'none'} onClick={() => setDesign((current) => ({ ...current, shapeHidden: !current.shapeHidden }))}>
-                        {design.shapeHidden ? 'Hiện shape' : 'Ẩn shape'}
+                        {design.shapeHidden ? 'Hiện badge' : 'Ẩn badge'}
                     </button>
                     <MediaEditorTabs
                         id={id}
                         items={[
                             ['background', 'Nền'],
-                            ['shape', 'Shape'],
+                            ['shape', 'Badge'],
                             ['text', 'Chữ'],
                         ]}
                         value={tab}
@@ -233,7 +233,7 @@ export default function CoverImageModal({
                             <p>
                                 {tab === 'background'
                                     ? 'Nhấn hoặc kéo thả ảnh vào khung xem trước để chọn ảnh nền. JPG, PNG, WebP · tối đa 5 MB.'
-                                    : 'Chuyển sang màu nền để tùy chỉnh shape và chữ của graphic banner.'}
+                                    : 'Chuyển sang màu nền để tùy chỉnh badge và chữ của graphic banner.'}
                             </p>
                             {tab !== 'background' && (
                                 <button

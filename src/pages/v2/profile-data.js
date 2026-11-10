@@ -84,7 +84,7 @@ function editableProfile(value, fallback, storage = globalThis.localStorage) {
     if (![...getCoverColors(storage).map((item) => item.id), 'custom'].includes(coverPreset)) {
         throw new Error('Mẫu ảnh bìa không hợp lệ.');
     }
-    if (!getCoverShapes(storage).some((item) => item.id === coverShape)) throw new Error('Shape ảnh bìa không hợp lệ.');
+    if (!getCoverShapes(storage).some((item) => item.id === coverShape)) throw new Error('Badge ảnh bìa không hợp lệ.');
 
     return {
         displayName,
@@ -287,7 +287,7 @@ export function saveProfile(user, patch, storage = globalThis.localStorage) {
         !canUseCoverItem('color', profile.coverBackgroundColor, inventory, storage) ||
         !canUseCoverItem('shape', profile.coverShape, inventory, storage)
     ) {
-        throw new Error('Bạn cần đổi màu hoặc shape này tại Kho quà của CLB trước khi sử dụng.');
+        throw new Error('Bạn cần đổi màu hoặc badge này tại Kho quà của CLB trước khi sử dụng.');
     }
     if (!canUseCoverItem('frame', profile.avatarFrame, inventory, storage))
         throw new Error('Bạn cần đổi khung này tại Kho quà của CLB trước khi sử dụng.');

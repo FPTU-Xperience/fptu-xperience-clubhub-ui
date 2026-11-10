@@ -75,7 +75,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
             setSyncAsset({ asset, vector });
         } catch (issue) {
             setShapeUsePalette(false);
-            setError(issue.message || 'Không thể đồng bộ màu shape.');
+            setError(issue.message || 'Không thể đồng bộ màu badge.');
         } finally {
             setSyncing(false);
         }
@@ -294,7 +294,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         />
                     </div>
                     <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
-                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                        {shapeTransform.hidden ? 'Hiện badge' : 'Ẩn badge'}
                     </button>
                     <p className="v2-cover-preview-note">
                         Xem trước toàn bộ ảnh bìa · Đề xuất 1200 × 300px (4:1) · Cùng bố cục với trang cá nhân.
@@ -302,7 +302,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                     <div className="v2-cover-modes" role="tablist" aria-label="Tùy chỉnh ảnh bìa">
                         {[
                             ['background', 'Nền'],
-                            ['shape', 'Shape'],
+                            ['shape', 'Badge'],
                             ['text', 'Chữ'],
                         ].map(([id, label], index) => (
                             <button
@@ -350,9 +350,9 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                             syncing
                                 ? 'Đang chuẩn bị SVG và đồng bộ màu…'
                                 : shape === 'none'
-                                  ? 'Chọn stamp trong tab Shape để dùng bộ màu.'
+                                  ? 'Chọn badge trong tab Badge để dùng bộ màu.'
                                   : automaticShape
-                                    ? 'Shape có sẵn đã tự động dùng màu chính/phụ từ bộ màu này.'
+                                    ? 'Badge có sẵn đã tự động dùng màu chính/phụ từ bộ màu này.'
                                     : !canSyncShape
                                       ? 'Thiết kế này chưa hỗ trợ đồng bộ hai màu.'
                                       : undefined
@@ -429,7 +429,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         <>
                             {renderOptions({
                                 kind: 'shape',
-                                label: 'Shape trang trí',
+                                label: 'Badge trang trí',
                                 items: shapes,
                                 selected: shape,
                                 select: (next) => {
@@ -439,7 +439,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 },
                             })}
                             <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
-                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                        {shapeTransform.hidden ? 'Hiện badge' : 'Ẩn badge'}
                     </button>
                     <p className="v2-cover-preview-note">
                                 Stamp là lớp ảnh độc lập. Kéo trên ảnh xem trước để di chuyển; dùng thanh điều chỉnh để
@@ -493,10 +493,10 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                                 <ShapeHslControls value={shapeHsl} onChange={setShapeHsl} disabled={saving} />
                             )}
                             <button type="button" className="v2-button" aria-pressed={shapeTransform.hidden === true} disabled={saving || shape === 'none'} onClick={() => setShapeTransform((current) => ({ ...current, hidden: !current.hidden }))}>
-                        {shapeTransform.hidden ? 'Hiện shape' : 'Ẩn shape'}
+                        {shapeTransform.hidden ? 'Hiện badge' : 'Ẩn badge'}
                     </button>
                     <p className="v2-cover-preview-note">
-                                CLB có thể thêm shape riêng bằng PNG hoặc SVG tối đa 5 MB tại Kho quà.
+                                CLB có thể thêm badge riêng tại Kho quà bằng ảnh PNG hoặc SVG tối đa 5 MB.
                             </p>
                         </>
                     )}
@@ -518,11 +518,11 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                 </div>
                 {!unlocked && (
                     <p className="v2-cover-locked" role="status">
-                        Bạn có thể xem thử thiết kế này. Đổi màu hoặc shape tại Kho quà của CLB để sử dụng.
+                        Bạn có thể xem thử thiết kế này. Đổi màu hoặc badge tại Kho quà của CLB để sử dụng.
                     </p>
                 )}
                 <Link className="v2-cover-store-link" to="/v2/my-clubs">
-                    Mở Kho quà tại CLB của tôi để đổi màu & shape →
+                    Mở Kho quà tại CLB của tôi để đổi màu và badge →
                 </Link>
                 {error && (
                     <p className="v2-profile-form-error" role="alert">

@@ -72,7 +72,7 @@ export default function ReportTemplateModal({ api, workspace, semester, onClose,
                 className="v2-report-template-modal"
             >
                 <p className="v2-report-template-intro">
-                    Báo cáo Hoạt động CLB · {workspace.name}
+                    Báo cáo kết thúc hoạt động · {workspace.name}
                     {semester?.label ? ` · ${semester.label}` : ''}
                 </p>
                 {result.status === 'loading' && <p role="status">Đang tải danh sách hoạt động…</p>}

@@ -12,7 +12,7 @@ import {
 test('report template catalog contains the four requested templates', () => {
     assert.deepEqual(
         REPORT_TEMPLATES.map((item) => item.label),
-        ['Báo cáo Hoạt động CLB', 'Báo cáo Tạo hoạt động', 'Báo cáo Đầu kỳ CLB', 'Báo cáo Cuối kỳ CLB'],
+        ['Báo cáo kết thúc hoạt động', 'Kế hoạch mở hoạt động', 'Báo cáo Đầu kỳ CLB', 'Báo cáo Cuối kỳ CLB'],
     );
     assert.deepEqual(
         REPORT_TEMPLATES.filter((item) => item.requiresActivity).map((item) => item.id),

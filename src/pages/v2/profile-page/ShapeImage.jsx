@@ -11,7 +11,7 @@ export default function ShapeImage({
     x = 0,
     y = 0,
     size = SHAPE_STAMP_SIZE,
-    label = 'Shape độc lập',
+    label = 'Badge độc lập',
 }) {
     const id = `shape-${useId().replace(/:/g, '')}`;
     const vectorAsset = usePaletteAsset(assetUrl, !!svgPalette);

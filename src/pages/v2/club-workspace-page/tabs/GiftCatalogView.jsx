@@ -30,7 +30,7 @@ const categories = [
     { id: 'FRAME', label: 'Khung avatar', icon: ScanFace, description: 'Thêm điểm nhấn cho ảnh đại diện của bạn.' },
     {
         id: 'SHAPE',
-        label: 'Shape cover',
+        label: 'Badge ảnh bìa',
         icon: Shapes,
         description: 'Trang trí ảnh bìa bằng các thiết kế riêng của CLB.',
     },
@@ -351,7 +351,7 @@ export default function GiftCatalogView({
                                                 <div className="v2-gift-card-meta">
                                                     <span>
                                                         {row.kind === 'BUNDLE'
-                                                            ? 'Bộ màu + shape'
+                                                            ? 'Bộ màu + Badge'
                                                             : categories.find((item) => item.id === row.kind)?.label}
                                                     </span>
                                                 </div>
