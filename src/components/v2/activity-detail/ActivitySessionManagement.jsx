@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import V2Modal from '../common/modal/V2Modal';
+import ActivityBooking from './ActivityBooking';
 import {
     attendanceError,
     localSessionDate,
@@ -366,6 +367,7 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
         [error, setError] = useState(''),
         [notice, setNotice] = useState('');
     const [editing, setEditing] = useState(null),
+        [booking, setBooking] = useState(null),
         [decision, setDecision] = useState(null),
         [selected, setSelected] = useState(null),
         [challenge, setChallenge] = useState(null);
@@ -381,6 +383,7 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
         const ticket = ++generation.current;
         setState({});
         setEditing(null);
+        setBooking(null);
         setDecision(null);
         setChallenge(null);
         setError('');
@@ -511,6 +514,11 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
                                     {sessionDate(row.attendancePolicy?.closesAt)}
                                 </p>
                                 <div className="v2-session-actions">
+                                    {row.mode === 'ONSITE' && (
+                                        <button className="v2-button" disabled={busy} onClick={() => setBooking(row)}>
+                                            Đặt địa điểm và thiết bị
+                                        </button>
+                                    )}
                                     <button
                                         className="v2-button"
                                         disabled={busy}
@@ -601,6 +609,15 @@ export default function ActivitySessionManagement({ activity, onChanged }) {
                 </>
             )}
             {error && !editing && !decision && <p role="alert">{error}</p>}
+            {booking && (
+                <ActivityBooking key={booking.id} api={api} session={booking} onClose={() => setBooking(null)}
+                    onLocationChanged={() => {
+                        setBooking(null);
+                        setRevision((value) => value + 1);
+                        onChanged?.();
+                    }}
+                />
+            )}
             <button className="v2-button" disabled={busy} onClick={() => setRevision((value) => value + 1)}>
                 Tải lại phiên điểm danh
             </button>
