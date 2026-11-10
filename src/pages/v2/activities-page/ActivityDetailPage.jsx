@@ -16,6 +16,7 @@ import './ActivityDetailPage.scss';
 import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLinks';
 import ActivityStaffingPanel from '../../../components/v2/activity-detail/ActivityStaffingPanel';
 import StudentSessionSources from '../../../components/v2/activity-detail/StudentSessionSources';
+import ActivityRecap from '../../../components/v2/activity-detail/ActivityRecap';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -34,10 +35,14 @@ export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onC
     const approvedMemberships = useMyApprovedMemberships(api, sessionKey);
     const workspacePath = activityWorkspacePath(activity.clubId, membership, approvedMemberships);
     const clubLink = <ClubNavigationLinks clubCode={clubCode} workspacePath={workspacePath} />;
+    const campusActivity = !activity.clubId;
+    const campusRecap = campusActivity && activity.status === 'COMPLETED' && activity.isRegistered;
+    const availableTabs = campusActivity ? tabs.filter(([id]) => !['assignments', 'recruitment', 'attendance'].includes(id)) : tabs;
     return (
-        <ActivityProfileLayout activity={activity} tabs={tabs} tab={tab} onTabChange={setTab} actions={clubLink} registrationActions={<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}>
+        <ActivityProfileLayout activity={activity} tabs={campusRecap ? [...availableTabs, ['recap', 'Recap']] : availableTabs} tab={tab} onTabChange={setTab} actions={clubLink} registrationActions={<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}>
             {refreshing ? <PageState status="loading" /> : <>
             {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
+            {tab === 'recap' && campusRecap && <ActivityRecap api={api} activityId={activity.id} />}
             {tab === 'documents' && <ActivityResources resources={resources} kind="DOCUMENT" />}
             {tab === 'media' && <ActivityResources resources={resources} kind="MEDIA" />}
             {['media', 'documents'].includes(tab) && activity.resourceAvailability !== 'AVAILABLE' && (

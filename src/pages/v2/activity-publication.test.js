@@ -87,3 +87,22 @@ test('publication only accepts matching versioned server acknowledgement; retrie
         );
     }
 });
+
+test('a scheduled publication receipt keeps the activity private until the server publishes it', async () => {
+    const publishAtUtc = '2026-11-09T02:00:00Z';
+    const window = {
+        publishAtUtc,
+        registrationOpensAt: '2026-11-09T03:00:00Z',
+        registrationClosesAt: '2026-11-09T04:00:00Z',
+    };
+    const receipt = { id: 15, isPublished: false, publicationVersion: 2, publishAtUtc: '2026-11-09T09:00:00+07:00' };
+    const api = {
+        async setActivityPublication(id, request) {
+            assert.equal(id, 15);
+            assert.deepEqual(request, { isPublished: true, expectedVersion: 1, ...window });
+            return receipt;
+        },
+    };
+    const saved = await saveActivityPublication(api, raw, true, 'schedule-key', window);
+    assert.equal(isActivityPublic({ ...raw, ...saved }), false);
+});

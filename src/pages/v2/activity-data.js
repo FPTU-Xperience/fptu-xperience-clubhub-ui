@@ -3,6 +3,7 @@ import { mapActivityResources } from '../../components/v2/activity-detail/activi
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 import { activityPublication, isActivityPublic } from './activity-publication.js';
 import { resolveActivityContactPoint } from './activity-contact-point.js';
+import { activityTimeline } from './activity-timeline.js';
 import {
     loadStudentActivityFeed,
     loadStudentActivitySchedule,
@@ -18,8 +19,9 @@ export function classifyActivityError(error) {
 
 export function mapActivityDetailItem(raw = {}) {
     const legacyStatus = String(raw.status || '').toUpperCase();
-    const status = legacyStatus === 'SCHEDULED' && raw.timeline?.status
-        ? raw.timeline.status
+    const timeline = activityTimeline(raw);
+    const status = legacyStatus === 'SCHEDULED' && timeline.status
+        ? timeline.status
         : legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
     if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(status)) return null;
     return {
@@ -40,8 +42,11 @@ export function mapActivityDetailItem(raw = {}) {
         description: String(raw.description || ''),
         contactPoint: resolveActivityContactPoint(raw),
         coverImageUrl: String(raw.coverImageUrl || ''),
-        startTime: raw.timeline?.startTimeUtc || raw.startTime || raw.startTimeUtc || '',
-        endTime: raw.timeline?.endTimeUtc || raw.endTime || raw.endTimeUtc || '',
+        startTime: timeline.startTime,
+        endTime: timeline.endTime,
+        nextSessionStartTime: timeline.nextSessionStartTime,
+        registrationOpensAt: raw.registrationOpensAt || '',
+        registrationClosesAt: raw.registrationClosesAt || '',
         resources: mapActivityResources(raw.resources),
         resourceCapabilities: {
             supportedKinds: Array.isArray(raw.resourceCapabilities?.supportedKinds)

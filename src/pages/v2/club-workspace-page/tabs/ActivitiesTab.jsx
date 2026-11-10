@@ -14,6 +14,9 @@ import { reportTemplateUrl } from '../../report-detail-page/report-templates';
 import { applicationPermission } from '../../activity-application/activity-application-data';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import { sortActivitiesNewestFirst } from '../../activity-data';
+import ActivityHandoverInbox from './activities/ActivityHandoverInbox';
+import ActivityCertificates from '../../../../components/v2/activity-detail/ActivityCertificates';
+import api from '../../../../services/api';
 
 export default function ActivitiesTab({ manager = false, readOnly = false, dashboard, workspace }) {
     const [list, setList] = useListQuery({ query: '', status: 'ALL', page: 1 });
@@ -66,6 +69,9 @@ export default function ActivitiesTab({ manager = false, readOnly = false, dashb
     const pageItems = visibleActivities.slice((currentPage - 1) * 12, currentPage * 12);
     return (
         <>
+            {manager && !readOnly && clubId && <ActivityHandoverInbox key={clubId} clubId={clubId}
+                clubCode={workspace.clubCode} onSaved={dashboard.retry} />}
+            {!readOnly && clubId && <ActivityCertificates key={`certificates-${clubId}`} api={api} clubId={clubId} />}
             <WorkspaceTabLayout
                 className="v2-workspace-activities"
                 title="Hoạt động của CLB"
