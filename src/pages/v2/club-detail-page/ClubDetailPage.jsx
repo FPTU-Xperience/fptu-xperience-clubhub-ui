@@ -10,6 +10,8 @@ import { isPendingClubInvitation } from '../../../services/club-invitations';
 import ClubProfileHeader from '../../../components/v2/club-detail/ClubProfileHeader';
 import { isAffairsViewer } from '../affairs-access';
 import ClubHeaderActions from '../../../components/v2/club-detail/ClubHeaderActions';
+import { DiscoveryTagList } from '../../../components/v2/DiscoveryTagFields';
+import { useDiscoveryInteraction } from '../../../services/discovery-interactions';
 import './ClubDetailPage.scss';
 
 const joinProfile = (viewer, profileSnapshot) => ({
@@ -36,6 +38,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     const profileResult = useProfile(viewer, sessionKey, api);
     const club = result.data;
     const affairs = isAffairsViewer(viewer);
+    const interaction = useDiscoveryInteraction(affairs ? null : api, 'club', club?.id, club?.discoveryTags?.length > 0);
     const [joinOpen, setJoinOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
     const [form, setForm] = useState(() => joinProfile(viewer));
@@ -141,13 +144,14 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                         </ClubProfileHeader>
                         <div className="v2-detail-columns">
                             <div>
-                                <section className="v2-panel">
+                                <section ref={interaction.ref} className="v2-panel">
                                     <span className="v2-eyebrow">CHÚNG MÌNH LÀ AI?</span>
                                     <h2>Một nơi để cùng nhau phát triển.</h2>
                                     <p className="v2-body-large">
                                         {club.description || 'Thông tin giới thiệu đang được cập nhật.'}
                                     </p>
-                                    {club.tags.length > 0 && (
+                                    <DiscoveryTagList tags={club.discoveryTags} />
+                                    {!club.discoveryTags.length && club.tags.length > 0 && (
                                         <div className="v2-inline">
                                             {club.tags.map((tag) => (
                                                 <Pill key={tag}>{tag}</Pill>

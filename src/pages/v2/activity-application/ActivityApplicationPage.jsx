@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { DiscoveryTagFields } from '../../../components/v2/DiscoveryTagFields';
+import { tagDraft } from '../../../services/discovery-tags';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CheckCircle2, Plus, Save, Send, Trash2 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
@@ -131,6 +133,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 const restored = {
                     ...newApplication(value.clubId, value.period),
                     ...value,
+                    discoveryTagDraft: value.tagSelection ? tagDraft(value.tagSelection) : undefined,
                     startTime: localDate(value.startTimeUtc),
                     endTime: localDate(value.endTimeUtc),
                     actions: value.actions.map((action) => newAction(action)),
@@ -410,6 +413,11 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 />
                             </div>
                             <p className="v2-report-editor-hint">Thời gian theo giờ Việt Nam (UTC+7).</p>
+                            <DiscoveryTagFields
+                                draft={draft.discoveryTagDraft ?? tagDraft()}
+                                onChange={(value) => change('discoveryTagDraft', value)}
+                                activity
+                            />
                             <Field
                                 label="Địa điểm *"
                                 name="location"

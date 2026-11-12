@@ -1,4 +1,5 @@
 import { clubCapability } from '../../../services/club-capabilities.js';
+import { tagSelectionPayload } from '../../../services/discovery-tags.js';
 export const ACTION_ROLES = [
     ['Participant', 'Người tham gia', 1],
     ['Contributor', 'Người đóng góp', 1.6],
@@ -176,6 +177,7 @@ export function applicationPayload(draft) {
         scale: draft.scale,
         independentActionsConfirmed: draft.independentActionsConfirmed,
         isInternal: draft.isInternal !== false,
+        ...(draft.discoveryTagDraft && { tagSelection: tagSelectionPayload(draft.discoveryTagDraft) }),
         actions: draft.actions.map((action) => ({
             clientId: action.clientId,
             name: action.name.trim(),

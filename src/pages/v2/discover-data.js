@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
+import { matchesTag, readDiscoveryTags, tagSearchText } from '../../services/discovery-tags.js';
+import { loadStudentRecommendations } from '../../services/student-read-api.js';
 
 const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null);
 const rows = (value) => (Array.isArray(value) ? value : value?.items || value?.content || []);
@@ -40,6 +42,7 @@ export function mapClubDirectoryEntry(raw = {}) {
         fullName: String(firstDefined(raw.fullName, raw.name, raw.code, 'Câu lạc bộ')),
         tagline: String(firstDefined(raw.tagline, raw.purpose, 'Cùng học hỏi, kết nối và trưởng thành.')),
         tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [category, raw.code].filter(Boolean),
+        discoveryTags: readDiscoveryTags(raw.discoveryTags),
         mark: String(firstDefined(raw.mark, raw.code, raw.name, 'CLB'))
             .slice(0, 6)
             .toUpperCase(),
@@ -83,10 +86,11 @@ export function filterClubDirectory(entries, criteria = {}) {
         .toLocaleLowerCase('vi');
     const category = criteria.category || 'ALL';
     return entries.filter((entry) => {
-        const text = `${entry.name} ${entry.code} ${entry.category} ${entry.description}`.toLocaleLowerCase('vi');
+        const text = `${entry.name} ${entry.code} ${entry.category} ${entry.description} ${tagSearchText(entry)}`.toLocaleLowerCase('vi');
         return (
             (!query || text.includes(query)) &&
             (category === 'ALL' || entry.category === category) &&
+            matchesTag(entry, criteria.tag) &&
             (!criteria.recruitingOnly || entry.isRecruiting === true)
         );
     });
@@ -182,6 +186,16 @@ export function useClubDirectory(api, sessionKey) {
             rows(value)
                 .map(mapClubDirectoryEntry)
                 .filter((club) => club.id),
+        [api, sessionKey],
+    );
+}
+
+export function useRecommendedClubIds(api, sessionKey) {
+    return useRequest(
+        () => loadStudentRecommendations(api, 'clubs'),
+        (value) => value.items.filter((item) => Number.isInteger(item.rank) && item.rank > 0 && item.club?.clubId > 0)
+            .sort((left, right) => left.rank - right.rank)
+            .map((item) => String(item.club.clubId)),
         [api, sessionKey],
     );
 }

@@ -329,6 +329,20 @@ class ApiService {
         });
     }
 
+    async updateActivityDiscoveryTags(activityId, tagSelection, expectedVersion) {
+        return this.request(`/api/activities/${encodeURIComponent(activityId)}/discovery-tags`, {
+            method: 'PUT',
+            body: JSON.stringify({ tagSelection, expectedVersion }),
+        });
+    }
+
+    async recordDiscoveryInteraction(event) {
+        return this.request('/api/v2/recommendations/interactions', {
+            method: 'POST',
+            body: JSON.stringify(event),
+        });
+    }
+
     async updateActivityCoverImage(activityId, coverImageUrl, expectedVersion) {
         const ticket = this.media.ticket();
         const updated = await this.request(`/api/activities/${encodeURIComponent(activityId)}/cover-image`, {

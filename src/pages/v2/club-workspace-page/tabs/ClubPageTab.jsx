@@ -10,6 +10,7 @@ import './ClubPageTab.scss';
 import { useEntityMedia } from '../../../../components/media/EntityMediaContext';
 import { subscribePublicMediaSaved } from '../../../../services/public-media-sync';
 import { clubSchedulePayload } from './club-page/club-schedule-data';
+import { DiscoveryTagEditor } from '../../../../components/v2/DiscoveryTagFields';
 
 function useImagePreview(file, savedUrl) {
     const [preview, setPreview] = useState(null);
@@ -230,6 +231,29 @@ export default function ClubPageTab({ manager = false, workspace }) {
                     canMedia={canMedia}
                     disabled={saving}
                     onEdit={openEditor}
+                />
+            )}
+            {canText && club?.version && (
+                <DiscoveryTagEditor
+                    key={`${clubId}:${club.version}`}
+                    selection={club.tagSelection}
+                    disabled={saving || Boolean(editor || profileDraft)}
+                    onSave={async (tagSelection) => {
+                        const version = requestVersion.current;
+                        setSaving(true);
+                        setNotice('');
+                        try {
+                            const updated = await api.updateClubPublicProfile(clubId, {
+                                tagSelection,
+                                expectedVersion: club.version,
+                            });
+                            if (version !== requestVersion.current) return;
+                            setClub((current) => ({ ...current, ...updated }));
+                            setNotice('Đã lưu tag CLB.');
+                        } finally {
+                            if (version === requestVersion.current) setSaving(false);
+                        }
+                    }}
                 />
             )}
             {canText && profileDraft && (

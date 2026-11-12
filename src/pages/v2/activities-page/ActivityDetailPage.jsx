@@ -17,6 +17,7 @@ import ClubNavigationLinks from '../../../components/v2/common/ClubNavigationLin
 import ActivityStaffingPanel from '../../../components/v2/activity-detail/ActivityStaffingPanel';
 import StudentSessionSources from '../../../components/v2/activity-detail/StudentSessionSources';
 import ActivityRecap from '../../../components/v2/activity-detail/ActivityRecap';
+import { useDiscoveryInteraction } from '../../../services/discovery-interactions';
 
 const tabs = [
     ['overview', 'Tổng quan'],
@@ -37,9 +38,10 @@ export function PublicActivityProfile({ activity, clubCode, sessionKey, api, onC
     const clubLink = <ClubNavigationLinks clubCode={clubCode} workspacePath={workspacePath} />;
     const campusActivity = !activity.clubId;
     const campusRecap = campusActivity && activity.status === 'COMPLETED' && activity.isRegistered;
+    const interaction = useDiscoveryInteraction(workspaceRead ? null : api, 'activity', activity.id, activity.discoveryTags?.length > 0);
     const availableTabs = campusActivity ? tabs.filter(([id]) => !['assignments', 'recruitment', 'attendance'].includes(id)) : tabs;
     return (
-        <ActivityProfileLayout activity={activity} tabs={campusRecap ? [...availableTabs, ['recap', 'Recap']] : availableTabs} tab={tab} onTabChange={setTab} actions={clubLink} registrationActions={<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}>
+        <ActivityProfileLayout activity={activity} identityRef={interaction.ref} tabs={campusRecap ? [...availableTabs, ['recap', 'Recap']] : availableTabs} tab={tab} onTabChange={setTab} actions={clubLink} registrationActions={<StudentActivityActions api={api} activity={activity} onChanged={onChanged} disabled={refreshing} compact />}>
             {refreshing ? <PageState status="loading" /> : <>
             {tab === 'overview' && <ActivityOverview activity={activity} clubLink={clubLink} />}
             {tab === 'recap' && campusRecap && <ActivityRecap api={api} activityId={activity.id} />}

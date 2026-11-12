@@ -169,6 +169,9 @@ jobs:
             - name: Verify deployed activity registration rendering with isolated API traffic
               run: node scripts/deployed-activity-registration-check.mjs
 
+            - name: Verify deployed discovery tags and capture with isolated API traffic
+              run: node scripts/deployed-discovery-tags-check.mjs
+
             - name: Verify deployed staffing approval and evidence with isolated API traffic
               run: node scripts/deployed-staffing-check.mjs
 
