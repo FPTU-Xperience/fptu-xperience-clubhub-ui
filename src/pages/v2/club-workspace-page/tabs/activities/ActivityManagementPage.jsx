@@ -24,6 +24,7 @@ import ActivityFinalRoles from '../../../../../components/v2/activity-detail/Act
 import CertificateDefinitions from '../../../../../components/v2/activity-detail/CertificateDefinitions';
 import CampusActivityOperations from '../../../../../components/v2/activity-detail/CampusActivityOperations';
 import ActivityStaffingPanel from '../../../../../components/v2/activity-detail/ActivityStaffingPanel';
+import { DiscoveryTagEditor } from '../../../../../components/v2/DiscoveryTagFields';
 import './ActivityEditing.scss';
 
 const tabs = [
@@ -365,6 +366,28 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                         }
                     >
                         {tab === 'overview' && <ActivityOverview activity={displayed} />}
+                        {tab === 'overview' && canContent && activity.version && (
+                            <DiscoveryTagEditor
+                                key={`${activity.id}:${activity.version}`}
+                                selection={activity.tagSelection}
+                                activity
+                                disabled={busy || Boolean(coreDraft || editorDraft || coverFile)}
+                                onSave={async (tagSelection) => {
+                                    setBusy(true);
+                                    setError('');
+                                    setNotice('');
+                                    try {
+                                        await api.updateActivityDiscoveryTags(activity.id, tagSelection, activity.version);
+                                        if (alive.current) {
+                                            setNotice('Đã lưu tag hoạt động.');
+                                            result.retry();
+                                        }
+                                    } finally {
+                                        if (alive.current) setBusy(false);
+                                    }
+                                }}
+                            />
+                        )}
                         {tab === 'overview' && manager && <CertificateDefinitions key={activity.id} api={api} activityId={activity.id} />}
                         {tab === 'overview' && manager && <CampusActivityOperations key={`campus-${activity.id}`} api={api} activityId={activity.id} optional />}
                         {tab === 'recap' && (

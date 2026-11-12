@@ -5,6 +5,7 @@ import DirectoryFilters from '../../../components/v2/directory-filter/DirectoryF
 import DirectoryPagination from '../../../components/v2/directory-pagination/DirectoryPagination';
 import { EmptyState, SectionHeading } from '../../../components/v2/DiscoveryLayout';
 import PageState from '../../../components/v2/PageState';
+import { DiscoveryTagFilter } from '../../../components/v2/DiscoveryTagFields';
 import {
     filterClubDirectory,
     orderDirectoryCategories,
@@ -16,8 +17,8 @@ import './AllClubsPage.scss';
 const PAGE_SIZE = 12;
 
 export default function AllClubsPage({ api, sessionKey }) {
-    const [list, setList] = useListQuery({ query: '', category: 'ALL', onlyRecruiting: false, page: 1 });
-    const { query, category, onlyRecruiting, page } = list;
+    const [list, setList] = useListQuery({ query: '', category: 'ALL', onlyRecruiting: false, tag: '', page: 1 });
+    const { query, category, onlyRecruiting, tag, page } = list;
     const setQuery = (value) => setList('query', value);
     const setCategory = (value) => setList('category', value);
     const setOnlyRecruiting = (value) => setList('onlyRecruiting', value);
@@ -30,8 +31,8 @@ export default function AllClubsPage({ api, sessionKey }) {
     );
     const recruitmentAvailable = entries.length > 0 && entries.every((club) => club.hasRecruitmentStatus);
     const clubs = useMemo(
-        () => filterClubDirectory(entries, { query, category, recruitingOnly: onlyRecruiting }),
-        [entries, query, category, onlyRecruiting],
+        () => filterClubDirectory(entries, { query, category, recruitingOnly: onlyRecruiting, tag }),
+        [entries, query, category, onlyRecruiting, tag],
     );
     const pagination = useMemo(() => paginateClubDirectory(clubs, page, PAGE_SIZE), [clubs, page]);
 
@@ -77,11 +78,15 @@ export default function AllClubsPage({ api, sessionKey }) {
                         onCategoryChange={updateCategory}
                         onRecruitingChange={updateRecruiting}
                     />
+                    <DiscoveryTagFilter items={entries} value={tag} onChange={(value) => {
+                        setList('tag', value);
+                        setPage(1);
+                    }} />
                     {clubs.length ? (
                         <>
                             <div className="v2-club-grid" data-directory-mode="all">
                                 {pagination.items.map((club) => (
-                                    <ClubCard key={club.id} club={club} />
+                                    <ClubCard key={club.id} club={club} interactionApi={api} />
                                 ))}
                             </div>
                             <DirectoryPagination

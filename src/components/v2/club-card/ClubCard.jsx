@@ -2,14 +2,17 @@ import { ArrowUpRight, CalendarDays } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Pill } from '../DiscoveryLayout';
 import ClubCardMedia, { ClubCardLogo } from './ClubCardMedia';
+import { DiscoveryTagList } from '../DiscoveryTagFields';
+import { useDiscoveryInteraction } from '../../../services/discovery-interactions';
 import './ClubCard.scss';
 
-export default function ClubCard({ club }) {
+export default function ClubCard({ club, interactionApi }) {
     const location = useLocation();
+    const interaction = useDiscoveryInteraction(interactionApi, 'club', club.id, club.discoveryTags?.length > 0);
     const destination = `${club.destination}${location.search}`;
     return (
-        <article className="v2-club-card">
-            <Link to={destination} className="v2-art-link" aria-label={`Khám phá ${club.name}`}>
+        <article ref={interaction.ref} className="v2-club-card">
+            <Link to={destination} className="v2-art-link" aria-label={`Khám phá ${club.name}`} onClick={() => interaction.record('click')}>
                 <ClubCardMedia club={club} showLogo={false} />
             </Link>
             <div className="v2-club-card-body">
@@ -36,9 +39,10 @@ export default function ClubCard({ club }) {
                 <p className="v2-club-card-description">
                     {club.description || 'Thông tin giới thiệu đang được cập nhật.'}
                 </p>
+                <DiscoveryTagList tags={club.discoveryTags?.filter((tag) => tag.kind !== 'category')} limit={3} />
                 <div className="v2-card-footer">
                     <span>{club.code || club.clubCode || '—'}</span>
-                    <Link to={destination} className="v2-text-link">
+                    <Link to={destination} className="v2-text-link" onClick={() => interaction.record('click')}>
                         Khám phá <ArrowUpRight size={16} />
                     </Link>
                 </div>

@@ -36,6 +36,7 @@ import { clubGuidePlan } from '../../components/guided-help/guide-plans';
 import { campusLabel } from './profile-options';
 import usePublicGuide from '../../components/guided-help/usePublicGuide';
 import { isAffairsViewer } from './affairs-access';
+import DiscoveryCaptureProvider from './DiscoveryCaptureProvider';
 const DemoApp = lazy(() => import('./DemoApp'));
 
 function AuthenticatedV2App() {
@@ -60,6 +61,7 @@ function AuthenticatedV2App() {
 
     return (
         <EntityMediaProvider api={api}>
+        <DiscoveryCaptureProvider key={sessionKey} api={api} enabled={Boolean(user?.id) && !isAffairsViewer(user)}>
         <PinnedClubsProvider key={sessionKey} api={api} accountKey={sessionKey}>
             <div data-guide-route={location.pathname + location.search} className={`v2-app${workspace ? ' v2-app--workspace' : ''}${directory ? ' v2-app--directory' : ''}`}>
                 <a className="v2-skip-link" href="#v2-main">
@@ -120,6 +122,7 @@ function AuthenticatedV2App() {
                 {publicGuide.notice && <p className="web-guide-notice web-guide-public-notice" role="status">{publicGuide.notice}</p>}
             </div>
         </PinnedClubsProvider>
+        </DiscoveryCaptureProvider>
         </EntityMediaProvider>
     );
 }

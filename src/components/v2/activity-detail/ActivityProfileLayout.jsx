@@ -2,6 +2,7 @@ import GraphicBanner from '../../media/GraphicBanner';
 import { defaultGraphicBanner, ACTIVITY_BANNER_SIZE } from '../../media/graphic-banner';
 import { useEntityMedia } from '../../media/EntityMediaContext';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
+import { DiscoveryTagList } from '../DiscoveryTagFields';
 import './ActivityProfileLayout.scss';
 
 const statuses = {
@@ -22,6 +23,7 @@ export default function ActivityProfileLayout({
     beforeTabs,
     children,
     preview = false,
+    identityRef,
 }) {
     const activity = useEntityMedia('activity', input, { preview });
     const [tone, label] = statuses[activity.status] || ['unknown', 'Đang cập nhật'];
@@ -42,7 +44,7 @@ export default function ActivityProfileLayout({
                 )}
                 {coverAction && <div className="v2-activity-profile-cover-action">{coverAction}</div>}
             </div>
-            <header className="v2-activity-profile-identity">
+            <header ref={identityRef} className="v2-activity-profile-identity">
                 <div className={`v2-activity-profile-mark is-${tone}`} aria-hidden="true">
                     <CalendarDays size={27} />
                     <strong>{valid ? String(date.getDate()).padStart(2, '0') : '—'}</strong>
@@ -52,6 +54,7 @@ export default function ActivityProfileLayout({
                     <span className={`v2-event-status is-${tone}`}>{label}</span>
                     <h1>{activity.title}</h1>
                     <p>{activity.clubName}</p>
+                    <DiscoveryTagList tags={activity.discoveryTags} />
                 </div>
                 {actions && <div className="v2-activity-profile-actions">{actions}</div>}
             </header>

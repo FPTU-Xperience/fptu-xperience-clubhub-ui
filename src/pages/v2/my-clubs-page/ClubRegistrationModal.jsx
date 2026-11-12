@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
+import { DiscoveryTagFields } from '../../../components/v2/DiscoveryTagFields';
+import { tagDraft, tagSelectionPayload } from '../../../services/discovery-tags';
 import V2Modal from '../../../components/v2/common/modal/V2Modal';
 import { buildClubRegistrationPayload } from './club-registration';
 import './ClubRegistrationModal.scss';
@@ -50,6 +52,7 @@ export default function ClubRegistrationModal({ api, user, application, onClose,
         : [{ fullName: user?.name || user?.fullName || '', email: user?.email || '', organization: '' }];
     const [members, setMembers] = useState(() => initialMembers.map((_, index) => index));
     const [foundingMemberCount, setFoundingMemberCount] = useState(application?.foundingMemberCount || 1);
+    const [tagSelection, setTagSelection] = useState(() => tagDraft(application?.tagSelection));
     const nextMember = useRef(initialMembers.length);
     const requestKey = useRef(null);
     const frequency = application?.activityFrequency?.match(/^(\d+) lần mỗi (tuần|tháng|năm)$/);
@@ -81,6 +84,7 @@ export default function ClubRegistrationModal({ api, user, application, onClose,
         let payload;
         try {
             payload = buildClubRegistrationPayload(new FormData(event.currentTarget));
+            payload.tagSelection = tagSelectionPayload(tagSelection);
         } catch (issue) {
             setError(issue.message);
             return;
@@ -178,6 +182,7 @@ export default function ClubRegistrationModal({ api, user, application, onClose,
                         </div>
                         <Field label="Mục tiêu" name="purpose" multiline maxLength={1000} />
                         <Field label="Mô tả ngắn về câu lạc bộ" name="description" multiline maxLength={1000} />
+                        <DiscoveryTagFields draft={tagSelection} onChange={setTagSelection} />
                     </fieldset>
                     <fieldset disabled={submitting}>
                         <legend>2. Thông tin người sáng lập / chủ nhiệm câu lạc bộ</legend>

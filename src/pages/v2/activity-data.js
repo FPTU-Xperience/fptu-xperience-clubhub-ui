@@ -4,6 +4,7 @@ import { usePublicMediaRevision } from '../../services/use-public-media-revision
 import { activityPublication, isActivityPublic } from './activity-publication.js';
 import { resolveActivityContactPoint } from './activity-contact-point.js';
 import { activityTimeline } from './activity-timeline.js';
+import { matchesTag, readDiscoveryTags, tagSearchText } from '../../services/discovery-tags.js';
 import {
     loadStudentActivityFeed,
     loadStudentActivitySchedule,
@@ -34,6 +35,8 @@ export function mapActivityDetailItem(raw = {}) {
         isEligible: raw.isEligible === true,
         isInternal: typeof raw.isInternal === 'boolean' ? raw.isInternal : null,
         version: typeof raw.version === 'string' ? raw.version : null,
+        discoveryTags: readDiscoveryTags(raw.discoveryTags),
+        tagSelection: raw.tagSelection ?? null,
         resourceAvailability: raw.resourceAvailability || 'UNCONFIGURED',
         clubId: String(raw.clubId || ''),
         clubCode: String(raw.clubCode || raw.code || ''),
@@ -161,14 +164,15 @@ export function sortActivitiesNewestFirst(items) {
     });
 }
 
-export function filterActivityFeed(items, query = '', status = 'ALL') {
+export function filterActivityFeed(items, query = '', status = 'ALL', tag = '') {
     const needle = String(query).trim().toLocaleLowerCase('vi');
     return sortActivitiesNewestFirst(
         items.filter(
             (item) =>
                 (status === 'ALL' || item.status === status) &&
+                matchesTag(item, tag) &&
                 (!needle ||
-                    `${item.clubName} ${item.title} ${item.description} ${item.location}`
+                    `${item.clubName} ${item.title} ${item.description} ${item.location} ${tagSearchText(item)}`
                         .toLocaleLowerCase('vi')
                         .includes(needle)),
         ),

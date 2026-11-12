@@ -15,6 +15,7 @@ import {
     orderDirectoryCategories,
     paginateClubDirectory,
     useClubDirectory,
+    useRecommendedClubIds,
 } from '../discover-data';
 import './DiscoveryPage.scss';
 
@@ -29,13 +30,18 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
     const [activityStatus, setActivityStatus] = useState('ALL');
     const activities = useMemo(() => selectDiscoveryActivities(activityFeed.data, recommendations.data, activityStatus), [activityFeed.data, recommendations.data, activityStatus]);
     const result = useClubDirectory(api, sessionKey);
+    const recommendedClubs = useRecommendedClubIds(api, sessionKey);
     const [list, setList] = useListQuery({ query: '', category: 'ALL', page: 1 });
     const { query, category, page } = list;
     const setQuery = (value) => setList('query', value);
     const setCategory = (value) => setList('category', value);
     const setPage = (value) => setList('page', value);
     const entries = result.data || [];
-    const suggestedEntries = useMemo(() => createCuratedClubSet(entries, MAX_SUGGESTED_CLUBS), [entries]);
+    const suggestedEntries = useMemo(() => {
+        const directory = new Map(entries.map((club) => [club.id, club]));
+        const ranked = [...new Set(recommendedClubs.data ?? [])].map((id) => directory.get(id)).filter(Boolean);
+        return ranked.length ? ranked : createCuratedClubSet(entries, MAX_SUGGESTED_CLUBS);
+    }, [entries, recommendedClubs.data]);
     const categories = useMemo(
         () => orderDirectoryCategories([...new Set(suggestedEntries.map((club) => club.category).filter(Boolean))]),
         [suggestedEntries],
@@ -72,7 +78,7 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
                 <PageState status={activityFeed.status} onRetry={activityFeed.retry}>
                     {activities.length ? (
                         <div className="v2-event-grid">
-                            {activities.map((activity) => <ActivityCard key={activity.id} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
+                            {activities.map((activity) => <ActivityCard key={activity.id} activity={activity} interactionApi={api} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
                         </div>
                     ) : (
                         <EmptyState title="Chưa có hoạt động phù hợp" text="Thử chọn trạng thái khác để xem thêm hoạt động.">
@@ -84,7 +90,7 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
             <section id="club-directory">
                 <SectionHeading
                     title="Câu lạc bộ dành cho bạn"
-                    description="Khám phá những cộng đồng được tuyển chọn phù hợp để bắt đầu hành trình."
+                    description="Khám phá cộng đồng phù hợp với sở thích của bạn."
                 >
                     <span className="v2-muted">{suggestedEntries.length} CLB dành cho bạn</span>
                 </SectionHeading>
@@ -103,7 +109,7 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
                         <>
                             <div className="v2-club-grid" data-directory-mode="suggested">
                                 {pagination.items.map((club) => (
-                                    <ClubCard key={club.id} club={club} />
+                                    <ClubCard key={club.id} club={club} interactionApi={api} />
                                 ))}
                             </div>
                             <DirectoryPagination

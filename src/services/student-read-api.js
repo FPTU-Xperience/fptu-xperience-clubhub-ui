@@ -43,8 +43,9 @@ export async function loadStudentActivityDetail(api, activityId) {
     }
 }
 
-export async function loadStudentRecommendations(api) {
-    const value = await api.request('/api/v2/recommendations/activities?limit=6&scope=PERIOD');
+export async function loadStudentRecommendations(api, kind = 'activities') {
+    const path = kind === 'clubs' ? 'clubs' : 'activities';
+    const value = await api.request(`/api/v2/recommendations/${path}?limit=6&scope=PERIOD`);
     if (value?.available !== true || !Array.isArray(value.items)) throw new Error('Gợi ý từ máy chủ chưa khả dụng.');
     return value;
 }

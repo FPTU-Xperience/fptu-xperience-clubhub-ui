@@ -3,6 +3,8 @@ import { ArrowUpRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 import GraphicBanner from '../../media/GraphicBanner';
 import { defaultGraphicBanner, ACTIVITY_BANNER_SIZE } from '../../media/graphic-banner';
 import { useEntityMedia } from '../../media/EntityMediaContext';
+import { DiscoveryTagList } from '../DiscoveryTagFields';
+import { useDiscoveryInteraction } from '../../../services/discovery-interactions';
 import './ActivityCard.scss';
 
 const statuses = {
@@ -13,8 +15,9 @@ const statuses = {
     CANCELLED: ['cancelled', 'Đã hủy'],
 };
 
-export default function ActivityCard({ activity: input, onOpen, variant = 'poster', publicationLabel }) {
+export default function ActivityCard({ activity: input, onOpen, variant = 'poster', publicationLabel, interactionApi }) {
     const activity = useEntityMedia('activity', input);
+    const interaction = useDiscoveryInteraction(interactionApi, 'activity', activity.id, activity.discoveryTags?.length > 0);
     const [failedImage, setFailedImage] = useState(null);
     const date = new Date(activity.startTime || '');
     const hasDate = Number.isFinite(date.getTime());
@@ -26,7 +29,7 @@ export default function ActivityCard({ activity: input, onOpen, variant = 'poste
     const palette = [...String(activity.id)].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
     const schedule = variant === 'schedule';
     return (
-        <article className={`v2-event-card is-${tone}${schedule ? ' v2-event-card--schedule' : ''}`}>
+        <article ref={interaction.ref} className={`v2-event-card is-${tone}${schedule ? ' v2-event-card--schedule' : ''}`}>
             {schedule ? (
                 <div className={`v2-event-date-tile is-${tone}`} aria-hidden="true">
                     <CalendarDays className="v2-event-date-tile-icon" size={18} strokeWidth={2} />
@@ -56,6 +59,7 @@ export default function ActivityCard({ activity: input, onOpen, variant = 'poste
                         {schedule && <span className={`v2-event-status is-${tone}`}>{label}</span>}
                     </div>
                     <h3>{activity.title}</h3>
+                    <DiscoveryTagList tags={activity.discoveryTags} limit={3} />
                     {publicationLabel && <span className="v2-event-publication">{publicationLabel}</span>}
                     <div className="v2-event-facts">
                         {schedule && (
@@ -101,7 +105,10 @@ export default function ActivityCard({ activity: input, onOpen, variant = 'poste
                         className="v2-event-open"
                         type="button"
                         aria-label={`Chi tiết ${activity.title}`}
-                        onClick={() => onOpen(activity)}
+                        onClick={() => {
+                            interaction.record('click');
+                            onOpen(activity);
+                        }}
                     >
                         <span>Xem chi tiết</span>
                         <ArrowUpRight size={18} />
