@@ -313,7 +313,7 @@ try {
             assert.equal((editor.match(/role="tab"/g) || []).length, 3);
             assert.ok(
                 editor.includes('Nền') &&
-                    editor.includes('Shape') &&
+                    editor.includes('Badge') &&
                     editor.includes('Chữ') &&
                     editor.includes('Lưu ảnh bìa'),
             );
@@ -343,7 +343,7 @@ try {
             assert.ok(textPanel.includes('type="checkbox"'));
             const shapePanel = render(GraphicBannerEditor, { value: design, tab: 'shape', onChange: noop });
             assert.equal((shapePanel.match(/type="range"/g) || []).length, 3);
-            assert.ok(shapePanel.includes('Shape trang trí') && shapePanel.includes('Không dùng shape'));
+            assert.ok(shapePanel.includes('Badge trang trí') && shapePanel.includes('Không dùng badge'));
         } finally {
             globalThis.localStorage = previousStorage;
         }
