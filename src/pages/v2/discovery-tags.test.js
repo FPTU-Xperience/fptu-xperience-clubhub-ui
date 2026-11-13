@@ -7,11 +7,16 @@ import { tagDraft, tagSelectionPayload } from '../../services/discovery-tags.js'
 
 test('tag search and filtering compose with existing catalog filters', () => {
     const tagged = { name: 'Club', title: 'Activity', status: 'UPCOMING', category: 'Học thuật',
-        discoveryTags: [{ id: 'experience:Research', label: 'Nghiên cứu' }] };
+        discoveryTags: [{ id: 'experience:Research', label: 'Nghiên cứu' },
+            { id: 'activity-category:workshop', label: 'Workshop' }] };
     const untagged = { ...tagged, discoveryTags: [] };
+    const competition = { ...tagged, discoveryTags: [tagged.discoveryTags[0],
+        { id: 'activity-category:competition', label: 'Cuộc thi' }] };
     assert.deepEqual(filterClubDirectory([tagged, untagged], { query: 'NGHIÊN CỨU', category: 'Học thuật' }), [tagged]);
     assert.deepEqual(filterActivityFeed([tagged, untagged], '', 'UPCOMING', 'experience:Research'), [tagged]);
     assert.deepEqual(filterActivityFeed([tagged], 'nghiên cứu', 'LIVE', 'experience:Research'), []);
+    assert.deepEqual(filterActivityFeed([tagged, competition, untagged], 'nghiên cứu', 'UPCOMING', 'experience:Research', 'workshop'), [tagged]);
+    assert.deepEqual(filterActivityFeed([tagged], '', 'UPCOMING', '', 'other'), []);
     const selection = { experience: ['RealWorldWork'], activityCategory: 'workshop', custom: ['C#', 'Thiết kế API'] };
     assert.deepEqual(tagSelectionPayload(tagDraft(selection)), selection);
     assert.throws(() => tagSelectionPayload({ ...tagDraft(), customText: 'AI, ai' }), /khác nhau/);

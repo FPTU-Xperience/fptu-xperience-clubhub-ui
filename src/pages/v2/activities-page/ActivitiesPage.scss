@@ -57,6 +57,13 @@
         outline-offset: 3px;
     }
 }
+
+.v2-event-category-tabs {
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
 // The sidebar reduces available space even while the viewport is desktop-sized.
 @container activity-directory (max-width: 680px) {
     .v2-event-grid {
