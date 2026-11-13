@@ -164,12 +164,13 @@ export function sortActivitiesNewestFirst(items) {
     });
 }
 
-export function filterActivityFeed(items, query = '', status = 'ALL', tag = '') {
+export function filterActivityFeed(items, query = '', status = 'ALL', tag = '', category = 'ALL') {
     const needle = String(query).trim().toLocaleLowerCase('vi');
     return sortActivitiesNewestFirst(
         items.filter(
             (item) =>
                 (status === 'ALL' || item.status === status) &&
+                (category === 'ALL' || matchesTag(item, `activity-category:${category}`)) &&
                 matchesTag(item, tag) &&
                 (!needle ||
                     `${item.clubName} ${item.title} ${item.description} ${item.location} ${tagSearchText(item)}`

@@ -7,22 +7,29 @@ import { SearchField } from '../../../components/v2/DiscoveryLayout';
 import '../../../components/v2/directory-filter/DirectoryFilters.scss';
 import ActivityCard from '../../../components/v2/activity-card/ActivityCard';
 import { DiscoveryTagFilter } from '../../../components/v2/DiscoveryTagFields';
+import { ACTIVITY_TAG_CATEGORIES } from '../../../services/discovery-tags';
 import { filterActivityFeed, useActivityFeed } from '../activity-data';
 import './ActivitiesPage.scss';
-const filters = [
+
+const statusFilters = [
     ['ALL', 'Tất cả'],
     ['UPCOMING', 'Sắp diễn ra'],
     ['LIVE', 'Đang diễn ra'],
 ];
+const categoryFilters = [['ALL', 'Tất cả'], ...ACTIVITY_TAG_CATEGORIES];
+
 export default function ActivitiesPage({ api, sessionKey }) {
-    const [list, setList] = useListQuery({ query: '', status: 'ALL', tag: '', page: 1 });
-    const { query, status, tag, page } = list;
+    const [list, setList] = useListQuery({ query: '', category: 'ALL', status: 'ALL', tag: '', page: 1 });
+    const { query, category, status, tag, page } = list;
     const setQuery = (value) => setList('query', value);
     const setStatus = (value) => setList('status', value);
     const setPage = (value) => setList('page', value);
     const result = useActivityFeed(api, sessionKey);
     const navigate = useNavigate();
-    const items = useMemo(() => filterActivityFeed(result.data || [], query, status, tag), [result.data, query, status, tag]);
+    const items = useMemo(
+        () => filterActivityFeed(result.data || [], query, status, tag, category),
+        [result.data, query, status, tag, category],
+    );
     const totalPages = Math.max(1, Math.ceil(items.length / 12));
     const currentPage = Math.min(page, totalPages);
     const pageItems = items.slice((currentPage - 1) * 12, currentPage * 12);
@@ -33,8 +40,21 @@ export default function ActivitiesPage({ api, sessionKey }) {
                 <p>Những hoạt động đang diễn ra và sắp tới.</p>
             </header>
             <div className="v2-filter-bar v2-event-filter-bar">
+                <div className="v2-tabs v2-event-category-tabs" role="group" aria-label="Thể loại hoạt động">
+                    {categoryFilters.map(([value, label]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            aria-pressed={category === value}
+                            className={category === value ? 'active' : ''}
+                            onClick={() => setList('category', value)}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
                 <div className="v2-tabs" role="group" aria-label="Trạng thái hoạt động">
-                    {filters.map(([value, label]) => (
+                    {statusFilters.map(([value, label]) => (
                         <button
                             key={value}
                             type="button"
@@ -48,14 +68,11 @@ export default function ActivitiesPage({ api, sessionKey }) {
                 </div>
                 <SearchField value={query} onChange={setQuery} placeholder="Tìm hoạt động..." />
             </div>
-            <DiscoveryTagFilter items={result.data || []} value={tag} onChange={(value) => {
-                setList('tag', value);
-                setPage(1);
-            }} />
+            <DiscoveryTagFilter items={result.data || []} value={tag} onChange={(value) => setList('tag', value)} />
             {result.status === 'populated' ? (
                 <>
                     <p className="v2-event-result-count" role="status">
-                        {items.length} hoạt động{query || tag || status !== 'ALL' ? ' phù hợp' : ' để khám phá'}
+                        {items.length} hoạt động{query || tag || status !== 'ALL' || category !== 'ALL' ? ' phù hợp' : ' để khám phá'}
                     </p>
                     {items.length ? (
                         <div>
@@ -81,6 +98,7 @@ export default function ActivitiesPage({ api, sessionKey }) {
                                 onClick={() => {
                                     setQuery('');
                                     setStatus('ALL');
+                                    setList('category', 'ALL');
                                     setList('tag', '');
                                 }}
                             >

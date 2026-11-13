@@ -7,13 +7,15 @@ const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_C
 const base = process.env.DISCOVERY_SMOKE_BASE_URL || 'https://fptux-clubhub-ui.pages.dev';
 const version = '11111111-1111-4111-8111-111111111111';
 const tag = { id: `custom:${'a'.repeat(64)}`, label: 'Thiết kế robot', kind: 'custom' };
+const workshop = { id: 'activity-category:workshop', label: 'Workshop', kind: 'category' };
+const competition = { id: 'activity-category:competition', label: 'Cuộc thi', kind: 'category' };
 const club = { id: 1, code: 'TEST', name: 'CLB kiểm thử', campusCode: 'HAN', category: 'TECHNOLOGY',
     isActive: true, isRecruiting: true, discoveryTags: [tag] };
 const activity = { id: 4, clubId: 1, clubCode: 'TEST', clubName: club.name, title: 'Buổi kiểm thử',
     description: 'Dữ liệu kiểm thử', status: 'UPCOMING', isInternal: false, isEligible: true, canRegister: false,
     startTime: new Date(Date.now() + 86_400_000).toISOString(), endTime: new Date(Date.now() + 90_000_000).toISOString(),
-    discoveryTags: [tag] };
-const other = { ...activity, id: 5, title: 'Buổi đối chứng', discoveryTags: [] };
+    discoveryTags: [tag, workshop] };
+const other = { ...activity, id: 5, title: 'Buổi đối chứng', discoveryTags: [competition] };
 const events = [];
 try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block' });
@@ -48,12 +50,24 @@ try {
     });
     await page.goto(`${base}/v2/activities`, { waitUntil: 'domcontentloaded' });
     await page.getByRole('heading', { name: other.title }).waitFor();
+    const categories = page.getByRole('group', { name: 'Thể loại hoạt động' });
+    await categories.getByRole('button', { name: workshop.label }).click();
+    await page.getByRole('heading', { name: other.title }).waitFor({ state: 'detached' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.getByRole('heading', { name: activity.title }).waitFor();
+    assert.equal(await categories.getByRole('button', { name: workshop.label }).getAttribute('aria-pressed'), 'true');
+    await categories.getByRole('button', { name: 'Tất cả', exact: true }).click();
+    await page.getByRole('heading', { name: other.title }).waitFor();
     await page.getByRole('textbox', { name: 'Tìm kiếm' }).fill('thiết kế robot');
     await page.getByRole('heading', { name: other.title }).waitFor({ state: 'detached' });
     await page.getByRole('heading', { name: activity.title }).waitFor();
     await page.getByRole('textbox', { name: 'Tìm kiếm' }).fill('');
     await page.getByLabel('Lọc theo tag').selectOption(tag.id);
     await page.getByRole('heading', { name: other.title }).waitFor({ state: 'detached' });
+    await categories.getByRole('button', { name: competition.label }).click();
+    await page.getByRole('heading', { name: 'Không tìm thấy hoạt động' }).waitFor();
+    await page.getByRole('button', { name: 'Xóa bộ lọc' }).click();
+    await page.getByRole('heading', { name: other.title }).waitFor();
     const open = page.getByRole('button', { name: `Chi tiết ${activity.title}` });
     await open.scrollIntoViewIfNeeded();
     await page.bringToFront();
@@ -79,7 +93,7 @@ try {
     await page.getByRole('heading', { name: 'CLB đối chứng' }).waitFor({ state: 'detached' });
     await page.getByRole('heading', { name: club.name }).waitFor();
     assert.deepEqual(errors, []);
-    console.log('DISCOVERY_TAGS_BROWSER_OK: ClubHub tag search/filter and versioned click/view on the served build.');
+    console.log('DISCOVERY_TAGS_BROWSER_OK: ClubHub category and tag filters, search, and versioned click/view on the served build.');
 } finally {
     await browser.close();
 }
