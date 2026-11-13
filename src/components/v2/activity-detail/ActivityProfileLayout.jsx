@@ -2,7 +2,7 @@ import GraphicBanner from '../../media/GraphicBanner';
 import { defaultGraphicBanner, ACTIVITY_BANNER_SIZE } from '../../media/graphic-banner';
 import { useEntityMedia } from '../../media/EntityMediaContext';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
-import { DiscoveryTagList } from '../DiscoveryTagFields';
+import { DiscoveryTagSection } from '../DiscoveryTagFields';
 import './ActivityProfileLayout.scss';
 
 const statuses = {
@@ -54,7 +54,6 @@ export default function ActivityProfileLayout({
                     <span className={`v2-event-status is-${tone}`}>{label}</span>
                     <h1>{activity.title}</h1>
                     <p>{activity.clubName}</p>
-                    <DiscoveryTagList tags={activity.discoveryTags} />
                 </div>
                 {actions && <div className="v2-activity-profile-actions">{actions}</div>}
             </header>
@@ -107,6 +106,7 @@ export function ActivityOverview({ activity, clubLink }) {
                 <p className="v2-activity-profile-description">
                     {activity.description || 'Nội dung hoạt động đang được cập nhật.'}
                 </p>
+                <DiscoveryTagSection tags={activity.discoveryTags} />
             </section>
             <aside className="v2-activity-profile-panel">
                 <h2>Lịch & địa điểm</h2>

@@ -45,3 +45,26 @@
     gap: 0.35rem;
     margin-block: 0.5rem;
 }
+
+.v2-discovery-tag-section {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--v2-line, #dfe7f1);
+
+    h3 {
+        margin: 0 0 0.625rem;
+        font-size: 1rem;
+    }
+
+    .v2-discovery-tag-list {
+        margin: 0;
+    }
+
+    .v2-discovery-pill {
+        max-width: 100%;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}

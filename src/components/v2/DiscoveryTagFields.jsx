@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { ACTIVITY_TAG_CATEGORIES, EXPERIENCE_TAGS, tagDraft, tagSelectionPayload } from '../../services/discovery-tags.js';
 import { Pill } from './DiscoveryLayout';
 import './DiscoveryTagFields.scss';
@@ -94,5 +94,17 @@ export function DiscoveryTagList({ tags, limit = tags?.length }) {
         <div className="v2-discovery-tag-list" aria-label="Tag khám phá">
             {tags.slice(0, limit).map((tag) => <Pill key={tag.id}>{tag.label}</Pill>)}
         </div>
+    );
+}
+
+export function DiscoveryTagSection({ tags }) {
+    const headingId = useId();
+    if (!tags?.length) return null;
+
+    return (
+        <section className="v2-discovery-tag-section" aria-labelledby={headingId}>
+            <h3 id={headingId}>Tag khám phá</h3>
+            <DiscoveryTagList tags={tags} />
+        </section>
     );
 }

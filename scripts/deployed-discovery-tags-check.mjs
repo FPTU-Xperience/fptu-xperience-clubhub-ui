@@ -7,14 +7,16 @@ const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_C
 const base = process.env.DISCOVERY_SMOKE_BASE_URL || 'https://fptux-clubhub-ui.pages.dev';
 const version = '11111111-1111-4111-8111-111111111111';
 const tag = { id: `custom:${'a'.repeat(64)}`, label: 'Thiết kế robot', kind: 'custom' };
+const experience = { id: 'experience:Research', label: 'Nghiên cứu', kind: 'experience' };
 const workshop = { id: 'activity-category:workshop', label: 'Workshop', kind: 'category' };
 const competition = { id: 'activity-category:competition', label: 'Cuộc thi', kind: 'category' };
 const club = { id: 1, code: 'TEST', name: 'CLB kiểm thử', campusCode: 'HAN', category: 'TECHNOLOGY',
-    isActive: true, isRecruiting: true, discoveryTags: [tag] };
+    isActive: true, isRecruiting: true, discoveryTags: [tag, experience] };
+const untaggedClub = { ...club, id: 2, code: 'OTHER', name: 'CLB đối chứng', discoveryTags: [] };
 const activity = { id: 4, clubId: 1, clubCode: 'TEST', clubName: club.name, title: 'Buổi kiểm thử',
     description: 'Dữ liệu kiểm thử', status: 'UPCOMING', isInternal: false, isEligible: true, canRegister: false,
     startTime: new Date(Date.now() + 86_400_000).toISOString(), endTime: new Date(Date.now() + 90_000_000).toISOString(),
-    discoveryTags: [tag, workshop] };
+    discoveryTags: [tag, workshop, experience, { id: 'custom:team', label: 'Làm việc nhóm', kind: 'custom' }] };
 const other = { ...activity, id: 5, title: 'Buổi đối chứng', discoveryTags: [competition] };
 const events = [];
 try {
@@ -40,8 +42,9 @@ try {
         if (path === '/api/users/me/profile')
             return ok({ userId: 901, version: 'qa', profile: { interests: [] }, personal: {}, academic: {},
                 editableFields: [], onboarding: { version: 1, completedAt: '2026-01-01T00:00:00Z' } });
-        if (path === '/api/clubs') return ok([club, { ...club, id: 2, code: 'OTHER', name: 'CLB đối chứng', discoveryTags: [] }]);
+        if (path === '/api/clubs') return ok([club, untaggedClub]);
         if (path === '/api/clubs/1') return ok(club);
+        if (path === '/api/clubs/2') return ok(untaggedClub);
         if (path === '/api/clubs/me/access' || path === '/api/clubs/me/memberships') return ok([]);
         if (path === '/api/v2/activities/feed') return ok({ items: [activity, other], page: 1, totalPages: 1, scopeVersion: 'qa' });
         if (path === '/api/v2/activities/4') return ok(activity);
@@ -83,6 +86,9 @@ try {
     assert.equal(events.filter((event) => event.action === 'view' && event.entityId === 4).length, 1);
     await open.click();
     await page.getByRole('heading', { name: activity.title }).waitFor();
+    const tagSection = page.getByRole('region', { name: 'Tag khám phá' });
+    for (const { label } of activity.discoveryTags)
+        await tagSection.getByText(label, { exact: true }).waitFor();
     const click = events.find((event) => event.action === 'click');
     assert.ok(click?.eventId);
     assert.equal(click.entityId, 4);
@@ -92,8 +98,14 @@ try {
     await page.getByLabel('Lọc theo tag').selectOption(tag.id);
     await page.getByRole('heading', { name: 'CLB đối chứng' }).waitFor({ state: 'detached' });
     await page.getByRole('heading', { name: club.name }).waitFor();
+    await page.getByRole('link', { name: `Khám phá ${club.name}` }).click();
+    for (const { label } of club.discoveryTags)
+        await tagSection.getByText(label, { exact: true }).waitFor();
+    await page.goto(`${base}/v2/clubs/${untaggedClub.code}`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('heading', { name: untaggedClub.name }).waitFor();
+    assert.equal(await tagSection.count(), 0);
     assert.deepEqual(errors, []);
-    console.log('DISCOVERY_TAGS_BROWSER_OK: ClubHub category and tag filters, search, and versioned click/view on the served build.');
+    console.log('DISCOVERY_TAGS_BROWSER_OK: ClubHub filters, search, detail tags, and versioned click/view on the served build.');
 } finally {
     await browser.close();
 }

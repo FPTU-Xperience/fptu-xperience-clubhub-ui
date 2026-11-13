@@ -10,7 +10,7 @@ import { isPendingClubInvitation } from '../../../services/club-invitations';
 import ClubProfileHeader from '../../../components/v2/club-detail/ClubProfileHeader';
 import { isAffairsViewer } from '../affairs-access';
 import ClubHeaderActions from '../../../components/v2/club-detail/ClubHeaderActions';
-import { DiscoveryTagList } from '../../../components/v2/DiscoveryTagFields';
+import { DiscoveryTagSection } from '../../../components/v2/DiscoveryTagFields';
 import { useDiscoveryInteraction } from '../../../services/discovery-interactions';
 import './ClubDetailPage.scss';
 
@@ -150,7 +150,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                                     <p className="v2-body-large">
                                         {club.description || 'Thông tin giới thiệu đang được cập nhật.'}
                                     </p>
-                                    <DiscoveryTagList tags={club.discoveryTags} />
+                                    <DiscoveryTagSection tags={club.discoveryTags} />
                                     {!club.discoveryTags.length && club.tags.length > 0 && (
                                         <div className="v2-inline">
                                             {club.tags.map((tag) => (
