@@ -18,8 +18,12 @@ export function tagDraft(value) {
     };
 }
 
+export function parseCustomTags(text) {
+    return text.split(',').map((tag) => tag.normalize().trim().replace(/\s+/g, ' ')).filter(Boolean);
+}
+
 export function tagSelectionPayload(draft) {
-    const custom = draft.customText.split(',').map((tag) => tag.normalize().trim().replace(/\s+/g, ' ')).filter(Boolean);
+    const custom = parseCustomTags(draft.customText);
     if (custom.length > 10 || custom.some((tag) => !/^[\p{L}\p{N}][\p{L}\p{M}\p{N} .&+#/_-]{0,39}$/u.test(tag))
         || new Set(custom.map((tag) => tag.toUpperCase())).size !== custom.length) {
         throw new Error('Nhập tối đa 10 tag khác nhau, mỗi tag 1–40 ký tự. Phân cách bằng dấu phẩy.');
@@ -37,4 +41,12 @@ export function tagSearchText(item) {
 
 export function matchesTag(item, id) {
     return !id || (item.discoveryTags ?? []).some((tag) => tag.id === id);
+}
+
+export function discoveryTagLabel(items, id) {
+    for (const item of items) {
+        const tag = item.discoveryTags?.find((entry) => entry.id === id);
+        if (tag) return tag.label;
+    }
+    return 'Tag không có trong danh sách';
 }

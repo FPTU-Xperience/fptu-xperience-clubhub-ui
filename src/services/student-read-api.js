@@ -50,6 +50,15 @@ export async function loadStudentRecommendations(api, kind = 'activities') {
     return value;
 }
 
+export function prioritizeRecommendedItems(items, recommendedIds) {
+    if (!recommendedIds?.length) return items;
+
+    const rank = new Map([...new Set(recommendedIds)].map((id, index) => [id, index]));
+    const unranked = rank.size;
+    return [...items].sort((left, right) =>
+        (rank.get(left.id) ?? unranked) - (rank.get(right.id) ?? unranked));
+}
+
 export function recommendationFailureDescription(error) {
     return {
         SCORE_POLICY_UNAPPROVED: 'Gợi ý chưa khả dụng vì chưa có chính sách Xperience Point đã được duyệt và có hiệu lực cho phạm vi hiện tại. Vui lòng liên hệ CTSV.',

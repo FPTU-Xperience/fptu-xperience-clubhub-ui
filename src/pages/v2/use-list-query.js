@@ -15,8 +15,10 @@ export function useListQuery(defaults) {
     }));
     const set = (key, value) => {
         const next = new URLSearchParams(pending.current);
-        const resolved = typeof value === 'function' ? value(values[key]) : value;
-        next.set(key, String(resolved));
+        const changes = typeof key === 'string'
+            ? { [key]: typeof value === 'function' ? value(values[key]) : value }
+            : key;
+        for (const [name, nextValue] of Object.entries(changes)) next.set(name, String(nextValue));
         if (key !== 'page') next.set('page', '1');
         pending.current = next;
         setParams(next, { replace: key !== 'page' });

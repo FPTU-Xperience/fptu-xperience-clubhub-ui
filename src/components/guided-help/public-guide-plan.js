@@ -30,7 +30,7 @@ export function publicGuidePlan(origin, personal = true) {
             '/v2/clubs',
             '#v2-main h1',
             'Câu lạc bộ',
-            'Danh sách CLB có bộ lọc lĩnh vực, từ khóa và tình trạng tuyển thành viên.',
+            'Danh sách CLB có bộ lọc lĩnh vực, tag, từ khóa và tình trạng tuyển thành viên.',
         ),
         page(
             '/v2/clubs',
@@ -40,9 +40,9 @@ export function publicGuidePlan(origin, personal = true) {
         ),
         page(
             '/v2/activities',
-            '.v2-event-filter-bar',
+            '.v2-directory-toolbar',
             'Hoạt động',
-            'Xem hoạt động công khai cùng campus và hoạt động nội bộ của CLB bạn đang tham gia. Lọc Sắp diễn ra hoặc Đang diễn ra.',
+            'Xem hoạt động công khai cùng campus và hoạt động nội bộ của CLB bạn đang tham gia. Lọc theo thể loại, trạng thái hoặc tag.',
         ),
     ];
     if (personal)

@@ -1,18 +1,21 @@
 import { useId, useMemo, useState } from 'react';
-import { ACTIVITY_TAG_CATEGORIES, EXPERIENCE_TAGS, tagDraft, tagSelectionPayload } from '../../services/discovery-tags.js';
+import { ACTIVITY_TAG_CATEGORIES, EXPERIENCE_TAGS, parseCustomTags, tagDraft, tagSelectionPayload } from '../../services/discovery-tags.js';
 import { Pill } from './DiscoveryLayout';
+import DirectoryFilterSelect from './directory-filter/DirectoryFilterSelect';
 import './DiscoveryTagFields.scss';
 
 export function DiscoveryTagFields({ draft, onChange, activity = false, disabled = false }) {
+    const hintId = useId();
+    const customTags = [...new Set(parseCustomTags(draft.customText))];
     return (
         <fieldset className="v2-discovery-tag-fields" disabled={disabled}>
-            <legend>Tag khám phá</legend>
+            <legend>Tag</legend>
             {activity && (
                 <label className="v2-discovery-tag-input">
                     Thể loại hoạt động
                     <select value={draft.activityCategory} onChange={(event) => onChange({ ...draft, activityCategory: event.target.value })}>
-                        <option value="">Hoạt động khác (mặc định)</option>
-                        {ACTIVITY_TAG_CATEGORIES.filter(([code]) => code !== 'other').map(([code, label]) => (
+                        <option value="">Chưa chọn thể loại</option>
+                        {ACTIVITY_TAG_CATEGORIES.map(([code, label]) => (
                             <option key={code} value={code}>{label}</option>
                         ))}
                     </select>
@@ -33,10 +36,17 @@ export function DiscoveryTagFields({ draft, onChange, activity = false, disabled
                 })}
             </div>
             <label className="v2-discovery-tag-input">
-                Tag tự thêm
-                <input value={draft.customText} maxLength={420} placeholder="Phân cách bằng dấu phẩy"
+                Tag tự nhập
+                <input value={draft.customText} maxLength={420} placeholder="Ví dụ: Robot, Thiết kế 3D"
+                    aria-describedby={hintId}
                     onChange={(event) => onChange({ ...draft, customText: event.target.value })} />
             </label>
+            <small id={hintId} className="v2-discovery-tag-hint">Phân cách bằng dấu phẩy. Tối đa 10 tag, mỗi tag 40 ký tự.</small>
+            {customTags.length > 0 && (
+                <div className="v2-discovery-tag-list v2-discovery-tag-preview">
+                    {customTags.map((tag) => <Pill key={tag}>{tag}</Pill>)}
+                </div>
+            )}
         </fieldset>
     );
 }
@@ -74,24 +84,20 @@ export function DiscoveryTagEditor({ selection, activity, disabled, onSave }) {
 
 export function DiscoveryTagFilter({ items, value, onChange }) {
     const options = useMemo(() => Array.from(new Map(items.flatMap((item) =>
-        (item.discoveryTags ?? []).map((tag) => [tag.id, tag.label])))).sort((a, b) => a[1].localeCompare(b[1], 'vi')), [items]);
+        (item.discoveryTags ?? []).filter((tag) => tag.kind !== 'category')
+            .map((tag) => [tag.id, tag.label])))).sort((a, b) => a[1].localeCompare(b[1], 'vi')), [items]);
     if (!options.length && !value) return null;
+    const choices = [['', 'Tất cả tag'], ...options];
+    if (value && !options.some(([id]) => id === value)) choices.push([value, 'Tag không có trong danh sách']);
     return (
-        <label className="v2-discovery-tag-filter">
-            Lọc theo tag
-            <select value={value} onChange={(event) => onChange(event.target.value)}>
-                <option value="">Tất cả tag</option>
-                {options.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
-                {value && !options.some(([id]) => id === value) && <option value={value}>Tag đã chọn</option>}
-            </select>
-        </label>
+        <DirectoryFilterSelect label="Tag" value={value} options={choices} onChange={onChange} />
     );
 }
 
 export function DiscoveryTagList({ tags, limit = tags?.length }) {
     if (!tags?.length) return null;
     return (
-        <div className="v2-discovery-tag-list" aria-label="Tag khám phá">
+        <div className="v2-discovery-tag-list">
             {tags.slice(0, limit).map((tag) => <Pill key={tag.id}>{tag.label}</Pill>)}
         </div>
     );
@@ -103,7 +109,7 @@ export function DiscoveryTagSection({ tags }) {
 
     return (
         <section className="v2-discovery-tag-section" aria-labelledby={headingId}>
-            <h3 id={headingId}>Tag khám phá</h3>
+            <h3 id={headingId}>Tag</h3>
             <DiscoveryTagList tags={tags} />
         </section>
     );

@@ -27,7 +27,7 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
     const activityFeed = useActivityFeed(api, sessionKey);
     const recommendations = useRecommendedActivities(api, sessionKey);
     const navigate = useNavigate();
-    const [activityStatus, setActivityStatus] = useState('ALL');
+    const [activityStatus, setActivityStatus] = useState('UPCOMING');
     const activities = useMemo(() => selectDiscoveryActivities(activityFeed.data, recommendations.data, activityStatus), [activityFeed.data, recommendations.data, activityStatus]);
     const result = useClubDirectory(api, sessionKey);
     const recommendedClubs = useRecommendedClubIds(api, sessionKey);
@@ -37,11 +37,10 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
     const setCategory = (value) => setList('category', value);
     const setPage = (value) => setList('page', value);
     const entries = result.data || [];
-    const suggestedEntries = useMemo(() => {
-        const directory = new Map(entries.map((club) => [club.id, club]));
-        const ranked = [...new Set(recommendedClubs.data ?? [])].map((id) => directory.get(id)).filter(Boolean);
-        return ranked.length ? ranked : createCuratedClubSet(entries, MAX_SUGGESTED_CLUBS);
-    }, [entries, recommendedClubs.data]);
+    const suggestedEntries = useMemo(
+        () => createCuratedClubSet(entries, MAX_SUGGESTED_CLUBS, recommendedClubs.data),
+        [entries, recommendedClubs.data],
+    );
     const categories = useMemo(
         () => orderDirectoryCategories([...new Set(suggestedEntries.map((club) => club.category).filter(Boolean))]),
         [suggestedEntries],

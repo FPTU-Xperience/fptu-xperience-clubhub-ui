@@ -118,9 +118,9 @@ export function clubGuidePlan(pathname) {
         title = 'Khám phá hoạt động';
         steps = [
             step(
-                '.v2-event-filter-bar',
+                '.v2-directory-toolbar',
                 'Tìm và lọc hoạt động',
-                'Tìm theo tên hoặc chuyển giữa Sắp diễn ra và Đang diễn ra.',
+                'Tìm theo từ khóa hoặc lọc theo thể loại, trạng thái và tag.',
             ),
             step(
                 '.v2-event-grid',
@@ -145,7 +145,7 @@ export function clubGuidePlan(pathname) {
     } else if (pathname === '/v2/clubs') {
         title = 'Danh sách câu lạc bộ';
         steps = [
-            step('.v2-filter-bar', 'Tìm câu lạc bộ', 'Lọc theo lĩnh vực, từ khóa và tình trạng tuyển thành viên.'),
+            step('.v2-filter-bar', 'Tìm câu lạc bộ', 'Lọc theo lĩnh vực, tag, từ khóa và tình trạng tuyển thành viên.'),
             step('.v2-club-grid', 'Trang câu lạc bộ', 'Mở thẻ để xem thông tin, lịch hoạt động và điều kiện tham gia.'),
         ];
     } else if (pathname === '/v2/my-clubs') {

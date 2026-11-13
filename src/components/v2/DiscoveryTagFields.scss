@@ -30,13 +30,10 @@
         gap: 0.25rem;
         margin-block: 0.5rem;
     }
-}
 
-.v2-discovery-tag-filter {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-block: 0.75rem;
+    .v2-discovery-tag-hint {
+        color: var(--v2-muted, #64748b);
+    }
 }
 
 .v2-discovery-tag-list {
@@ -59,7 +56,10 @@
     .v2-discovery-tag-list {
         margin: 0;
     }
+}
 
+.v2-discovery-tag-section,
+.v2-discovery-tag-preview {
     .v2-discovery-pill {
         max-width: 100%;
         padding: 4px 10px;

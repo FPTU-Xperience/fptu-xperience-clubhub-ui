@@ -3,12 +3,6 @@
     container: activity-directory / inline-size;
 }
 
-.v2-activities-page h1 {
-    margin: 4px 0 10px;
-    font-size: clamp(26px, 2.5vw, 36px);
-    letter-spacing: -0.035em;
-}
-
 .v2-activity-filters {
     display: flex;
     flex-wrap: wrap;
@@ -56,12 +50,6 @@
         outline: 2px solid #fb923c;
         outline-offset: 3px;
     }
-}
-
-.v2-event-category-tabs {
-    flex-basis: 100%;
-    flex-wrap: wrap;
-    min-width: 0;
 }
 
 // The sidebar reduces available space even while the viewport is desktop-sized.

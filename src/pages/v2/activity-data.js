@@ -10,6 +10,7 @@ import {
     loadStudentActivitySchedule,
     loadStudentActivityDetail,
     loadStudentRecommendations,
+    prioritizeRecommendedItems,
 } from '../../services/student-read-api.js';
 
 export function classifyActivityError(error) {
@@ -146,10 +147,10 @@ export function mapRecommendations(value) {
 // Discovery includes live and non-registerable activities too. Recommendations
 // only order the authorized feed; they never determine its availability or scope.
 export function selectDiscoveryActivities(feed, recommendations, status = 'ALL') {
-    const ranks = new Map(recommendations.map(({ activity, rank }) => [activity.id, rank]));
-    return filterActivityFeed(feed, '', status)
-        .sort((left, right) => (ranks.get(left.id) ?? Number.MAX_SAFE_INTEGER) - (ranks.get(right.id) ?? Number.MAX_SAFE_INTEGER))
-        .slice(0, 6);
+    return prioritizeRecommendedItems(
+        filterActivityFeed(feed, '', status),
+        recommendations.map(({ activity }) => activity.id),
+    ).slice(0, 6);
 }
 
 export function sortActivitiesNewestFirst(items) {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePublicMediaRevision } from '../../services/use-public-media-revision.js';
 import { matchesTag, readDiscoveryTags, tagSearchText } from '../../services/discovery-tags.js';
-import { loadStudentRecommendations } from '../../services/student-read-api.js';
+import { loadStudentRecommendations, prioritizeRecommendedItems } from '../../services/student-read-api.js';
 
 const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null);
 const rows = (value) => (Array.isArray(value) ? value : value?.items || value?.content || []);
@@ -107,8 +107,9 @@ export function orderDirectoryCategories(categories) {
     });
 }
 
-export function createCuratedClubSet(entries, limit = 3) {
-    return [...entries].sort((left, right) => left.name.localeCompare(right.name, 'vi')).slice(0, limit);
+export function createCuratedClubSet(entries, limit = 3, recommendedIds) {
+    const alphabetical = [...entries].sort((left, right) => left.name.localeCompare(right.name, 'vi'));
+    return prioritizeRecommendedItems(alphabetical, recommendedIds).slice(0, limit);
 }
 
 export function paginateClubDirectory(entries, requestedPage = 1, pageSize = 6) {
