@@ -49,8 +49,37 @@ export const newApplication = (clubId, period = '') => ({
         newAction({ name: 'Staff supporting', contributionRole: 'Organizer', expectedPeople: 10, maxAwardCount: 10 }),
         newAction({ name: 'Hosting', basePoints: 75, contributionRole: 'Leader', expectedPeople: 2, maxAwardCount: 2 }),
     ],
+    staffing: [],
     recruitment: { enabled: false, visibility: 'PUBLIC', eligibility: 'SCHOOL_STUDENTS', actionIds: [] },
 });
+export const STAFFING_KINDS = [
+    ['HOST', 'Host', 'thành viên nhóm Event', 'Leader'],
+    ['STAFF', 'Staff', 'thành viên thường', 'Organizer'],
+];
+export function staffingAction(actions, kind) {
+    const preferredRole = STAFFING_KINDS.find(([id]) => id === kind)?.[3];
+    return actions.find((action) => action.contributionRole === preferredRole)?.clientId ?? actions[0]?.clientId ?? '';
+}
+export const recruitmentCapacity = (draft, action) =>
+    Number(action.expectedPeople) - draft.staffing.filter((row) => row.actionClientId === action.clientId).length;
+function staffingIssue(draft, candidates) {
+    const rows = draft.staffing;
+    for (const [kind, label, memberRole] of STAFFING_KINDS) {
+        if (!rows.some((row) => row.assignmentKind === kind))
+            return { message: `Chọn ít nhất một ${memberRole} làm ${label}.`, field: `staffing-${kind}` };
+    }
+    if (new Set(rows.map((row) => row.userId)).size !== rows.length)
+        return { message: 'Mỗi thành viên chỉ được chọn một lần trong phân công nội bộ.' };
+    for (const row of rows) {
+        if (candidates && !candidates.some((member) => member.userId === row.userId && member.assignmentKind === row.assignmentKind))
+            return { message: 'Thành viên đã chọn không còn đủ điều kiện. Vui lòng chọn lại.', field: `staffing-${row.assignmentKind}` };
+        const action = draft.actions.find((item) => item.clientId === row.actionClientId);
+        if (!action) return { message: 'Chọn action cho từng người được phân công.', field: `staffing-action-${row.assignmentKind}` };
+        if (rows.filter((item) => item.actionClientId === action.clientId).length > Number(action.expectedPeople))
+            return { message: `Số người phân công cho ${action.name} vượt số người dự kiến.`, field: `staffing-action-${row.assignmentKind}` };
+    }
+    return null;
+}
 export function actionEstimate(action, activityScale) {
     const role = ACTION_ROLES.find(([id]) => id === action.contributionRole)?.[2];
     const scale = ACTIVITY_SCALES.find(
@@ -72,33 +101,66 @@ export function applicationPermission(access, permission) {
     if (Array.isArray(access.permissions)) return access.permissions.includes(permission);
     return clubCapability(access, 'event.registrations.manage');
 }
+const infoFields = [
+    ['period', 'kỳ hoạt động', 40],
+    ['title', 'tên hoạt động', 200],
+    ['location', 'địa điểm hoạt động', 200],
+    ['description', 'nội dung hoạt động', 2000],
+    ['objective', 'mục tiêu hoạt động', 2000],
+];
+function activityInfoIssue(draft, now, requireComplete = false, semester) {
+    if (!Number.isSafeInteger(Number(draft.clubId)) || Number(draft.clubId) <= 0)
+        return { message: 'CLB không hợp lệ.' };
+    for (const [field, label, limit] of infoFields) {
+        const value = draft[field].trim();
+        if (!value && (field !== 'objective' || requireComplete))
+            return { field, message: `Vui lòng nhập ${label}.` };
+        if (value.length > limit)
+            return { field, message: `Giới hạn cho ${label} là ${limit.toLocaleString('vi-VN')} ký tự.` };
+    }
+    const start = Date.parse(`${draft.startTime}:00+07:00`);
+    const end = Date.parse(`${draft.endTime}:00+07:00`);
+    if (!Number.isFinite(start) || start <= now)
+        return { field: 'startTime', message: 'Thời gian bắt đầu phải ở tương lai.' };
+    if (!Number.isFinite(end) || end <= start)
+        return { field: 'endTime', message: 'Thời gian kết thúc phải sau thời gian bắt đầu.' };
+    if ([semester?.code, semester?.id, semester?.reportPeriod, semester?.invitationCode]
+        .some((id) => String(id ?? '').toLowerCase() === draft.period.trim().toLowerCase())) {
+        if (start < Date.parse(semester.startUtc))
+            return { field: 'startTime', message: 'Thời gian bắt đầu nằm trước kỳ hoạt động.' };
+        if (end >= Date.parse(semester.endUtc) + 24 * 60 * 60 * 1000)
+            return { field: 'endTime', message: 'Thời gian kết thúc nằm sau kỳ hoạt động.' };
+    }
+    if (!ACTIVITY_SCALES.some(([id]) => id === draft.scale))
+        return { field: 'scale', message: 'Quy mô hoạt động không hợp lệ.' };
+    return null;
+}
 export function validateApplication(draft, now = Date.now(), throughStage = 3) {
-    if (!Number.isSafeInteger(Number(draft.clubId)) || Number(draft.clubId) <= 0) return 'CLB không hợp lệ.';
-    if (!draft.period.trim()) return 'Vui lòng nhập kỳ hoạt động.';
-    if (!draft.title.trim()) return 'Vui lòng nhập tên hoạt động.';
-    if (!draft.location.trim()) return 'Vui lòng nhập địa điểm hoạt động.';
-    if (!draft.description.trim()) return 'Vui lòng nhập nội dung hoạt động.';
-    const start = Date.parse(`${draft.startTime}:00+07:00`),
-        end = Date.parse(`${draft.endTime}:00+07:00`);
-    if (!Number.isFinite(start) || !Number.isFinite(end) || start <= now || end <= start)
-        return 'Thời gian bắt đầu phải ở tương lai; thời gian kết thúc phải sau bắt đầu.';
-    if (!ACTIVITY_SCALES.some(([id]) => id === draft.scale)) return 'Quy mô hoạt động không hợp lệ.';
+    const issue = activityInfoIssue(draft, now);
+    if (issue) return issue.message;
     if (throughStage === 0) return '';
-    if (!draft.actions.length) return 'Cần ít nhất một action.';
+    if (!draft.actions.length || draft.actions.length > 100) return 'Hồ sơ cần từ 1 đến 100 action.';
     if (new Set(draft.actions.map((action) => action.clientId)).size !== draft.actions.length)
         return 'Mã action bị trùng.';
     for (const action of draft.actions) {
         if (!action.name.trim()) return 'Nhập tên cho tất cả action.';
-        if (!Number.isFinite(Number(action.basePoints)) || Number(action.basePoints) <= 0)
+        if (action.name.trim().length > 200) return 'Tên action tối đa 200 ký tự.';
+        const basePoints = Number(action.basePoints);
+        if (!Number.isFinite(basePoints) || basePoints <= 0)
             return `Điểm nền của ${action.name} phải lớn hơn 0.`;
+        if (basePoints > 100000 || Number(basePoints.toFixed(4)) !== basePoints)
+            return `Điểm nền của ${action.name} tối đa 100.000 và có tối đa 4 chữ số thập phân.`;
         if (
             !['ACTIVITY', 'OVERRIDE'].includes(action.scaleSource) ||
             !Number.isFinite(actionEstimate(action, draft.scale).rawXp)
         )
             return 'Vai trò hoặc quy mô action không hợp lệ.';
-        for (const field of ['expectedPeople', 'expectedOccurrencesPerPerson', 'maxAwardsPerPerson', 'maxAwardCount']) {
+        const limits = { expectedPeople: 100000, expectedOccurrencesPerPerson: 1000, maxAwardsPerPerson: 1000, maxAwardCount: 1000000 };
+        for (const [field, limit] of Object.entries(limits)) {
             if (!Number.isSafeInteger(Number(action[field])) || Number(action[field]) <= 0)
                 return `Số người, số lượt và giới hạn của ${action.name} phải là số nguyên dương.`;
+            if (Number(action[field]) > limit)
+                return `Số người, số lượt hoặc giới hạn của ${action.name} vượt mức cho phép.`;
         }
         if (
             Number(action.maxAwardsPerPerson) < Number(action.expectedOccurrencesPerPerson) ||
@@ -133,33 +195,21 @@ export function validateApplication(draft, now = Date.now(), throughStage = 3) {
             return 'Phạm vi tuyển dụng không hợp lệ.';
         if (draft.recruitment.visibility === 'PRIVATE' && draft.recruitment.eligibility !== 'CLUB_MEMBERS')
             return 'Tuyển riêng tư chỉ dành cho thành viên CLB.';
+        if (draft.actions.some((action) => draft.recruitment.actionIds.includes(action.clientId) && recruitmentCapacity(draft, action) <= 0))
+            return 'Chọn action còn vị trí trống để tuyển bổ sung.';
     }
     return '';
 }
 // Return the owning step so both step navigation and final submit validate the same draft.
-export function applicationValidationIssue(draft, throughStage = 3, now = Date.now(), requireObjective = false) {
-    for (let stage = 0; stage <= Math.min(throughStage, 2); stage++) {
+export function applicationValidationIssue(draft, throughStage = 3, now = Date.now(), requireComplete = false, candidates, semester) {
+    const infoIssue = activityInfoIssue(draft, now, requireComplete, semester);
+    if (infoIssue) return { ...infoIssue, stage: 0 };
+    for (let stage = 1; stage <= Math.min(throughStage, 2); stage++) {
         const message = validateApplication(draft, now, stage);
-        if (message) {
-            let field;
-            if (stage === 0) {
-                field = !draft.period.trim()
-                    ? 'period'
-                    : !draft.title.trim()
-                      ? 'title'
-                      : !draft.location.trim()
-                        ? 'location'
-                        : !draft.description.trim()
-                          ? 'description'
-                          : !Number.isFinite(Date.parse(`${draft.startTime}:00+07:00`)) ||
-                              Date.parse(`${draft.startTime}:00+07:00`) <= now
-                            ? 'startTime'
-                            : 'endTime';
-            }
-            return { message, stage, field };
-        }
-        if (stage === 0 && requireObjective && !draft.objective.trim()) {
-            return { message: 'Vui lòng nhập mục tiêu hoạt động trước khi gửi duyệt.', stage, field: 'objective' };
+        if (message) return { message, stage };
+        if (stage === 2 && requireComplete) {
+            const issue = staffingIssue(draft, candidates);
+            if (issue) return { ...issue, stage };
         }
     }
     return null;
@@ -193,13 +243,16 @@ export function applicationPayload(draft) {
             completionMode: action.completionMode,
             stackingRule: action.stackingRule,
         })),
+        staffing: draft.staffing
+            .filter((row) => draft.actions.some((action) => action.clientId === row.actionClientId))
+            .map(({ userId, actionClientId, assignmentKind }) => ({ userId, actionClientId, assignmentKind })),
         recruitment: draft.recruitment.enabled
             ? {
                   visibility: draft.recruitment.visibility,
                   eligibility: draft.recruitment.eligibility,
                   positions: draft.recruitment.actionIds.map((id) => ({
                       actionClientId: id,
-                      capacity: Number(draft.actions.find((action) => action.clientId === id).expectedPeople),
+                      capacity: recruitmentCapacity(draft, draft.actions.find((action) => action.clientId === id)),
                   })),
               }
             : null,
