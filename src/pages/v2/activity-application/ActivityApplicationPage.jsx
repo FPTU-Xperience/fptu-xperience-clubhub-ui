@@ -8,6 +8,7 @@ import PageState from '../../../components/v2/PageState';
 import {
     ACTION_ROLES,
     ACTIVITY_SCALES,
+    STAFFING_KINDS,
     actionEstimate,
     applicationEstimate,
     applicationPayload,
@@ -15,6 +16,8 @@ import {
     formatXp,
     newAction,
     newApplication,
+    recruitmentCapacity,
+    staffingAction,
     applicationValidationIssue,
 } from './activity-application-data';
 import '../report-detail-page/ReportEditorPage.scss';
@@ -25,7 +28,7 @@ import {
 } from '../../../services/activity-application-contract.js';
 import WorkspacePolicyStatus from '../../../components/v2/activity-detail/WorkspacePolicyStatus';
 
-const steps = ['Thông tin hoạt động', 'Action & dự toán Xperience Point', 'Tuyển nhân sự', 'Kiểm tra & gửi duyệt'];
+const steps = ['Thông tin hoạt động', 'Action & dự toán Xperience Point', 'Phân công nhân sự', 'Kiểm tra & gửi duyệt'];
 function Field({ label, value, onChange, options, multiline, ...props }) {
     const id = useId();
     return (
@@ -92,6 +95,9 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
     const [receipt, setReceipt] = useState(null);
     const [retry, setRetry] = useState(0);
     const [loadError, setLoadError] = useState('');
+    const [staffingRoster, setStaffingRoster] = useState(null);
+    const [staffingError, setStaffingError] = useState('');
+    const [staffingRetry, setStaffingRetry] = useState(0);
     const lock = useRef(false);
     const createKey = useRef(crypto.randomUUID());
     const submitKey = useRef(crypto.randomUUID());
@@ -133,6 +139,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 const restored = {
                     ...newApplication(value.clubId, value.period),
                     ...value,
+                    staffing: value.staffing ?? [],
                     discoveryTagDraft: value.tagSelection ? tagDraft(value.tagSelection) : undefined,
                     startTime: localDate(value.startTimeUtc),
                     endTime: localDate(value.endTimeUtc),
@@ -162,6 +169,21 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
         };
     }, [api, requestedId, workspace?.clubId, context?.clubId, retry]);
     useEffect(() => {
+        if (!canEdit || readOnly || submitted || stage !== 2) return;
+        let active = true;
+        setStaffingRoster(null);
+        setStaffingError('');
+        api.request(`/api/activity-applications/staffing-candidates?clubId=${encodeURIComponent(draft.clubId)}`)
+            .then((value) => {
+                if (!Array.isArray(value?.items)) throw new Error('Danh sách thành viên không hợp lệ.');
+                if (active) setStaffingRoster(value.items);
+            })
+            .catch((issue) => {
+                if (active) setStaffingError(issue.message || 'Không tải được danh sách thành viên.');
+            });
+        return () => { active = false; };
+    }, [api, canEdit, draft.clubId, readOnly, stage, staffingRetry, submitted]);
+    useEffect(() => {
         if (!validationIssue) return;
         const panel = formRef.current?.querySelector(`[data-step="${validationIssue.stage}"]`);
         const field = validationIssue.field
@@ -178,7 +200,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
     }, [validationIssue]);
     const navigateStep = (next) => {
         if (next > stage) {
-            const issue = applicationValidationIssue(draft, next - 1);
+            const issue = applicationValidationIssue(draft, next - 1, Date.now(), true, staffingRoster ?? [], semester);
             if (issue) {
                 setError(issue.message);
                 setValidationIssue(issue);
@@ -201,9 +223,15 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
             actions: current.actions.map((action) => (action.clientId === id ? { ...action, [key]: value } : action)),
         }));
     const changeRecruitment = (key, value) => change('recruitment', { ...draft.recruitment, [key]: value });
+    const addStaffing = (assignmentKind, value) => {
+        if (!value) return;
+        const member = staffingRoster?.find((row) => row.userId === Number(value) && row.assignmentKind === assignmentKind);
+        if (!member) return;
+        change('staffing', [...draft.staffing, { ...member, actionClientId: staffingAction(draft.actions, assignmentKind) }]);
+    };
     const save = async (submit) => {
         if (lock.current || readOnly || !canEdit || (submit && !canSubmit)) return;
-        const validation = applicationValidationIssue(draft, undefined, undefined, submit);
+        const validation = applicationValidationIssue(draft, undefined, Date.now(), submit, staffingRoster ?? [], semester);
         if (validation) {
             setError(validation.message);
             setValidationIssue(validation);
@@ -254,6 +282,9 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 if (mounted.current) setReceipt(value);
             }
         } catch (issue) {
+            if (mounted.current && ['STAFFING_REQUIRED', 'INVALID_STAFFING', 'STAFFING_MEMBER_INELIGIBLE'].includes(issue.code)) {
+                setStage(2);
+            }
             if (mounted.current)
                 setError(
                     [404, 405, 501].includes(issue.status)
@@ -426,7 +457,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 onChange={(v) => change('location', v)}
                             />
                             <Field
-                                label="Mục tiêu (bắt buộc khi gửi duyệt)"
+                                label="Mục tiêu *"
                                 name="objective"
                                 value={draft.objective}
                                 maxLength={2000}
@@ -578,7 +609,42 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                             </label>
                         </section>
                         <section hidden={stage !== 2} data-step="2" className="v2-report-editor-card">
-                            <h2>Tuyển nhân sự cho hoạt động</h2>
+                            <h2>Phân công thành viên CLB</h2>
+                            {staffingError && <p role="alert">{staffingError} <button type="button" onClick={() => setStaffingRetry((value) => value + 1)}>Thử lại</button></p>}
+                            {!staffingRoster && !staffingError && <p role="status">Đang tải danh sách thành viên…</p>}
+                            {STAFFING_KINDS.map(([kind, label, memberRole]) => (
+                                <div key={kind}>
+                                    <Field
+                                        label={`${label} · ${memberRole} *`}
+                                        name={`staffing-${kind}`}
+                                        value=""
+                                        disabled={!staffingRoster}
+                                        onChange={(value) => addStaffing(kind, value)}
+                                        options={[
+                                            ['', 'Chọn thành viên'],
+                                            ...(staffingRoster ?? [])
+                                                .filter((row) => row.assignmentKind === kind && !draft.staffing.some((item) => item.userId === row.userId))
+                                                .map((row) => [row.userId, row.displayName]),
+                                        ]}
+                                    />
+                                    {draft.staffing.filter((row) => row.assignmentKind === kind).map((row) => (
+                                        <div key={row.userId}>
+                                            <Field
+                                                label={`Action của ${row.displayName || staffingRoster?.find((member) => member.userId === row.userId)?.displayName || `thành viên #${row.userId}`}`}
+                                                name={`staffing-action-${kind}`}
+                                                value={row.actionClientId}
+                                                onChange={(value) => change('staffing', draft.staffing.map((item) =>
+                                                    item.userId === row.userId ? { ...item, actionClientId: value } : item))}
+                                                options={[[ '', 'Chọn action' ], ...draft.actions.map((item) => [item.clientId, item.name])]}
+                                            />
+                                            <button type="button" className="v2-button" onClick={() => change('staffing', draft.staffing.filter((item) => item.userId !== row.userId))}>
+                                                Bỏ phân công {row.displayName || `#${row.userId}`}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                            <h2>Tuyển bổ sung (tùy chọn)</h2>
                             <label className="v2-application-check">
                                 <input
                                     type="checkbox"
@@ -644,7 +710,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                                 }
                                             />
                                             <span>
-                                                {action.name || 'Action chưa có tên'} · {action.expectedPeople} vị trí
+                                                {action.name || 'Action chưa có tên'} · {Math.max(0, recruitmentCapacity(draft, action))} vị trí còn trống
                                             </span>
                                         </label>
                                     ))}
@@ -670,7 +736,14 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt>Tuyển nhân sự</dt>
+                                    <dt>Phân công nội bộ</dt>
+                                    <dd>{draft.staffing.map((row) => {
+                                        const name = row.displayName || staffingRoster?.find((member) => member.userId === row.userId)?.displayName;
+                                        return `${row.assignmentKind === 'HOST' ? 'Host' : 'Staff'} · ${name || `#${row.userId}`}`;
+                                    }).join(', ')}</dd>
+                                </div>
+                                <div>
+                                    <dt>Tuyển bổ sung</dt>
                                     <dd>
                                         {draft.recruitment.enabled
                                             ? `${draft.recruitment.actionIds.length} vị trí theo action`
@@ -745,7 +818,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 <ArrowLeft size={16} /> Quay lại
                             </button>
                             {stage < 3 && (
-                                <button type="submit" className="v2-button v2-button--primary" disabled={busy}>
+                                <button type="submit" className="v2-button v2-button--primary" disabled={busy || (stage === 2 && !staffingRoster)}>
                                     Tiếp tục <ArrowRight size={16} />
                                 </button>
                             )}

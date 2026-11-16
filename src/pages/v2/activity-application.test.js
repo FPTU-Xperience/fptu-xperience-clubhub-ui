@@ -35,20 +35,39 @@ const draft = () => ({
     ...newApplication(7, 'FA26'),
     title: 'Workshop',
     description: 'Nội dung',
+    objective: 'Mục tiêu',
     location: 'FPT',
     startTime: '2026-11-01T09:00',
     endTime: '2026-11-01T12:00',
     independentActionsConfirmed: true,
 });
-test('the objective is optional for draft saves and required before submission', () => {
+test('the objective is optional for draft saves and required when leaving step one', () => {
     const data = { ...draft(), objective: '   ' };
     assert.equal(applicationValidationIssue(data, 3, now), null);
-    assert.deepEqual(applicationValidationIssue(data, 3, now, true), {
-        message: 'Vui lòng nhập mục tiêu hoạt động trước khi gửi duyệt.',
+    assert.deepEqual(applicationValidationIssue(data, 0, now, true), {
+        message: 'Vui lòng nhập mục tiêu hoạt động.',
         stage: 0,
         field: 'objective',
     });
-    assert.equal(applicationValidationIssue({ ...data, objective: 'Mục tiêu' }, 3, now, true), null);
+    assert.equal(applicationValidationIssue({ ...data, objective: 'Mục tiêu' }, 0, now, true), null);
+});
+test('leaving staffing requires an EVENT host and a regular staff member with valid actions', () => {
+    const data = draft();
+    const candidates = [
+        { userId: 10, assignmentKind: 'HOST' },
+        { userId: 20, assignmentKind: 'STAFF' },
+    ];
+    const host = { ...candidates[0], actionClientId: data.actions[2].clientId };
+    const staff = { ...candidates[1], actionClientId: data.actions[1].clientId };
+    assert.equal(applicationValidationIssue(data, 2, now, true, candidates).field, 'staffing-HOST');
+    data.staffing = [host];
+    assert.equal(applicationValidationIssue(data, 2, now, true, candidates).field, 'staffing-STAFF');
+    data.staffing = [host, { ...staff, userId: 30 }];
+    assert.match(applicationValidationIssue(data, 2, now, true, candidates).message, /không còn đủ điều kiện/);
+    data.staffing = [host, staff];
+    assert.equal(applicationValidationIssue(data, 2, now, true, candidates), null);
+    assert.deepEqual(applicationPayload(data).staffing, [host, staff]);
+    assert.equal(applicationPayload(data).recruitment, null);
 });
 test('action budget matches agreed 7100 example and never applies tier base twice', () => {
     const data = draft();
