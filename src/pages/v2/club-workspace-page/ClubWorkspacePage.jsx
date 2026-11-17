@@ -48,7 +48,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
         dashboardRefreshKey,
     );
     const encodedCode = encodeURIComponent(result.workspace?.clubCode || routeClubCode || '');
-    const base = observation ? `/v2/ctsv/clubs/${encodedCode}/workspace` : `/v2/my-clubs/${encodedCode}`;
+    const base = observation ? `/ctsv/clubs/${encodedCode}/workspace` : `/my-clubs/${encodedCode}`;
     if (result.status !== 'populated')
         return (
             <div className="v2-public-content v2-workspace-state">
@@ -65,7 +65,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     {null}
                 </PageState>
                 {result.status === 'not-found' && (
-                    <Link className="v2-button" to={observation ? '/v2/clubs' : '/v2/my-clubs'}>
+                    <Link className="v2-button" to={observation ? '/clubs' : '/my-clubs'}>
                         {observation ? 'Về danh sách CLB' : 'Về CLB của tôi'}
                     </Link>
                 )}
@@ -102,7 +102,7 @@ export function ClubWorkspaceView({ api, sessionKey, viewer, result, observation
                     canViewDeclarations={canViewDeclarations}
                     treasurer={treasurer}
                     access={observation ? null : access}
-                    onClubChange={(clubCode) => navigate(`/v2/my-clubs/${encodeURIComponent(clubCode)}`)}
+                    onClubChange={(clubCode) => navigate(`/my-clubs/${encodeURIComponent(clubCode)}`)}
                 />
                 <main className="v2-workspace-main">
                     <header className="v2-workspace-bar">

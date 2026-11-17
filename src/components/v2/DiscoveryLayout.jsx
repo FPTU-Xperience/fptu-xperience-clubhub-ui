@@ -163,7 +163,7 @@ export function BottomCallout() {
                 <h2>Nếu vẫn chưa thấy CLB phù hợp, xem nhiều hơn tại đây.</h2>
                 <p>Khám phá toàn bộ câu lạc bộ để tìm cộng đồng phù hợp với sở thích của bạn.</p>
             </div>
-            <Link className="v2-discovery-button" to="/v2/clubs">
+            <Link className="v2-discovery-button" to="/clubs">
                 Xem tất cả câu lạc bộ <ArrowUpRight size={18} />
             </Link>
         </section>

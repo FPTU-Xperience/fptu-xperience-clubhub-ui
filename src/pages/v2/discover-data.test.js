@@ -25,7 +25,7 @@ test('directory adapter exposes only the V2 card model and preserves unavailable
         members: [{ userId: 'private', fullName: 'Private Student' }],
     });
     assert.equal(mapped.id, '7');
-    assert.equal(mapped.destination, '/v2/clubs/F-CODE');
+    assert.equal(mapped.destination, '/clubs/F-CODE');
     assert.equal(mapped.category, 'Công nghệ');
     assert.equal(mapped.logoUrl, 'https://cdn.example.edu/f-code.png');
     assert.equal(mapped.hasRecruitmentStatus, false);
@@ -114,36 +114,21 @@ test('club directory pagination returns six clubs per page and clamps invalid pa
     assert.equal(paginateClubDirectory(entries, 1, 12).items.length, 12);
 });
 
-test('production V2 modules do not import demo state and demo links stay under /v2/demo', () => {
+test('ClubHub routes and discovery have no demo entry points', () => {
     const productionFiles = [
         'discovery-page/DiscoveryPage.jsx',
         'all-clubs-page/AllClubsPage.jsx',
         'club-detail-page/ClubDetailPage.jsx',
+        'V2App.jsx',
     ];
     for (const file of productionFiles) {
         const source = readFileSync(new URL(file, import.meta.url), 'utf8');
-        assert.doesNotMatch(source, /DemoContext|\.\/model|UI LAB/);
-    }
-    for (const file of [
-        'DemoApp.jsx',
-        'Discovery.jsx',
-        'club-workspace/Workspace.jsx',
-        'profile-page/Profile.jsx',
-        'ui.jsx',
-    ]) {
-        const source = readFileSync(new URL(file, import.meta.url), 'utf8');
-        const paths = source.match(/\/v2[^'"`\s}]*/g) || [];
-        assert.equal(
-            paths.every((path) => path.startsWith('/v2/demo')),
-            true,
-            `${file} contains production V2 path`,
-        );
+        assert.doesNotMatch(source, /DemoContext|DemoApp|\.\/model|UI LAB|\/v2\/demo|ClubGovernancePreview/);
     }
 });
 
-test('production routing isolates demo, all-clubs, and club-detail pages', () => {
+test('production routing has dedicated all-clubs and club-detail pages', () => {
     const routes = readFileSync(new URL('V2App.jsx', import.meta.url), 'utf8');
-    assert.match(routes, /path="demo\/\*"/);
     assert.match(routes, /<Route index element={<DiscoverPage/);
     assert.match(routes, /path="clubs"/);
     assert.match(routes, /path="my-clubs"/);
@@ -172,21 +157,21 @@ test('production left rail is V2-local, production-routed, and accessible', () =
     );
 
     assert.match(app, /import LeftRail from '..\/..\/components\/v2\/common\/leftrail\/LeftRail'/);
-    assert.match(rail, /to="\/v2"/);
-    assert.match(rail, /'\/v2\/clubs'/);
+    assert.match(rail, /to="\/"/);
+    assert.match(rail, /'\/clubs'/);
     assert.match(accountSection, /useHeaderNotifications/);
     assert.match(rail, /aria-expanded/);
     assert.match(accountSection, /aria-controls="v2-rail-notification-popover"/);
     assert.match(rail, /Của tôi/);
     assert.match(rail, /Lịch trình/);
-    assert.match(rail, /'\/v2\/my-clubs'/);
-    assert.match(rail, /'\/v2\/my-schedule'/);
+    assert.match(rail, /'\/my-clubs'/);
+    assert.match(rail, /'\/my-schedule'/);
     assert.match(rail, /aria-controls="v2-left-rail-personal-nav"/);
     assert.match(accountSection, /event\.key === 'Escape'/);
     assert.match(accountSection, /<NotificationPopover/);
     const notificationPanel = readFileSync(new URL('../../components/v2/common/leftrail/NotificationPopover.jsx', import.meta.url), 'utf8');
     assert.match(notificationPanel, /aria-label="Đóng thông báo"/);
-    assert.match(rail, /onLogout/);
+    assert.match(accountSection, /navigate\('\/logout'\)/);
     assert.doesNotMatch(rail, /DemoContext|NotificationContext|fixture|\/v2\/demo/);
     assert.doesNotMatch(rail, /className="[^"]*dx-/);
     assert.match(rail, /className="v2-left-rail"/);
@@ -220,7 +205,7 @@ test('production Discover composes the complete discovery layout', () => {
     assert.match(layout, /failedUrl === club\.logoUrl/);
     assert.match(layout, /onError/);
     assert.match(layout, /return <ClubArt club={club} hero={hero} \/>/);
-    assert.match(layout, /to="\/v2\/clubs"/);
+    assert.match(layout, /to="\/clubs"/);
     for (const className of [
         'v2-discovery-hero',
         'v2-discovery-strip',

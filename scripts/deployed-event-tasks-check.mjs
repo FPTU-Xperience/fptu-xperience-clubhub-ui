@@ -153,7 +153,7 @@ try {
             }
             return send({ items: [], page: 1, total: 0, totalItems: 0, totalPages: 0 });
         });
-        await page.goto(base + '/v2/my-clubs/TEST/quests', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/my-clubs/TEST/quests', { waitUntil: 'domcontentloaded' });
         await page.getByRole('button', { name: 'Tất cả (2)', exact: true }).waitFor();
         assert.equal(await page.locator('.v2-club-recruitment-list > button').count(), 2);
         assert.deepEqual([...new Set(staffingReads)].sort(), [4, 5]);

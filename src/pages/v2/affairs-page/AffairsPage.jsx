@@ -18,7 +18,7 @@ const sections = {
         description: 'Quan sát các hoạt động do nhà trường tổ chức và nội dung hiển thị cho sinh viên.',
         emptyTitle: 'Hoạt động cấp trường chưa khả dụng',
         emptyDescription: 'Hiện chưa thể hiển thị riêng danh sách hoạt động cấp trường.',
-        link: '/v2/activities',
+        link: '/activities',
         linkLabel: 'Xem tất cả hoạt động',
     },
     rewards: {

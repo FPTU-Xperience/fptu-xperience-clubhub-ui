@@ -58,7 +58,7 @@ export default function ActivityHandoverInbox({ clubId, clubCode, onSaved }) {
                         </>
                     ) : (
                         <>
-                            <Link to={`/v2/my-clubs/${encodeURIComponent(clubCode)}/activities/${row.id}`}>Mở hoạt động</Link>
+                            <Link to={`/my-clubs/${encodeURIComponent(clubCode)}/activities/${row.id}`}>Mở hoạt động</Link>
                             <form key={row.version} onSubmit={(event) => {
                                 event.preventDefault();
                                 const form = new FormData(event.currentTarget);

@@ -451,7 +451,7 @@ export default function ProfilePage({ user, sessionKey, api, profileImages, prof
                                 {shared ? (
                                     'Lịch sử riêng tư được ẩn trong bản chia sẻ.'
                                 ) : (
-                                    <Link to="/v2/personal-experience">
+                                    <Link to="/personal-experience">
                                         Xem trải nghiệm và minh chứng cá nhân từ hệ thống
                                     </Link>
                                 )}

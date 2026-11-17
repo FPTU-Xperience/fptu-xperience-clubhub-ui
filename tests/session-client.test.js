@@ -21,7 +21,7 @@ test('downstream 401 after a successful refresh does not log out an identity sti
     });
     client.save(credentials('old'));
     const visited = [];
-    const stop = watchSessionRedirect(client, { destination: '/v2', location: { replace: url => visited.push(url) } });
+    const stop = watchSessionRedirect(client, { destination: '/', location: { replace: url => visited.push(url) } });
     const result = await client.authFetch('https://api.test/api/users/me/profile');
     assert.equal(result.status, 401);
     assert.equal(client.read().accessToken, 'access-new');
@@ -249,10 +249,10 @@ test('stale legacy tokens and an old atomic record cannot revive the logout tomb
 test('manual session clearing redirects, but initial anonymous state does not navigate', () => {
   const { client } = fixture(async () => response(204));
   const visited = [];
-  const stop = watchSessionRedirect(client, { destination: '/v2', location: { replace: path => visited.push(path) } });
+  const stop = watchSessionRedirect(client, { destination: '/', location: { replace: path => visited.push(path) } });
   client.clear(); assert.deepEqual(visited, []);
   client.save(credentials('a')); client.clear();
-  assert.deepEqual(visited, ['/v2']); stop();
+  assert.deepEqual(visited, ['/']); stop();
 });
 
 test('initiating logout completes server revocation before redirecting to ClubHub /v2', async () => {
@@ -281,7 +281,7 @@ test('expired session is detected on the next API call, signals once and waits f
   const { client } = fixture(async () => { requests++; return response(401); });
   client.save(credentials('idle'));
   const visited = [];
-  const stopRedirect = watchSessionRedirect(client, { destination: '/v2', location: { replace: path => visited.push(path) } });
+  const stopRedirect = watchSessionRedirect(client, { destination: '/', location: { replace: path => visited.push(path) } });
   const stop = client.subscribe(() => { if (client.isExpired()) signals++; });
   assert.equal(requests, 0);
   await assert.rejects(client.authFetch('/protected'));

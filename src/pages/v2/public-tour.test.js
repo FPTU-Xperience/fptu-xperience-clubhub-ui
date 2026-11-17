@@ -5,7 +5,7 @@ import { publicGuidePlan } from '../../components/guided-help/public-guide-plan.
 import { isGuideTargetPainted, isGuideTargetVisible } from '../../components/guided-help/guide-model.js';
 
 function fixture(waitForTarget = async () => true) {
-    let route = '/v2/profile?tab=settings';
+    let route = '/profile?tab=settings';
     let config,
         shown = [],
         visits = [],
@@ -14,8 +14,8 @@ function fixture(waitForTarget = async () => true) {
     const tour = createPublicTour({
         plan: [
             { path: route, popover: { title: 'Intro' } },
-            { path: '/v2/clubs', element: '.clubs' },
-            { path: '/v2/activities', element: '.activities' },
+            { path: '/clubs', element: '.clubs' },
+            { path: '/activities', element: '.activities' },
         ],
         driver: (options) => {
             config = options;
@@ -63,13 +63,13 @@ test('next and previous navigate across pages and closing restores the exact ori
     await f.config.onPrevClick();
     assert.deepEqual(f.stopped, []);
     await f.config.onNextClick();
-    assert.equal(f.route(), '/v2/clubs');
+    assert.equal(f.route(), '/clubs');
     await f.config.onNextClick();
-    assert.equal(f.route(), '/v2/activities');
+    assert.equal(f.route(), '/activities');
     await f.config.onPrevClick();
-    assert.equal(f.route(), '/v2/clubs');
+    assert.equal(f.route(), '/clubs');
     f.config.onDestroyStarted();
-    assert.equal(f.route(), '/v2/profile?tab=settings');
+    assert.equal(f.route(), '/profile?tab=settings');
     assert.ok(f.visits.every((item) => item.replace));
     assert.deepEqual(f.stopped, [true]);
 });
@@ -97,7 +97,7 @@ test('missing targets are skipped and stale waits cannot move the tour after clo
 test('manual navigation cancels without redirecting the user back', async () => {
     const f = fixture();
     await f.tour.start();
-    f.tour.routeChanged('/v2/personal-experience');
+    f.tour.routeChanged('/personal-experience');
     await f.config.onNextClick();
     assert.equal(f.visits.length, 0);
     assert.deepEqual(f.stopped, [false]);
@@ -120,7 +120,7 @@ test('closing during cross-page loading prevents stale advancement and restores 
     complete(true);
     await pending;
     assert.deepEqual(f.shown, [0]);
-    assert.equal(f.route(), '/v2/profile?tab=settings');
+    assert.equal(f.route(), '/profile?tab=settings');
 });
 
 test('finishing the final tour step restores origin and leaves business actions disabled', async () => {
@@ -129,23 +129,23 @@ test('finishing the final tour step restores origin and leaves business actions 
     await f.config.onNextClick();
     await f.config.onNextClick();
     f.config.onDoneClick();
-    assert.equal(f.route(), '/v2/profile?tab=settings');
+    assert.equal(f.route(), '/profile?tab=settings');
     assert.equal(f.config.disableActiveInteraction, true);
     assert.deepEqual(f.stopped, [true]);
 });
 
 test('public plan covers main student tabs while staff only see applicable navigation', () => {
-    const studentPaths = new Set(publicGuidePlan('/v2').map((item) => item.path));
+    const studentPaths = new Set(publicGuidePlan('/').map((item) => item.path));
     for (const path of [
-        '/v2',
-        '/v2/clubs',
-        '/v2/activities',
-        '/v2/my-clubs',
-        '/v2/my-schedule',
-        '/v2/study-schedule',
-        '/v2/personal-experience',
-        '/v2/profile',
+        '/',
+        '/clubs',
+        '/activities',
+        '/my-clubs',
+        '/my-schedule',
+        '/study-schedule',
+        '/personal-experience',
+        '/profile',
     ])
         assert.ok(studentPaths.has(path));
-    assert.ok(!publicGuidePlan('/v2', false).some((item) => item.path === '/v2/my-clubs'));
+    assert.ok(!publicGuidePlan('/', false).some((item) => item.path === '/my-clubs'));
 });

@@ -9,7 +9,7 @@ const directory = path.join(os.tmpdir(), 'clubhub-personal-experience-qa');
 await fs.mkdir(directory, { recursive: true });
 await fs.writeFile(path.join(directory, 'certificate.pdf'), '%PDF-1.4\ncontrolled evidence fixture');
 const entry = `import React from 'react';import{createRoot}from'react-dom/client';import{BrowserRouter}from'react-router-dom';import Page from '/src/pages/v2/personal-experience/PersonalExperiencePage.jsx';import Rail from '/src/components/v2/common/leftrail/LeftRail.jsx';import{ThemeProvider}from'/src/context/ThemeContext.jsx';import api from '/src/services/api.js';import '/src/styles/index.scss';import '/src/pages/v2/V2App.scss';
-const mode=new URLSearchParams(location.search).get('qa');history.replaceState(null,'','/v2/personal-experience'+location.search);window.__calls=[];localStorage.setItem('accessToken','test-token');
+const mode=new URLSearchParams(location.search).get('qa');history.replaceState(null,'','/personal-experience'+location.search);window.__calls=[];localStorage.setItem('accessToken','test-token');
 const user={id:1,name:'Nguyễn An',email:'an@example.test',roles:['STUDENT']};
 const initial={id:'12345678-1234-1234-1234-123456789abc',userId:1,title:'Chứng chỉ tiếng Anh quốc tế',status:'APPROVED',sourceType:'EXTERNAL',isAuthoritative:true,rawPoints:14,semesterId:'FALL2026',occurredAt:'2026-10-10T00:00:00Z',version:'12345678-1234-1234-1234-123456789abc',evidenceRefs:['eeeeeeee-1111-2222-3333-444444444444']};window.__rows=mode==='empty'?[]:[initial];
 window.fetch=async(url,options={})=>{const pathname=new URL(url,location.origin).pathname;const body=options.body;window.__calls.push({pathname,method:options.method||'GET',key:options.headers?.['Idempotency-Key'],body:typeof body==='string'?JSON.parse(body):body instanceof FormData?{fileName:body.get('file')?.name}:null});const json=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
@@ -164,7 +164,7 @@ try {
     await expect('Chứng chỉ tiếng Anh quốc tế');
     assert.equal(
         await evaluate(
-            `document.querySelector('#v2-left-rail-personal-nav a[href="/v2/personal-experience"]').textContent.trim()`,
+            `document.querySelector('#v2-left-rail-personal-nav a[href="/personal-experience"]').textContent.trim()`,
         ),
         'Trải nghiệm cá nhân',
     );

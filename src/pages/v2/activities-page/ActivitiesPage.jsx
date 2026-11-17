@@ -77,7 +77,7 @@ export default function ActivitiesPage({ api, sessionKey }) {
                                         <ActivityCard
                                             activity={item}
                                             interactionApi={api}
-                                            onOpen={(activity) => navigate(`/v2/activities/${activity.id}${window.location.search}`)}
+                                            onOpen={(activity) => navigate(`/activities/${activity.id}${window.location.search}`)}
                                         />
                                     </div>
                                 ))}

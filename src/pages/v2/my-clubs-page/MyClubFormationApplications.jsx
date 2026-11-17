@@ -61,7 +61,7 @@ export default function MyClubFormationApplications({ api, userId, revision, onR
                         {row.status === 'Approved' && (
                             <>
                                 <p>Chủ nhiệm: {row.approvedManagerName || 'Xem trong CLB'}</p>
-                                <Link className="v2-button" to={`/v2/my-clubs/${encodeURIComponent(row.code)}`}>
+                                <Link className="v2-button" to={`/my-clubs/${encodeURIComponent(row.code)}`}>
                                     Vào Club Workspace
                                 </Link>
                             </>

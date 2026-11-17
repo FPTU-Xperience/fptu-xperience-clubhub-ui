@@ -29,7 +29,7 @@ try {
         '/src/pages/v2/club-workspace-page/tabs/members/ClubRolesInfo.jsx',
     );
     const { default: EditProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-page/EditProfileModal.jsx');
-    const { createMockProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-data.js');
+    const { createInitialProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-data.js');
     const { default: CoverArt } = await vite.ssrLoadModule('/src/pages/v2/profile-page/ProfileCoverArt.jsx');
     const { default: CoverModal } = await vite.ssrLoadModule('/src/pages/v2/profile-page/ProfileCoverModal.jsx');
     const { AuthProvider } = await vite.ssrLoadModule('/src/context/AuthContext.jsx');
@@ -53,13 +53,13 @@ try {
         const publicCard = renderToStaticMarkup(
             React.createElement(
                 StaticRouter,
-                { location: '/v2' },
+                { location: '/' },
                 React.createElement(ClubCard, {
                     club: {
                         id: '7',
                         name: 'Club',
                         tags: [],
-                        destination: '/v2/clubs/C7',
+                        destination: '/clubs/C7',
                         logoUrl: 'https://example.com/saved-logo.png',
                         coverImageUrl: 'https://example.com/saved-cover.png',
                     },
@@ -77,16 +77,16 @@ try {
             onOpen: noop,
         });
         assert.ok(publicActivity.includes('saved-activity.png'));
-        const myClub = renderToStaticMarkup(React.createElement(StaticRouter, { location: '/v2/my-clubs' },
+        const myClub = renderToStaticMarkup(React.createElement(StaticRouter, { location: '/my-clubs' },
             React.createElement(MyClubCard, {
                 club: { clubId: '7', clubCode: 'C7', name: 'My club', role: 'MANAGER', pendingApplications: null,
-                    workspacePath: '/v2/my-clubs/C7', logoUrl: 'https://example.com/my-logo.png', coverImageUrl: 'https://example.com/my-cover.png' },
+                    workspacePath: '/my-clubs/C7', logoUrl: 'https://example.com/my-logo.png', coverImageUrl: 'https://example.com/my-cover.png' },
                 pinned: true, onTogglePin: noop,
             })));
         assert.equal((myClub.match(/class="v2-club-card-logo /g) || []).length, 1);
         assert.equal((myClub.match(/src="https:\/\/example.com\/my-logo.png"/g) || []).length, 1);
         assert.ok(myClub.includes('my-cover.png') && myClub.includes('v2-my-club-identity'));
-        assert.ok(myClub.includes('href="/v2/my-clubs/C7"') && myClub.includes('aria-pressed="true"'));
+        assert.ok(myClub.includes('href="/my-clubs/C7"') && myClub.includes('aria-pressed="true"'));
         const previousWindow = globalThis.window,
             originalRequest = clientApi.request;
         const events = [];
@@ -111,9 +111,9 @@ try {
             await clientApi.updateClub(7, { logoUrl: 'https://example.com/latest-logo.png' });
             await clientApi.updateClubPublicImages(7, { coverImageUrl: 'https://example.com/latest-cover.png' });
             await clientApi.updateActivity(1, { coverImageUrl: 'https://example.com/latest-activity.png' });
-            const staleCard = renderToStaticMarkup(React.createElement(StaticRouter, { location: '/v2' },
+            const staleCard = renderToStaticMarkup(React.createElement(StaticRouter, { location: '/' },
                 React.createElement(EntityMediaProvider, { api: clientApi }, React.createElement(ClubCard, {
-                    club: { id: '7', name: 'Club', tags: [], destination: '/v2/clubs/C7', logoUrl: 'old-logo', coverImageUrl: 'old-cover' },
+                    club: { id: '7', name: 'Club', tags: [], destination: '/clubs/C7', logoUrl: 'old-logo', coverImageUrl: 'old-cover' },
                 }))));
             assert.ok(staleCard.includes('latest-logo.png') && staleCard.includes('latest-cover.png'));
             assert.equal(staleCard.includes('src="old-'), false);
@@ -143,7 +143,7 @@ try {
         assert.ok(activityModal.includes('1200 × 500px (12:5)') && activityModal.includes('aspect-ratio:1200 / 500'));
     }
     const profileEditor = render(EditProfile, {
-        snapshot: createMockProfile({ id: 1, name: 'Student' }),
+        snapshot: createInitialProfile({ id: 1, name: 'Student' }),
         onClose: noop,
         onPreview: noop,
     });
@@ -156,10 +156,10 @@ try {
     const coverModal = renderToStaticMarkup(
         React.createElement(
             StaticRouter,
-            { location: '/v2/profile' },
+            { location: '/profile' },
             React.createElement(CoverModal, {
                 user: { id: 1 },
-                profile: createMockProfile({ id: 1, name: 'Student' }).profile,
+                profile: createInitialProfile({ id: 1, name: 'Student' }).profile,
                 savedImage: '',
                 onClose: noop,
                 onSave: noop,
@@ -203,7 +203,7 @@ try {
         renderToStaticMarkup(
             React.createElement(
                 StaticRouter,
-                { location: '/v2/my-clubs/C7/members' },
+                { location: '/my-clubs/C7/members' },
                 React.createElement(AuthProvider, null, React.createElement(Members, { manager, dashboard, workspace: { clubId: 7 } })),
             ),
         );

@@ -4,7 +4,7 @@ import test from 'node:test';
 import { formatBirthDate, parseBirthDate } from './profile-date.js';
 import {
     PROFILE_STORAGE_VERSION,
-    createMockProfile,
+    createInitialProfile,
     mapProfileMemberships,
     loadProfileMemberships,
     profileStorageKey,
@@ -89,17 +89,17 @@ test('profile storage requires an authenticated identity and isolates accounts',
     assert.notEqual(profileStorageKey(studentA), profileStorageKey(studentB));
 });
 
-test('mock profile seeds representative data without mutating authenticated identity', () => {
+test('initial profile uses the authenticated identity and empty experience fields', () => {
     const before = structuredClone(studentA);
-    const profile = createMockProfile(studentA);
+    const profile = createInitialProfile(studentA);
 
     assert.deepEqual(studentA, before);
     assert.equal(profile.profile.displayName, studentA.name);
     assert.equal(profile.profile.initials, 'NA');
-    assert.ok(profile.participations.length > 0);
-    assert.ok(profile.evidence.length > 0);
-    assert.equal(profile.summary.clubCount, profile.participations.length);
-    assert.ok(profile.terms.some((term) => term.id === profile.evidence[0].term));
+    assert.deepEqual(profile.participations, []);
+    assert.deepEqual(profile.evidence, []);
+    assert.equal(profile.summary.clubCount, null);
+    assert.deepEqual(profile.terms, []);
 });
 
 test('profile records round-trip per account and returned snapshots are cloned', () => {
@@ -208,14 +208,14 @@ test('academic fields persist per account, support clearing and keep student cod
 
 test('shared preview removes private fields without mutating or persisting the profile', () => {
     const storage = memoryStorage();
-    const privateProfile = saveProfile(studentA, { displayName: 'Anh profile' }, storage);
+    const privateProfile = saveProfile(studentA, { displayName: 'Anh profile', personal: { address: 'Đà Nẵng' } }, storage);
     const shared = toSharedProfile(privateProfile);
 
     assert.equal(shared.academic.studentCode, '');
     assert.equal(shared.summary.recognizedContributionTotal, null);
     assert.deepEqual(shared.evidence, []);
     assert.equal('personal' in shared, false);
-    assert.equal(privateProfile.evidence.length > 0, true);
+    assert.equal(privateProfile.personal.address, 'Đà Nẵng');
     assert.equal(readProfile(studentA, storage).profile.displayName, 'Anh profile');
 });
 
@@ -276,7 +276,7 @@ test('production profile sources stay isolated from demo dependencies', () => {
         assert.equal(source.includes('DemoContext'), false);
         assert.equal(source.includes("from './model"), false);
         assert.equal(source.includes("from './ui"), false);
-        assert.equal(source.includes('/v2/demo'), false);
+        assert.equal(source.includes('/demo'), false);
         assert.equal(source.includes('demo.scss'), false);
     }
 });

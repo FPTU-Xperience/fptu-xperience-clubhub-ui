@@ -4,6 +4,8 @@ export const EXPERIENCE_TAGS = [
     ['Entrepreneurship', 'Khởi nghiệp'], ['RealWorldWork', 'Thực chiến dự án (+1)'],
 ];
 
+export const ACTIVITY_TYPES = EXPERIENCE_TAGS.filter(([type]) => type !== 'RealWorldWork');
+
 export const ACTIVITY_TAG_CATEGORIES = [
     ['workshop', 'Workshop'], ['competition', 'Cuộc thi'], ['talk', 'Hội thảo'],
     ['volunteering', 'Tình nguyện'], ['networking', 'Giao lưu'], ['performance', 'Biểu diễn'],

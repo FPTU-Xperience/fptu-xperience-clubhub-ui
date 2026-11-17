@@ -6,9 +6,9 @@ export function isAffairsViewer(user) {
 }
 
 export const affairsNavigation = [
-    ['/v2/ctsv/activities', 'Hoạt động cấp trường'],
-    ['/v2/ctsv/rewards', 'Phần thưởng cấp trường'],
-    ['/v2/ctsv/admin', 'Trang quản trị'],
+    ['/ctsv/activities', 'Hoạt động cấp trường'],
+    ['/ctsv/rewards', 'Phần thưởng cấp trường'],
+    ['/ctsv/admin', 'Trang quản trị'],
 ];
 
 export function adminAppUrl(value) {

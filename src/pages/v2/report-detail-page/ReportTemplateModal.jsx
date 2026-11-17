@@ -8,7 +8,7 @@ import { reportDate } from './report-detail-data';
 import './ReportTemplateModal.scss';
 
 const icons = [ClipboardCheck, CalendarPlus, Flag, CalendarCheck2];
-export default function ReportTemplateModal({ api, workspace, semester, onClose, basePath = '/v2/reports' }) {
+export default function ReportTemplateModal({ api, workspace, semester, onClose, basePath = '/reports' }) {
     const navigate = useNavigate();
     const [selectingActivity, setSelectingActivity] = useState(false);
     const [selectedId, setSelectedId] = useState('');

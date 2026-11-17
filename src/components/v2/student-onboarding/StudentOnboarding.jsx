@@ -74,7 +74,7 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
                 api,
             );
             onComplete(saved);
-            navigate('/v2', { replace: true });
+            navigate('/', { replace: true });
         } catch (saveError) {
             setError(saveError.message);
             if (saveError.status === 409) setError('Hồ sơ đã thay đổi. Tải lại để xem dữ liệu mới trước khi lưu.');
@@ -86,7 +86,7 @@ export default function StudentOnboarding({ user, snapshot, api, onComplete, onR
     return (
         <div className="v2-access-shell v2-access-page v2-student-onboarding">
             <header className="v2-onboarding-header">
-                <a className="v2-access-brand" href="/v2">
+                <a className="v2-access-brand" href="/">
                     <img src="/fptux.png" alt="" />
                     <span>
                         clubhub<span className="v2-access-brand-dot">.</span>

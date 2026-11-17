@@ -2,14 +2,7 @@ import SessionExpiryGuard from './components/auth/SessionExpiryGuard';
 import LogoutPage from './pages/LogoutPage';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import App from './App';
-import LegacyReportEditorRedirect from './pages/CreateReportPage';
-import LegacyReportDetailRedirect from './pages/ReportDetailPage';
-import { AuthProvider } from './context/AuthContext';
-import { NotificationProvider } from './context/NotificationContext';
-import { ToastProvider } from './context/ToastContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './styles/index.scss';
 
 const V2App = lazy(() => import('./pages/v2/V2App'));
@@ -26,19 +19,10 @@ if (import.meta.hot) {
     import.meta.hot.accept(() => window.location.reload());
 }
 
-// The v2 branch owns its auth boundary; keep notification polling and other legacy providers out of it.
-function ExistingApplication() {
-    return (
-        <AuthProvider>
-            <ThemeProvider>
-                <NotificationProvider>
-                    <ToastProvider>
-                        <App />
-                    </ToastProvider>
-                </NotificationProvider>
-            </ThemeProvider>
-        </AuthProvider>
-    );
+function RedirectLegacyPath() {
+    const { pathname, search, hash } = useLocation();
+    const target = pathname.replace(/^\/v2(?:\/+|$)/i, '/');
+    return <Navigate to={`${target}${search}${hash}`} replace />;
 }
 
 function renderApplication() {
@@ -46,7 +30,7 @@ function renderApplication() {
     runtime.root.render(
     <React.StrictMode>
         <BrowserRouter>
-            <SessionExpiryGuard session={session} loginTo="/v2">
+            <SessionExpiryGuard session={session} loginTo="/">
             <Suspense
                 fallback={
                     <div role="status" style={{ padding: 40 }}>
@@ -56,11 +40,9 @@ function renderApplication() {
             >
                 <Routes>
                     <Route path="/logout" element={<LogoutPage />} />
-                    <Route path="/v2/*" element={<V2App />} />
-                    <Route path="/reports/create" element={<LegacyReportEditorRedirect />} />
-                    <Route path="/reports/:id/edit" element={<LegacyReportEditorRedirect />} />
-                    <Route path="/reports/:id" element={<LegacyReportDetailRedirect />} />
-                    <Route path="/*" element={<ExistingApplication />} />
+                    <Route path="/v2/*" element={<RedirectLegacyPath />} />
+                    <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                    <Route path="/*" element={<V2App />} />
                 </Routes>
             </Suspense>
             </SessionExpiryGuard>
@@ -91,7 +73,7 @@ async function start() {
         }
     }
     if (!isCurrent()) return;
-    const stopRedirect = watchSessionRedirect(session, { destination: '/v2' });
+    const stopRedirect = watchSessionRedirect(session, { destination: '/' });
     runtime.stop = () => { stopRedirect(); };
     renderApplication();
 }

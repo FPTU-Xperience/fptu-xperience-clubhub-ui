@@ -414,7 +414,7 @@ try {
                 totalItems: 0,
             });
         });
-        await page.goto(base + '/v2/my-clubs/TEST/members?tab=governance', {
+        await page.goto(base + '/my-clubs/TEST/members?tab=governance', {
             waitUntil: 'domcontentloaded',
         });
         await page.getByRole('button', { name: 'Thêm người', exact: true }).click();
@@ -441,7 +441,7 @@ try {
 
         assert.equal(writes, 2);
         actor = 104;
-        await page.goto(base + '/v2/my-clubs/TEST/members?tab=governance', {
+        await page.goto(base + '/my-clubs/TEST/members?tab=governance', {
             waitUntil: 'domcontentloaded',
         });
         await page.getByRole('heading', { name: 'Ban quản lý', exact: true }).waitFor();

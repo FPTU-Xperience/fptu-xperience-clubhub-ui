@@ -121,7 +121,7 @@ export default function WorkspaceLeftRail({
     }, [switchOpen]);
     return (
         <aside className="v2-workspace-left-rail" aria-label={`Điều hướng ${workspace.name}`}>
-            <Link to="/v2" className="v2-workspace-left-rail-brand">
+            <Link to="/" className="v2-workspace-left-rail-brand">
                 <img src={`${import.meta.env.BASE_URL}fptux.png`} alt="FPTU Xperience" />
                 <span>
                     <small className="v2-workspace-left-rail-brand-eyebrow">FPTU Xperience</small>
@@ -201,7 +201,7 @@ export default function WorkspaceLeftRail({
                     )}
                     <Link
                         className="v2-workspace-left-rail-back"
-                        to={observation ? '/v2/clubs' : '/v2/my-clubs'}
+                        to={observation ? '/clubs' : '/my-clubs'}
                         title={observation ? 'Tất cả câu lạc bộ' : 'CLB của tôi'}
                         aria-label={observation ? 'Tất cả câu lạc bộ' : 'CLB của tôi'}
                     >

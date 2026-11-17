@@ -44,7 +44,7 @@ try {
       if (request.method()!=='GET') return route.abort();
       return ok({items:[],total:0,page:1,totalPages:0});
     });
-    await page.goto(base + '/v2/activities/4');
+    await page.goto(base + '/activities/4');
     const heading = page.locator('.v2-activity-profile-identity h1');
     try {
       await heading.waitFor({timeout:25000});
@@ -91,13 +91,13 @@ try {
         assert.ok(gap >= 8 && gap <= 16, side + ' registration spacing must be compact: ' + gap);
       console.log('ACTIVITY_SPACING_OK',JSON.stringify({width,internal,canRegister,...spacing}));
       await page.screenshot({path:'TestResults/deployed-registration/'+internal+'-'+canRegister+'-'+width+'.png',fullPage:true});
-      await page.goto(base + '/v2/my-schedule');
+      await page.goto(base + '/my-schedule');
       if(canRegister) await page.getByText('Software Engineering Weekly Lab',{exact:true}).waitFor();
       else await page.getByText('Lịch trình đang trống',{exact:true}).waitFor();
-      await page.goto(base + '/v2/activities');
+      await page.goto(base + '/activities');
       await page.locator('.v2-event-grid').waitFor();
       assert.equal(await page.getByRole('button',{name:'Đăng ký tham gia',exact:true}).count(),0,'Activity list has detail links only');
-      console.log('DEPLOYED_ACTIVITY_CTA_OK',JSON.stringify({path:'/v2/activities/4',internal,canRegister,width,submitted}));
+      console.log('DEPLOYED_ACTIVITY_CTA_OK',JSON.stringify({path:'/activities/4',internal,canRegister,width,submitted}));
     } catch(error) {
       console.error('INTERCEPTED_API_PATHS',JSON.stringify(apiPaths));
       console.error('VISIBLE_PAGE_TEXT',(await page.locator('body').innerText()).slice(0,3500));

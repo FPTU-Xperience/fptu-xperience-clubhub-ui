@@ -10,7 +10,7 @@ try {
         '/src/pages/v2/club-workspace-page/tabs/activities/ActivityResourceEditor.jsx',
     );
     const { default: ProfileEditor } = await vite.ssrLoadModule('/src/pages/v2/profile-page/EditProfileModal.jsx');
-    const { createMockProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-data.js');
+    const { createInitialProfile } = await vite.ssrLoadModule('/src/pages/v2/profile-data.js');
     const { clubSchedulePayload, persistedClubScheduleLabel } = await vite.ssrLoadModule(
         '/src/pages/v2/club-workspace-page/tabs/club-page/club-schedule-data.js',
     );
@@ -28,11 +28,14 @@ try {
             busy: false,
         }),
     );
-    assert.match(html, /type="file"[^>]*disabled/);
-    assert.match(html, /<button[^>]*(?<!disabled)>[\s\S]*?Thêm liên kết/);
+    const buttons = html.match(/<button\b[^>]*>[\s\S]*?<\/button>/g) || [];
+    assert.match(buttons.find((button) => button.includes('Thêm media')) || '', /^<button\b[^>]*\bdisabled\b/);
+    const linkButton = buttons.find((button) => button.includes('Thêm liên kết'));
+    assert.ok(linkButton);
+    assert.doesNotMatch(linkButton, /^<button\b[^>]*\bdisabled\b/);
     const profile = renderToStaticMarkup(
         React.createElement(ProfileEditor, {
-            snapshot: createMockProfile({ id: 4, fullName: 'Student' }),
+            snapshot: createInitialProfile({ id: 4, fullName: 'Student' }),
             onClose: noop,
             onPreview: noop,
         }),
@@ -55,7 +58,9 @@ try {
     const captured = [];
     api.request = async (path, options) => {
         captured.push([path, options]);
-        return { id: 4, version: 'server-version' };
+        if (!options?.body) return [];
+        const { coverImageUrl, logoUrl } = JSON.parse(options.body);
+        return { id: 4, version: 'server-version', coverImageUrl, logoUrl };
     };
     const previousWindow = globalThis.window;
     globalThis.window = { dispatchEvent: noop, localStorage: { setItem: noop } };

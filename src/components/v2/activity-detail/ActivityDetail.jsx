@@ -43,11 +43,11 @@ export default function ActivityDetail({ activity: input, onClose, manager }) {
             <ActivityAttendance key={activity.id} activity={activity} manager={manager} />
             <div className="v2-activity-actions">
                 {activity.clubCode && (
-                    <Link className="v2-button" to={`/v2/clubs/${encodeURIComponent(activity.clubCode)}`}>
+                    <Link className="v2-button" to={`/clubs/${encodeURIComponent(activity.clubCode)}`}>
                         Đến trang CLB
                     </Link>
                 )}
-                <Link className="v2-button primary" to={`/v2/activities/${activity.id}`} state={{ activity }}>
+                <Link className="v2-button primary" to={`/activities/${activity.id}`} state={{ activity }}>
                     Xem chi tiết
                 </Link>
             </div>

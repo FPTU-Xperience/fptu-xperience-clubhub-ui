@@ -11,7 +11,6 @@ function productionSources(file = entry, sources = new Map()) {
     if (sources.has(file)) return sources;
     const source = readFileSync(file, 'utf8');
     sources.set(file, source);
-    // Follow static imports only: the demo is a separately loaded route.
     for (const match of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+)['"]/g)) {
         const base = path.resolve(path.dirname(file), match[1]);
         const dependency = [base, `${base}.jsx`, `${base}.js`].find(existsSync);
@@ -26,13 +25,10 @@ test('production V2 imports component styles without demo classes or stylesheet 
         assert.doesNotMatch(source, /\bdx-/, `${path.basename(file)} still depends on demo classes`);
         assert.doesNotMatch(
             source,
-            /demo\.scss|from ['"].*DemoApp/,
-            `${path.basename(file)} loads demo styles eagerly`,
+            /demo\.scss|DemoApp/,
+            `${path.basename(file)} loads demo code`,
         );
     }
-    assert.match(sources.get(entry), /lazy\(\(\) => import\('\.\/DemoApp'\)\)/);
-    const demo = readFileSync(new URL('./DemoApp.jsx', import.meta.url), 'utf8');
-    assert.match(demo, /import '\.\/demo\.scss'/);
 });
 
 test('migrated component classes have styles and use defined V2 color tokens', () => {

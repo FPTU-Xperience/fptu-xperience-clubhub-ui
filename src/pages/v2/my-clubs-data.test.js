@@ -27,7 +27,7 @@ test('selection maps only display-safe eligible roles and deduplicates cards', (
         ],
     });
     assert.equal(items.length, 2);
-    assert.equal(items[0].workspacePath, '/v2/my-clubs/F-CODE');
+    assert.equal(items[0].workspacePath, '/my-clubs/F-CODE');
     assert.equal(items[0].pendingApplications, undefined);
     assert.equal('members' in items[0], false);
     assert.equal(items[1].pendingApplications, null);

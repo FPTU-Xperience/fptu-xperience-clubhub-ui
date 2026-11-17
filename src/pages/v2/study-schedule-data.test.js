@@ -84,7 +84,7 @@ test('production route and personal navigation own the study schedule without de
     const rail = readFileSync(new URL('../../components/v2/common/leftrail/LeftRail.jsx', import.meta.url), 'utf8');
     const page = readFileSync(new URL('./personal-pages/StudySchedulePage.jsx', import.meta.url), 'utf8');
     assert.match(app, /path="study-schedule"/);
-    assert.match(rail, /'\/v2\/study-schedule', 'Lịch học'/);
+    assert.match(rail, /'\/study-schedule', 'Lịch học'/);
     assert.match(page, /PersonalPageHeading/);
     assert.doesNotMatch(page, /DemoContext|\/v2\/demo/);
 });

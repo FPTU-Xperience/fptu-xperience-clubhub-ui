@@ -312,7 +312,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                                 {activity.isPublished === true && (
                                     <Link
                                         className="v2-button"
-                                        to={`/v2/activities/${activity.id}`}
+                                        to={`/activities/${activity.id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >

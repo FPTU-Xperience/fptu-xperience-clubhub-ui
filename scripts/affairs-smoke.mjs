@@ -34,7 +34,7 @@ try {
     const { default: AffairsPage, AffairsAccess } = await vite.ssrLoadModule(
         '/src/pages/v2/affairs-page/AffairsPage.jsx',
     );
-    const render = (element, location = '/v2/ctsv/clubs') =>
+    const render = (element, location = '/ctsv/clubs') =>
         renderToStaticMarkup(
             React.createElement(StaticRouter, { location }, React.createElement(ThemeProvider, null, element)),
         );
@@ -42,7 +42,7 @@ try {
     for (const role of ['ADMIN', 'SYSTEM_ADMIN', 'STUDENT_AFFAIRS_ADMIN', 'CLUB_MEMBER', 'CLUB_MANAGER']) {
         const user = { id: role, name: role, roles: [role] };
         const staff = ['ADMIN', 'SYSTEM_ADMIN', 'STUDENT_AFFAIRS_ADMIN'].includes(role);
-        const rail = render(React.createElement(LeftRail, { user }), '/v2/my-clubs');
+        const rail = render(React.createElement(LeftRail, { user }), '/my-clubs');
         for (const label of ['Khám phá', 'Câu lạc bộ', 'Hoạt động']) assert.ok(rail.includes(label));
         assert.equal(rail.includes('Công tác sinh viên'), staff);
         assert.equal(rail.includes('Của tôi'), !staff);
@@ -63,7 +63,7 @@ try {
                 null,
                 React.createElement(
                     Route,
-                    { path: '/v2/ctsv', element: React.createElement(AffairsAccess, { user }) },
+                    { path: '/ctsv', element: React.createElement(AffairsAccess, { user }) },
                     React.createElement(Route, {
                         path: 'clubs',
                         element: React.createElement('p', null, 'OBSERVATION_CONTENT'),
@@ -84,7 +84,7 @@ try {
         assert.equal(actions.includes('Nộp hồ sơ gia nhập'), !staff);
         if (staff) {
             assert.ok(actions.includes('/#/ctsv/clubs?club=12'));
-            assert.ok(actions.includes('/v2/ctsv/clubs/FPT-TECH/workspace'));
+            assert.ok(actions.includes('/ctsv/clubs/FPT-TECH/workspace'));
             assert.ok(!actions.includes('v2-button--primary'));
         }
     }
@@ -113,7 +113,7 @@ try {
                 },
             },
         }),
-        '/v2/ctsv/clubs/FPT-TECH/workspace',
+        '/ctsv/clubs/FPT-TECH/workspace',
     );
     assert.ok(workspace.includes('CTSV · Chỉ xem'));
     for (const forbidden of ['Tạo hoạt động', 'Quản lý trang CLB', 'CẦN XỬ LÝ', 'Chuyển câu lạc bộ']) {
@@ -139,7 +139,7 @@ try {
                     },
                 },
             }),
-            `/v2/ctsv/clubs/FPT-TECH/workspace${path ? '/' + path : ''}`,
+            `/ctsv/clubs/FPT-TECH/workspace${path ? '/' + path : ''}`,
         );
         for (const action of [
             'Tạo hoạt động',
@@ -165,7 +165,7 @@ try {
             viewer: { roles: ['CLUB_MEMBER'] },
         }),
     );
-    assert.ok(memberActions.includes('/v2/my-clubs/FPT-TECH'));
+    assert.ok(memberActions.includes('/my-clubs/FPT-TECH'));
     assert.ok(!memberActions.includes('Xem ở Admin'));
     for (const section of ['activities', 'rewards']) {
         const html = render(React.createElement(AffairsPage, { section }));

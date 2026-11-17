@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { DiscoveryTagFields } from '../../../components/v2/DiscoveryTagFields';
-import { tagDraft } from '../../../services/discovery-tags';
+import { ACTIVITY_TYPES, tagDraft } from '../../../services/discovery-tags';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CheckCircle2, Plus, Save, Send, Trash2 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
@@ -27,6 +27,7 @@ import {
     applicationXpLabel,
 } from '../../../services/activity-application-contract.js';
 import WorkspacePolicyStatus from '../../../components/v2/activity-detail/WorkspacePolicyStatus';
+import ApplicationVenuePicker from './ApplicationVenuePicker';
 
 const steps = ['Thông tin hoạt động', 'Action & dự toán Xperience Point', 'Phân công nhân sự', 'Kiểm tra & gửi duyệt'];
 function Field({ label, value, onChange, options, multiline, ...props }) {
@@ -87,6 +88,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
         ),
     );
     const [stage, setStage] = useState(0);
+    const [useCampusMap, setUseCampusMap] = useState(false);
     const [error, setError] = useState('');
     const [validationIssue, setValidationIssue] = useState(null);
     const formRef = useRef(null);
@@ -105,10 +107,12 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
     const pendingPayload = useRef('');
     const mounted = useRef(true);
     const access = clubAccess.find((item) => String(item.clubId) === String(draft.clubId));
+    const hostName = workspace?.name || access?.clubName;
+    const activityTypeLabel = ACTIVITY_TYPES.find(([type]) => type === draft.activityType)?.[1];
     const canUpdate = applicationPermission(access, 'activity.edit');
     const canEdit = requestedId ? canUpdate : applicationPermission(access, 'activity.create');
     const canSubmit = applicationPermission(access, 'activity.application.submit');
-    const backTo = base ? `${base}/activities` : '/v2/my-clubs';
+    const backTo = base ? `${base}/activities` : '/my-clubs';
     const total = applicationEstimate(draft);
     const submitted = receipt?.status === 'SUBMITTED';
     const resumeQuery = new URLSearchParams(location.search);
@@ -140,6 +144,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                     ...newApplication(value.clubId, value.period),
                     ...value,
                     staffing: value.staffing ?? [],
+                    activityType: value.activityType ?? '',
                     discoveryTagDraft: value.tagSelection ? tagDraft(value.tagSelection) : undefined,
                     startTime: localDate(value.startTimeUtc),
                     endTime: localDate(value.endTimeUtc),
@@ -154,6 +159,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 };
                 if (active) {
                     setDraft(restored);
+                    setUseCampusMap(Boolean(restored.venueIds?.length));
                     setReceipt(value);
                     savedPayload.current = JSON.stringify(applicationPayload(restored));
                 }
@@ -228,6 +234,11 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
         const member = staffingRoster?.find((row) => row.userId === Number(value) && row.assignmentKind === assignmentKind);
         if (!member) return;
         change('staffing', [...draft.staffing, { ...member, actionClientId: staffingAction(draft.actions, assignmentKind) }]);
+    };
+    const changeVenues = (venueIds, names) => {
+        setDraft((current) => ({ ...current, venueIds, location: names }));
+        setError('');
+        setValidationIssue(null);
     };
     const save = async (submit) => {
         if (lock.current || readOnly || !canEdit || (submit && !canSubmit)) return;
@@ -348,6 +359,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                         Xperience Point theo server: <strong>{applicationXpLabel(receipt)}</strong>. Hoạt động và tuyển
                         nhân sự chỉ được triển khai sau khi CTSV duyệt kế hoạch.
                     </p>
+                    {receipt.venueIds?.length > 0 && <p><strong>Phòng đề xuất</strong> · {receipt.location}</p>}
                     <p>
                         Khi hoạt động kết thúc, báo cáo được sinh từ dữ liệu thực hiện; CTSV duyệt lần hai trước khi cấp
                         điểm.
@@ -444,18 +456,29 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                 />
                             </div>
                             <p className="v2-report-editor-hint">Thời gian theo giờ Việt Nam (UTC+7).</p>
-                            <DiscoveryTagFields
+                            <Field label="Loại hoạt động *" name="activityType" value={draft.activityType}
+                                options={[[ '', 'Chọn loại hoạt động' ], ...ACTIVITY_TYPES]} required
+                                onChange={(value) => change('activityType', value)} />
+                            <p className="v2-report-editor-hint">XP được ghi vào trụ cột tương ứng sau khi duyệt tổng kết.</p>
+                            <DiscoveryTagFields customOnly automaticTags={[...new Set([activityTypeLabel, hostName].filter(Boolean))]}
                                 draft={draft.discoveryTagDraft ?? tagDraft()}
                                 onChange={(value) => change('discoveryTagDraft', value)}
-                                activity
                             />
-                            <Field
-                                label="Địa điểm *"
-                                name="location"
-                                value={draft.location}
-                                maxLength={250}
-                                onChange={(v) => change('location', v)}
-                            />
+                            <label className="v2-application-check v2-application-location-toggle">
+                                <input type="checkbox" name={useCampusMap ? 'location' : undefined} checked={useCampusMap}
+                                    onChange={(event) => {
+                                        setUseCampusMap(event.target.checked);
+                                        changeVenues([], '');
+                                    }} />
+                                Chọn phòng từ sơ đồ campus
+                            </label>
+                            {useCampusMap ? (
+                                <ApplicationVenuePicker api={api} clubId={draft.clubId} selected={draft.venueIds ?? []}
+                                    onChange={changeVenues} busy={busy || Boolean(receipt && !canUpdate)} />
+                            ) : (
+                                <Field label="Địa điểm *" name="location" value={draft.location} maxLength={200}
+                                    onChange={(v) => change('location', v)} />
+                            )}
                             <Field
                                 label="Mục tiêu *"
                                 name="objective"
@@ -734,6 +757,14 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                                         {draft.period || 'Chưa nhập'} ·{' '}
                                         {ACTIVITY_SCALES.find(([id]) => id === draft.scale)?.[1]}
                                     </dd>
+                                </div>
+                                <div>
+                                    <dt>Loại hoạt động · Trụ cột XP</dt>
+                                    <dd>{activityTypeLabel || 'Chưa chọn'}</dd>
+                                </div>
+                                <div>
+                                    <dt>{draft.venueIds?.length ? 'Phòng đề xuất' : 'Địa điểm'}</dt>
+                                    <dd>{draft.location || 'Chưa nhập'}</dd>
                                 </div>
                                 <div>
                                     <dt>Phân công nội bộ</dt>

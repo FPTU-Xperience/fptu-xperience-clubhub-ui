@@ -171,8 +171,8 @@ function ReportEditorForm({ api, workspace, base, semester, sessionKey, reportId
     const scope = managerClubs.find((item) => String(item.clubId) === String(draft.clubId));
     const manager = Boolean(scope) && (!editing || clubLeadership(scope) || String(original?.createdByUserId) === String(user?.id));
     const canSubmit = clubSubmitReport(scope, draft);
-    const reportBase = base ? `${base}/reports` : '/v2/reports';
-    const backTo = editing ? `${reportBase}/${reportId}` : base ? `${base}/reports` : '/v2/my-clubs';
+    const reportBase = base ? `${base}/reports` : '/reports';
+    const backTo = editing ? `${reportBase}/${reportId}` : base ? `${base}/reports` : '/my-clubs';
     const template = REPORT_TEMPLATES.find((item) => item.reportType === draft.reportType);
     const title = editing ? 'Chỉnh sửa báo cáo' : template?.label || 'Tạo báo cáo';
     const future = draft.reportType === 'FUTURE_EVENT';

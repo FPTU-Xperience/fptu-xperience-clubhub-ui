@@ -189,7 +189,7 @@ export function ReportDetailContent({
             <div className="v2-report-toolbar" aria-label="Thao tác báo cáo">
                 <div className="v2-report-actions">
                     {access.edit && (
-                        <Link className="v2-button" to={editTo || `/v2/reports/${report.id}/edit`}>
+                        <Link className="v2-button" to={editTo || `/reports/${report.id}/edit`}>
                             <Pencil size={16} /> Chỉnh sửa
                         </Link>
                     )}
@@ -557,8 +557,8 @@ export default function ReportDetailPage({ api, reportId: scopedId, workspace, b
     const backTo = base
         ? `${base}/reports${window.location.search}`
         : ownClub?.clubCode
-          ? `/v2/my-clubs/${encodeURIComponent(ownClub.clubCode)}/reports`
-          : '/v2/my-clubs';
+          ? `/my-clubs/${encodeURIComponent(ownClub.clubCode)}/reports`
+          : '/my-clubs';
     const run = useCallback(
         async (operation, message = '') => {
             if (busyRef.current) return false;
@@ -631,7 +631,7 @@ export default function ReportDetailPage({ api, reportId: scopedId, workspace, b
         <>
             <ReportDetailContent
                 report={report}
-                editTo={base ? `${base}/reports/${report.id}/edit` : `/v2/reports/${report.id}/edit`}
+                editTo={base ? `${base}/reports/${report.id}/edit` : `/reports/${report.id}/edit`}
                 access={access}
                 backTo={backTo}
                 busy={busy}

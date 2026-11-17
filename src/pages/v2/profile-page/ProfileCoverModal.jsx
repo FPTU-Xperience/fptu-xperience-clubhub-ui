@@ -521,7 +521,7 @@ export default function ProfileCoverModal({ user, profile, savedImage, onClose, 
                         Bạn có thể xem thử thiết kế này. Đổi màu hoặc badge tại Kho quà của CLB để sử dụng.
                     </p>
                 )}
-                <Link className="v2-cover-store-link" to="/v2/my-clubs">
+                <Link className="v2-cover-store-link" to="/my-clubs">
                     Mở Kho quà tại CLB của tôi để đổi màu và badge →
                 </Link>
                 {error && (
