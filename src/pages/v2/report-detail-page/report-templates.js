@@ -42,7 +42,7 @@ export function reportTemplateContext(search) {
     };
 }
 
-export function reportTemplateUrl(templateId, clubId, semester, activityId, basePath = '/v2/reports') {
+export function reportTemplateUrl(templateId, clubId, semester, activityId, basePath = '/reports') {
     const template = REPORT_TEMPLATES.find((item) => item.id === templateId);
     if (!template) throw new Error('Mẫu báo cáo không hợp lệ.');
     const params = new URLSearchParams({ template: templateId, clubId: String(clubId) });

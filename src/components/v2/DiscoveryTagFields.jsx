@@ -4,13 +4,18 @@ import { Pill } from './DiscoveryLayout';
 import DirectoryFilterSelect from './directory-filter/DirectoryFilterSelect';
 import './DiscoveryTagFields.scss';
 
-export function DiscoveryTagFields({ draft, onChange, activity = false, disabled = false }) {
+export function DiscoveryTagFields({ draft, onChange, activity = false, customOnly = false, automaticTags = [], disabled = false }) {
     const hintId = useId();
     const customTags = [...new Set(parseCustomTags(draft.customText))];
     return (
         <fieldset className="v2-discovery-tag-fields" disabled={disabled}>
             <legend>Tag</legend>
-            {activity && (
+            {automaticTags.length > 0 && (
+                <div className="v2-discovery-tag-list v2-discovery-tag-preview" role="group" aria-label="Tag tự động">
+                    {automaticTags.map((tag) => <Pill key={tag}>{tag}</Pill>)}
+                </div>
+            )}
+            {activity && !customOnly && (
                 <label className="v2-discovery-tag-input">
                     Thể loại hoạt động
                     <select value={draft.activityCategory} onChange={(event) => onChange({ ...draft, activityCategory: event.target.value })}>
@@ -21,7 +26,7 @@ export function DiscoveryTagFields({ draft, onChange, activity = false, disabled
                     </select>
                 </label>
             )}
-            <div className="v2-discovery-tag-options" role="group" aria-label="Loại trải nghiệm">
+            {!customOnly && <div className="v2-discovery-tag-options" role="group" aria-label="Loại trải nghiệm">
                 {EXPERIENCE_TAGS.map(([code, label]) => {
                     const checked = draft.experience.includes(code);
                     return (
@@ -34,7 +39,7 @@ export function DiscoveryTagFields({ draft, onChange, activity = false, disabled
                         </label>
                     );
                 })}
-            </div>
+            </div>}
             <label className="v2-discovery-tag-input">
                 Tag tự nhập
                 <input value={draft.customText} maxLength={420} placeholder="Ví dụ: Robot, Thiết kế 3D"
@@ -73,7 +78,8 @@ export function DiscoveryTagEditor({ selection, activity, disabled, onSave }) {
     };
     return (
         <form onSubmit={save}>
-            <DiscoveryTagFields draft={draft} onChange={setDraft} activity={activity} disabled={disabled || saving} />
+            <DiscoveryTagFields draft={draft} onChange={setDraft} activity={activity}
+                customOnly={Boolean(selection?.activityType)} disabled={disabled || saving} />
             <button className="v2-button" type="submit" disabled={!changed || disabled || saving}>
                 {saving ? 'Đang lưu…' : 'Lưu tag'}
             </button>

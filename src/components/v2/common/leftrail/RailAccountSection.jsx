@@ -7,7 +7,7 @@ import { useTheme } from '../../../../context/ThemeContext';
 import { useHeaderNotifications } from '../../../../pages/v2/header-data';
 import ProfileAvatar from '../../../../pages/v2/profile-page/ProfileAvatar';
 import './LeftRail.scss';
-export default function RailAccountSection({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
+export default function RailAccountSection({ user, profile, avatarUrl, api, onStartGuide }) {
     const location = useLocation();
     const navigate = useNavigate();
     const accountMenuRef = useRef(null);
@@ -45,10 +45,9 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
         return () => document.removeEventListener('pointerdown', closeOnOutsidePress);
     }, [isAccountMenuOpen]);
 
-    const signOut = async () => {
+    const signOut = () => {
         notifications.close();
-        if (location.pathname.startsWith('/v2/demo')) await onLogout?.();
-        else navigate('/logout');
+        navigate('/logout');
     };
 
     return (
@@ -57,7 +56,7 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
                 <div className="v2-left-rail-account-menu" ref={accountMenuRef}>
                     <div className="v2-left-rail-account">
                         <Link
-                            to="/v2/profile"
+                            to="/profile"
                             className="v2-left-rail-profile-link"
                             aria-label={`Mở hồ sơ cá nhân của ${displayName}`}
                         >
@@ -113,10 +112,10 @@ export default function RailAccountSection({ user, profile, avatarUrl, onLogout,
                             role="menu"
                             aria-label="Tài khoản"
                         >
-                            <Link to="/v2/profile" role="menuitem">
+                            <Link to="/profile" role="menuitem">
                                 <UserRound size={16} /> Hồ sơ
                             </Link>
-                            <Link to="/v2/profile?tab=settings" role="menuitem">
+                            <Link to="/profile?tab=settings" role="menuitem">
                                 <Settings size={16} /> Cài đặt
                             </Link>
                             {onStartGuide && (

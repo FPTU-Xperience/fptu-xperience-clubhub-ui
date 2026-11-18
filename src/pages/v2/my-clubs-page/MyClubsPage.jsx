@@ -72,7 +72,7 @@ export default function MyClubsPage({ api, sessionKey }) {
             const club = await api.getClub(item.club.clubId);
             if (request !== invitationRequest.current) return;
             if (!club.code) throw new Error('Không tìm thấy trang CLB để xác nhận lời mời.');
-            navigate(`/v2/clubs/${encodeURIComponent(club.code)}?invitation=${encodeURIComponent(item.applicationId)}`);
+            navigate(`/clubs/${encodeURIComponent(club.code)}?invitation=${encodeURIComponent(item.applicationId)}`);
         } catch (issue) {
             if (request === invitationRequest.current) setInvitationError(issue?.message || 'Không thể mở lời mời.');
         } finally {
@@ -115,7 +115,7 @@ export default function MyClubsPage({ api, sessionKey }) {
                                 <Plus size={16} /> Đăng ký mở CLB
                             </button>
                         )}
-                        <Link className="v2-button" to="/v2/clubs">
+                        <Link className="v2-button" to="/clubs">
                             Khám phá thêm <ArrowUpRight size={16} />
                         </Link>
                     </div>

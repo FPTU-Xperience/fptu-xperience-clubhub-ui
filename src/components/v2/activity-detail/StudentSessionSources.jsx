@@ -177,7 +177,7 @@ export default function StudentSessionSources({ api, activityId, onChanged }) {
                                 )}
                                 {row.sourceActions?.manualAttendance === 'REQUIRES_SUBMISSION_VALIDATION' && (
                                     <p>
-                                        <Link to="/v2/personal-experience">Gửi minh chứng để đề nghị xác nhận</Link>
+                                        <Link to="/personal-experience">Gửi minh chứng để đề nghị xác nhận</Link>
                                     </p>
                                 )}
                             </article>

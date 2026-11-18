@@ -497,19 +497,6 @@
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
 }
-.governance-preview-page {
-    max-width: 1150px;
-    margin: 0 auto;
-    padding: 35px;
-    background: #fbfcfe;
-    min-height: 100vh;
-    .governance-preview-back {
-        display: inline-block;
-        margin-bottom: 20px;
-        color: #647a95;
-        font-size: 13px;
-    }
-}
 @media (max-width: 800px) {
     .club-governance-preview {
         .governance-groups {
@@ -524,9 +511,6 @@
         .governance-report-list article {
             flex-wrap: wrap;
         }
-    }
-    .governance-preview-page {
-        padding: 20px 15px;
     }
 }
 @media (max-width: 520px) {

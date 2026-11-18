@@ -126,7 +126,7 @@ try {
             return send({ items: [], total: 0, page: 1, totalPages: 0 });
         });
         const open = async () => {
-            await page.goto(base + '/v2/activities/4', { waitUntil: 'domcontentloaded' });
+            await page.goto(base + '/activities/4', { waitUntil: 'domcontentloaded' });
             await page.locator('.v2-activity-profile-identity h1').waitFor();
             await page
                 .getByRole('navigation', { name: 'Nội dung hoạt động' })

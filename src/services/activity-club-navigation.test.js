@@ -9,8 +9,8 @@ test('manager access alone, pending/inactive membership, and another club member
         assert.equal(activityWorkspacePath(7, selection, populated(data)), null);
 });
 test('approved member uses current workspace code rather than stale activity code', () => {
-    assert.equal(activityWorkspacePath(7, selection, populated([{ clubId: 7, status: 'Approved' }])), '/v2/my-clubs/FU-IGO');
-    assert.equal(activityWorkspacePath(7, populated([{ clubId: 7, clubCode: 'IGo / HCM' }]), populated([{ clubId: 7, status: 'APPROVED' }])), '/v2/my-clubs/IGo%20%2F%20HCM');
+    assert.equal(activityWorkspacePath(7, selection, populated([{ clubId: 7, status: 'Approved' }])), '/my-clubs/FU-IGO');
+    assert.equal(activityWorkspacePath(7, populated([{ clubId: 7, clubCode: 'IGo / HCM' }]), populated([{ clubId: 7, status: 'APPROVED' }])), '/my-clubs/IGo%20%2F%20HCM');
 });
 test('membership loading/errors and missing matching workspace fail closed', () => {
     for (const status of ['loading', 'error', 'unauthorized', 'empty'])

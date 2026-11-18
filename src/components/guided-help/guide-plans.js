@@ -95,7 +95,7 @@ export function clubGuidePlan(pathname) {
                 'Lưu nháp để tiếp tục chỉnh sửa. Kiểm tra đầy đủ thông tin trước khi nộp duyệt.',
             ),
         ];
-    } else if (/\/workspace(?:\/|$)/.test(pathname) || /^\/v2\/my-clubs\//.test(pathname)) {
+    } else if (/\/workspace(?:\/|$)/.test(pathname) || /^\/my-clubs\//.test(pathname)) {
         title = 'Không gian câu lạc bộ';
         steps = [
             step(
@@ -114,7 +114,7 @@ export function clubGuidePlan(pathname) {
                 'Các chức năng hiển thị theo vai trò và quyền của bạn trong CLB.',
             ),
         ];
-    } else if (pathname === '/v2/activities') {
+    } else if (pathname === '/activities') {
         title = 'Khám phá hoạt động';
         steps = [
             step(
@@ -128,7 +128,7 @@ export function clubGuidePlan(pathname) {
                 'Mở thẻ hoạt động để kiểm tra lịch, địa điểm và điều kiện tham gia.',
             ),
         ];
-    } else if (/^\/v2\/activities\//.test(pathname)) {
+    } else if (/^\/activities\//.test(pathname)) {
         title = 'Chi tiết hoạt động';
         steps = [
             step(
@@ -142,13 +142,13 @@ export function clubGuidePlan(pathname) {
                 'Đọc hướng dẫn của CLB. Các thao tác đăng ký hoặc nhận việc chỉ hiện khi bạn đủ điều kiện.',
             ),
         ];
-    } else if (pathname === '/v2/clubs') {
+    } else if (pathname === '/clubs') {
         title = 'Danh sách câu lạc bộ';
         steps = [
             step('.v2-filter-bar', 'Tìm câu lạc bộ', 'Lọc theo lĩnh vực, tag, từ khóa và tình trạng tuyển thành viên.'),
             step('.v2-club-grid', 'Trang câu lạc bộ', 'Mở thẻ để xem thông tin, lịch hoạt động và điều kiện tham gia.'),
         ];
-    } else if (pathname === '/v2/my-clubs') {
+    } else if (pathname === '/my-clubs') {
         title = 'Câu lạc bộ của tôi';
         steps = [
             step(
@@ -157,7 +157,7 @@ export function clubGuidePlan(pathname) {
                 'Mở một CLB để vào không gian làm việc. Lời mời và đơn chờ duyệt có trạng thái riêng.',
             ),
         ];
-    } else if (pathname === '/v2/profile') {
+    } else if (pathname === '/profile') {
         title = 'Hồ sơ của bạn';
         steps = [
             step(
@@ -171,7 +171,7 @@ export function clubGuidePlan(pathname) {
                 'Xem thông tin cá nhân, sở thích và các kết quả trải nghiệm đã được ghi nhận.',
             ),
         ];
-    } else if (pathname === '/v2/study-schedule' || pathname === '/v2/my-schedule') {
+    } else if (pathname === '/study-schedule' || pathname === '/my-schedule') {
         title = 'Lịch trình của bạn';
         steps = [
             step(
@@ -186,7 +186,7 @@ export function clubGuidePlan(pathname) {
             ),
             step('#v2-main h1', 'Lịch trình cá nhân', 'Đối chiếu lịch học với các hoạt động bạn đã đăng ký.'),
         ];
-    } else if (pathname === '/v2/personal-experience') {
+    } else if (pathname === '/personal-experience') {
         title = 'Trải nghiệm cá nhân';
         steps = [
             step(
@@ -200,7 +200,7 @@ export function clubGuidePlan(pathname) {
                 'Điền thông tin và minh chứng. Kiểm tra kỹ trước khi gửi để CTSV xét duyệt.',
             ),
         ];
-    } else if (/^\/v2\/clubs\//.test(pathname)) {
+    } else if (/^\/clubs\//.test(pathname)) {
         title = 'Tìm hiểu câu lạc bộ';
         steps = [
             step('#v2-main h1', 'Thông tin CLB', 'Xem giới thiệu, lĩnh vực và thông tin liên hệ của CLB.'),

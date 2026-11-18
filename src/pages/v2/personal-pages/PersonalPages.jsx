@@ -21,7 +21,7 @@ export function MySchedulePage({ api, sessionKey }) {
                 {activities.length ? (
                     <div className="v2-activity-list">
                         {activities.map((activity) => (
-                            <ActivityCard key={activity.scheduleKey} activity={activity} onOpen={item => navigate(`/v2/activities/${item.id}`)} variant="schedule" />
+                            <ActivityCard key={activity.scheduleKey} activity={activity} onOpen={item => navigate(`/activities/${item.id}`)} variant="schedule" />
                         ))}
                     </div>
                 ) : (
@@ -29,7 +29,7 @@ export function MySchedulePage({ api, sessionKey }) {
                         title="Lịch trình đang trống"
                         text="Sau khi đăng ký tham gia hoạt động, lịch sẽ xuất hiện tại đây."
                     >
-                        <Link className="v2-button" to="/v2/activities">
+                        <Link className="v2-button" to="/activities">
                             Xem tất cả hoạt động
                         </Link>
                     </EmptyState>

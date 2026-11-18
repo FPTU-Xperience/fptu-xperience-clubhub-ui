@@ -7,19 +7,19 @@ import useRailDropdown from './useRailDropdown';
 import { campusLabel } from '../../../../pages/v2/profile-options';
 import './LeftRail.scss';
 const navigation = [
-    ['/v2', 'Khám phá', true],
-    ['/v2/clubs', 'Câu lạc bộ'],
-    ['/v2/activities', 'Hoạt động'],
+    ['/', 'Khám phá', true],
+    ['/clubs', 'Câu lạc bộ'],
+    ['/activities', 'Hoạt động'],
 ];
 
 const personalNavigation = [
-    ['/v2/my-clubs', 'Câu lạc bộ'],
-    ['/v2/my-schedule', 'Lịch trình'],
-    ['/v2/study-schedule', 'Lịch học'],
-    ['/v2/personal-experience', 'Trải nghiệm cá nhân'],
+    ['/my-clubs', 'Câu lạc bộ'],
+    ['/my-schedule', 'Lịch trình'],
+    ['/study-schedule', 'Lịch học'],
+    ['/personal-experience', 'Trải nghiệm cá nhân'],
 ];
 
-export default function LeftRail({ user, profile, avatarUrl, onLogout, api, onStartGuide }) {
+export default function LeftRail({ user, profile, avatarUrl, api, onStartGuide }) {
     const location = useLocation();
     const { pinnedClubs = [], togglePin } = usePinnedClubs() || {};
     const affairs = isAffairsViewer(user);
@@ -28,7 +28,7 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api, onSt
     const personalMenu = useRailDropdown(() => personalNavigation.some(([path]) => location.pathname === path));
     return (
         <aside className="v2-left-rail" aria-label="Điều hướng ClubHub">
-            <Link to="/v2" className="v2-left-rail-brand">
+            <Link to="/" className="v2-left-rail-brand">
                 <img src={`${import.meta.env.BASE_URL}fptux.png`} alt="FPTU Xperience" />
                 <span>
                     <small className="v2-left-rail-brand-eyebrow">FPTU Xperience</small>
@@ -70,7 +70,7 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api, onSt
                         {affairsMenu.open && (
                             <div id="v2-left-rail-affairs-nav" className="v2-left-rail-nav-group-items">
                                 {affairsNavigation.map(([to, label]) =>
-                                    to === '/v2/ctsv/admin' && adminUrl ? (
+                                    to === '/ctsv/admin' && adminUrl ? (
                                         <a
                                             key={to}
                                             href={adminUrl}
@@ -144,7 +144,7 @@ export default function LeftRail({ user, profile, avatarUrl, onLogout, api, onSt
                 )}
             </nav>
 
-            <RailAccountSection user={user} profile={profile} avatarUrl={avatarUrl} onLogout={onLogout} api={api} onStartGuide={onStartGuide} />
+            <RailAccountSection user={user} profile={profile} avatarUrl={avatarUrl} api={api} onStartGuide={onStartGuide} />
         </aside>
     );
 }

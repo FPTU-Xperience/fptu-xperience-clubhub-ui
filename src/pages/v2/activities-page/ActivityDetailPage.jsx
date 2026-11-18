@@ -81,7 +81,7 @@ export default function ActivityDetailPage({ api, sessionKey }) {
         directory.data?.find((club) => String(club.id) === String(activity?.clubId))?.code || activity?.clubCode || '';
     return (
         <div className="v2-public-content v2-activity-detail-page">
-            <Link className="v2-text-link" to={`/v2/activities${location.search}`}>
+            <Link className="v2-text-link" to={`/activities${location.search}`}>
                 ← Quay lại hoạt động
             </Link>
             {activity && !isActivityPublic(activity) ? (

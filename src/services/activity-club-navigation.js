@@ -8,5 +8,5 @@ export function activityWorkspacePath(activityClubId, selection, memberships) {
     if (!approved) return null;
     const workspace = selection.data.find((club) => String(club.clubId) === id);
     const code = typeof workspace?.clubCode === 'string' ? workspace.clubCode.trim() : '';
-    return code ? `/v2/my-clubs/${encodeURIComponent(code)}` : null;
+    return code ? `/my-clubs/${encodeURIComponent(code)}` : null;
 }

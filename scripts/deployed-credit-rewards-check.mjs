@@ -427,7 +427,7 @@ try {
                 });
             return send({ items: [], page: 1, totalPages: 0, total: 0, totalItems: 0 });
         });
-        await page.goto(base + '/v2/my-clubs/TEST/gifts', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/my-clubs/TEST/gifts', { waitUntil: 'domcontentloaded' });
         await page.getByRole('button', { name: 'Mở tất cả', exact: true }).click();
         const card = page
             .locator('article')
@@ -462,14 +462,14 @@ try {
 
         assert.equal(spends, 1);
         actor = 100;
-        await page.goto(base + '/v2/my-clubs/TEST/gifts', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/my-clubs/TEST/gifts', { waitUntil: 'domcontentloaded' });
         await page.getByRole('button', { name: 'Tạo quà', exact: true }).click();
         await page.getByText('XEM TRƯỚC', { exact: true }).waitFor();
         assert.equal(await page.locator('.v2-create-gift-types input[type="radio"]').count(), 5);
         await page.screenshot({ path: `TestResults/registration-roles-online/gift-editor-${width}.png` });
         await page.getByRole('button', { name: 'Hủy', exact: true }).click();
         assert.equal(creates, 0);
-        await page.goto(base + '/v2/my-clubs/TEST/points', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/my-clubs/TEST/points', { waitUntil: 'domcontentloaded' });
         await page.getByRole('tab', { name: 'Tính điểm CLB', exact: true }).waitFor();
         await page.getByRole('heading', { name: 'Phân bổ XP theo trụ cột', exact: true }).waitFor();
         assert.equal(await page.getByRole('tab').count(), 2);

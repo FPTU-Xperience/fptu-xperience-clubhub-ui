@@ -13,7 +13,7 @@ try{fs.mkdirSync('TestResults/formation-online',{recursive:true});for(const widt
  if(path==='/api/clubs/applications/me')return send(application?[application]:[]);
  if(path==='/api/clubs'||path==='/api/clubs/me/access'||path==='/api/clubs/me/memberships')return send([]);
  return send({items:[],total:0,page:1,totalPages:0});});
- const open=async()=>{await page.goto(base+'/v2/my-clubs',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Đăng ký mở CLB',exact:true}).click();};
+ const open=async()=>{await page.goto(base+'/my-clubs',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Đăng ký mở CLB',exact:true}).click();};
  await open();const dialog=page.getByRole('dialog');assert.equal(await dialog.locator('[name=code]').count(),1);
  const values={name:'Formation Club',code:'form26',purpose:'Learn together',description:'Build together',founderPhone:'0912345678',founderOrganization:'SE',memberOrganization:'SE',mainActivities:'Workshops',activityFrequencyCount:'2'};
  for(const[name,value]of Object.entries(values))await dialog.locator('[name="'+name+'"]').fill(value);for(const check of await dialog.locator('input[type=checkbox]').all())await check.check();await page.getByRole('button',{name:'Gửi đơn thành lập',exact:true}).evaluate(el=>{el.click();el.click()});await dialog.waitFor({state:'hidden'});await page.getByText('Chờ xét duyệt · HCM',{exact:false}).waitFor();assert.equal(writes,1);

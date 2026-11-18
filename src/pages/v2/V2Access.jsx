@@ -42,7 +42,7 @@ function V2Login() {
             setBusy(true);
             try {
                 await action();
-                navigate('/v2', { replace: true });
+                navigate('/', { replace: true });
             } catch (loginError) {
                 setError(loginError.message || 'Không thể đăng nhập. Vui lòng thử lại.');
             } finally {
@@ -125,7 +125,7 @@ function V2Login() {
         <div className="v2-access-shell v2-access-page v2-access-login-page">
             <main className="v2-access-login-layout">
                 <section className="v2-access-login-story">
-                    <a className="v2-access-brand" href="/v2" aria-label="ClubHub">
+                    <a className="v2-access-brand" href="/" aria-label="ClubHub">
                         <img src="/fptux.png" alt="" />
                         <span>
                             clubhub<span className="v2-access-brand-dot">.</span>

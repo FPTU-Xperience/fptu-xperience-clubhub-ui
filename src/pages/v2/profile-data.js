@@ -145,52 +145,9 @@ export function profileStorageKey(user) {
     return identity ? `clubhub:v2:profile:${identity}` : null;
 }
 
-export function createMockProfile(user) {
-    const identity = accountIdentity(user);
-    if (!identity) throw new Error('Không thể tải hồ sơ khi chưa có tài khoản.');
+export function createInitialProfile(user) {
+    if (!accountIdentity(user)) throw new Error('Không thể tải hồ sơ khi chưa có tài khoản.');
     const displayName = text(user?.name || user?.fullName, 'Sinh viên FPTU');
-    const primaryTerm = 'FA26';
-    const secondaryTerm = 'SU26';
-    const participations = [
-        { clubId: 'fcode', clubName: 'F-Code', clubLogoUrl: '', role: 'THÀNH VIÊN' },
-        { clubId: 'fstyle', clubName: 'F-Style', clubLogoUrl: '', role: 'THÀNH VIÊN' },
-    ];
-    const evidence = [
-        {
-            id: `${identity}-evidence-1`,
-            term: primaryTerm,
-            date: '2026-09-12',
-            clubId: 'fcode',
-            clubName: 'F-Code',
-            title: 'Đồng hành Code Camp: Build for Campus',
-            source: 'Hoạt động CLB',
-            verifier: 'Ban chủ nhiệm F-Code',
-            points: 30,
-        },
-        {
-            id: `${identity}-evidence-2`,
-            term: primaryTerm,
-            date: '2026-08-29',
-            clubId: 'fstyle',
-            clubName: 'F-Style',
-            title: 'Hỗ trợ triển lãm Portfolio Night',
-            source: 'Đóng góp CLB',
-            verifier: 'Ban chủ nhiệm F-Style',
-            points: 20,
-        },
-        {
-            id: `${identity}-evidence-3`,
-            term: secondaryTerm,
-            date: '2026-06-18',
-            clubId: 'fcode',
-            clubName: 'F-Code',
-            title: 'Tham dự Design Systems Workshop',
-            source: 'Hoạt động CLB',
-            verifier: 'Ban chủ nhiệm F-Code',
-            points: 15,
-        },
-    ];
-    const contributionTotal = evidence.reduce((total, item) => total + item.points, 0);
     return {
         profile: {
             displayName,
@@ -201,11 +158,10 @@ export function createMockProfile(user) {
             avatarDesign: { ...DEFAULT_INITIALS_DESIGN },
             coverShape: 'petals',
             initials: text(user?.avatar, initials(displayName)),
-            headline: 'Học hỏi, kết nối và tạo dấu ấn theo cách của mình.',
+            headline: '',
             about: '',
             interests: [],
             skills: [],
-            project: 'Một hành trình được xây từ những lần dám thử.',
         },
         personal: {
             dateOfBirth: '',
@@ -218,22 +174,16 @@ export function createMockProfile(user) {
             year: '',
             studentCode: '',
         },
-        participations,
+        participations: [],
         summary: {
-            clubCount: participations.length,
-            activityCount: evidence.filter((item) => item.source === 'Hoạt động CLB').length,
-            recognizedContributionTotal: contributionTotal,
-            contributionRecordCount: evidence.length,
-            experiencePillars: {
-                current: [66, 43, 36, 58, 78, 49],
-                previous: [52, 31, 25, 44, 64, 35],
-            },
+            clubCount: null,
+            activityCount: null,
+            recognizedContributionTotal: null,
+            contributionRecordCount: null,
+            experiencePillars: { current: [], previous: [] },
         },
-        evidence,
-        terms: [
-            { id: primaryTerm, label: 'Fall 2026' },
-            { id: secondaryTerm, label: 'Summer 2026' },
-        ],
+        evidence: [],
+        terms: [],
     };
 }
 
@@ -259,7 +209,7 @@ function savedProfileRecord(user, storage) {
 }
 
 export function readProfile(user, storage = globalThis.localStorage) {
-    const seed = createMockProfile(user);
+    const seed = createInitialProfile(user);
     const saved = savedProfileRecord(user, storage);
     if (!saved) return clone(seed);
     try {

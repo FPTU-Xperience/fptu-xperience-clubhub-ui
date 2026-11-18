@@ -34,6 +34,7 @@ const now = Date.parse('2026-10-16T00:00:00Z');
 const draft = () => ({
     ...newApplication(7, 'FA26'),
     title: 'Workshop',
+    activityType: 'Academic',
     description: 'Nội dung',
     objective: 'Mục tiêu',
     location: 'FPT',
@@ -163,6 +164,19 @@ test('payload retains policy facts, uses Vietnam dates and omits client Xperienc
     assert.equal(body.actions[0].rawXp, undefined);
     assert.equal(body.actions[0].expectedRawXp, undefined);
     assert.equal(body.actions[0].roleMultiplier, undefined);
+});
+
+test('activity type is required and custom tags do not send automatic tag values', () => {
+    const data = draft();
+    for (const type of ['', 'RealWorldWork', 'workshop']) {
+        assert.equal(applicationValidationIssue({ ...data, activityType: type }, 0, now).field, 'activityType');
+    }
+    const payload = applicationPayload({
+        ...data, activityType: 'Research',
+        discoveryTagDraft: { experience: ['Community'], activityCategory: 'workshop', customText: 'Robot, AI' },
+    });
+    assert.equal(payload.activityType, 'Research');
+    assert.deepEqual(payload.tagSelection, { custom: ['Robot', 'AI'] });
 });
 test('scoped permissions override manager fallback and do not elevate members or activity staff', () => {
     assert.equal(applicationPermission({ isManager: true }, 'activity.create'), true);

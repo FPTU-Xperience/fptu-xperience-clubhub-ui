@@ -71,13 +71,13 @@ export default function DiscoverPage({ api, sessionKey, campus }) {
             <DiscoverHero campus={campus} />
             <section className="v2-recommended-activities">
                 <SectionHeading title="Hoạt động dành cho bạn" description="Khám phá những hoạt động đang diễn ra và sắp tới.">
-                    <Link className="v2-discovery-button" to="/v2/activities">Xem tất cả hoạt động <ArrowUpRight size={18} /></Link>
+                    <Link className="v2-discovery-button" to="/activities">Xem tất cả hoạt động <ArrowUpRight size={18} /></Link>
                 </SectionHeading>
                 <div className="v2-tabs v2-activity-filter-tabs" role="group" aria-label="Trạng thái hoạt động">{[['ALL','Tất cả'],['UPCOMING','Sắp diễn ra'],['LIVE','Đang diễn ra']].map(([value,label]) => <button key={value} type="button" aria-pressed={activityStatus === value} className={activityStatus === value ? 'active' : ''} onClick={() => setActivityStatus(value)}>{label}</button>)}</div>
                 <PageState status={activityFeed.status} onRetry={activityFeed.retry}>
                     {activities.length ? (
                         <div className="v2-event-grid">
-                            {activities.map((activity) => <ActivityCard key={activity.id} activity={activity} interactionApi={api} onOpen={item => navigate(`/v2/activities/${item.id}`)} />)}
+                            {activities.map((activity) => <ActivityCard key={activity.id} activity={activity} interactionApi={api} onOpen={item => navigate(`/activities/${item.id}`)} />)}
                         </div>
                     ) : (
                         <EmptyState title="Chưa có hoạt động phù hợp" text="Thử chọn trạng thái khác để xem thêm hoạt động.">

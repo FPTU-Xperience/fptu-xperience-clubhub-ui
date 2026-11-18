@@ -22,9 +22,9 @@ const api = {
 function Fixture() {
     const [sessionKey, setSessionKey] = useState('student-a');
     window.__TAB_TEST_AUTH__ = { api, user: { id: sessionKey === 'student-a' ? 104 : 205 }, clubAccess: [] };
-    return <MemoryRouter initialEntries={['/v2/activities/1']}>
+    return <MemoryRouter initialEntries={['/activities/1']}>
         <button onClick={() => { window.__TAB_TEST_ACCOUNT__ = 'student-b'; setSessionKey('student-b'); }}>Đổi tài khoản kiểm thử</button>
-        <Routes><Route path="/v2/activities/:activityId" element={workspaceMode ? <ActivityManagementPage api={api} sessionKey={sessionKey} activityId={1} manager={false} workspace={{clubId: 1, clubCode: "TEST"}} base="/v2/my-clubs/TEST" /> : <ActivityDetailPage api={api} sessionKey={sessionKey} />} /></Routes>
+        <Routes><Route path="/activities/:activityId" element={workspaceMode ? <ActivityManagementPage api={api} sessionKey={sessionKey} activityId={1} manager={false} workspace={{clubId: 1, clubCode: "TEST"}} base="/my-clubs/TEST" /> : <ActivityDetailPage api={api} sessionKey={sessionKey} />} /></Routes>
     </MemoryRouter>;
 }
 createRoot(document.getElementById('root')).render(<Fixture />);

@@ -1,4 +1,10 @@
 .v2-activity-application {
+    .v2-report-editor-steps {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .v2-report-editor-card[hidden] {
+        display: none;
+    }
     .v2-application-fields {
         border: 0;
         padding: 0;
@@ -63,7 +69,19 @@
         height: 18px;
         flex-shrink: 0;
         margin-top: 3px;
+        padding: 0;
         accent-color: #ea580c;
+    }
+    .v2-application-location-toggle {
+        margin-block: 16px 12px;
+        font-weight: 550;
+    }
+    .booking-workspace {
+        min-width: 0;
+        margin-bottom: 18px;
+        padding: clamp(10px, 2vw, 18px);
+        border: 1px solid var(--booking-line);
+        border-radius: 12px;
     }
     .v2-application-total {
         background: #fff7ed;
@@ -120,6 +138,11 @@
     article small {
         color: #64748b;
         line-height: 1.7;
+    }
+}
+@media (max-width: 900px) {
+    .v2-activity-application .v2-report-editor-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 @media (max-width: 600px) {

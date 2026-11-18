@@ -92,7 +92,7 @@ export default function ActivitiesTab({ manager = false, readOnly = false, dashb
                                         clubId,
                                         semester,
                                         null,
-                                        `/v2/my-clubs/${encodeURIComponent(workspace.clubCode)}/reports`,
+                                        `/my-clubs/${encodeURIComponent(workspace.clubCode)}/reports`,
                                     ),
                                 )
                             }

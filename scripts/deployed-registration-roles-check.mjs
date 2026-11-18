@@ -161,7 +161,7 @@ try {
                 });
             return send({ items: [], page: 1, totalPages: 0, total: 0, totalItems: 0 });
         });
-        await page.goto(base + '/v2/activities/4', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/activities/4', { waitUntil: 'domcontentloaded' });
         await page.getByRole('button', { name: 'Đã đăng ký', exact: true }).click();
         await page.getByRole('button', { name: 'Giữ đăng ký', exact: true }).click();
         assert.equal(cancelWrites, 0);
@@ -180,7 +180,7 @@ try {
             fullPage: true,
         });
         actor = 100;
-        await page.goto(base + '/v2/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
         await page.getByRole('heading', { name: 'Thành viên CLB', exact: true }).waitFor();
         await page.getByRole('button', { name: 'Ban quản lý', exact: true }).waitFor();
         assert.equal(await page.locator('.v2-club-roles').count(), 0);
@@ -190,7 +190,7 @@ try {
             fullPage: true,
         });
         actor = 104;
-        await page.goto(base + '/v2/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/my-clubs/TEST/members', { waitUntil: 'domcontentloaded' });
         await page.getByRole('heading', { name: 'Thành viên CLB', exact: true }).waitFor();
         assert.equal(await page.locator('.v2-club-roles').count(), 0);
         assert.equal(roleWrites, 0);

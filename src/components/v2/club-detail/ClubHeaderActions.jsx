@@ -12,7 +12,7 @@ export default function ClubHeaderActions({ club, clubCode, viewer, joined, acce
         });
         return (
             <div className="v2-club-observer-actions" role="group" aria-label="Xem câu lạc bộ">
-                <Link className="v2-button" to={`/v2/ctsv/clubs/${code}/workspace`}>
+                <Link className="v2-button" to={`/ctsv/clubs/${code}/workspace`}>
                     Ghé thăm CLB
                 </Link>
                 {adminUrl && (
@@ -25,7 +25,7 @@ export default function ClubHeaderActions({ club, clubCode, viewer, joined, acce
     }
     if (['MEMBER', 'MANAGER'].includes(club.viewerRelationship)) {
         return (
-            <Link className="v2-button" to={`/v2/my-clubs/${code}`}>
+            <Link className="v2-button" to={`/my-clubs/${code}`}>
                 Đến không gian CLB
             </Link>
         );

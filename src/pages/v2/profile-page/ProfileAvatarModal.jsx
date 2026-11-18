@@ -220,7 +220,7 @@ export default function ProfileAvatarModal({ user, images, profile, onClose, onS
                         Bạn đang xem thử khung này. Đổi khung tại Kho quà của CLB để sử dụng.
                     </p>
                 )}
-                {tab === 'frame' && <Link to="/v2/my-clubs">Mở Kho quà tại CLB của tôi →</Link>}
+                {tab === 'frame' && <Link to="/my-clubs">Mở Kho quà tại CLB của tôi →</Link>}
                 <p className="v2-avatar-note">
                     Khung ảnh chỉ áp dụng trên thiết bị này.
                 </p>

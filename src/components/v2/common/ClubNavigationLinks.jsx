@@ -7,7 +7,7 @@ export default function ClubNavigationLinks({ clubCode, showPage = true, workspa
     return (
         <div className="v2-club-navigation-links">
             {showPage && (
-                <Link className="v2-button" to={`/v2/clubs/${code}`}>
+                <Link className="v2-button" to={`/clubs/${code}`}>
                     Đến trang CLB
                 </Link>
             )}

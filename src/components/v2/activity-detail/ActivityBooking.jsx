@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, CalendarClock, List, MapPin, Package } from 'lucide-react';
+import { Building2, CalendarClock, List, MapPin, Package, X } from 'lucide-react';
 import { sessionDate } from '../../../services/activity-sessions';
 import V2Modal from '../common/modal/V2Modal';
 import './ActivityBooking.scss';
@@ -19,32 +19,43 @@ const errors = {
 };
 const describeError = (issue) => errors[issue.code] || issue.message || 'Không thể kết nối dịch vụ đặt chỗ.';
 
-function Plan({ image, label, children }) {
+function Plan({ image, label, compact = false, children }) {
     const [failed, setFailed] = useState(false);
+    if (failed) return <p role="status">Không mở được ảnh sơ đồ. Bạn có thể chọn phòng trong danh sách.</p>;
     return (
-        <div className={`booking-floor${image && !failed ? ' booking-floor--image' : ''}`} role="group" aria-label={label}>
-            {image && !failed && <img src={image} alt="" referrerPolicy="no-referrer" onError={() => setFailed(true)} />}
+        <div className={`booking-floor${image ? ' booking-floor--image' : ''}${compact ? ' booking-floor--rooms' : ''}`} role="group" aria-label={label}>
+            {image && <img src={image} alt="" referrerPolicy="no-referrer" onError={() => setFailed(true)} />}
             {children}
         </div>
     );
 }
 
-function VenuePicker({ venues, layouts, selected, onSelect }) {
-    const [building, setBuilding] = useState('');
-    const [floor, setFloor] = useState('');
-    const [view, setView] = useState('map');
+export function VenuePicker({ venues, layouts, selected, onToggle, busy }) {
+    const selectedRooms = venues.filter((venue) => selected.includes(venue.id));
+    const selectedRoom = selectedRooms[0];
     const buildings = [...new Set(venues.map((venue) => venue.building).filter(Boolean))].sort();
+    const startingBuilding = selectedRoom?.building || buildings[0] || '';
+    const sortFloors = (rooms) => [...new Set(rooms.flatMap((venue) =>
+        [venue.floor, ...Object.keys(venue.planAreasByFloor || {})]).filter(Boolean))]
+        .sort((a, b) => a === 'G' ? -1 : b === 'G' ? 1 : a.localeCompare(b, 'vi', { numeric: true }));
+    const [building, setBuilding] = useState(startingBuilding);
+    const [floor, setFloor] = useState(selectedRoom?.floor || sortFloors(venues.filter((venue) => venue.building === startingBuilding))[0] || '');
+    const [view, setView] = useState(buildings.length ? 'map' : 'list');
+    const [zoomed, setZoomed] = useState(false);
     const inBuilding = venues.filter((venue) => venue.building === building);
-    const floors = [...new Set(inBuilding.map((venue) => venue.floor).filter(Boolean))].sort((a, b) =>
-        a.localeCompare(b, 'vi', { numeric: true }));
-    const pins = inBuilding.filter((venue) => venue.floor === floor && venue.planX != null && venue.planY != null);
+    const floors = sortFloors(inBuilding);
     const campusImage = layouts.find((layout) => !layout.building && !layout.floor)?.imageUrl;
     const floorImage = layouts.find((layout) => layout.building === building && layout.floor === floor && floor)?.imageUrl;
+    const roomsOnFloor = inBuilding.filter((venue) => venue.floor === floor);
+    const areas = floorImage ? inBuilding.map((venue) => ({
+        ...venue, planArea: venue.floor === floor ? venue.planArea : venue.planAreasByFloor?.[floor],
+    })).filter((venue) => venue.planArea) : [];
+    const pins = roomsOnFloor.filter((venue) => (!floorImage || !venue.planArea) && venue.planX != null && venue.planY != null);
     const buildingPins = layouts.filter((layout) => !layout.floor && buildings.includes(layout.building) && layout.planX != null);
     const position = ({ planX, planY }) => ({ left: `${planX}%`, top: `${planY}%` });
     const chooseBuilding = (value) => {
         setBuilding(value);
-        setFloor(venues.find((venue) => venue.building === value && venue.floor)?.floor || '');
+        setFloor(sortFloors(venues.filter((venue) => venue.building === value))[0] || '');
     };
     return (
         <div className="booking-picker">
@@ -81,30 +92,62 @@ function VenuePicker({ venues, layouts, selected, onSelect }) {
                             </select>
                         </label>
                     )}
-                    {(floorImage || pins.length > 0) && (
-                        <Plan key={`${building}:${floor}:${floorImage}`} image={floorImage} label={`Sơ đồ ${building}, tầng ${floor}`}>
+                    {floorImage && <div className="booking-switch">
+                        <button type="button" aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>
+                            {zoomed ? 'Thu nhỏ sơ đồ' : 'Phóng to sơ đồ'}
+                        </button>
+                    </div>}
+                    {(floorImage || pins.length > 0) && <div className={`booking-floor-scroll${zoomed ? ' booking-floor-scroll--zoomed' : ''}`}>
+                        <Plan key={`${building}:${floor}:${floorImage}`} image={floorImage} compact={Boolean(floorImage)}
+                            label={`Sơ đồ ${building}, tầng ${floor}`}>
+                            {areas.length > 0 && (
+                                <svg className="booking-room-areas" viewBox="0 0 100 100" preserveAspectRatio="none"
+                                    role="group" aria-label="Phòng trên sơ đồ">
+                                    {areas.map((venue) => (
+                                        <polygon key={venue.id} points={venue.planArea} role="button" tabIndex={busy ? -1 : 0}
+                                            aria-pressed={selected.includes(venue.id)} aria-disabled={busy}
+                                            aria-label={`Chọn ${venue.name} (${venue.code})`} vectorEffect="non-scaling-stroke"
+                                            onClick={() => !busy && onToggle(venue.id)}
+                                            onKeyDown={(event) => {
+                                                if (event.key !== 'Enter' && event.key !== ' ') return;
+                                                event.preventDefault();
+                                                if (!busy) onToggle(venue.id);
+                                            }}>
+                                            <title>{venue.name}</title>
+                                        </polygon>
+                                    ))}
+                                </svg>
+                            )}
                             {pins.map((venue) => (
-                                <button type="button" key={venue.id} aria-pressed={selected === venue.id}
-                                    aria-label={`Chọn ${venue.name}`} title={venue.name}
-                                    style={position(venue)}
-                                    onClick={() => onSelect(venue.id)}>
-                                    <MapPin size={16} /> {venue.code}
+                                <button type="button" key={venue.id} aria-pressed={selected.includes(venue.id)}
+                                    aria-label={`Chọn ${venue.name} (${venue.code})`} title={`${venue.name} · ${venue.code}`}
+                                    style={position(venue)} onClick={() => onToggle(venue.id)}>
+                                    <MapPin size={floorImage ? 12 : 16} aria-hidden="true" />{!floorImage && venue.code}
                                 </button>
                             ))}
                         </Plan>
-                    )}
-                    {building && !pins.length && <p>Tầng này chưa có vị trí đánh dấu. Chọn phòng trong danh sách bên dưới.</p>}
+                    </div>}
+                    {building && !areas.length && !pins.length && <p>Tầng này chưa có phòng được gắn trên sơ đồ.</p>}
                 </>
             )}
-            <div className="booking-venues" role="group" aria-label="Địa điểm có thể yêu cầu">
-                {(view === 'map' && building ? inBuilding.filter((venue) => !floor || !venue.floor || venue.floor === floor) : venues)
-                    .map((venue) => (
-                        <button type="button" key={venue.id} aria-pressed={selected === venue.id} onClick={() => onSelect(venue.id)}>
+            {view === 'list' && <div className="booking-venues" role="group" aria-label="Địa điểm có thể yêu cầu">
+                {venues.map((venue) => (
+                        <button type="button" key={venue.id} aria-pressed={selected.includes(venue.id)} onClick={() => onToggle(venue.id)}>
                             <strong>{venue.name}</strong>
                             <small>{[venue.code, venue.venueType, venue.building, venue.floor && `Tầng ${venue.floor}`, venue.capacity > 0 && `${venue.capacity} chỗ`].filter(Boolean).join(' · ')}</small>
                         </button>
                     ))}
-            </div>
+            </div>}
+            {selectedRooms.length > 0 && (
+                <div className="booking-selected-rooms" role="group" aria-label="Phòng đã chọn">
+                    {selectedRooms.map((room) => (
+                        <button key={room.id} type="button" className="booking-room-chip" disabled={busy}
+                            aria-label={`Bỏ chọn ${room.name}`} onClick={() => onToggle(room.id)}>
+                            <span>{room.name}</span><X size={14} aria-hidden="true" />
+                        </button>
+                    ))}
+                </div>
+            )}
             {!venues.length && <p>CTSV chưa mở địa điểm nào tại cơ sở này.</p>}
         </div>
     );
@@ -113,15 +156,17 @@ function VenuePicker({ venues, layouts, selected, onSelect }) {
 function BookingResult({ row, catalog, onCancel, busy }) {
     const [confirm, setConfirm] = useState(false);
     const venue = (id) => catalog.venues.find((item) => item.id === id)?.name || (id ? `Địa điểm #${id}` : '');
+    const requested = row.requestedVenueIds ?? (row.requestedVenueId ? [row.requestedVenueId] : []);
+    const confirmed = row.confirmedVenueIds ?? (row.confirmedVenueId ? [row.confirmedVenueId] : []);
     return (
         <article className="booking-card">
             <header><strong>Yêu cầu #{row.id}</strong><span className="booking-badge" data-status={row.status}>{statuses[row.status]}</span>
                 {row.isLate && <span className="booking-badge" data-status="PENDING">Gửi sau cutoff</span>}
             </header>
             <p className="booking-muted">Gửi lúc {sessionDate(row.requestedAtUtc)}{row.processedAtUtc && ` · Cập nhật ${sessionDate(row.processedAtUtc)}`}</p>
-            <p><strong>Địa điểm:</strong> {venueStatuses[row.venueStatus]}{(row.requestedVenueId || row.requestedVenueType) && (
-                <> · Ưu tiên {venue(row.requestedVenueId) || row.requestedVenueType}</>
-            )}{row.venueStatus === 'CONFIRMED' && <> · Được bố trí tại {venue(row.confirmedVenueId)}</>}</p>
+            <p><strong>Địa điểm:</strong> {venueStatuses[row.venueStatus]}{(requested.length > 0 || row.requestedVenueType) && (
+                <> · Ưu tiên {requested.map(venue).join(', ') || row.requestedVenueType}</>
+            )}{row.venueStatus === 'CONFIRMED' && <> · Được bố trí tại {confirmed.map(venue).join(', ')}</>}</p>
             {row.equipment.length > 0 && (
                 <div className="booking-table">
                     <table>
@@ -158,7 +203,8 @@ export default function ActivityBooking({ api, session, onClose, onLocationChang
     const [catalogError, setCatalogError] = useState('');
     const [busy, setBusy] = useState(false);
     const [venueMode, setVenueMode] = useState('none');
-    const [venueId, setVenueId] = useState(null);
+    const [venueIds, setVenueIds] = useState([]);
+    const toggleVenue = (id) => setVenueIds((ids) => ids.includes(id) ? ids.filter((current) => current !== id) : [...ids, id]);
     const [type, setType] = useState('');
     const [quantities, setQuantities] = useState({});
     const [notice, setNotice] = useState('');
@@ -199,7 +245,7 @@ export default function ActivityBooking({ api, session, onClose, onLocationChang
             setNotice(message);
             setQuantities({});
             setVenueMode('none');
-            setVenueId(null);
+            setVenueIds([]);
             setType('');
             setRevision((value) => value + 1);
         } catch (issue) {
@@ -212,10 +258,10 @@ export default function ActivityBooking({ api, session, onClose, onLocationChang
 
     const venues = state?.catalog.venues.filter((venue) => venue.isBookable) || [];
     const equipment = state?.catalog.equipment.filter((item) => item.isBookable) || [];
-    const selectedVenue = venues.find((venue) => venue.id === venueId);
+    const selectedVenueIds = venueIds.filter((id) => venues.some((venue) => venue.id === id));
     const lines = equipment.filter((item) => Number(quantities[item.id]) > 0)
         .map((item) => ({ equipmentId: item.id, quantity: Number(quantities[item.id]) }));
-    const ready = (venueMode === 'room' && selectedVenue) || (venueMode === 'type' && type.trim()) || (venueMode === 'none' && lines.length);
+    const ready = (venueMode === 'room' && selectedVenueIds.length) || (venueMode === 'type' && type.trim()) || (venueMode === 'none' && lines.length);
 
     return (
         <V2Modal title="Đặt địa điểm và thiết bị" wide className="booking-modal" onClose={() => !busy && onClose()}>
@@ -238,7 +284,7 @@ export default function ActivityBooking({ api, session, onClose, onLocationChang
                         event.preventDefault();
                         if (ready) save(path, {
                             sessionVersion: state.sessionVersion,
-                            venueId: venueMode === 'room' ? venueId : null,
+                            venueIds: venueMode === 'room' ? selectedVenueIds : [],
                             venueType: venueMode === 'type' ? type.trim() : null,
                             equipment: lines,
                         }, 'Đã gửi yêu cầu. Bạn có thể theo dõi kết quả xử lý ngay tại phiên này.');
@@ -255,7 +301,8 @@ export default function ActivityBooking({ api, session, onClose, onLocationChang
                                         onChange={() => setVenueMode(value)} /> {label}</label>
                                 ))}
                             </div>
-                            {venueMode === 'room' && <VenuePicker venues={venues} layouts={state.catalog.layouts || []} selected={venueId} onSelect={setVenueId} />}
+                            {venueMode === 'room' && <VenuePicker venues={venues} layouts={state.catalog.layouts || []}
+                                selected={selectedVenueIds} onToggle={toggleVenue} busy={busy} />}
                             {venueMode === 'type' && <label className="booking-label">Loại địa điểm
                                 <input value={type} onChange={(event) => setType(event.target.value)} maxLength={40}
                                     required placeholder="Ví dụ: Hội trường, phòng seminar" /></label>}
@@ -274,7 +321,9 @@ export default function ActivityBooking({ api, session, onClose, onLocationChang
                             <small>CTSV xác nhận số lượng theo tồn kho trong khung giờ của phiên.</small>
                         </fieldset>
                         <div className="booking-submit">
-                            <p>{selectedVenue && venueMode === 'room' ? selectedVenue.name : venueMode === 'type' && type.trim() ? type.trim() : 'Không chọn địa điểm'} · {lines.length} loại thiết bị</p>
+                            <p aria-live="polite">{selectedVenueIds.length > 0 && venueMode === 'room'
+                                ? `${selectedVenueIds.length} phòng đã chọn`
+                                : venueMode === 'type' && type.trim() ? type.trim() : 'Không chọn địa điểm'} · {lines.length} loại thiết bị</p>
                             <button type="submit" className="v2-button v2-button--primary" disabled={busy || !ready}>{busy ? 'Đang gửi…' : 'Gửi yêu cầu'}</button>
                         </div>
                     </form>

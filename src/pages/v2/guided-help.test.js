@@ -40,8 +40,8 @@ test('onboarding plans follow the current step and never execute form actions', 
 });
 
 test('page tours describe the current route rather than navigating to another one', () => {
-    assert.equal(clubGuidePlan('/v2/activities')[0].popover.title, 'Khám phá hoạt động');
-    assert.equal(clubGuidePlan('/v2/my-clubs/tech')[0].popover.title, 'Không gian câu lạc bộ');
-    assert.equal(clubGuidePlan('/v2/my-clubs/tech/reports/create')[0].popover.title, 'Báo cáo câu lạc bộ');
-    assert.equal(clubGuidePlan('/v2/profile')[0].popover.title, 'Hồ sơ của bạn');
+    assert.equal(clubGuidePlan('/activities')[0].popover.title, 'Khám phá hoạt động');
+    assert.equal(clubGuidePlan('/my-clubs/tech')[0].popover.title, 'Không gian câu lạc bộ');
+    assert.equal(clubGuidePlan('/my-clubs/tech/reports/create')[0].popover.title, 'Báo cáo câu lạc bộ');
+    assert.equal(clubGuidePlan('/profile')[0].popover.title, 'Hồ sơ của bạn');
 });

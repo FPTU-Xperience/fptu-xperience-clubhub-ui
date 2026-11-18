@@ -12,7 +12,7 @@ export default defineConfig(() => {
     },
   },
   server: {
-    open: '/v2',
+    open: '/',
     watch: {
       // Browser QA artifacts contain files that Chrome locks on Windows.
       ignored: ['**/.tmp/**'],

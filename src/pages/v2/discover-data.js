@@ -38,7 +38,7 @@ export function mapClubDirectoryEntry(raw = {}) {
         scheduleLabel: firstDefined(raw.scheduleLabel, raw.schedule, raw.expectedSchedule, ''),
         hasRecruitmentStatus: recruitmentValue !== undefined,
         isRecruiting: recruitmentValue === undefined ? null : Boolean(recruitmentValue),
-        destination: raw.code ? `/v2/clubs/${encodeURIComponent(String(raw.code))}` : '/v2/clubs',
+        destination: raw.code ? `/clubs/${encodeURIComponent(String(raw.code))}` : '/clubs',
         fullName: String(firstDefined(raw.fullName, raw.name, raw.code, 'Câu lạc bộ')),
         tagline: String(firstDefined(raw.tagline, raw.purpose, 'Cùng học hỏi, kết nối và trưởng thành.')),
         tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [category, raw.code].filter(Boolean),

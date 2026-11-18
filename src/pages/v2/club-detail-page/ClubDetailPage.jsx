@@ -126,7 +126,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
     };
     return (
         <div className="v2-public-content v2-club-detail-page">
-            <Link to={`/v2/clubs${location.search}`} className="v2-back">
+            <Link to={`/clubs${location.search}`} className="v2-back">
                 <ArrowLeft size={16} /> Tất cả câu lạc bộ
             </Link>
             <PageState status={result.status} onRetry={result.retry}>
@@ -228,7 +228,7 @@ export default function ClubDetailPage({ api, viewer, viewerAccess, sessionKey }
                         <p>Hồ sơ sẽ được gửi đến ban chủ nhiệm CLB để xem xét.</p>
                         <p className="v2-club-join-profile">
                             <span>Thông tin hồ sơ đã được tự điền.</span>
-                            <Link to="/v2/profile">Chỉnh sửa hồ sơ</Link>
+                            <Link to="/profile">Chỉnh sửa hồ sơ</Link>
                         </p>
                         <div className="v2-club-join-form-grid">
                             <label>

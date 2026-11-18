@@ -35,7 +35,7 @@ test('SSO roundtrip restores the original route, uses PKCE, and never puts token
     assert.equal(body.code, 'opaque-ticket');
     assert.equal(await challengeFor(body.codeVerifier), expectedChallenge);
     return response(200, credentials);
-  }, '/v2/my-clubs/ABC?tab=reports#section');
+  }, '/my-clubs/ABC?tab=reports#section');
   assert.equal(await destination.sso.bootstrap(), true);
   const request = new URL(destination.location.navigated);
   expectedChallenge = request.searchParams.get('challenge');
@@ -54,7 +54,7 @@ test('SSO roundtrip restores the original route, uses PKCE, and never puts token
   assert.equal(source.location.navigated.includes('staff-refresh'), false);
   destination.location.href = source.location.navigated;
   assert.equal(await destination.sso.bootstrap(), false);
-  assert.equal(destination.location.href, `${CLUB}/v2/my-clubs/ABC?tab=reports#section`);
+  assert.equal(destination.location.href, `${CLUB}/my-clubs/ABC?tab=reports#section`);
   assert.equal(destination.session.read().user.id, 7);
   assert.equal(redeemed, 1);
 });

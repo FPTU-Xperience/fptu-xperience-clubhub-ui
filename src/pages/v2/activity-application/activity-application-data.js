@@ -1,5 +1,5 @@
 import { clubCapability } from '../../../services/club-capabilities.js';
-import { tagSelectionPayload } from '../../../services/discovery-tags.js';
+import { ACTIVITY_TYPES, tagDraft, tagSelectionPayload } from '../../../services/discovery-tags.js';
 export const ACTION_ROLES = [
     ['Participant', 'Người tham gia', 1],
     ['Contributor', 'Người đóng góp', 1.6],
@@ -39,6 +39,8 @@ export const newApplication = (clubId, period = '') => ({
     description: '',
     objective: '',
     location: '',
+    activityType: '',
+    venueIds: [],
     startTime: '',
     endTime: '',
     scale: 'Club',
@@ -112,12 +114,15 @@ function activityInfoIssue(draft, now, requireComplete = false, semester) {
     if (!Number.isSafeInteger(Number(draft.clubId)) || Number(draft.clubId) <= 0)
         return { message: 'CLB không hợp lệ.' };
     for (const [field, label, limit] of infoFields) {
+        if (field === 'location' && draft.venueIds?.length) continue;
         const value = draft[field].trim();
         if (!value && (field !== 'objective' || requireComplete))
             return { field, message: `Vui lòng nhập ${label}.` };
         if (value.length > limit)
             return { field, message: `Giới hạn cho ${label} là ${limit.toLocaleString('vi-VN')} ký tự.` };
     }
+    if (!ACTIVITY_TYPES.some(([type]) => type === draft.activityType))
+        return { field: 'activityType', message: 'Vui lòng chọn loại hoạt động.' };
     const start = Date.parse(`${draft.startTime}:00+07:00`);
     const end = Date.parse(`${draft.endTime}:00+07:00`);
     if (!Number.isFinite(start) || start <= now)
@@ -219,15 +224,17 @@ export function applicationPayload(draft) {
         clubId: Number(draft.clubId),
         period: draft.period.trim(),
         title: draft.title.trim(),
+        activityType: draft.activityType,
         description: draft.description.trim(),
         objective: draft.objective.trim(),
-        location: draft.location.trim(),
+        location: draft.venueIds?.length ? '' : draft.location.trim(),
+        ...(draft.venueIds?.length && { venueIds: draft.venueIds }),
         startTimeUtc: activityTimeUtc(draft.startTime),
         endTimeUtc: activityTimeUtc(draft.endTime),
         scale: draft.scale,
         independentActionsConfirmed: draft.independentActionsConfirmed,
         isInternal: draft.isInternal !== false,
-        ...(draft.discoveryTagDraft && { tagSelection: tagSelectionPayload(draft.discoveryTagDraft) }),
+        tagSelection: { custom: tagSelectionPayload({ ...tagDraft(), customText: draft.discoveryTagDraft?.customText ?? '' }).custom },
         actions: draft.actions.map((action) => ({
             clientId: action.clientId,
             name: action.name.trim(),
