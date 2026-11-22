@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { workspaceSemesterQuery, workspaceSemesterKey } from './workspace-semester-data.js';
+import { workspaceSemesterQuery, workspaceSemesterKey, workspaceSemesterPath } from './workspace-semester-data.js';
+
+test('workspace navigation retains the selected semester without carrying other tab filters', () => {
+    assert.equal(workspaceSemesterPath('/my-clubs/C1/finance', { id: 'SUMMER2026' }), '/my-clubs/C1/finance?semester=SUMMER2026');
+    assert.equal(workspaceSemesterPath('/my-clubs/C1', { id: 'SUMMER2026' }), '/my-clubs/C1?semester=SUMMER2026');
+    assert.equal(workspaceSemesterPath('/ctsv/clubs/C1/workspace/members?tab=members#roster', { id: 's 1' }), '/ctsv/clubs/C1/workspace/members?tab=members&semester=s+1#roster');
+    assert.equal(workspaceSemesterPath('/my-clubs/C2/activities', null), '/my-clubs/C2/activities');
+});
 
 test('workspace filters require authoritative bounds and explicit report period mapping', () => {
     assert.deepEqual(workspaceSemesterQuery({ id: 'FA2026' }, 'activities'), {});

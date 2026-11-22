@@ -38,3 +38,15 @@ export const workspaceSemesterKey = (semester) =>
     semester
         ? JSON.stringify([semester.id, semester.startUtc, semester.endUtc, semester.reportPeriod])
         : 'unconfigured';
+
+export function workspaceSemesterPath(path, semester) {
+    if (!semester?.id) return path;
+    const hashAt = path.indexOf('#');
+    const hash = hashAt < 0 ? '' : path.slice(hashAt);
+    const target = hashAt < 0 ? path : path.slice(0, hashAt);
+    const queryAt = target.indexOf('?');
+    const pathname = queryAt < 0 ? target : target.slice(0, queryAt);
+    const params = new URLSearchParams(queryAt < 0 ? '' : target.slice(queryAt + 1));
+    params.set('semester', String(semester.id));
+    return `${pathname}?${params}${hash}`;
+}

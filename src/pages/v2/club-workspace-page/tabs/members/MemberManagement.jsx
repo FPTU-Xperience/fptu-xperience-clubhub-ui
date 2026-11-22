@@ -20,7 +20,9 @@ const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 export default function MemberManagement({ clubId, dashboard, readOnly = false, recruitmentOnly = false }) {
     const [list, setList] = useListQuery({ tab: 'members', search: '', role: 'All', page: 1 });
     const { search, role, page } = list;
-    const tab = recruitmentOnly && list.tab === 'members' ? 'applications' : list.tab;
+    const tab = readOnly && list.tab === 'applications'
+        ? 'members'
+        : recruitmentOnly && list.tab === 'members' ? 'applications' : list.tab;
     const setTab = (value) => setList('tab', value);
     const setSearch = (value) => setList('search', value);
     const setRole = (value) => setList('role', value);
@@ -72,7 +74,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
                               sortBy: 'name',
                               sortDirection: 'asc',
                           }),
-                    api.getClubMemberships(clubId),
+                    readOnly ? Promise.resolve(null) : api.getClubMemberships(clubId),
                 ]);
                 if (!active) return;
                 setMembers(results[0].status === 'fulfilled' ? results[0].value : null);
@@ -91,7 +93,7 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
             active = false;
             clearTimeout(timer);
         };
-    }, [api, clubId, search, role, page, version, recruitmentOnly]);
+    }, [api, clubId, search, role, page, version, recruitmentOnly, readOnly]);
 
     const refresh = () => {
         setPage(1);
@@ -234,14 +236,14 @@ export default function MemberManagement({ clubId, dashboard, readOnly = false, 
                                 Ban quản lý
                             </button>
                         }
-                        <button
+                        {!readOnly && <button
                             type="button"
                             className="v2-button"
                             aria-pressed={tab === 'applications'}
                             onClick={() => setTab('applications')}
                         >
                             Quản lý đơn <CountBadge count={pending?.length} label="đơn chờ duyệt" />
-                        </button>
+                        </button>}
                     </div>
                     {tab === 'governance' && (
                         <ClubGovernance
