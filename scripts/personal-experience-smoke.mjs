@@ -13,7 +13,10 @@ const mode=new URLSearchParams(location.search).get('qa');history.replaceState(n
 const user={id:1,name:'Nguyễn An',email:'an@example.test',roles:['STUDENT']};
 const initial={id:'12345678-1234-1234-1234-123456789abc',userId:1,title:'Chứng chỉ tiếng Anh quốc tế',status:'APPROVED',sourceType:'EXTERNAL',isAuthoritative:true,rawPoints:14,semesterId:'FALL2026',occurredAt:'2026-10-10T00:00:00Z',version:'12345678-1234-1234-1234-123456789abc',evidenceRefs:['eeeeeeee-1111-2222-3333-444444444444']};window.__rows=mode==='empty'?[]:[initial];
 Object.assign(initial,{organizationSource:'Trung tâm chứng nhận',proposedAttributes:{tier:'T1',role:'Participant',scale:'National',result:'None',pillarWeights:[{pillar:'Academic',weight:1}]}});if(mode==='revision')Object.assign(initial,{status:'REVISION_REQUESTED',rawPoints:0,referringClubId:7,clubId:7,clubReviewStatus:'CHANGES_REQUESTED',ctsvSubmissionStatus:'NOT_SUBMITTED',message:'Bổ sung kết quả được xác nhận'});
+if(mode==='legacy')Object.assign(initial,{isAuthoritative:false,sourceNamespace:'LEGACY_DECLARATION',status:'SUBMITTED',semesterId:null,version:null});
 window.fetch=async(url,options={})=>{const pathname=new URL(url,location.origin).pathname;const body=options.body;window.__calls.push({pathname,method:options.method||'GET',key:options.headers?.['Idempotency-Key'],body:typeof body==='string'?JSON.parse(body):body instanceof FormData?{fileName:body.get('file')?.name}:null});const json=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
+if(pathname.startsWith('/api/v1/declarations/')&&pathname.endsWith('/upgrade')){if(window.__failUpgrade)return json({message:'Lỗi chuyển hồ sơ kiểm thử'},503);const input=JSON.parse(body).submission;Object.assign(initial,{isAuthoritative:true,sourceNamespace:'DECLARATION',canUpgradeLegacy:false,status:'SUBMITTED',semesterId:input.semesterId,version:crypto.randomUUID(),evidenceRefs:input.evidenceRefs,proposedAttributes:input.proposedAttributes,rawPoints:0});return json(initial,201);}
+if(mode==='legacy'&&pathname==='/api/v1/declarations/'+initial.id)return json(initial.isAuthoritative?{contribution:initial,decisions:[]}:{id:initial.id,studentId:1,title:initial.title,status:'Submitted',isAuthoritative:false,sourceNamespace:'LEGACY_DECLARATION',canUpgradeLegacy:true,legacyVersion:'a'.repeat(64),organizationSource:'Đơn vị chứng nhận lịch sử',category:'Academic',startDate:'2026-10-10',evidenceDescription:'Minh chứng cần bổ sung học kỳ và tệp riêng tư',evidenceUrl:'https://example.test/old-evidence'});
 if(pathname.endsWith('/experience-summary'))return mode==='summary-error'?json({message:'Báo cáo tổng hợp chưa sẵn sàng'},503):json({userId:1,semesterId:'FALL2026',recognizedContributionCount:1,rawExperiencePoints:14});
 if(pathname==='/api/users/me/contributions')return mode==='list-error'?json({message:'Lỗi danh sách trải nghiệm'},503):json({items:window.__rows,page:1,pageSize:20,total:window.__rows.length,totalPages:window.__rows.length?1:0});
 if(pathname==='/api/contributions/evidence')return json({evidenceId:'eeeeeeee-1111-2222-3333-444444444444'});
@@ -233,6 +236,25 @@ try {
         ),
     );
     await responsive('personal-experience-revised');
+    await open('legacy');
+    await click('Chứng chỉ tiếng Anh quốc tế');
+    await waitFor(`document.querySelector('main').textContent.includes('Bổ sung hồ sơ cũ')`);
+    await click('Bổ sung hồ sơ cũ');
+    await waitFor(`!!document.querySelector('.personal-experience-form')`);
+    await fill('Học kỳ *', 'FALL2026');
+    const legacyDocument = await call('DOM.getDocument');
+    const legacyFile = await call('DOM.querySelector', { nodeId: legacyDocument.root.nodeId, selector: 'input[type="file"]' });
+    await call('DOM.setFileInputFiles', { nodeId: legacyFile.nodeId, files: [path.join(directory, 'certificate.pdf')] });
+    await delay(100);
+    await evaluate('window.__failUpgrade=true');
+    await click('Gửi trải nghiệm xét duyệt');
+    await expect('Lỗi chuyển hồ sơ kiểm thử');
+    await evaluate('window.__failUpgrade=false');
+    await click('Gửi trải nghiệm xét duyệt');
+    await waitFor(`!document.querySelector('.personal-experience-form')&&document.querySelector('main').textContent.includes('Chưa ghi nhận')`);
+    assert.ok(await evaluate(`(()=>{const calls=window.__calls.filter(c=>c.pathname.endsWith('/upgrade'));return calls.length===2&&calls[0].key===calls[1].key&&calls[1].body.expectedLegacyVersion==='a'.repeat(64)&&calls[1].body.submission.semesterId==='FALL2026'&&calls[1].body.submission.evidenceRefs.length===1&&window.__rows[0].id==='12345678-1234-1234-1234-123456789abc'})()`));
+    assert.equal(await evaluate(`window.__calls.filter(c=>c.pathname==='/api/contributions/evidence').length`), 1);
+    await responsive('personal-experience-legacy-upgraded');
     await open('list-error');
     await expect('Lỗi danh sách trải nghiệm');
     assert.equal(await evaluate(`!!document.querySelector('.personal-experience-empty')`), false);
