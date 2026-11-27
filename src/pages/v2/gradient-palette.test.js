@@ -9,8 +9,7 @@ import {
     canvasPaletteColor,
 } from '../../components/media/color-palette.js';
 import { normalizeInitialsDesign } from '../../components/media/initials-design.js';
-import { publishClubGift } from './profile-page/club-gifts.js';
-import { publishClubShape, redeemCoverReward, getClubCoverRewards } from './profile-page/cover-cosmetics.js';
+import { acceptServerCosmetics } from '../../services/server-cosmetics-cache.js';
 import { encodeSvgAsset, decodeSvgAsset, applySvgPalette } from './profile-page/svg-palette.js';
 import { frameAssetStyle } from './profile-page/avatar-frame-assets.js';
 import { saveProfile, readProfile } from './profile-data.js';
@@ -78,35 +77,46 @@ test('profile accepts basic gradients and custom solid colors while custom gradi
 test('reward palettes, frame tint and shape SVG roles accept advanced gradients and retain ownership checks', () => {
     const db = store(),
         user = { id: 302, name: 'Student' };
-    const base = { clubId: 'gradient-club', label: 'Gradient', cost: 0 };
-    const palette = publishClubGift(
+    const palette = { id: 'gradient-palette' },
+        frame = { id: 'gradient-frame' },
+        shape = { id: 'gradient-shape' };
+    const entries = [
         {
-            ...base,
-            kind: 'color',
-            background: advanced,
-            secondary: 'gradient:forest',
-            accent: advanced,
-            ink: '#123456',
+            cosmetic: {
+                cosmeticId: palette.id,
+                kind: 'COLOR',
+                issuerClubId: 10,
+                label: 'Gradient',
+                definition: { background: advanced, secondary: 'gradient:forest', accent: advanced, ink: '#123456' },
+            },
         },
-        db,
-    );
-    const frame = publishClubGift(
-        { ...base, kind: 'frame', assetUrl: 'data:image/png;base64,aW1hZ2U=', color: advanced, recolor: true },
-        db,
-    );
-    const shape = publishClubShape(
         {
-            ...base,
-            assetUrl: encodeSvgAsset(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="var(--primary)"/></svg>',
-            ),
-            svgPalette: { primary: advanced, secondary: 'gradient:forest' },
+            cosmetic: {
+                cosmeticId: frame.id,
+                kind: 'FRAME',
+                issuerClubId: 10,
+                label: 'Frame',
+                definition: { assetUrl: 'data:image/png;base64,aW1hZ2U=', color: advanced, recolor: true },
+            },
         },
-        db,
-    );
-    assert.equal(getClubCoverRewards('gradient-club', db)[0].svgPalette.primary, advanced);
+        {
+            cosmetic: {
+                cosmeticId: shape.id,
+                kind: 'SHAPE',
+                issuerClubId: 10,
+                label: 'Shape',
+                definition: {
+                    assetUrl: encodeSvgAsset(
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="var(--primary)"/></svg>',
+                    ),
+                    svgPalette: { primary: advanced, secondary: 'gradient:forest' },
+                },
+            },
+        },
+    ];
+    acceptServerCosmetics(303, entries);
     assert.throws(() => saveProfile(user, { coverPreset: palette.id }, db), /Kho quà/);
-    for (const gift of [palette, frame, shape]) redeemCoverReward(user, 'gradient-club', gift.key, db);
+    acceptServerCosmetics(user.id, entries);
     saveProfile(
         user,
         { coverPreset: palette.id, coverShape: shape.id, avatarFrame: frame.id, coverShapeUsePalette: true },

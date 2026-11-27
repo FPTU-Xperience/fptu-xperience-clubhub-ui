@@ -197,7 +197,7 @@ try {
     assert.deepEqual(errors, []);
     await open('missing');
     await click('4Báo cáo Xperience Point');
-    await expect('Chưa kết nối dữ liệu báo cáo Xperience Point');
+    await expect('Chưa thể lưu bảng Xperience Point');
     assert.equal(
         await evaluate(
             `[...document.querySelectorAll('button')].find(e=>e.textContent.includes('Tự điền từ minh chứng')).disabled`,

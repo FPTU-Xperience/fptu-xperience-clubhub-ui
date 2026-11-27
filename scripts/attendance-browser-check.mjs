@@ -35,7 +35,10 @@ try {
     }
     browser = await chromium.launch({ args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
     fs.mkdirSync('TestResults/attendance', { recursive: true });
-    for (const { width, registeredUsers } of [1440, 390].flatMap((width) => [{ width, registeredUsers: false }, { width, registeredUsers: true }])) {
+    for (const { width, registeredUsers } of [1440, 390].flatMap((width) => [
+        { width, registeredUsers: false },
+        { width, registeredUsers: true },
+    ])) {
         const context = await browser.newContext({
             viewport: { width, height: 1000 },
             geolocation: { latitude: 10, longitude: 106, accuracy: 20 },
@@ -279,7 +282,13 @@ try {
         assert.equal(challenges, 1, 'No automatic challenge polling');
         await page.getByRole('button', { name: 'Lấy mã xác thực phiên #1', exact: true }).click();
         const qrImage = page.getByAltText('Mã QR điểm danh phiên 1', { exact: true });
-        await qrImage.waitFor();
+        try {
+            await qrImage.waitFor();
+        } catch (issue) {
+            await page.screenshot({ path: `TestResults/attendance/qr-failure-${width}.png`, fullPage: true });
+            console.error('QR diagnostic:', await page.locator('body').innerText(), errors);
+            throw issue;
+        }
         const encodedQr = Buffer.from((await qrImage.getAttribute('src')).split(',')[1], 'base64');
         await page.getByRole('button', { name: 'Xem điểm danh phiên #1', exact: true }).click();
         await page.getByRole('button', { name: 'Ghi điểm danh · Student 105', exact: true }).click();
@@ -297,36 +306,63 @@ try {
         await page.getByRole('button', { name: 'Vai sinh viên A', exact: true }).click();
         await page.getByRole('button', { name: 'Điểm danh phiên', exact: true }).click();
         if (!registeredUsers) {
-        await page.evaluate(() => {
-            window.__originalQrMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
-            navigator.mediaDevices.getUserMedia = async () => { throw new DOMException('Denied', 'NotAllowedError'); };
-        });
-        await page.getByRole('button', { name: 'Quét mã QR bằng camera', exact: true }).click();
-        await page.getByRole('alert').filter({ hasText: 'Chưa được cấp quyền camera' }).waitFor();
-        await page.evaluate(() => { navigator.mediaDevices.getUserMedia = window.__originalQrMedia; });
-        await page.getByRole('button', { name: 'Quét mã QR bằng camera', exact: true }).click();
-        await page.waitForFunction(() => document.querySelector('video')?.srcObject?.active);
-        await page.evaluate(() => { window.__qrTracks = document.querySelector('video').srcObject.getTracks(); });
-        await page.getByRole('button', { name: 'Dừng camera', exact: true }).click();
-        assert.equal(await page.evaluate(() => window.__qrTracks.every((track) => track.readyState === 'ended')), true);
-        const wrongQr = await qr.toBuffer(attendanceQrPayload(2, {
-            sessionId: 1, challenge: 'signed-current-fixture', expiresAt: new Date(Date.now() + 30000).toISOString(),
-        }));
-        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'other-session.png', mimeType: 'image/png', buffer: wrongQr });
-        await page.getByRole('alert').filter({ hasText: 'không thuộc phiên' }).waitFor();
-        assert.equal(checkIns, 0, 'Scanning never sends attendance');
-        // This payload consistently exposes the detector's alignment-pattern
-        // failure. The image fallback must still pass normal session validation.
-        const alignmentQr = await qr.toBuffer(attendanceQrPayload(1, {
-            sessionId: 1, challenge: 'signed-current-fixture', expiresAt: '2026-11-05T13:48:26.265Z',
-        }), { width: 360, margin: 4, errorCorrectionLevel: 'M' });
-        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'exported-session.png', mimeType: 'image/png', buffer: alignmentQr });
-        await page.getByRole('alert').filter({ hasText: 'Mã QR đã hết hạn' }).waitFor();
-        assert.equal(checkIns, 0, 'Exported QR fallback never sends attendance');
-        await page.getByLabel('Ảnh QR điểm danh', { exact: true }).setInputFiles({ name: 'current-session.png', mimeType: 'image/png', buffer: encodedQr });
-        await page.getByText('Đã đọc mã QR.', { exact: false }).waitFor();
-        assert.equal(await page.getByLabel('Mã xác thực phiên', { exact: true }).inputValue(), 'signed-current-fixture');
-        assert.equal(checkIns, 0, 'A decoded QR still requires explicit confirmation');
+            await page.evaluate(() => {
+                window.__originalQrMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+                navigator.mediaDevices.getUserMedia = async () => {
+                    throw new DOMException('Denied', 'NotAllowedError');
+                };
+            });
+            await page.getByRole('button', { name: 'Quét mã QR bằng camera', exact: true }).click();
+            await page.getByRole('alert').filter({ hasText: 'Chưa được cấp quyền camera' }).waitFor();
+            await page.evaluate(() => {
+                navigator.mediaDevices.getUserMedia = window.__originalQrMedia;
+            });
+            await page.getByRole('button', { name: 'Quét mã QR bằng camera', exact: true }).click();
+            await page.waitForFunction(() => document.querySelector('video')?.srcObject?.active);
+            await page.evaluate(() => {
+                window.__qrTracks = document.querySelector('video').srcObject.getTracks();
+            });
+            await page.getByRole('button', { name: 'Dừng camera', exact: true }).click();
+            assert.equal(
+                await page.evaluate(() => window.__qrTracks.every((track) => track.readyState === 'ended')),
+                true,
+            );
+            const wrongQr = await qr.toBuffer(
+                attendanceQrPayload(2, {
+                    sessionId: 1,
+                    challenge: 'signed-current-fixture',
+                    expiresAt: new Date(Date.now() + 30000).toISOString(),
+                }),
+            );
+            await page
+                .getByLabel('Ảnh QR điểm danh', { exact: true })
+                .setInputFiles({ name: 'other-session.png', mimeType: 'image/png', buffer: wrongQr });
+            await page.getByRole('alert').filter({ hasText: 'không thuộc phiên' }).waitFor();
+            assert.equal(checkIns, 0, 'Scanning never sends attendance');
+            // This payload consistently exposes the detector's alignment-pattern
+            // failure. The image fallback must still pass normal session validation.
+            const alignmentQr = await qr.toBuffer(
+                attendanceQrPayload(1, {
+                    sessionId: 1,
+                    challenge: 'signed-current-fixture',
+                    expiresAt: '2026-11-05T13:48:26.265Z',
+                }),
+                { width: 360, margin: 4, errorCorrectionLevel: 'M' },
+            );
+            await page
+                .getByLabel('Ảnh QR điểm danh', { exact: true })
+                .setInputFiles({ name: 'exported-session.png', mimeType: 'image/png', buffer: alignmentQr });
+            await page.getByRole('alert').filter({ hasText: 'Mã QR đã hết hạn' }).waitFor();
+            assert.equal(checkIns, 0, 'Exported QR fallback never sends attendance');
+            await page
+                .getByLabel('Ảnh QR điểm danh', { exact: true })
+                .setInputFiles({ name: 'current-session.png', mimeType: 'image/png', buffer: encodedQr });
+            await page.getByText('Đã đọc mã QR.', { exact: false }).waitFor();
+            assert.equal(
+                await page.getByLabel('Mã xác thực phiên', { exact: true }).inputValue(),
+                'signed-current-fixture',
+            );
+            assert.equal(checkIns, 0, 'A decoded QR still requires explicit confirmation');
         } else {
             await page.getByLabel('Mã xác thực phiên', { exact: true }).fill('signed-current-fixture');
         }

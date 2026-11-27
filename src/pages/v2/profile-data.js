@@ -213,11 +213,22 @@ export function readProfile(user, storage = globalThis.localStorage) {
     const saved = savedProfileRecord(user, storage);
     if (!saved) return clone(seed);
     try {
+        const restored = { ...saved.profile };
+        const colors = getCoverColors(storage);
+        // Retired local rewards must not discard unrelated profile text or personal fields.
+        if (restored.coverPreset !== 'custom' && !colors.some((item) => item.id === restored.coverPreset))
+            restored.coverPreset = seed.profile.coverPreset;
+        if (!colors.some((item) => item.id === restored.coverBackgroundColor))
+            restored.coverBackgroundColor = seed.profile.coverBackgroundColor;
+        if (!getCoverShapes(storage).some((item) => item.id === restored.coverShape))
+            restored.coverShape = seed.profile.coverShape;
+        if (!getAvatarFrames(storage).some((item) => item.id === restored.avatarFrame))
+            restored.avatarFrame = seed.profile.avatarFrame;
         return {
             ...seed,
             profile: {
                 ...seed.profile,
-                ...editableProfile(saved.profile, seed.profile, storage),
+                ...editableProfile(restored, seed.profile, storage),
             },
             personal: editablePersonal(saved.personal || {}, seed.personal),
             academic: editableAcademic(saved.academic || {}, seed.academic),
@@ -290,7 +301,8 @@ export function readProfileFromMemberships(user, memberships, storage = globalTh
 }
 
 export function projectOwnMemberProfile(member, user, snapshot) {
-    if (member.profileSource === 'user-profile' || !snapshot || !user?.id || String(member.userId) !== String(user.id)) return member;
+    if (member.profileSource === 'user-profile' || !snapshot || !user?.id || String(member.userId) !== String(user.id))
+        return member;
     return {
         ...member,
         fullName: snapshot.profile.displayName,
