@@ -13,6 +13,7 @@ const fileTypes = {
 };
 
 export function safeResourceUrl(value) {
+    if (/^\/api\/activities\/\d+\/resources\/[a-f0-9-]{36}\/download$/i.test(value || '')) return value;
     try {
         const url = new URL(value);
         if (
@@ -30,7 +31,7 @@ export function safeResourceUrl(value) {
 
 export function youtubeEmbedUrl(value) {
     const safe = safeResourceUrl(value);
-    if (!safe) return '';
+    if (!safe || safe.startsWith('/')) return '';
     const url = new URL(safe);
     let id;
     if (url.hostname === 'youtu.be') id = url.pathname.slice(1);

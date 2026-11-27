@@ -20,6 +20,7 @@ import ActivityPublicationControl from './ActivityPublicationControl';
 import ActivityRescheduleControl from './ActivityRescheduleControl';
 import ActivityRecap from '../../../../../components/v2/activity-detail/ActivityRecap';
 import ActivityClosingReport from '../../../../../components/v2/activity-detail/ActivityClosingReport';
+import ActivityPostponement from '../../../../../components/v2/activity-detail/ActivityPostponement';
 import ActivityFinalRoles from '../../../../../components/v2/activity-detail/ActivityFinalRoles';
 import CertificateDefinitions from '../../../../../components/v2/activity-detail/CertificateDefinitions';
 import CampusActivityOperations from '../../../../../components/v2/activity-detail/CampusActivityOperations';
@@ -340,6 +341,7 @@ export default function ActivityManagementPage({ api, sessionKey, activityId, wo
                             <>{manager && <ActivityVisibilityControl api={api} activity={activity}
                                 disabled={busy || Boolean(coreDraft || editorDraft)} onSaved={() => result.retry()} />}
                             {manager && activity.sourceApplicationId && <ActivityRescheduleControl key={activity.id} api={api} activity={activity} />}
+                            {manager && <ActivityPostponement key={`postpone-${activity.id}-${activity.version}`} api={api} activityId={activity.id} onChanged={result.retry} />}
                             <ActivityPublicationControl
                                 api={api}
                                 activity={activity}

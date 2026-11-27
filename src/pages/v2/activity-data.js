@@ -25,7 +25,7 @@ export function mapActivityDetailItem(raw = {}) {
     const status = legacyStatus === 'SCHEDULED' && timeline.status
         ? timeline.status
         : legacyStatus === 'SCHEDULED' ? 'UPCOMING' : legacyStatus;
-    if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED'].includes(status)) return null;
+    if (!raw.id || !['UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED', 'POSTPONED'].includes(status)) return null;
     return {
         ...activityPublication(raw),
         id: String(raw.id),

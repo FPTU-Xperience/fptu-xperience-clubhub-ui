@@ -795,6 +795,15 @@ class ApiService {
         return this.parseResponse(response);
     }
 
+    async activityResourceBlob(path) {
+        if (!/^\/api\/activities\/\d+\/resources\/[a-f0-9-]{36}\/download$/i.test(path)) throw new Error('Đường dẫn tài nguyên không hợp lệ.');
+        const response = await session.authFetch(this.buildUrl(path), {
+            headers: this.getToken() ? { Authorization: `Bearer ${this.getToken()}` } : {},
+        });
+        if (!response.ok) throw new Error(await this.getErrorMessage(response));
+        return response.blob();
+    }
+
     async downloadContributionEvidence(id, name = 'minh-chung') {
         const token = this.getToken();
         const response = await session.authFetch(

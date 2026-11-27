@@ -33,11 +33,16 @@ test('embedded video links only produce controlled YouTube iframe URLs', () => {
     for (const value of ['http://example.com', 'https://user:pass@example.com', 'https://127.0.0.1', 'https://172.16.0.1']) assert.equal(safeResourceUrl(value), '');
 });
 
-test('provisional upload refuses an unexpected signed destination before sending file bytes or committing', async () => {
+test('file upload uses authenticated multipart and requires an exact persisted receipt', async () => {
     const requests = [];
-    const api = { request: async (path) => { requests.push(path); return { id: 'intent', mimeType: 'application/pdf', uploadUrl: 'https://evil.test/file?X-Amz-Signature=foo' }; } };
-    await assert.rejects(saveActivityResource(api, 1, { id: 'draft', kind: 'DOCUMENT', file: { name: 'a.pdf', type: 'application/pdf', size: 10 } }), /địa chỉ/);
-    assert.deepEqual(requests, ['/api/activities/1/resources/upload-intents']);
+    const file = new File(['%PDF-1.4'], 'a.pdf', { type: 'application/pdf' });
+    const api = { request: async (path, options) => {
+        requests.push(path); assert.ok(options.body instanceof FormData);
+        assert.equal(options.body.get('file').name, 'a.pdf');
+        return { id: 'file', mimeType: 'application/pdf', url: 'https://evil.test/file' };
+    } };
+    await assert.rejects(saveActivityResource(api, 1, { id: 'draft', kind: 'DOCUMENT', title: 'File', visibility: 'CLUB', file }), /chưa xác nhận/);
+    assert.deepEqual(requests, ['/api/activities/1/resources/upload']);
 });
 
 test('a resource is not reported saved without a server acknowledgement', async () => {

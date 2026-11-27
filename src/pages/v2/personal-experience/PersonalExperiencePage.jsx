@@ -46,7 +46,7 @@ function SelectField({ label, value, onChange, options, disabled = false }) {
     );
 }
 
-function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSubmitted, revisionRecord = null }) {
+function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSubmitted, revisionRecord = null, legacyRecord = null }) {
     const [form, setForm] = useState(() =>
             revisionRecord
                 ? {
@@ -63,7 +63,12 @@ function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSu
                       referenceMode: revisionRecord.referringClubId ? 'CLUB' : 'DIRECT',
                       referenceClubId: revisionRecord.referringClubId || '',
                   }
-                : blankExperience(semesterId),
+                : legacyRecord ? {
+                    ...blankExperience(semesterId), title: legacyRecord.title,
+                    organizationSource: legacyRecord.organizationSource || '',
+                    occurredDate: legacyRecord.startDate || '', description: legacyRecord.evidenceDescription || '',
+                    category: legacyRecord.category || 'Academic',
+                } : blankExperience(semesterId),
         ),
         [files, setFiles] = useState(() =>
             (revisionRecord?.evidenceRefs || []).map((id, index) => ({
@@ -118,7 +123,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSu
             if (revisionRecord) payload.evidenceDescription = form.description.trim();
             if (revisionRecord && revisionRecord.proposedAttributes.pillarWeights.length > 1)
                 payload.proposedAttributes.pillarWeights = revisionRecord.proposedAttributes.pillarWeights;
-            const result = revisionRecord
+            const result = legacyRecord ? await client.upgrade(legacyRecord, payload, key.current) : revisionRecord
                 ? await client.revise(revisionRecord, payload, key.current)
                 : await client.submit(payload, key.current);
             if (alive.current) onSubmitted(result);
@@ -136,7 +141,8 @@ function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSu
                 <ArrowLeft size={16} /> Danh sách trải nghiệm
             </button>
             <section className="personal-experience-panel">
-                <h2>{revisionRecord ? 'Bổ sung và gửi lại trải nghiệm' : 'Tạo trải nghiệm tự khai'}</h2>
+                <h2>{legacyRecord ? 'Bổ sung hồ sơ cũ để xét duyệt' : revisionRecord ? 'Bổ sung và gửi lại trải nghiệm' : 'Tạo trải nghiệm tự khai'}</h2>
+                {legacyRecord && <p>Chọn học kỳ và tải minh chứng riêng tư để tiếp tục hồ sơ đang chờ. Hồ sơ giữ nguyên mã và chưa được cộng điểm.</p>}
                 <p>
                     Ghi nhận giải thi đấu, cuộc thi bên ngoài, văn bằng hoặc chứng chỉ bạn đã đạt được. Đính kèm minh
                     chứng để đề nghị xét Xperience Point.
@@ -401,7 +407,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSu
     );
 }
 
-function ExperienceDetail({ row, client, api, onBack }) {
+function ExperienceDetail({ row, client, api, onBack, semesterId, clubAccess }) {
     const [result, setResult] = useState({ loading: true }),
         [retry, setRetry] = useState(0),
         [error, setError] = useState(''),
@@ -434,6 +440,9 @@ function ExperienceDetail({ row, client, api, onBack }) {
         );
     const data = result.data,
         record = data.contribution;
+    if (editing && record.canUpgradeLegacy) return <ExperienceForm key={`${record.id}:${record.legacyVersion}`} api={api} client={client}
+        legacyRecord={record} semesterId={semesterId} clubAccess={clubAccess}
+        onBack={() => setEditing(false)} onSubmitted={() => { setEditing(false); setRetry(v => v + 1); }} />;
     if (editing && record.status === 'REVISION_REQUESTED')
         return (
             <ExperienceForm
@@ -465,6 +474,10 @@ function ExperienceDetail({ row, client, api, onBack }) {
                     <span className="personal-experience-status">{status(record.status)}</span>
                 </div>
                 <p>{record.message || record.evidenceDescription || 'Chưa có mô tả.'}</p>
+                {record.sourceNamespace === 'LEGACY_DECLARATION' && <p className="personal-experience-notice">
+                    {record.canUpgradeLegacy ? 'Hồ sơ cũ đang chờ bổ sung học kỳ và minh chứng riêng tư trước khi xét duyệt.' : 'Hồ sơ lịch sử chỉ đọc. Kết quả cũ không được tự động tính lại vào sổ điểm hiện tại.'}
+                </p>}
+                {record.canUpgradeLegacy && <button type="button" className="v2-button v2-button--primary" onClick={() => setEditing(true)}>Bổ sung hồ sơ cũ</button>}
                 {record.referringClubId && (
                     <p className="personal-experience-notice">
                         Tham chiếu CLB #{record.referringClubId} ·{' '}
@@ -703,6 +716,8 @@ export default function PersonalExperiencePage({ api, user, clubAccess = [] }) {
                         client={client}
                         api={api}
                         onBack={back}
+                        semesterId={semester || summary.data?.semesterId || ''}
+                        clubAccess={clubAccess}
                     />
                 ) : (
                     <PageState status="error" description="Mã trải nghiệm không hợp lệ." />

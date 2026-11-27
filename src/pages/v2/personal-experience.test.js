@@ -9,6 +9,20 @@ import {
     validateExperience,
 } from './personal-experience/personal-experience-data.js';
 const id = '12345678-1234-1234-1234-123456789abc';
+test('legacy upgrade keeps the historical ID and current fingerprint, and rejects unconfirmed migration receipts', async () => {
+    const record = { id, canUpgradeLegacy: true, legacyVersion: 'a'.repeat(64) };
+    const receipt = { id, userId: 1, status: 'SUBMITTED', version: 'aaaaaaaa-1111-2222-3333-444444444444' };
+    const calls = [];
+    const client = createPersonalExperienceClient({ request: async (path, options) => { calls.push({ path, options }); return receipt; } }, 1);
+    const submission = { semesterId: 'FA2026', evidenceRefs: ['private-evidence'] };
+    await client.upgrade(record, submission, 'stable-upgrade-key');
+    assert.equal(calls[0].path, `/api/v1/declarations/${id}/upgrade`);
+    assert.equal(calls[0].options.headers['Idempotency-Key'], 'stable-upgrade-key');
+    assert.deepEqual(JSON.parse(calls[0].options.body), { expectedLegacyVersion: record.legacyVersion, submission });
+    await assert.rejects(() => client.upgrade({ ...record, canUpgradeLegacy: false }, submission, 'denied'));
+    for (const patch of [{ id: 'other-id' }, { userId: 2 }, { status: 'APPROVED' }, { version: null }])
+        await assert.rejects(() => createPersonalExperienceClient({ request: async () => ({ ...receipt, ...patch }) }, 1).upgrade(record, submission, 'bad-receipt'));
+});
 const form = () => ({
     ...blankExperience('FALL2026'),
     title: 'Đạt giải thi đấu bên ngoài',

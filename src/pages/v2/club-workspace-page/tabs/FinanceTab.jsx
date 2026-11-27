@@ -3,6 +3,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import WorkspaceTabLayout from './WorkspaceTabLayout';
 import useWorkspaceResource from './useWorkspaceResource';
 import { useWorkspaceSemester } from '../WorkspaceSemesterContext';
+import RawFundingBalance from '../../../../components/v2/activity-detail/RawFundingBalance';
 
 const money = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(amount);
 
@@ -27,6 +28,7 @@ export default function FinanceTab({ workspace }) {
         <WorkspaceTabLayout title="Tài chính" description="Đề xuất ngân sách và giao dịch toàn CLB theo quyền truy cập." records={proposals}>
             {() => (
                 <>
+                    <RawFundingBalance api={api} clubId={clubId} semesterId={semester?.code || semester?.reportPeriod || semester?.id} />
                     {result.status === 'loading' && <p className="v2-workspace-data-note" role="status">Đang tải dữ liệu tài chính…</p>}
                     {result.status !== 'loading' && (result.status !== 'ready' || (!result.data?.proposals && !result.data?.transactions)) && (
                         <p className="v2-workspace-data-note" role="alert">Bạn chưa có quyền xem hoặc không tải được tài chính CLB. <button type="button" onClick={result.retry}>Thử lại</button></p>

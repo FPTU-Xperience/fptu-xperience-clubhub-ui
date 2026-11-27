@@ -162,6 +162,17 @@ export function experiencePage(value, userId) {
 }
 export function createPersonalExperienceClient(api, userId) {
     return {
+        async upgrade(record, payload, key) {
+            if (!record.canUpgradeLegacy || !/^[0-9a-f]{64}$/i.test(record.legacyVersion ?? ''))
+                throw new Error('Tải lại hồ sơ cũ trước khi bổ sung.');
+            const row = await api.request(`/api/v1/declarations/${encodeURIComponent(record.id)}/upgrade`, {
+                method: 'POST', headers: { 'Idempotency-Key': key },
+                body: JSON.stringify({ expectedLegacyVersion: record.legacyVersion, submission: payload }),
+            });
+            if (row?.id !== record.id || String(row.userId) !== String(userId) || row.status !== 'SUBMITTED' || !GUID.test(row.version))
+                throw new Error('Chưa xác nhận được hồ sơ đã bổ sung. Tải lại trước khi thử tiếp.');
+            return row;
+        },
         async revise(record, payload, key) {
             const row = await api.request(`/api/contributions/${encodeURIComponent(record.id)}`, {
                 method: 'PATCH',

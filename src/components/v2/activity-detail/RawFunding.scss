@@ -1,0 +1,23 @@
+.v2-raw-funding-fields, .v2-raw-funding-balance {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    color: #334155;
+    line-height: 1.6;
+    label { display: grid; gap: 6px; min-width: 0; font-size: 14px; font-weight: 600; }
+    input, select, textarea { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font: inherit; background: #fff; color: #0f172a; }
+    input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid #f97316; outline-offset: 2px; }
+    legend, h3 { font-weight: 700; font-size: 16px; }
+    p { margin: 0; }
+    button { border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; background: #fff; color: #334155; cursor: pointer; font: inherit; }
+    button:disabled { opacity: .5; cursor: default; }
+    dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; }
+    dl > div { padding: 12px; background: #f8fafc; border-radius: 8px; }
+    dd { margin: 6px 0 0; font-weight: 700; }
+    article { border-top: 1px solid #e2e8f0; padding-top: 12px; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+}

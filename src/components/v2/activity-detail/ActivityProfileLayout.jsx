@@ -11,6 +11,7 @@ const statuses = {
     LIVE: ['live', 'Đang diễn ra'],
     COMPLETED: ['completed', 'Đã hoàn thành'],
     CANCELLED: ['cancelled', 'Đã hủy'],
+    POSTPONED: ['cancelled', 'Tạm hoãn · Chờ lịch mới'],
 };
 export default function ActivityProfileLayout({
     activity: input,
