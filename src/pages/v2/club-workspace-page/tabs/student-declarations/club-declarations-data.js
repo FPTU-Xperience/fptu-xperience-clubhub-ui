@@ -20,34 +20,37 @@ export function belongsToClub(row, clubId) {
 const assertClub = (id) => {
     if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0) throw new Error('Không xác định được CLB.');
 };
-export async function loadClubDeclarations(api, clubId) {
+export async function loadClubDeclarations(
+    api,
+    clubId,
+    { page = 1, query = '', status = '', period = 'all', semester = '' } = {},
+) {
     assertClub(clubId);
-    // The existing authorized declaration queue does not support clubId filtering.
-    // Traverse its server pages, retaining only this club, so local counts/search stay correct.
-    let page = 1,
-        total,
-        seenCount = 0;
-    const seen = new Set(),
-        items = [];
-    do {
-        const value = await api.request(`/api/v1/student-affairs/declarations/?page=${page}&pageSize=100`);
-        const count = value?.pagination?.totalItems ?? value?.totalItems ?? value?.total;
-        if (!Array.isArray(value?.items) || !Number.isSafeInteger(count) || count < 0)
-            throw new Error('Danh sách trải nghiệm trả về chưa hợp lệ.');
-        if (total !== undefined && total !== count) throw new Error('Danh sách đã thay đổi. Vui lòng tải lại.');
-        total = count;
-        if (!value.items.length && seenCount < total) throw new Error('Danh sách đã thay đổi. Vui lòng tải lại.');
-        for (const row of value.items) {
-            if (!row?.id || seen.has(String(row.id)))
-                throw new Error('Danh sách trải nghiệm bị trùng hoặc thiếu nguồn. Tải lại trước khi xem.');
-            seen.add(String(row.id));
-            if (belongsToClub(row, clubId)) items.push(row);
-        }
-        seenCount += value.items.length;
-        page++;
-    } while ((page - 1) * 100 < total);
-    if (seenCount !== total) throw new Error('Danh sách đã thay đổi. Vui lòng tải lại.');
-    return items;
+    const params = new URLSearchParams({ page: String(page), pageSize: '20' });
+    if (query.trim()) params.set('query', query.trim());
+    if (status) params.set('status', status === 'REVISIONREQUESTED' ? 'REVISION_REQUESTED' : status);
+    if (period === 'workspace') {
+        if (!semester) throw new Error('Chọn học kỳ có mã hợp lệ.');
+        params.set('semesterId', semester);
+    }
+    if (period === 'unassigned') params.set('unassigned', 'true');
+    const value = await api.request(`/api/v1/declarations/clubs/${encodeURIComponent(clubId)}?${params}`);
+    if (
+        !Array.isArray(value?.items) ||
+        value.page !== page ||
+        value.pageSize !== 20 ||
+        !Number.isSafeInteger(value.total) ||
+        value.total < 0 ||
+        !Number.isSafeInteger(value.totalPages) ||
+        value.totalPages !== Math.ceil(value.total / 20) ||
+        value.items.length > 20 ||
+        new Set(value.items.map((row) => row?.id)).size !== value.items.length ||
+        value.items.some(
+            (row) => !row?.id || !belongsToClub(row, clubId) || String(row.referringClubId) !== String(clubId),
+        )
+    )
+        throw new Error('Danh sách trải nghiệm trả về chưa đúng phạm vi CLB hoặc phân trang.');
+    return { ...value, totalPages: Math.max(1, value.totalPages) };
 }
 export async function loadClubDeclarationDetail(api, clubId, id) {
     assertClub(clubId);

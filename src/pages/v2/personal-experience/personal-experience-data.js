@@ -56,14 +56,16 @@ export function validateEvidenceFile(file) {
         throw new Error('Chọn minh chứng PDF, PNG hoặc JPEG, tối đa 10 MB mỗi tệp.');
 }
 export function validateExperience(form, files, now = Date.now()) {
-    if (form.referenceMode !== 'DIRECT')
-        throw new Error(
-            'Gửi qua CLB trực thuộc cần chức năng tham chiếu/xác nhận từ máy chủ. Lựa chọn của bạn chưa được gửi.',
-        );
+    if (
+        !['DIRECT', 'CLUB'].includes(form.referenceMode) ||
+        (form.referenceMode === 'CLUB' &&
+            (!Number.isSafeInteger(Number(form.referenceClubId)) || Number(form.referenceClubId) <= 0))
+    )
+        throw new Error('Chọn hình thức gửi và CLB bạn đang trực thuộc.');
     if (
         !form.title.trim() ||
         form.title.trim().length > 200 ||
-        !form.organizationSource.trim() ||
+        (!form.isRevision && !form.organizationSource.trim()) ||
         !form.semesterId.trim()
     )
         throw new Error('Nhập tên trải nghiệm, đơn vị tổ chức/cấp chứng nhận và học kỳ.');
@@ -88,7 +90,9 @@ export function validateExperience(form, files, now = Date.now()) {
     )
         throw new Error('Chọn thuộc tính trải nghiệm hợp lệ.');
     if (!files.length || files.length > 10) throw new Error('Cần từ 1 đến 10 minh chứng để gửi xét duyệt.');
-    files.forEach(({ file }) => validateEvidenceFile(file));
+    files.forEach(({ file, evidenceId }) => {
+        if (!GUID.test(evidenceId)) validateEvidenceFile(file);
+    });
 }
 export function experiencePayload(form, evidenceRefs) {
     if (
@@ -98,7 +102,12 @@ export function experiencePayload(form, evidenceRefs) {
         new Set(evidenceRefs).size !== evidenceRefs.length
     )
         throw new Error('Chưa xác nhận đầy đủ các minh chứng đã tải lên.');
-    if (form.referenceMode !== 'DIRECT') throw new Error('Chưa hỗ trợ gửi trải nghiệm qua CLB trực thuộc.');
+    if (
+        !['DIRECT', 'CLUB'].includes(form.referenceMode) ||
+        (form.referenceMode === 'CLUB' &&
+            (!Number.isSafeInteger(Number(form.referenceClubId)) || Number(form.referenceClubId) <= 0))
+    )
+        throw new Error('Chọn CLB tham chiếu hợp lệ.');
     const kind = {
         competition: 'Thi đấu / cuộc thi bên ngoài',
         certificate: 'Chứng chỉ',
@@ -111,6 +120,7 @@ export function experiencePayload(form, evidenceRefs) {
         organizationSource: form.organizationSource.trim(),
         isOutsideClub: true,
         clubId: null,
+        ...(form.referenceMode === 'CLUB' ? { referringClubId: Number(form.referenceClubId) } : {}),
         evidenceUrl: '',
         evidenceDescription: `${kind}\n${form.description.trim()}`,
         roleProposed: form.role,
@@ -152,6 +162,31 @@ export function experiencePage(value, userId) {
 }
 export function createPersonalExperienceClient(api, userId) {
     return {
+        async revise(record, payload, key) {
+            const row = await api.request(`/api/contributions/${encodeURIComponent(record.id)}`, {
+                method: 'PATCH',
+                headers: { 'Idempotency-Key': key },
+                body: JSON.stringify({
+                    expectedVersion: record.version,
+                    proposedAttributes: payload.proposedAttributes,
+                    message: payload.evidenceDescription,
+                    evidenceRefs: payload.evidenceRefs,
+                }),
+            });
+            if (
+                String(row?.id) !== String(record.id) ||
+                String(row?.userId) !== String(userId) ||
+                row.status !== 'SUBMITTED' ||
+                !GUID.test(row.version) ||
+                row.version === record.version ||
+                (record.referringClubId &&
+                    (row.referringClubId !== record.referringClubId ||
+                        row.clubReviewStatus !== 'PENDING' ||
+                        row.ctsvSubmissionStatus !== 'NOT_SUBMITTED'))
+            )
+                throw new Error('Chưa xác nhận được bản bổ sung. Tải lại hồ sơ trước khi thử tiếp.');
+            return row;
+        },
         async list(params) {
             const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== '' && v != null));
             return experiencePage(await api.request(`/api/users/me/contributions?${query}`), userId);
@@ -184,7 +219,17 @@ export function createPersonalExperienceClient(api, userId) {
                 headers: { 'Idempotency-Key': key },
                 body: JSON.stringify(payload),
             });
-            if (!GUID.test(row?.id) || String(row.userId) !== String(userId) || row.status !== 'SUBMITTED')
+            if (
+                !GUID.test(row?.id) ||
+                !GUID.test(row.version) ||
+                String(row.userId) !== String(userId) ||
+                row.status !== 'SUBMITTED' ||
+                (payload.referringClubId != null &&
+                    (row.referringClubId !== payload.referringClubId ||
+                        row.clubReviewStatus !== 'PENDING' ||
+                        row.ctsvSubmissionStatus !== 'NOT_SUBMITTED')) ||
+                (payload.referringClubId == null && row.referringClubId != null)
+            )
                 throw new Error('Chưa xác nhận được kết quả gửi trải nghiệm. Kiểm tra danh sách trước khi thử lại.');
             return row;
         },

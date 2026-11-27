@@ -32,10 +32,10 @@ function Field({ label, children }) {
         </label>
     );
 }
-function SelectField({ label, value, onChange, options }) {
+function SelectField({ label, value, onChange, options, disabled = false }) {
     return (
         <Field label={label}>
-            <select value={value} onChange={(e) => onChange(e.target.value)}>
+            <select disabled={disabled} value={value} onChange={(e) => onChange(e.target.value)}>
                 {options.map(([id, text]) => (
                     <option key={id} value={id}>
                         {text}
@@ -46,9 +46,32 @@ function SelectField({ label, value, onChange, options }) {
     );
 }
 
-function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitted }) {
-    const [form, setForm] = useState(() => blankExperience(semesterId)),
-        [files, setFiles] = useState([]),
+function ExperienceForm({ api, client, semesterId, clubAccess = [], onBack, onSubmitted, revisionRecord = null }) {
+    const [form, setForm] = useState(() =>
+            revisionRecord
+                ? {
+                      ...blankExperience(revisionRecord.semesterId),
+                      title: revisionRecord.title,
+                      organizationSource: revisionRecord.organizationSource || '',
+                      isRevision: true,
+                      occurredDate: new Date(Date.parse(revisionRecord.occurredAt) + 7 * 60 * 60 * 1000)
+                          .toISOString()
+                          .slice(0, 10),
+                      category: revisionRecord.proposedAttributes.pillarWeights[0].pillar,
+                      description: revisionRecord.message || '',
+                      ...revisionRecord.proposedAttributes,
+                      referenceMode: revisionRecord.referringClubId ? 'CLUB' : 'DIRECT',
+                      referenceClubId: revisionRecord.referringClubId || '',
+                  }
+                : blankExperience(semesterId),
+        ),
+        [files, setFiles] = useState(() =>
+            (revisionRecord?.evidenceRefs || []).map((id, index) => ({
+                key: id,
+                evidenceId: id,
+                file: { name: `Minh chứng đã gửi ${index + 1}`, size: 0 },
+            })),
+        ),
         [busy, setBusy] = useState(false),
         [error, setError] = useState('');
     const key = useRef(crypto.randomUUID()),
@@ -91,7 +114,13 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                 }
                 refs.push(id);
             }
-            const result = await client.submit(experiencePayload(form, refs), key.current);
+            const payload = experiencePayload(form, refs);
+            if (revisionRecord) payload.evidenceDescription = form.description.trim();
+            if (revisionRecord && revisionRecord.proposedAttributes.pillarWeights.length > 1)
+                payload.proposedAttributes.pillarWeights = revisionRecord.proposedAttributes.pillarWeights;
+            const result = revisionRecord
+                ? await client.revise(revisionRecord, payload, key.current)
+                : await client.submit(payload, key.current);
             if (alive.current) onSubmitted(result);
         } catch (issue) {
             if (alive.current)
@@ -107,7 +136,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                 <ArrowLeft size={16} /> Danh sách trải nghiệm
             </button>
             <section className="personal-experience-panel">
-                <h2>Tạo trải nghiệm tự khai</h2>
+                <h2>{revisionRecord ? 'Bổ sung và gửi lại trải nghiệm' : 'Tạo trải nghiệm tự khai'}</h2>
                 <p>
                     Ghi nhận giải thi đấu, cuộc thi bên ngoài, văn bằng hoặc chứng chỉ bạn đã đạt được. Đính kèm minh
                     chứng để đề nghị xét Xperience Point.
@@ -118,24 +147,29 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                             <input
                                 required
                                 maxLength={200}
+                                disabled={Boolean(revisionRecord)}
                                 value={form.title}
                                 onChange={(e) => change('title', e.target.value)}
                                 placeholder="Ví dụ: Đạt giải cuộc thi lập trình bên ngoài"
                             />
                         </Field>
-                        <SelectField
-                            label="Hình thức trải nghiệm"
-                            value={form.kind}
-                            onChange={(v) => change('kind', v)}
-                            options={[
-                                ['competition', 'Thi đấu / cuộc thi bên ngoài'],
-                                ['certificate', 'Chứng chỉ'],
-                                ['qualification', 'Văn bằng'],
-                                ['other', 'Trải nghiệm khác'],
-                            ]}
-                        />
+                        {!revisionRecord && (
+                            <SelectField
+                                label="Hình thức trải nghiệm"
+                                disabled={Boolean(revisionRecord)}
+                                value={form.kind}
+                                onChange={(v) => change('kind', v)}
+                                options={[
+                                    ['competition', 'Thi đấu / cuộc thi bên ngoài'],
+                                    ['certificate', 'Chứng chỉ'],
+                                    ['qualification', 'Văn bằng'],
+                                    ['other', 'Trải nghiệm khác'],
+                                ]}
+                            />
+                        )}
                         <Field label="Đơn vị tổ chức / cấp chứng nhận *">
                             <input
+                                disabled={Boolean(revisionRecord)}
                                 required
                                 value={form.organizationSource}
                                 onChange={(e) => change('organizationSource', e.target.value)}
@@ -145,6 +179,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                         <Field label="Ngày đạt được / hoàn thành *">
                             <input
                                 type="date"
+                                disabled={Boolean(revisionRecord)}
                                 required
                                 value={form.occurredDate}
                                 onChange={(e) => change('occurredDate', e.target.value)}
@@ -154,15 +189,25 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                             <input
                                 required
                                 value={form.semesterId}
+                                disabled={Boolean(revisionRecord)}
                                 onChange={(e) => change('semesterId', e.target.value)}
                                 placeholder="Mã học kỳ do trường cung cấp"
                             />
                         </Field>
                         <SelectField
                             label="Nhóm trải nghiệm"
+                            disabled={
+                                Boolean(revisionRecord) &&
+                                (revisionRecord.sourceType === 'REAL_WORLD' ||
+                                    revisionRecord.proposedAttributes.pillarWeights.length > 1)
+                            }
                             value={form.category}
                             onChange={(v) => change('category', v)}
-                            options={EXPERIENCE_CATEGORIES}
+                            options={
+                                revisionRecord?.sourceType === 'EXTERNAL'
+                                    ? EXPERIENCE_CATEGORIES.filter(([id]) => id !== 'RealWorldWork')
+                                    : EXPERIENCE_CATEGORIES
+                            }
                         />
                     </div>
                     <Field label="Kết quả đạt được & mô tả minh chứng *">
@@ -183,7 +228,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                     Bạn có thể gửi trực tiếp hoặc chọn thông qua CLB mình trực thuộc để tham chiếu/xác nhận. Tham chiếu
                     CLB không thay thế quyết định xét duyệt của CTSV.
                 </p>
-                <fieldset disabled={busy} className="personal-experience-reference">
+                <fieldset disabled={busy || Boolean(revisionRecord)} className="personal-experience-reference">
                     <legend className="personal-experience-sr">Hình thức gửi trải nghiệm</legend>
                     <label>
                         <input
@@ -215,10 +260,15 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                         <Field label="CLB tham chiếu">
                             <select
                                 value={form.referenceClubId}
-                                disabled={busy || !clubAccess.length}
+                                disabled={busy || Boolean(revisionRecord) || !clubAccess.length}
                                 onChange={(e) => change('referenceClubId', e.target.value)}
                             >
                                 <option value="">Chọn CLB bạn đang trực thuộc</option>
+                                {revisionRecord?.referringClubId && (
+                                    <option value={revisionRecord.referringClubId}>
+                                        CLB #{revisionRecord.referringClubId}
+                                    </option>
+                                )}
                                 {clubAccess.map((club) => (
                                     <option key={club.clubId} value={club.clubId}>
                                         {club.clubName || club.name || `CLB #${club.clubId}`}
@@ -227,7 +277,8 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                             </select>
                         </Field>
                         <p className="personal-experience-notice" role="status">
-                            {!clubAccess.length ? 'Bạn chưa có CLB trực thuộc để lựa chọn. ' : ''}Chưa thể gửi qua CLB. Chọn “Gửi trực tiếp” để nộp cho CTSV.
+                            {!clubAccess.length && !revisionRecord ? 'Bạn chưa có CLB trực thuộc để lựa chọn. ' : ''}Hồ
+                            sơ được CLB xem xét trước, sau đó chuyển CTSV quyết định. Mọi bản bổ sung cần CLB xét lại.
                         </p>
                     </>
                 )}
@@ -274,7 +325,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                                 <span>
                                     {item.file.name}
                                     <small>
-                                        {Math.ceil(item.file.size / 1024)} KB ·{' '}
+                                        {item.file.size > 0 ? `${Math.ceil(item.file.size / 1024)} KB · ` : ''}
                                         {item.evidenceId ? 'Đã tải lên riêng tư' : 'Chờ tải lên khi gửi'}
                                     </small>
                                 </span>
@@ -340,7 +391,7 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
                 <button
                     type="submit"
                     className="v2-button v2-button--primary"
-                    disabled={busy || !files.length || form.referenceMode !== 'DIRECT'}
+                    disabled={busy || !files.length || (form.referenceMode === 'CLUB' && !form.referenceClubId)}
                 >
                     <Send size={16} />
                     {busy ? 'Đang tải minh chứng & gửi…' : 'Gửi trải nghiệm xét duyệt'}
@@ -353,7 +404,8 @@ function ExperienceForm({ api, client, semesterId, clubAccess, onBack, onSubmitt
 function ExperienceDetail({ row, client, api, onBack }) {
     const [result, setResult] = useState({ loading: true }),
         [retry, setRetry] = useState(0),
-        [error, setError] = useState('');
+        [error, setError] = useState(''),
+        [editing, setEditing] = useState(false);
     useEffect(() => {
         let active = true;
         setResult({ loading: true });
@@ -382,6 +434,23 @@ function ExperienceDetail({ row, client, api, onBack }) {
         );
     const data = result.data,
         record = data.contribution;
+    if (editing && record.status === 'REVISION_REQUESTED')
+        return (
+            <ExperienceForm
+                key={`${record.id}:${record.version}`}
+                api={api}
+                client={client}
+                revisionRecord={record}
+                onBack={() => {
+                    setEditing(false);
+                    setRetry((v) => v + 1);
+                }}
+                onSubmitted={() => {
+                    setEditing(false);
+                    setRetry((v) => v + 1);
+                }}
+            />
+        );
     const evidenceUrl =
         typeof record.evidenceUrl === 'string' && /^https:\/\//i.test(record.evidenceUrl) ? record.evidenceUrl : null;
     return (
@@ -396,6 +465,26 @@ function ExperienceDetail({ row, client, api, onBack }) {
                     <span className="personal-experience-status">{status(record.status)}</span>
                 </div>
                 <p>{record.message || record.evidenceDescription || 'Chưa có mô tả.'}</p>
+                {record.referringClubId && (
+                    <p className="personal-experience-notice">
+                        Tham chiếu CLB #{record.referringClubId} ·{' '}
+                        {record.ctsvSubmissionStatus === 'SUBMITTED'
+                            ? 'Đã chuyển CTSV'
+                            : {
+                                  PENDING: 'Chờ CLB xét',
+                                  APPROVED: 'CLB đã thông qua, chờ chuyển CTSV',
+                                  CHANGES_REQUESTED: 'CLB yêu cầu bổ sung',
+                              }[record.clubReviewStatus] || 'Đang xử lý'}
+                        .{record.clubReviewReason && <span> Phản hồi CLB: {record.clubReviewReason}</span>}
+                    </p>
+                )}
+                {record.status === 'REVISION_REQUESTED' &&
+                    GUID.test(record.version) &&
+                    ['EXTERNAL', 'REAL_WORLD'].includes(record.sourceType) && (
+                        <button className="v2-button v2-button--primary" onClick={() => setEditing(true)}>
+                            Bổ sung và gửi lại
+                        </button>
+                    )}
                 <dl className="personal-experience-metadata">
                     <div>
                         <dt>Ngày trải nghiệm</dt>
@@ -464,6 +553,21 @@ function ExperienceDetail({ row, client, api, onBack }) {
             </section>
             <section className="personal-experience-panel">
                 <h2>Lịch sử xét duyệt</h2>
+                {data.revisions
+                    ?.filter((item) => item.status?.startsWith('CLUB_'))
+                    .map((item) => (
+                        <article key={item.id}>
+                            <strong>
+                                {{
+                                    CLUB_ENDORSE: 'CLB thông qua',
+                                    CLUB_REQUEST_CHANGES: 'CLB yêu cầu bổ sung',
+                                    CLUB_FORWARD: 'CLB chuyển CTSV',
+                                }[item.status] || item.status}
+                            </strong>
+                            <p>{item.reason}</p>
+                            <small>{date(item.createdAtUtc)}</small>
+                        </article>
+                    ))}
                 {data.decisions?.length ? (
                     <ol className="personal-experience-history">
                         {data.decisions.map((decision) => (

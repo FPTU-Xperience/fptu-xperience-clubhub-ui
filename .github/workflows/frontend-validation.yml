@@ -1,28 +1,48 @@
 name: Frontend validation
 
 on:
-  push:
-    branches: [cuongnk21/integrate-api-email-login]
-  pull_request:
-  workflow_dispatch:
+    push:
+        branches: [cuongnk21/integrate-api-email-login]
+    pull_request:
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-      - run: npm ci
-      - name: Unit and contract tests
-        run: npm test
-      - name: Production build
-        run: npm run build
-      - name: Club and profile render smoke tests
-        run: npm run test:club-page
+    build-test:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '24'
+                  cache: npm
+            - run: npm ci
+            - name: Unit and contract tests
+              run: npm test
+            - name: Production build
+              run: npm run build
+            - name: Club and profile render smoke tests
+              run: npm run test:club-page
+
+            - name: Install browser validation dependencies
+              run: |
+                  npm install --no-save --package-lock=false playwright
+                  npx playwright install --with-deps chromium
+            - name: Verify club referral submission, revision and processing
+              run: |
+                  export CHROME_PATH="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+                  node scripts/club-declarations-smoke.mjs
+                  node scripts/personal-experience-smoke.mjs
+
+            - name: Save declaration referral screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: clubhub-declaration-referral
+                  path: |
+                      /tmp/clubhub-club-declarations-qa/*.png
+                      /tmp/clubhub-personal-experience-qa/*.png
+                  if-no-files-found: ignore

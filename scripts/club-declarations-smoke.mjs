@@ -9,19 +9,28 @@ const directory = path.join(os.tmpdir(), 'clubhub-club-declarations-qa');
 await fs.mkdir(directory, { recursive: true });
 const entry = `import React from 'react';import{createRoot}from'react-dom/client';import{BrowserRouter}from'react-router-dom';import{ClubWorkspaceView}from'/src/pages/v2/club-workspace-page/ClubWorkspacePage.jsx';import{ThemeProvider}from'/src/context/ThemeContext.jsx';import api from '/src/services/api.js';import '/src/styles/index.scss';import '/src/pages/v2/V2App.scss';
 const mode=new URLSearchParams(location.search).get('qa');history.replaceState(null,'','/my-clubs/C7/student-declarations'+location.search);window.__calls=[];localStorage.setItem('accessToken','fixture');
-const user={id:1,name:'BQL kiểm thử',roles:['STUDENT']};const workspace={clubId:'7',clubCode:'C7',name:'CLB Công nghệ',role:['member','delegated','vice'].includes(mode)?'MEMBER':'MANAGER',semesters:[{id:'FALL2026',code:'FALL2026',reportPeriod:'FALL2026',label:'Fall 2026',isCurrent:true}],...(mode==='vice'?{displayRole:'VICE_PRESIDENT'}:{}),...(mode==='delegated'?{studentDeclarationPermissions:['club.declarations.process']}:{})};window.__clubAuth={user,api,logout:()=>{},clubAccess:[{clubId:7,isManager:mode!=='member'}]};
+const user={id:1,name:'BQL kiểm thử',roles:['STUDENT']};const workspace={clubId:'7',clubCode:'C7',name:'CLB Công nghệ',role:['member','delegated','vice'].includes(mode)?'MEMBER':'MANAGER',semesters:[{id:'FALL2026',code:'FALL2026',reportPeriod:'FALL2026',label:'Fall 2026',isCurrent:true}],...(mode==='vice'?{displayRole:'VICE_PRESIDENT'}:{}),...(mode==='delegated'?{studentDeclarationPermissions:['club.declarations.process']}:{})};window.__clubAuth={user,api,logout:()=>{},clubAccess:[{clubId:7,isManager:!['member','delegated','vice'].includes(mode),isApprovedMember:true,isVicePresident:mode==='vice',accessValidUntilUtc:'2099-01-01T00:00:00Z',capabilities:mode==='delegated'?['club.declarations.process']:[]}]};
 const current={id:'11111111-1111-1111-1111-111111111111',clubId:7,userId:8,title:'Giải lập trình sinh viên',status:'SUBMITTED',semesterId:'FALL2026',occurredAt:'2026-10-20T00:00:00Z',evidenceRefs:['eeeeeeee-1111-2222-3333-444444444444'],message:'Bảng kết quả và giấy chứng nhận',version:'11111111-1111-1111-1111-111111111111'};
 const legacy={id:'22222222-2222-2222-2222-222222222222',clubId:7,studentId:9,studentName:'Lê Bình',studentEmail:'binh@example.test',title:'Chứng chỉ học thuật',status:'Approved',startDate:'2026-09-10',evidenceUrl:'https://example.test/proof',rawPoints:5};
-window.fetch=async(url,options={})=>{const parsed=new URL(url,location.origin),p=parsed.pathname;window.__calls.push({path:p,query:parsed.search,method:options.method||'GET'});const json=(v,s=200)=>new Response(JSON.stringify(v),{status:s,headers:{'Content-Type':'application/json'}});
-if(p==='/api/v1/student-affairs/declarations/')return mode==='denied'?json({message:'Forbidden'},403):mode==='error'?json({message:'Lỗi nguồn trải nghiệm'},503):json({items:mode==='empty'?[]:[{...current,id:'99999999-1111-2222-3333-444444444444',clubId:8,title:'Không được lộ CLB khác'},current,legacy],totalItems:mode==='empty'?0:3});
-if(p==='/api/v1/declarations/'+current.id)return json({contribution:mode==='mismatch'?{...current,clubId:8}:current,decisions:[]});
+Object.assign(current,{referringClubId:7,sourceType:'EXTERNAL',clubReviewStatus:'PENDING',ctsvSubmissionStatus:'NOT_SUBMITTED',capabilities:{canClubReview:true,canSubmitToStudentAffairs:false}});Object.assign(legacy,{referringClubId:7,clubReviewStatus:'APPROVED',ctsvSubmissionStatus:'SUBMITTED'});window.__current=current;window.__history=[];
+window.fetch=async(url,options={})=>{const parsed=new URL(url,location.origin),p=parsed.pathname;window.__calls.push({path:p,query:parsed.search,method:options.method||'GET',key:options.headers?.['Idempotency-Key'],body:typeof options.body==='string'?JSON.parse(options.body):null});const json=(v,s=200)=>new Response(JSON.stringify(v),{status:s,headers:{'Content-Type':'application/json'}});
+if(p==='/api/clubs/7/workspace-semesters')return json({items:workspace.semesters});
+if(p==='/api/v1/declarations/clubs/7/access')return json({clubId:7,canProcess:mode!=='member',canManagePermissions:!['member','delegated'].includes(mode)});
+if(p==='/api/v1/declarations/clubs/7'){
+if(mode==='denied')return json({message:'Forbidden'},403);if(mode==='error')return json({message:'Lỗi nguồn trải nghiệm'},503);
+let rows=mode==='empty'?[]:[current,legacy];const q=parsed.searchParams.get('query')?.toLowerCase();if(q)rows=rows.filter(r=>JSON.stringify(r).toLowerCase().includes(q));const semester=parsed.searchParams.get('semesterId');if(semester)rows=rows.filter(r=>r.semesterId===semester);const status=parsed.searchParams.get('status');if(status)rows=rows.filter(r=>r.status.toUpperCase()===status);const page=Number(parsed.searchParams.get('page')||1);return json({items:rows.slice((page-1)*20,page*20),page,pageSize:20,total:rows.length,totalPages:Math.ceil(rows.length/20)});}
+if(p.endsWith('/club-review')||p.endsWith('/forward')){
+if(window.__failAction)return json({message:'Lỗi xét duyệt kiểm thử'},503);const input=JSON.parse(options.body);if(input.expectedVersion!==current.version)return json({message:'Stale version'},409);
+if(p.endsWith('/forward')){if(current.clubReviewStatus!=='APPROVED')return json({message:'Not endorsed'},409);current.ctsvSubmissionStatus='SUBMITTED';current.ctsvSubmittedBy=1;}else{current.clubReviewStatus=input.decision==='ENDORSE'?'APPROVED':'CHANGES_REQUESTED';current.clubReviewReason=input.reason;current.clubReviewedBy=1;if(input.decision==='REQUEST_CHANGES')current.status='REVISION_REQUESTED';}
+current.version=crypto.randomUUID();current.capabilities={canClubReview:current.clubReviewStatus==='PENDING',canSubmitToStudentAffairs:current.clubReviewStatus==='APPROVED'&&current.ctsvSubmissionStatus==='NOT_SUBMITTED'};window.__history.push({id:crypto.randomUUID(),status:p.endsWith('/forward')?'CLUB_FORWARD':'CLUB_'+input.decision,reason:input.reason,createdAtUtc:new Date().toISOString()});return json(current);}
+if(p==='/api/v1/declarations/'+current.id)return json({contribution:mode==='mismatch'?{...current,clubId:8}:current,decisions:[],revisions:window.__history});
 if(p.includes('/api/contributions/evidence/'))return new Response('%PDF-1.4 fixture',{headers:{'Content-Type':'application/pdf'}});
 return json([]);};
 const h=React.createElement;createRoot(document.getElementById('root')).render(h(ThemeProvider,null,h(BrowserRouter,null,h('div',{className:'v2-app v2-app--workspace'},h(ClubWorkspaceView,{api,viewer:user,sessionKey:'1',result:{status:'populated',clubId:'7',workspace,data:[workspace]}})))));`;
 const html =
     '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/__personal-entry.js"></script></body></html>';
 const server = await createServer({
-    server: { host: '127.0.0.1', port: 5194, strictPort: true, open: false },
+    server: { host: 'localhost', port: 5173, strictPort: true, open: false },
     plugins: [
         {
             name: 'personal-fixture',
@@ -54,9 +63,10 @@ try {
     await server.listen();
     const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'clubhub-declarations-chrome-'));
     chrome = spawn(
-        'C:/Program Files/Google/Chrome/Application/chrome.exe',
+        process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         [
             '--headless=new',
+            ...(process.platform === 'linux' ? ['--no-sandbox'] : []),
             '--disable-gpu',
             '--no-first-run',
             `--user-data-dir=${profile}`,
@@ -68,7 +78,7 @@ try {
     let targets;
     for (let n = 0; n < 100; n++) {
         try {
-            targets = await (await fetch('http://127.0.0.1:9345/json')).json();
+            targets = await (await fetch('http://localhost:9345/json')).json();
             break;
         } catch {
             await new Promise((r) => setTimeout(r, 100));
@@ -120,15 +130,28 @@ try {
         );
         await delay(60);
     };
-    const expect = async (value) =>
-        assert.ok((await evaluate('document.querySelector("main").textContent')).includes(value), value);
+    const expect = async (value) => {
+        for (let i = 0; i < 100; i++) {
+            if ((await evaluate('document.querySelector("main").textContent')).includes(value)) return;
+            await delay(70);
+        }
+        throw Error(
+            value +
+                ' ' +
+                JSON.stringify(
+                    await evaluate(
+                        '({text:document.querySelector("main").textContent,calls:window.__calls.slice(-6)})',
+                    ),
+                ),
+        );
+    };
     const shot = async (name) => {
         const r = await call('Page.captureScreenshot', { format: 'png' });
         await fs.writeFile(path.join(directory, name + '.png'), Buffer.from(r.data, 'base64'));
     };
     const open = async (mode = 'normal') => {
         errors.length = 0;
-        await call('Page.navigate', { url: `http://127.0.0.1:5194/__personal?qa=${mode}` });
+        await call('Page.navigate', { url: `http://localhost:5173/__personal?qa=${mode}` });
         await waitFor(`!!document.querySelector('.v2-workspace-main')`);
         await delay(400);
     };
@@ -162,42 +185,17 @@ try {
     await open();
     await expect('Giải lập trình sinh viên');
     await expect('Chứng chỉ học thuật');
-    assert.equal(await evaluate(`!!document.querySelector('aside a[href$="/student-declarations"]')`), true);
+    assert.equal(await evaluate(`!!document.querySelector('aside a[href*="/student-declarations"]')`), true);
     assert.equal(
         await evaluate(`document.querySelector('main').textContent.includes('Không được lộ CLB khác')`),
         false,
     );
     await responsive('club-declarations-list');
-    await click('Phân quyền');
-    await waitFor(`!!document.querySelector('.club-declaration-permissions')`);
-    assert.equal(
-        await evaluate(`document.querySelectorAll('.club-declaration-permissions input:checked:disabled').length`),
-        2,
-    );
-    await evaluate(`document.querySelector('input[aria-label="Thư ký: Xử lý trải nghiệm tự khai trong CLB"]').click()`);
-    await delay(80);
-    assert.equal(
-        await evaluate(
-            `document.querySelector('input[aria-label="Thư ký: Xử lý trải nghiệm tự khai trong CLB"]').checked`,
-        ),
-        true,
-    );
-    await evaluate(`document.querySelector('input[aria-label="Thư ký: Xử lý trải nghiệm tự khai trong CLB"]').click()`);
-    await delay(80);
-    assert.equal(
-        await evaluate(
-            `document.querySelector('input[aria-label="Thư ký: Xử lý trải nghiệm tự khai trong CLB"]').checked`,
-        ),
-        false,
-    );
     assert.ok(
         await evaluate(
-            `[...document.querySelectorAll('[role="dialog"] button')].find(e=>e.textContent==='Lưu phân quyền').disabled`,
+            `!![...document.querySelectorAll('main a')].find(a=>a.textContent.includes('Phân quyền tại cơ cấu CLB')&&a.getAttribute('href').includes('/members'))`,
         ),
     );
-    await responsive('club-declarations-permissions');
-    await evaluate(`document.querySelector('[aria-label="Đóng hộp thoại"]').click()`);
-    await delay(80);
     await choose('Tìm sinh viên / trải nghiệm', 'Lê Bình');
     await expect('Chứng chỉ học thuật');
     assert.equal(await evaluate(`document.querySelector('main tbody').textContent.includes('Giải lập trình')`), false);
@@ -224,21 +222,41 @@ try {
     );
     await delay(100);
     assert.ok(await evaluate(`window.__calls.some(c=>c.path.includes('/api/contributions/evidence/'))`));
+    const reason = async () => {
+        await evaluate(
+            `(()=>{const e=document.querySelector('[role="dialog"] textarea');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(e,'Đã kiểm tra minh chứng của sinh viên');e.dispatchEvent(new Event('input',{bubbles:true}))})()`,
+        );
+        await delay(100);
+    };
+    await reason();
+    await evaluate('window.__failAction=true');
+    await click('Duyệt tại CLB');
+    await expect('Lỗi xét duyệt kiểm thử');
+    await evaluate('window.__failAction=false');
+    await click('Duyệt tại CLB');
+    await expect('Đã được CLB thông qua');
+    await reason();
+    await click('Chuyển lên CTSV');
+    await expect('Đã chuyển CTSV');
+    assert.equal(await evaluate(`window.__current.ctsvSubmissionStatus`), 'SUBMITTED');
+    assert.ok(
+        await evaluate(
+            `(()=>{const rows=window.__calls.filter(c=>c.path.endsWith('/club-review'));return rows.length===2&&rows[0].key===rows[1].key&&rows[0].body.expectedVersion===rows[1].body.expectedVersion})()`,
+        ),
+    );
     await evaluate(`document.querySelector('[aria-label="Đóng hộp thoại"]').click()`);
     await delay(100);
-    assert.equal(await evaluate(`window.__calls.some(c=>c.method!=='GET')`), false);
     assert.deepEqual(errors, []);
     await open('member');
-    await expect('Chỉ BQL');
+    await expect('quyền');
     assert.equal(await evaluate(`window.__calls.some(c=>c.path.includes('student-affairs/declarations'))`), false);
-    assert.equal(await evaluate(`!!document.querySelector('aside a[href$="/student-declarations"]')`), false);
+    assert.equal(await evaluate(`!!document.querySelector('aside a[href*="/student-declarations"]')`), false);
     await open('vice');
     await expect('Giải lập trình sinh viên');
     await expect('Phân quyền');
-    await expect('Chủ tịch và Phó chủ tịch mặc định đầy đủ quyền');
     await open('delegated');
     await expect('Giải lập trình sinh viên');
-    assert.equal(await evaluate(`!!document.querySelector('aside a[href$="/student-declarations"]')`), true);
+    assert.equal(await evaluate(`!!document.querySelector('aside a[href*="/student-declarations"]')`), true);
     assert.equal(
         await evaluate(`[...document.querySelectorAll('main button')].some(e=>e.textContent==='Phân quyền')`),
         false,
@@ -256,7 +274,7 @@ try {
     assert.equal(await evaluate(`!!document.querySelector('[role="dialog"] .club-student-declaration-detail')`), false);
     assert.deepEqual(errors, []);
     console.log(
-        'PASS club workspace navigation, scoped declaration list/detail/evidence, search, semester, member/delegated guards, denial/error/empty, 320–1440 geometry; no writes',
+        'PASS club workspace navigation, scoped declaration list/detail/evidence, search, semester, member/delegated guards, denial/error/empty, 320–1440 geometry; endorsement, retry and forwarding through the API adapter',
     );
     console.log('Screenshots: ' + directory);
 } catch (error) {

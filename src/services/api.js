@@ -11,12 +11,41 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:700
 export const session = createSessionClient({ baseUrl: API_BASE_URL });
 
 class ApiService {
+    getClubStudentDeclarationAccess(clubId) {
+        return this.request(`/api/v1/declarations/clubs/${encodeURIComponent(clubId)}/access`);
+    }
+
+    reviewClubStudentDeclaration(clubId, id, payload, key) {
+        return this.request(
+            `/api/v1/declarations/clubs/${encodeURIComponent(clubId)}/${encodeURIComponent(id)}/club-review`,
+            {
+                method: 'POST',
+                headers: { 'Idempotency-Key': key },
+                body: JSON.stringify(payload),
+            },
+        );
+    }
+
+    submitClubStudentDeclarationToStudentAffairs(clubId, id, payload, key) {
+        return this.request(
+            `/api/v1/declarations/clubs/${encodeURIComponent(clubId)}/${encodeURIComponent(id)}/forward`,
+            {
+                method: 'POST',
+                headers: { 'Idempotency-Key': key },
+                body: JSON.stringify(payload),
+            },
+        );
+    }
+
     constructor() {
         this.baseUrl = API_BASE_URL;
         this.media = createEntityMediaStore();
         let sessionId = session.read()?.id;
-        session.subscribe(record => {
-            if (record?.id !== sessionId) { this.media.reset(); sessionId = record?.id; }
+        session.subscribe((record) => {
+            if (record?.id !== sessionId) {
+                this.media.reset();
+                sessionId = record?.id;
+            }
         });
     }
 
@@ -96,10 +125,14 @@ class ApiService {
         }
 
         const anonymous = ['/api/auth/google', '/api/auth/email-login', '/api/auth/sso/redeem'].includes(endpoint);
-        const response = await session.authFetch(url, {
-            ...options,
-            headers,
-        }, { anonymous });
+        const response = await session.authFetch(
+            url,
+            {
+                ...options,
+                headers,
+            },
+            { anonymous },
+        );
 
         if (endpoint === '/api/auth/google' || endpoint === '/api/auth/email-login') {
             if (!response.ok) {
@@ -110,7 +143,10 @@ class ApiService {
         }
 
         if (!response.ok) {
-            const problem = await response.clone().json().catch(() => null);
+            const problem = await response
+                .clone()
+                .json()
+                .catch(() => null);
             const requestError = new Error(await this.getErrorMessage(response));
             requestError.status = response.status;
             if (typeof problem?.code === 'string') requestError.code = problem.code;
@@ -192,10 +228,20 @@ class ApiService {
     }
 
     async uploadPrivateEvidence(file, key) {
-        if (!file || !['application/pdf', 'image/png', 'image/jpeg'].includes(file.type) || file.size <= 0 || file.size > 10 * 1024 * 1024)
+        if (
+            !file ||
+            !['application/pdf', 'image/png', 'image/jpeg'].includes(file.type) ||
+            file.size <= 0 ||
+            file.size > 10 * 1024 * 1024
+        )
             throw new Error('Minh chứng phải là PDF, PNG hoặc JPG, tối đa 10 MB.');
-        const form = new FormData(); form.append('file', file);
-        return this.request('/api/contributions/evidence', { method: 'POST', headers: { 'Idempotency-Key': key }, body: form });
+        const form = new FormData();
+        form.append('file', file);
+        return this.request('/api/contributions/evidence', {
+            method: 'POST',
+            headers: { 'Idempotency-Key': key },
+            body: form,
+        });
     }
 
     async downloadPrivateEvidence(id) {
@@ -203,10 +249,16 @@ class ApiService {
             headers: { Authorization: `Bearer ${this.getToken()}` },
         });
         if (!response.ok) throw new Error(await this.getErrorMessage(response));
-        const blob = await response.blob(), url = URL.createObjectURL(blob);
+        const blob = await response.blob(),
+            url = URL.createObjectURL(blob);
         const extension = { 'application/pdf': 'pdf', 'image/png': 'png', 'image/jpeg': 'jpg' }[blob.type] || 'bin';
-        const anchor = document.createElement('a'); anchor.href = url; anchor.download = `evidence-${id}.${extension}`;
-        document.body.appendChild(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `evidence-${id}.${extension}`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     async getMyExperienceLedger(params = {}) {
@@ -236,8 +288,11 @@ class ApiService {
         if (!response.ok) throw new Error(await this.getErrorMessage(response));
         const url = URL.createObjectURL(await response.blob());
         const anchor = document.createElement('a');
-        anchor.href = url; anchor.download = `experience-${id}.pdf`;
-        document.body.appendChild(anchor); anchor.click(); anchor.remove();
+        anchor.href = url;
+        anchor.download = `experience-${id}.pdf`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
@@ -374,7 +429,8 @@ class ApiService {
 
     async withdrawMyMembershipApplication(applicationId) {
         return this.request(`/api/clubs/me/membership-applications/${encodeURIComponent(applicationId)}/withdraw`, {
-            method: 'POST', headers: { 'Idempotency-Key': crypto.randomUUID() },
+            method: 'POST',
+            headers: { 'Idempotency-Key': crypto.randomUUID() },
         });
     }
 
@@ -706,11 +762,14 @@ class ApiService {
         const formData = new FormData();
         formData.append('file', file);
         const token = this.getToken();
-        const response = await session.authFetch(this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/upload`), {
-            method: 'POST',
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-            body: formData,
-        });
+        const response = await session.authFetch(
+            this.buildUrl(`/api/reports/${encodeURIComponent(reportId)}/attachments/upload`),
+            {
+                method: 'POST',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                body: formData,
+            },
+        );
         if (!response.ok) {
             const uploadError = new Error(await this.getErrorMessage(response));
             uploadError.status = response.status;
@@ -738,9 +797,12 @@ class ApiService {
 
     async downloadContributionEvidence(id, name = 'minh-chung') {
         const token = this.getToken();
-        const response = await session.authFetch(this.buildUrl(`/api/contributions/evidence/${encodeURIComponent(id)}/download`), {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const response = await session.authFetch(
+            this.buildUrl(`/api/contributions/evidence/${encodeURIComponent(id)}/download`),
+            {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            },
+        );
         if (!response.ok) throw new Error(await this.getErrorMessage(response));
         const url = URL.createObjectURL(await response.blob());
         const link = document.createElement('a');
