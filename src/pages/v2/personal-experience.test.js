@@ -47,8 +47,15 @@ test('personal experience requires real evidence, valid dates and a canonical ex
 });
 test('club reference never silently becomes a direct submission or unrelated club contribution', () => {
     const draft = { ...form(), referenceMode: 'CLUB', referenceClubId: '7' };
-    assert.throws(() => validateExperience(draft, files()), /CLB/);
-    assert.throws(() => experiencePayload(draft, [id]), /CLB/);
+    validateExperience(draft, files());
+    const payload = experiencePayload(draft, [id]);
+    assert.equal(payload.referringClubId, 7);
+    assert.equal(payload.clubId, null);
+    assert.equal(payload.isOutsideClub, true);
+    for (const referenceClubId of ['', '0', '-1', 'x']) {
+        assert.throws(() => validateExperience({ ...draft, referenceClubId }, files()), /CLB/);
+        assert.throws(() => experiencePayload({ ...draft, referenceClubId }, [id]), /CLB/);
+    }
 });
 test('personal report rejects cross-account records, malformed pages and fabricated approved totals', () => {
     const row = { id, userId: 1, status: 'SUBMITTED', title: 'Trải nghiệm' };
@@ -65,7 +72,7 @@ test('personal client uses declared own-source routes and stable submit receipts
             request: async (path, options) => {
                 calls.push({ path, options });
                 if (path.includes('?')) return { items: [], total: 0, totalPages: 0 };
-                if (options) return { id, userId: 1, status: 'SUBMITTED' };
+                if (options) return { id, version: id, userId: 1, status: 'SUBMITTED' };
                 return { contribution: { id, userId: 1 } };
             },
         },
@@ -94,4 +101,48 @@ test('personal client uses declared own-source routes and stable submit receipts
         /unavailable/,
     );
     await assert.rejects(() => createPersonalExperienceClient({ request: async () => null }, 1).summary(), /hợp lệ/);
+});
+
+test('submit and revision receipts preserve club routing and reset the referral stage', async () => {
+    const payload = experiencePayload({ ...form(), referenceMode: 'CLUB', referenceClubId: '7' }, [id]);
+    const receipt = {
+        id,
+        version: id,
+        userId: 1,
+        status: 'SUBMITTED',
+        referringClubId: 7,
+        clubReviewStatus: 'PENDING',
+        ctsvSubmissionStatus: 'NOT_SUBMITTED',
+    };
+    for (const patch of [
+        { referringClubId: null },
+        { referringClubId: 8 },
+        { clubReviewStatus: 'APPROVED' },
+        { ctsvSubmissionStatus: 'SUBMITTED' },
+        { version: null },
+    ])
+        await assert.rejects(() =>
+            createPersonalExperienceClient({ request: async () => ({ ...receipt, ...patch }) }, 1).submit(
+                payload,
+                'key',
+            ),
+        );
+    const calls = [];
+    const client = createPersonalExperienceClient(
+        {
+            request: async (path, options) => {
+                calls.push({ path, options });
+                return receipt;
+            },
+        },
+        1,
+    );
+    await client.submit(payload, 'submit-key');
+    const previous = { ...receipt, version: 'aaaaaaaa-1111-2222-3333-444444444444' };
+    await client.revise(previous, payload, 'revision-key');
+    assert.equal(calls[1].path, `/api/contributions/${id}`);
+    assert.equal(calls[1].options.method, 'PATCH');
+    assert.equal(JSON.parse(calls[1].options.body).expectedVersion, previous.version);
+    assert.equal(calls[1].options.headers['Idempotency-Key'], 'revision-key');
+    await assert.rejects(() => client.revise(receipt, payload, 'stale'));
 });

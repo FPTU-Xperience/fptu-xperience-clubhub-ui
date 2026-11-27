@@ -83,7 +83,7 @@ export default function ClubDeclarationActions({ api, clubId, record, permission
                         <textarea
                             rows={3}
                             minLength={5}
-                            maxLength={2000}
+                            maxLength={1000}
                             value={reason}
                             disabled={busy}
                             onChange={(e) => {

@@ -1,4 +1,5 @@
 export const CLUB_CAPABILITY_LABELS = Object.freeze({
+    'club.declarations.process': 'Xử lý trải nghiệm tự khai trong CLB',
     'club.profile.write': 'Chỉnh sửa trang CLB',
     'club.media.write': 'Cập nhật ảnh CLB',
     'event.content.write': 'Chỉnh sửa nội dung sự kiện',
@@ -11,28 +12,16 @@ export const CLUB_CAPABILITY_LABELS = Object.freeze({
     'club.finance.submit': 'Nộp hồ sơ tài chính',
 });
 const valid = (scope, now) =>
-    Number.isFinite(Date.parse(scope?.accessValidUntilUtc)) &&
-    Date.parse(scope.accessValidUntilUtc) > now;
+    Number.isFinite(Date.parse(scope?.accessValidUntilUtc)) && Date.parse(scope.accessValidUntilUtc) > now;
 export const clubLeadership = (scope, now = Date.now()) =>
     scope?.isManager === true ||
-    (scope?.isApprovedMember === true &&
-        scope?.isVicePresident === true &&
-        valid(scope, now));
+    (scope?.isApprovedMember === true && scope?.isVicePresident === true && valid(scope, now));
 export function clubCapability(scope, code, now = Date.now()) {
     if (!Object.hasOwn(CLUB_CAPABILITY_LABELS, code)) return false;
     if (clubLeadership(scope, now)) return true;
     if (scope?.isApprovedMember !== true) return false;
-    if (
-        scope.capabilities == null &&
-        scope.isTreasurer === true &&
-        code.startsWith('club.finance.')
-    )
-        return true;
-    return (
-        Array.isArray(scope.capabilities) &&
-        scope.capabilities.includes(code) &&
-        valid(scope, now)
-    );
+    if (scope.capabilities == null && scope.isTreasurer === true && code.startsWith('club.finance.')) return true;
+    return Array.isArray(scope.capabilities) && scope.capabilities.includes(code) && valid(scope, now);
 }
 export const clubRoleSummary = (scope) =>
     scope?.isManager
@@ -55,13 +44,6 @@ export const clubFinancialReport = (report) =>
         ),
     );
 export const clubDraftReport = (scope, report) =>
-    clubCapability(
-        scope,
-        clubFinancialReport(report)
-            ? 'club.finance.draft.write'
-            : 'club.reports.draft.write',
-    );
+    clubCapability(scope, clubFinancialReport(report) ? 'club.finance.draft.write' : 'club.reports.draft.write');
 export const clubSubmitReport = (scope, report) =>
-    clubLeadership(scope) ||
-    (clubFinancialReport(report) &&
-        clubCapability(scope, 'club.finance.submit'));
+    clubLeadership(scope) || (clubFinancialReport(report) && clubCapability(scope, 'club.finance.submit'));

@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Download, ExternalLink, FileCheck2, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../../../../context/AuthContext';
 import PageState from '../../../../../components/v2/PageState';
 import V2Modal from '../../../../../components/v2/common/modal/V2Modal';
 import WorkspaceTabLayout from '../WorkspaceTabLayout';
 import {
-    canViewClubDeclarations,
     declarationStatus,
     declarationStatusLabel,
-    filterClubDeclarations,
     loadClubDeclarationDetail,
     loadClubDeclarations,
 } from './club-declarations-data';
-import { declarationPermissions } from './club-declaration-permissions';
-import DeclarationPermissionEditor from './DeclarationPermissionEditor';
 import ClubDeclarationActions from './ClubDeclarationActions';
 import './StudentDeclarationsTab.scss';
 
@@ -129,6 +126,21 @@ function DeclarationDetail({ api, clubId, item, permissions, onClose }) {
                     {!url && !record.evidenceRefs?.length && <p>Chưa có minh chứng được trả về cho bản ghi này.</p>}
                     {error && <p role="alert">{error}</p>}
                     <h3>Phản hồi & lịch sử</h3>
+                    {result.data.revisions
+                        ?.filter((row) => row.status?.startsWith('CLUB_'))
+                        .map((row) => (
+                            <article key={row.id}>
+                                <strong>
+                                    {{
+                                        CLUB_ENDORSE: 'CLB thông qua',
+                                        CLUB_REQUEST_CHANGES: 'CLB yêu cầu bổ sung',
+                                        CLUB_FORWARD: 'Đã chuyển CTSV',
+                                    }[row.status] || row.status}
+                                </strong>
+                                <p>{row.reason}</p>
+                                <small>{date(row.createdAtUtc)}</small>
+                            </article>
+                        ))}
                     {record.reviewNote && <p>{record.reviewNote}</p>}
                     {result.data.decisions?.length ? (
                         <ol>
@@ -167,7 +179,7 @@ function DeclarationDetail({ api, clubId, item, permissions, onClose }) {
 }
 
 function StudentDeclarationList({ api, workspace, permissions }) {
-    const [permissionEditorOpen, setPermissionEditorOpen] = useState(false);
+    const location = useLocation();
     const [result, setResult] = useState({ loading: true }),
         [retry, setRetry] = useState(0),
         [query, setQuery] = useState(''),
@@ -182,9 +194,15 @@ function StudentDeclarationList({ api, workspace, permissions }) {
         let active = true;
         setResult({ loading: true });
         setSelected(null);
-        loadClubDeclarations(api, clubId).then(
-            (items) => {
-                if (active) setResult({ items });
+        loadClubDeclarations(api, clubId, { page, query, status, period, semester }).then(
+            (data) => {
+                if (active) {
+                    if (page > data.totalPages) {
+                        setPage(data.totalPages);
+                        return;
+                    }
+                    setResult(data);
+                }
             },
             (error) => {
                 if (active) setResult({ error });
@@ -193,12 +211,12 @@ function StudentDeclarationList({ api, workspace, permissions }) {
         return () => {
             active = false;
         };
-    }, [api, clubId, retry]);
+    }, [api, clubId, retry, page, query, status, period, semester]);
     useEffect(() => {
         setPage(1);
     }, [query, status, period, semester]);
-    const rows = filterClubDeclarations(result.items || [], { query, status, period, semester }),
-        pages = Math.max(1, Math.ceil(rows.length / 20)),
+    const rows = result.items || [],
+        pages = result.totalPages || 1,
         current = Math.min(page, pages);
     const update = (set, value) => {
         set(value);
@@ -211,9 +229,9 @@ function StudentDeclarationList({ api, workspace, permissions }) {
             action={
                 <div className="club-student-declaration-actions">
                     {permissions.manage && (
-                        <button type="button" className="v2-button" onClick={() => setPermissionEditorOpen(true)}>
-                            Phân quyền
-                        </button>
+                        <Link className="v2-button" to={'../members' + location.search} relative="path">
+                            Phân quyền tại cơ cấu CLB
+                        </Link>
                     )}
                     <button
                         type="button"
@@ -290,7 +308,7 @@ function StudentDeclarationList({ api, workspace, permissions }) {
                     ) : (
                         <>
                             <p className="club-student-declaration-scope" role="status">
-                                {rows.length} trải nghiệm phù hợp · {workspace.name}
+                                {result.total || 0} trải nghiệm phù hợp · {workspace.name}
                             </p>
                             {!rows.length ? (
                                 <div className="club-student-declaration-empty">
@@ -319,7 +337,7 @@ function StudentDeclarationList({ api, workspace, permissions }) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {rows.slice((current - 1) * 20, current * 20).map((item) => (
+                                            {rows.map((item) => (
                                                 <tr key={item.id}>
                                                     <td>
                                                         <strong>{student(item)}</strong>
@@ -393,20 +411,16 @@ function StudentDeclarationList({ api, workspace, permissions }) {
                             )}
                         </>
                     )}
-                    {permissionEditorOpen && permissions.manage && (
-                        <DeclarationPermissionEditor
-                            api={api}
-                            clubId={clubId}
-                            onClose={() => setPermissionEditorOpen(false)}
-                        />
-                    )}
                     {selected && (
                         <DeclarationDetail
                             api={api}
                             clubId={clubId}
                             item={selected}
                             permissions={permissions}
-                            onClose={() => setSelected(null)}
+                            onClose={() => {
+                                setSelected(null);
+                                setRetry((v) => v + 1);
+                            }}
                         />
                     )}
                 </div>
@@ -417,7 +431,38 @@ function StudentDeclarationList({ api, workspace, permissions }) {
 
 export default function StudentDeclarationsTab({ manager, workspace, readOnly = false }) {
     const { api, user } = useAuth();
-    if (!canViewClubDeclarations(manager, workspace, readOnly))
+    const [authority, setAuthority] = useState({ loading: true }),
+        [retry, setRetry] = useState(0);
+    useEffect(() => {
+        let active = true;
+        setAuthority({ loading: true });
+        if (readOnly) {
+            setAuthority({ canProcess: false });
+            return;
+        }
+        api.getClubStudentDeclarationAccess(workspace.clubId)
+            .then((value) => {
+                if (
+                    String(value?.clubId) !== String(workspace.clubId) ||
+                    typeof value.canProcess !== 'boolean' ||
+                    typeof value.canManagePermissions !== 'boolean'
+                )
+                    throw new Error('Không xác nhận được quyền tại CLB.');
+                if (active) setAuthority(value);
+            })
+            .catch((error) => {
+                if (active) setAuthority({ error });
+            });
+        return () => {
+            active = false;
+        };
+    }, [api, user?.id, workspace.clubId, readOnly, retry]);
+    if (authority.loading) return <PageState status="loading" title="Đang kiểm tra quyền tại CLB…" />;
+    if (authority.error)
+        return (
+            <PageState status="error" description={authority.error.message} onRetry={() => setRetry((v) => v + 1)} />
+        );
+    if (readOnly || !authority.canProcess)
         return (
             <PageState
                 status="forbidden"
@@ -429,7 +474,7 @@ export default function StudentDeclarationsTab({ manager, workspace, readOnly = 
             key={`${user?.id}:${workspace.clubId}`}
             api={api}
             workspace={workspace}
-            permissions={declarationPermissions(manager, workspace, readOnly)}
+            permissions={{ process: true, manage: authority.canManagePermissions }}
         />
     );
 }

@@ -24,43 +24,52 @@ test('club declaration visibility respects delegated capability, explicit denial
     assert.equal(club.canViewStudentDeclarations, true);
     assert.equal(club.role, 'MEMBER');
 });
-test('club declarations traverse all authorized pages and never retain another club or unshared external record', async () => {
+test('club declarations use one server-scoped page and send filters before pagination', async () => {
     const calls = [];
-    const items = Array.from({ length: 101 }, (_, i) => ({
-        id: `row-${i}`,
-        clubId: i === 100 ? 7 : 8,
-        status: 'Submitted',
-    }));
-    items.push({ id: 'external', clubId: null, sourceType: 'EXTERNAL' });
+    const row = { id: 'referral', clubId: 7, referringClubId: 7, status: 'SUBMITTED' };
     const result = await loadClubDeclarations(
         {
             request: async (path) => {
                 calls.push(path);
-                return {
-                    items: calls.length === 1 ? items.slice(0, 100) : items.slice(100),
-                    pagination: { page: calls.length, pageSize: 100, totalItems: 102, totalPages: 2 },
-                };
+                return { items: [row], total: 21, totalPages: 2, page: 2, pageSize: 20 };
             },
         },
         7,
+        { page: 2, query: 'cert', status: 'REVISIONREQUESTED', period: 'workspace', semester: 'FA26' },
     );
-    assert.deepEqual(
-        result.map((row) => row.id),
-        ['row-100'],
-    );
-    assert.equal(calls.length, 2);
-    assert.match(calls[1], /page=2&pageSize=100/);
-    assert.equal(
-        calls.some((path) => path.includes('/users/me/')),
-        false,
-    );
+    assert.deepEqual(result.items, [row]);
+    assert.equal(calls.length, 1);
+    assert.match(calls[0], /^\/api\/v1\/declarations\/clubs\/7\?/);
+    const params = new URLSearchParams(calls[0].split('?')[1]);
+    assert.equal(params.get('page'), '2');
+    assert.equal(params.get('pageSize'), '20');
+    assert.equal(params.get('query'), 'cert');
+    assert.equal(params.get('status'), 'REVISION_REQUESTED');
+    assert.equal(params.get('semesterId'), 'FA26');
+    for (const bad of [
+        { ...row, clubId: 8 },
+        { ...row, referringClubId: null },
+    ])
+        await assert.rejects(
+            () =>
+                loadClubDeclarations(
+                    { request: async () => ({ items: [bad], page: 1, pageSize: 20, total: 1, totalPages: 1 }) },
+                    7,
+                ),
+            /CLB/,
+        );
 });
+
 test('club declaration queue accepts the canonical empty page and rejects missing metadata', async () => {
-    assert.deepEqual(await loadClubDeclarations({ request: async () => ({
-        items: [], pagination: { page: 1, pageSize: 100, totalItems: 0, totalPages: 0 },
-    }) }, 7), []);
-    await assert.rejects(() => loadClubDeclarations({ request: async () => ({ items: [] }) }, 7), /chưa hợp lệ/);
+    const result = await loadClubDeclarations(
+        { request: async () => ({ items: [], page: 1, pageSize: 20, total: 0, totalPages: 0 }) },
+        7,
+    );
+    assert.deepEqual(result.items, []);
+    assert.equal(result.totalPages, 1);
+    await assert.rejects(() => loadClubDeclarations({ request: async () => ({ items: [] }) }, 7), /phân trang/);
 });
+
 test('club list and detail preserve denial/stale/mismatched scope instead of using samples or trusting a URL', async () => {
     await assert.rejects(
         () =>
@@ -86,7 +95,7 @@ test('club list and detail preserve denial/stale/mismatched scope instead of usi
                 },
                 7,
             ),
-        /thay đổi/,
+        /phân trang/,
     );
     await assert.rejects(
         () => loadClubDeclarationDetail({ request: async () => ({ id: 'x', clubId: 8 }) }, 7, 'x'),
@@ -185,6 +194,8 @@ test('workspace adapter preserves scoped vice president and only the unified per
                 isApprovedMember: true,
                 displayRole: 'VICE_PRESIDENT',
                 studentDeclarationPermissions: ['club.declarations.process', 'club.declarations.read', 'unknown'],
+                capabilities: ['club.declarations.process'],
+                accessValidUntilUtc: '2099-01-01T00:00:00Z',
             },
         ],
         [{ id: 7, code: 'C7', name: 'Club' }],

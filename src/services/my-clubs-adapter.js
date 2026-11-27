@@ -1,4 +1,5 @@
 import { isPendingClubInvitation } from './club-invitations.js';
+import { clubCapability } from './club-capabilities.js';
 
 const rows = (value) => (Array.isArray(value) ? value : value?.items || []);
 
@@ -15,9 +16,23 @@ export function selectionFromClubAccess(accessResponse, clubsResponse) {
                 logoUrl: club?.logoUrl || '',
                 coverImageUrl: club?.coverImageUrl || club?.coverUrl || '',
                 role: access.isManager ? 'MANAGER' : 'MEMBER',
-                displayRole: access.isManager ? 'CLUB_OWNER' : ['VICE_PRESIDENT','CLUB_VICE_PRESIDENT'].includes(access.displayRole) ? 'VICE_PRESIDENT' : access.isTreasurer ? 'TREASURER' : 'MEMBER',
-                ...(Array.isArray(access.studentDeclarationPermissions) ? { studentDeclarationPermissions: access.studentDeclarationPermissions.filter((id)=>['club.declarations.process'].includes(id)) } : {}),
-                ...(typeof access.canViewStudentDeclarations === 'boolean' ? { canViewStudentDeclarations: access.canViewStudentDeclarations } : {}),
+                displayRole: access.isManager
+                    ? 'CLUB_OWNER'
+                    : ['VICE_PRESIDENT', 'CLUB_VICE_PRESIDENT'].includes(access.displayRole)
+                      ? 'VICE_PRESIDENT'
+                      : access.isTreasurer
+                        ? 'TREASURER'
+                        : 'MEMBER',
+                ...(Array.isArray(access.capabilities)
+                    ? {
+                          studentDeclarationPermissions: clubCapability(access, 'club.declarations.process')
+                              ? ['club.declarations.process']
+                              : [],
+                      }
+                    : {}),
+                ...(typeof access.canViewStudentDeclarations === 'boolean'
+                    ? { canViewStudentDeclarations: access.canViewStudentDeclarations }
+                    : {}),
                 pendingApplications: access.isManager ? null : undefined,
             };
         });
@@ -32,8 +47,11 @@ export function applicationsFromMemberships(membershipsResponse, clubsResponse) 
             club: {
                 clubId: membership.clubId,
                 name: clubs.get(String(membership.clubId))?.name || membership.clubName,
-                logoUrl: clubs.has(String(membership.clubId)) && Object.hasOwn(clubs.get(String(membership.clubId)), 'logoUrl')
-                    ? clubs.get(String(membership.clubId)).logoUrl || '' : membership.logoUrl || '',
+                logoUrl:
+                    clubs.has(String(membership.clubId)) &&
+                    Object.hasOwn(clubs.get(String(membership.clubId)), 'logoUrl')
+                        ? clubs.get(String(membership.clubId)).logoUrl || ''
+                        : membership.logoUrl || '',
                 clubCode: clubs.get(String(membership.clubId))?.code || membership.clubCode || '',
             },
             reason: membership.reason || membership.requestMessage || '',

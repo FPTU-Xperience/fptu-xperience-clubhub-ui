@@ -12,11 +12,13 @@ const entry = `import React from 'react';import{createRoot}from'react-dom/client
 const mode=new URLSearchParams(location.search).get('qa');history.replaceState(null,'','/personal-experience'+location.search);window.__calls=[];localStorage.setItem('accessToken','test-token');
 const user={id:1,name:'Nguyễn An',email:'an@example.test',roles:['STUDENT']};
 const initial={id:'12345678-1234-1234-1234-123456789abc',userId:1,title:'Chứng chỉ tiếng Anh quốc tế',status:'APPROVED',sourceType:'EXTERNAL',isAuthoritative:true,rawPoints:14,semesterId:'FALL2026',occurredAt:'2026-10-10T00:00:00Z',version:'12345678-1234-1234-1234-123456789abc',evidenceRefs:['eeeeeeee-1111-2222-3333-444444444444']};window.__rows=mode==='empty'?[]:[initial];
+Object.assign(initial,{organizationSource:'Trung tâm chứng nhận',proposedAttributes:{tier:'T1',role:'Participant',scale:'National',result:'None',pillarWeights:[{pillar:'Academic',weight:1}]}});if(mode==='revision')Object.assign(initial,{status:'REVISION_REQUESTED',rawPoints:0,referringClubId:7,clubId:7,clubReviewStatus:'CHANGES_REQUESTED',ctsvSubmissionStatus:'NOT_SUBMITTED',message:'Bổ sung kết quả được xác nhận'});
 window.fetch=async(url,options={})=>{const pathname=new URL(url,location.origin).pathname;const body=options.body;window.__calls.push({pathname,method:options.method||'GET',key:options.headers?.['Idempotency-Key'],body:typeof body==='string'?JSON.parse(body):body instanceof FormData?{fileName:body.get('file')?.name}:null});const json=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
 if(pathname.endsWith('/experience-summary'))return mode==='summary-error'?json({message:'Báo cáo tổng hợp chưa sẵn sàng'},503):json({userId:1,semesterId:'FALL2026',recognizedContributionCount:1,rawExperiencePoints:14});
 if(pathname==='/api/users/me/contributions')return mode==='list-error'?json({message:'Lỗi danh sách trải nghiệm'},503):json({items:window.__rows,page:1,pageSize:20,total:window.__rows.length,totalPages:window.__rows.length?1:0});
 if(pathname==='/api/contributions/evidence')return json({evidenceId:'eeeeeeee-1111-2222-3333-444444444444'});
-if(pathname==='/api/v1/declarations/'){if(window.__failSubmit)return json({message:'Lỗi gửi trải nghiệm kiểm thử'},503);const data=JSON.parse(body);const row={...initial,id:'aaaaaaaa-1111-2222-3333-444444444444',title:data.title,status:'SUBMITTED',message:data.evidenceDescription,rawPoints:0,evidenceRefs:data.evidenceRefs};window.__rows.unshift(row);return json(row,201);}
+if(pathname==='/api/v1/declarations/'){if(window.__failSubmit)return json({message:'Lỗi gửi trải nghiệm kiểm thử'},503);const data=JSON.parse(body);const row={...initial,id:'aaaaaaaa-1111-2222-3333-444444444444',title:data.title,status:'SUBMITTED',referringClubId:data.referringClubId||null,clubReviewStatus:data.referringClubId?'PENDING':null,ctsvSubmissionStatus:data.referringClubId?'NOT_SUBMITTED':null,proposedAttributes:data.proposedAttributes,organizationSource:data.organizationSource,message:data.evidenceDescription,rawPoints:0,evidenceRefs:data.evidenceRefs};window.__rows.unshift(row);return json(row,201);}
+if(pathname.startsWith('/api/contributions/')&&!pathname.includes('evidence')&&options.method==='PATCH'){const input=JSON.parse(body);const row=window.__rows.find(r=>r.id===pathname.split('/').pop());if(row.version!==input.expectedVersion)return json({message:'STALE_VERSION'},409);Object.assign(row,{version:crypto.randomUUID(),status:'SUBMITTED',message:input.message,proposedAttributes:input.proposedAttributes,evidenceRefs:input.evidenceRefs,clubReviewStatus:row.referringClubId?'PENDING':null,ctsvSubmissionStatus:row.referringClubId?'NOT_SUBMITTED':null});return json(row);}
 if(pathname.startsWith('/api/contributions/')&&!pathname.includes('evidence')){const id=pathname.split('/').pop();const row=window.__rows.find(r=>r.id===id);return row?json({contribution:row,decisions:[]}):json({message:'Không tìm thấy trải nghiệm'},404);}
 if(pathname.includes('/evidence/')&&pathname.endsWith('/download'))return new Response('%PDF-1.4 fixture',{headers:{'Content-Type':'application/pdf'}});
 return json([]);};
@@ -24,7 +26,7 @@ const h=React.createElement;createRoot(document.getElementById('root')).render(h
 const html =
     '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/__personal-entry.js"></script></body></html>';
 const server = await createServer({
-    server: { host: '127.0.0.1', port: 5193, strictPort: true, open: false },
+    server: { host: 'localhost', port: 5173, strictPort: true, open: false },
     plugins: [
         {
             name: 'personal-fixture',
@@ -55,9 +57,10 @@ try {
     await server.listen();
     const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'clubhub-personal-chrome-'));
     chrome = spawn(
-        'C:/Program Files/Google/Chrome/Application/chrome.exe',
+        process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         [
             '--headless=new',
+            ...(process.platform === 'linux' ? ['--no-sandbox'] : []),
             '--disable-gpu',
             '--no-first-run',
             `--user-data-dir=${profile}`,
@@ -69,7 +72,7 @@ try {
     let targets;
     for (let n = 0; n < 100; n++) {
         try {
-            targets = await (await fetch('http://127.0.0.1:9344/json')).json();
+            targets = await (await fetch('http://localhost:9344/json')).json();
             break;
         } catch {
             await new Promise((r) => setTimeout(r, 100));
@@ -129,7 +132,7 @@ try {
     };
     const open = async (mode = 'normal') => {
         errors.length = 0;
-        await call('Page.navigate', { url: `http://127.0.0.1:5193/__personal?qa=${mode}` });
+        await call('Page.navigate', { url: `http://localhost:5173/__personal?qa=${mode}` });
         await waitFor(
             `!!document.querySelector('main h1') && !document.querySelector('[role="status"]')?.textContent.includes('Đang tải')`,
         );
@@ -188,16 +191,14 @@ try {
     await evaluate(`document.querySelector('input[name="referenceMode"]:not(:checked)').click()`);
     await delay(100);
     await fill('CLB tham chiếu', '7');
-    await expect('chưa được máy chủ hỗ trợ');
+    await expect('Hồ sơ được CLB xem xét trước');
     assert.equal(
         await evaluate(
             `[...document.querySelectorAll('main button')].find(e=>e.textContent.includes('Gửi trải nghiệm xét duyệt')).disabled`,
         ),
-        true,
+        false,
     );
     await responsive('personal-experience-club-reference');
-    await evaluate(`document.querySelector('input[name="referenceMode"]:not(:checked)').click()`);
-    await delay(100);
     await evaluate('window.__failSubmit=true');
     await click('Gửi trải nghiệm xét duyệt');
     await expect('Lỗi gửi trải nghiệm kiểm thử');
@@ -209,12 +210,29 @@ try {
     assert.equal(await evaluate(`window.__calls.filter(c=>c.pathname==='/api/contributions/evidence').length`), 1);
     assert.equal(
         await evaluate(
-            `(()=>{const calls=window.__calls.filter(c=>c.pathname==='/api/v1/declarations/');return calls.length===2&&calls[0].key===calls[1].key&&calls[1].body.clubId===null&&calls[1].body.evidenceRefs.length===1&&!('rawPoints' in calls[1].body)})()`,
+            `(()=>{const calls=window.__calls.filter(c=>c.pathname==='/api/v1/declarations/');return calls.length===2&&calls[0].key===calls[1].key&&calls[1].body.clubId===null&&calls[1].body.referringClubId===7&&calls[1].body.evidenceRefs.length===1&&!('rawPoints' in calls[1].body)})()`,
         ),
         true,
     );
     await responsive('personal-experience-submitted');
     assert.deepEqual(errors, []);
+    await open('revision');
+    await click('Chứng chỉ tiếng Anh quốc tế');
+    await waitFor(`document.querySelector('main').textContent.includes('Bổ sung và gửi lại')`);
+    await click('Bổ sung và gửi lại');
+    await waitFor(`!!document.querySelector('.personal-experience-form')`);
+    await fill('Kết quả đạt được & mô tả minh chứng *', 'Đã bổ sung kết quả và nguồn xác nhận.');
+    await click('Gửi trải nghiệm xét duyệt');
+    await waitFor(
+        `document.querySelector('main').textContent.includes('Chờ CLB xét')&&!document.querySelector('.personal-experience-form')`,
+    );
+    assert.equal(await evaluate(`window.__calls.filter(c=>c.pathname==='/api/contributions/evidence').length`), 0);
+    assert.ok(
+        await evaluate(
+            `(()=>{const rows=window.__calls.filter(c=>c.method==='PATCH');return rows.length===1&&rows[0].body.expectedVersion==='12345678-1234-1234-1234-123456789abc'&&window.__rows[0].referringClubId===7&&window.__rows[0].clubReviewStatus==='PENDING'&&window.__rows[0].ctsvSubmissionStatus==='NOT_SUBMITTED'})()`,
+        ),
+    );
+    await responsive('personal-experience-revised');
     await open('list-error');
     await expect('Lỗi danh sách trải nghiệm');
     assert.equal(await evaluate(`!!document.querySelector('.personal-experience-empty')`), false);
