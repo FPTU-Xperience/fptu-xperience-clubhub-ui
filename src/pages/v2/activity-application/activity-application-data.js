@@ -55,7 +55,7 @@ export const newApplication = (clubId, period = '') => ({
     recruitment: { enabled: false, visibility: 'PUBLIC', eligibility: 'SCHOOL_STUDENTS', actionIds: [] },
 });
 export const STAFFING_KINDS = [
-    ['HOST', 'Host', 'thành viên nhóm Event', 'Leader'],
+    ['HOST', 'Host', 'Chủ nhiệm, Phó chủ nhiệm, Thư ký hoặc thành viên Event', 'Leader'],
     ['STAFF', 'Staff', 'thành viên thường', 'Organizer'],
 ];
 export function staffingAction(actions, kind) {
@@ -209,6 +209,15 @@ export function validateApplication(draft, now = Date.now(), throughStage = 3) {
 export function applicationValidationIssue(draft, throughStage = 3, now = Date.now(), requireComplete = false, candidates, semester) {
     const infoIssue = activityInfoIssue(draft, now, requireComplete, semester);
     if (infoIssue) return { ...infoIssue, stage: 0 };
+    if (draft.fundingEnabled && throughStage >= 1) {
+        const budget = Number(draft.rawBudget);
+        if (!Number.isFinite(budget) || budget <= 0 || budget > 1_000_000_000 || Math.abs(budget * 10000 - Math.round(budget * 10000)) > 0.00001)
+            return { stage: 1, field: 'rawBudget', message: 'Nhập dự toán điểm thô dương, tối đa bốn chữ số thập phân.' };
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(draft.policyVersion ?? ''))
+            return { stage: 1, field: 'policyVersion', message: 'Chọn chính sách học kỳ đã được phê duyệt.' };
+        if (!['T1', 'T2', 'T3', 'T4', 'T5'].includes(draft.fundingAttributes?.tier) || !draft.fundingAttributes?.pillarWeights?.length)
+            return { stage: 1, field: 'fundingTier', message: 'Chọn mức đóng góp và trụ cột cho dự toán.' };
+    }
     for (let stage = 1; stage <= Math.min(throughStage, 2); stage++) {
         const message = validateApplication(draft, now, stage);
         if (message) return { message, stage };
@@ -232,6 +241,10 @@ export function applicationPayload(draft) {
         startTimeUtc: activityTimeUtc(draft.startTime),
         endTimeUtc: activityTimeUtc(draft.endTime),
         scale: draft.scale,
+        ...(draft.fundingEnabled && {
+            rawBudget: Number(draft.rawBudget), policyVersion: draft.policyVersion,
+            fundingAttributes: { ...draft.fundingAttributes, role: 'Participant', scale: draft.scale, result: 'None' },
+        }),
         independentActionsConfirmed: draft.independentActionsConfirmed,
         isInternal: draft.isInternal !== false,
         tagSelection: { custom: tagSelectionPayload({ ...tagDraft(), customText: draft.discoveryTagDraft?.customText ?? '' }).custom },

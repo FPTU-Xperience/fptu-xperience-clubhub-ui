@@ -18,6 +18,16 @@ const active = {
     capabilities: ['club.reports.draft.write', 'event.content.write'],
     accessValidUntilUtc: new Date(Date.now() + 60000).toISOString(),
 };
+test('current secretary has operational leadership without becoming treasurer and loses it on expiry', () => {
+    const secretary = { ...active, isSecretary: true, isTreasurer: false, capabilities: [] };
+    assert.equal(clubLeadership(secretary), true);
+    assert.equal(clubCapability(secretary, 'event.staff.assign'), true);
+    assert.equal(clubSubmitReport(secretary, { reportType: 'CLUB_TERM_START' }), true);
+    assert.equal(clubCapability(secretary, 'club.finance.submit'), true);
+    assert.equal(secretary.isTreasurer, false);
+    assert.equal(clubLeadership({ ...secretary, isApprovedMember: false }), false);
+    assert.equal(clubCapability({ ...secretary, accessValidUntilUtc: '2000-01-01' }, 'event.staff.assign'), false);
+});
 test('specialist grants require current membership, explicit permission and live expiry', () => {
     assert.equal(clubCapability(active, 'event.content.write'), true);
     for (const scope of [
@@ -39,7 +49,7 @@ test('specialist grants require current membership, explicit permission and live
         false,
     );
 });
-test('secretary can draft nonfinancial reports without submit or financial rights', () => {
+test('a specialist can draft nonfinancial reports without leadership or financial rights', () => {
     assert.equal(
         clubDraftReport(active, { reportType: 'CLUB_TERM_START' }),
         true,

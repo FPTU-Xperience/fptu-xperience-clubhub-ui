@@ -15,7 +15,7 @@ const valid = (scope, now) =>
     Number.isFinite(Date.parse(scope?.accessValidUntilUtc)) && Date.parse(scope.accessValidUntilUtc) > now;
 export const clubLeadership = (scope, now = Date.now()) =>
     scope?.isManager === true ||
-    (scope?.isApprovedMember === true && scope?.isVicePresident === true && valid(scope, now));
+    (scope?.isApprovedMember === true && (scope?.isVicePresident === true || scope?.isSecretary === true) && valid(scope, now));
 export function clubCapability(scope, code, now = Date.now()) {
     if (!Object.hasOwn(CLUB_CAPABILITY_LABELS, code)) return false;
     if (clubLeadership(scope, now)) return true;
@@ -27,7 +27,7 @@ export const clubRoleSummary = (scope) =>
     scope?.isManager
         ? 'Chủ nhiệm'
         : clubLeadership(scope)
-          ? 'Phó chủ nhiệm'
+          ? scope.isSecretary ? 'Thư ký' : 'Phó chủ nhiệm'
           : scope?.isTreasurer
             ? 'Thủ quỹ'
             : scope?.groupIds?.length

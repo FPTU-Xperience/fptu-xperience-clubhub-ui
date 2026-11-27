@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import defaultApi from '../../../services/api';
 import { ExternalLink, FileText, Film, Image, Link2 } from 'lucide-react';
 import V2Modal from '../common/modal/V2Modal';
 import { resourceSize, youtubeEmbedUrl } from './activity-resources-data';
 import './ActivityResources.scss';
 
-export default function ActivityResources({ resources, kind }) {
+export default function ActivityResources({ resources, kind, api = defaultApi }) {
     const [selected, setSelected] = useState(null);
+    const [fileUrl, setFileUrl] = useState('');
+    const [error, setError] = useState('');
+    useEffect(() => {
+        let active = true, objectUrl;
+        setFileUrl(''); setError('');
+        if (selected?.url?.startsWith('/api/')) api.activityResourceBlob(selected.url).then((blob) => {
+            objectUrl = URL.createObjectURL(blob);
+            if (active) setFileUrl(objectUrl); else URL.revokeObjectURL(objectUrl);
+        }).catch((issue) => { if (active) setError(issue.message); });
+        return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+    }, [api, selected]);
+    const download = async (resource) => {
+        setError('');
+        try {
+            const url = URL.createObjectURL(await api.activityResourceBlob(resource.url));
+            const link = document.createElement('a'); link.href = url; link.download = resource.title;
+            link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (issue) { setError(issue.message); }
+    };
     const rows = resources.filter((resource) =>
         kind === 'MEDIA' ? ['MEDIA', 'EMBED'].includes(resource.kind) : resource.kind === 'DOCUMENT',
     );
     const embedded = selected && youtubeEmbedUrl(selected.url);
     return (
         <>
+            {error && <p role="alert">{error}</p>}
             {rows.length ? (
                 <div className={`v2-activity-resource-grid${kind === 'DOCUMENT' ? ' is-documents' : ''}`}>
                     {rows.map((resource) => {
@@ -27,7 +48,7 @@ export default function ActivityResources({ resources, kind }) {
                                     : Image;
                         return (
                             <article key={resource.id} className="v2-activity-resource-card">
-                                {image ? (
+                                {image && !resource.url.startsWith('/api/') ? (
                                     <button
                                         type="button"
                                         className="v2-activity-resource-image"
@@ -71,7 +92,9 @@ export default function ActivityResources({ resources, kind }) {
                                                   .join(' · ')}
                                     </p>
                                     {resource.draft && <span className="v2-activity-resource-draft">Chưa lưu</span>}
-                                    {resource.kind === 'DOCUMENT' ? (
+                                    {resource.kind === 'DOCUMENT' && resource.url.startsWith('/api/') ? (
+                                        <button type="button" onClick={() => download(resource)}>Tải tài liệu <ExternalLink size={14} /></button>
+                                    ) : resource.kind === 'DOCUMENT' ? (
                                         <a
                                             href={resource.previewUrl || resource.url}
                                             target="_blank"
@@ -110,16 +133,16 @@ export default function ActivityResources({ resources, kind }) {
             )}
             {selected && (
                 <V2Modal title={selected.title} onClose={() => setSelected(null)} wide>
-                    {selected.mimeType.startsWith('image/') ? (
+                    {selected.url.startsWith('/api/') && !fileUrl ? <p>{error || 'Đang tải nội dung…'}</p> : selected.mimeType.startsWith('image/') ? (
                         <img
                             className="v2-activity-resource-preview"
-                            src={selected.previewUrl || selected.url}
+                            src={fileUrl || selected.previewUrl || selected.url}
                             alt={selected.title}
                         />
                     ) : selected.mimeType.startsWith('video/') ? (
                         <video
                             className="v2-activity-resource-preview"
-                            src={selected.previewUrl || selected.url}
+                            src={fileUrl || selected.previewUrl || selected.url}
                             controls
                         />
                     ) : embedded ? (

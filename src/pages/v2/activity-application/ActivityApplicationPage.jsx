@@ -28,6 +28,7 @@ import {
 } from '../../../services/activity-application-contract.js';
 import WorkspacePolicyStatus from '../../../components/v2/activity-detail/WorkspacePolicyStatus';
 import ApplicationVenuePicker from './ApplicationVenuePicker';
+import FundingPlanFields from './FundingPlanFields';
 
 const steps = ['Thông tin hoạt động', 'Action & dự toán Xperience Point', 'Phân công nhân sự', 'Kiểm tra & gửi duyệt'];
 function Field({ label, value, onChange, options, multiline, ...props }) {
@@ -77,7 +78,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
     const location = useLocation();
     const requestedId = new URLSearchParams(location.search).get('applicationId');
     const [draft, setDraft] = useState(() =>
-        newApplication(
+        ({ fundingEnabled: true, ...newApplication(
             workspace?.clubId || context?.clubId || '',
             context?.period ||
                 semester?.reportPeriod ||
@@ -85,7 +86,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 semester?.code ||
                 semester?.id ||
                 '',
-        ),
+        ) }),
     );
     const [stage, setStage] = useState(0);
     const [useCampusMap, setUseCampusMap] = useState(false);
@@ -143,6 +144,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                 const restored = {
                     ...newApplication(value.clubId, value.period),
                     ...value,
+                    fundingEnabled: value.rawBudget != null,
                     staffing: value.staffing ?? [],
                     activityType: value.activityType ?? '',
                     discoveryTagDraft: value.tagSelection ? tagDraft(value.tagSelection) : undefined,
@@ -497,6 +499,7 @@ export default function ActivityApplicationPage({ api, workspace, base, semester
                             />
                         </section>
                         <section hidden={stage !== 1} data-step="1" className="v2-report-editor-card">
+                            <FundingPlanFields api={api} draft={draft} change={change} />
                             <div className="v2-report-editor-card-heading">
                                 <h2>Action & dự toán Xperience Point</h2>
                                 <button

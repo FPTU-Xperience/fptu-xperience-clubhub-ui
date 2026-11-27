@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const png = (value) => `data:image/png;base64,${value}`;
 
@@ -7,28 +7,41 @@ export function useCertificateDisplay(api, sessionKey) {
     const [data, setData] = useState(null);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
+    const lock = useRef(false);
+    const pending = useRef(null);
+    const generation = useRef(0);
     useEffect(() => {
         let active = true;
+        generation.current += 1; pending.current = null; lock.current = false;
+        setError(''); setBusy(false);
         setData(null);
         api.request(path).then((value) => { if (active) setData(value); })
             .catch((issue) => { if (active) setError(issue.message); });
         return () => { active = false; };
     }, [api, sessionKey]);
     const save = async (changes) => {
-        if (!data || busy) return;
+        if (!data || lock.current) return;
+        const currentGeneration = generation.current;
         const { badgeId, frameId, badgeX, badgeY, badgeSize } = data;
         const body = JSON.stringify({ badgeId, frameId, badgeX, badgeY, badgeSize, expectedVersion: data.version, ...changes });
+        if (pending.current?.body !== body) pending.current = { body, key: crypto.randomUUID() };
+        const key = pending.current.key;
+        lock.current = true;
         setBusy(true);
         setError('');
         try {
-            setData(await api.request(path, { method: 'PUT', body, headers: { 'Idempotency-Key': crypto.randomUUID() } }));
+            const saved = await api.request(path, { method: 'PUT', body, headers: { 'Idempotency-Key': key } });
+            if (currentGeneration !== generation.current) return;
+            setData(saved); pending.current = null;
         } catch (issue) {
+            if (currentGeneration !== generation.current) return;
             setError(issue.message);
             if (issue.status === 409) {
-                try { setData(await api.request(path)); } catch { /* Keep the write error visible. */ }
+                pending.current = null;
+                try { const fresh = await api.request(path); if (currentGeneration === generation.current) setData(fresh); } catch { /* Keep the write error visible. */ }
             }
         } finally {
-            setBusy(false);
+            if (currentGeneration === generation.current) { lock.current = false; setBusy(false); }
         }
     };
     return { data, error, busy, save };

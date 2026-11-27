@@ -52,7 +52,7 @@ test('the objective is optional for draft saves and required when leaving step o
     });
     assert.equal(applicationValidationIssue({ ...data, objective: 'Mục tiêu' }, 0, now, true), null);
 });
-test('leaving staffing requires an EVENT host and a regular staff member with valid actions', () => {
+test('leaving staffing requires an eligible host and a regular staff member with valid actions', () => {
     const data = draft();
     const candidates = [
         { userId: 10, assignmentKind: 'HOST' },
@@ -69,6 +69,25 @@ test('leaving staffing requires an EVENT host and a regular staff member with va
     assert.equal(applicationValidationIssue(data, 2, now, true, candidates), null);
     assert.deepEqual(applicationPayload(data).staffing, [host, staff]);
     assert.equal(applicationPayload(data).recruitment, null);
+});
+
+test('new funded plans require an explicit budget and policy, and preserve the scoring source', () => {
+    const data = { ...draft(), fundingEnabled: true };
+    assert.equal(applicationValidationIssue(data, 0, now), null);
+    assert.equal(applicationValidationIssue(data, 1, now).field, 'rawBudget');
+    data.rawBudget = 100.12345;
+    assert.equal(applicationValidationIssue(data, 1, now).field, 'rawBudget');
+    data.rawBudget = 100.125;
+    assert.equal(applicationValidationIssue(data, 1, now).field, 'policyVersion');
+    data.policyVersion = 'aaaaaaaa-1111-2222-3333-444444444444';
+    assert.equal(applicationValidationIssue(data, 1, now).field, 'fundingTier');
+    data.fundingAttributes = { tier: 'T3', pillarWeights: [{ pillar: 'Academic', weight: 1 }] };
+    assert.equal(applicationValidationIssue(data, 1, now), null);
+    const payload = applicationPayload(data);
+    assert.equal(payload.rawBudget, 100.125);
+    assert.equal(payload.policyVersion, data.policyVersion);
+    assert.deepEqual(payload.fundingAttributes, { tier: 'T3', role: 'Participant', scale: 'Club', result: 'None', pillarWeights: [{ pillar: 'Academic', weight: 1 }] });
+    assert.equal('rawBudget' in applicationPayload(draft()), false);
 });
 test('action budget matches agreed 7100 example and never applies tier base twice', () => {
     const data = draft();
