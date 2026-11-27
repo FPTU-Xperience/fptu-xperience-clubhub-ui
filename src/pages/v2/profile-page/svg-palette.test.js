@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { applySvgPalette, cropSvgAsset, decodeSvgAsset, encodeSvgAsset, normalizeSvgPalette } from './svg-palette.js';
-import { publishClubShape, getClubCoverRewards, redeemCoverReward } from './cover-cosmetics.js';
-import { publishClubGift } from './club-gifts.js';
+import { acceptServerCosmetics } from '../../../services/server-cosmetics-cache.js';
 import { saveProfile, readProfile } from '../profile-data.js';
 
 const palette = { primary: '#123456', secondary: '#abcdef' };
@@ -49,16 +48,32 @@ test('circular SVG crop preserves vector paints and recoloring can still be appl
     assert.match(colored, /clip-path="url\(#crop-/);
 });
 
-test('SVG palette defaults and per-account follow-palette settings survive publishing and equipping', () => {
+test('SVG palette defaults and per-account follow-palette settings survive server grants and equipping', () => {
     const values = new Map(),
         db = { getItem: (key) => values.get(key) || null, setItem: (key, value) => values.set(key, value) };
-    const base = { clubId: 'palette-club', label: 'SVG', cost: 0, assetUrl: encodeSvgAsset(svg), svgPalette: palette };
-    const shape = publishClubShape(base, db);
-    const frame = publishClubGift({ ...base, kind: 'frame', color: '#123456', recolor: false }, db);
-    for (const gift of getClubCoverRewards('palette-club', db)) assert.deepEqual(gift.svgPalette, palette);
-    const user = { id: 201, name: 'Student' };
-    redeemCoverReward(user, 'palette-club', shape.key, db);
-    redeemCoverReward(user, 'palette-club', frame.key, db);
+    const user = { id: 201, name: 'Student' },
+        shape = { id: 'svg-shape' },
+        frame = { id: 'svg-frame' };
+    acceptServerCosmetics(user.id, [
+        {
+            cosmetic: {
+                cosmeticId: shape.id,
+                kind: 'SHAPE',
+                issuerClubId: 10,
+                label: 'SVG',
+                definition: { assetUrl: encodeSvgAsset(svg), svgPalette: palette },
+            },
+        },
+        {
+            cosmetic: {
+                cosmeticId: frame.id,
+                kind: 'FRAME',
+                issuerClubId: 10,
+                label: 'SVG',
+                definition: { assetUrl: encodeSvgAsset(svg), svgPalette: palette, color: '#123456', recolor: false },
+            },
+        },
+    ]);
     saveProfile(
         user,
         {
