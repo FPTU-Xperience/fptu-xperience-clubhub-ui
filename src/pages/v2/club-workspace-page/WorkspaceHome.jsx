@@ -1,4 +1,6 @@
 import { usePersonalMedia } from '../../../components/media/PersonalMediaContext';
+import { useWorkspaceSemester } from './WorkspaceSemesterContext';
+import { workspaceSemesterPath } from './workspace-semester-data';
 import { getDisplayName } from '../../../services/display-name';
 import { ArrowRight, CalendarDays, Check, Home, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -35,6 +37,8 @@ function ResourceState({ loading, unavailable, onRetry, children }) {
 
 export default function WorkspaceHome({ workspace, manager, base, viewer, dashboard, observation = false }) {
     const navigate = useNavigate();
+    const { semester } = useWorkspaceSemester();
+    const workspacePath = (path) => workspaceSemesterPath(path, semester);
     const summary = dashboard.data;
     const loading = dashboard.status === 'loading';
     const activities = (summary?.activities || [])
@@ -62,7 +66,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                               : 'Xem lịch sắp tới và tham gia hoạt động cùng CLB.'}
                     </p>
                 </div>
-                <Link className="workspace-home__primary" to={`${base}/${manager ? 'club-page' : 'activities'}`}>
+                <Link className="workspace-home__primary" to={workspacePath(`${base}/${manager ? 'club-page' : 'activities'}`)}>
                     {manager && <Home size={16} aria-hidden="true" />}
                     {manager ? 'Quản lý trang CLB' : 'Xem hoạt động'} <ArrowRight size={16} aria-hidden="true" />
                 </Link>
@@ -98,7 +102,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                                         variant="schedule"
                                         onOpen={(item) =>
                                             navigate(
-                                                `${base}/activities/${encodeURIComponent(item.id)}`,
+                                                workspacePath(`${base}/activities/${encodeURIComponent(item.id)}`),
                                             )
                                         }
                                     />
@@ -106,7 +110,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                             ))}
                         </ol>
                     )}
-                    <Link className="workspace-home__all" to={`${base}/activities`}>
+                    <Link className="workspace-home__all" to={workspacePath(`${base}/activities`)}>
                         Xem tất cả hoạt động <ArrowRight size={16} aria-hidden="true" />
                     </Link>
                 </section>
@@ -152,7 +156,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                                     </ul>
                                 </>
                             )}
-                            <Link className="workspace-home__text-link" to={`${base}/members`}>
+                            <Link className="workspace-home__text-link" to={workspacePath(`${base}/members`)}>
                                 {pending > 0 ? 'Xem đơn tham gia' : 'Quản lý thành viên'}{' '}
                                 <ArrowRight size={16} aria-hidden="true" />
                             </Link>
@@ -175,7 +179,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                                   ]
                             : []
                         ).map(([path, title, copy]) => (
-                            <Link key={path} to={`${base}/${path}`}>
+                            <Link key={path} to={workspacePath(`${base}/${path}`)}>
                                 <div>
                                     <strong>{title}</strong>
                                     <span>{copy}</span>
@@ -183,7 +187,7 @@ export default function WorkspaceHome({ workspace, manager, base, viewer, dashbo
                                 <ArrowRight size={16} aria-hidden="true" />
                             </Link>
                         ))}
-                        <Link className="workspace-home__members" to={`${base}/members`}>
+                        <Link className="workspace-home__members" to={workspacePath(`${base}/members`)}>
                             <Users size={16} aria-hidden="true" />
                             <span>
                                 {summary?.memberCount != null && !loading

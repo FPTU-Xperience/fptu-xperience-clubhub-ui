@@ -1,4 +1,6 @@
 import { clubCapability } from '../../../services/club-capabilities';
+import { useWorkspaceSemester } from './WorkspaceSemesterContext';
+import { workspaceSemesterPath } from './workspace-semester-data';
 import { useEffect, useId, useRef, useState } from 'react';
 import {
     ArrowLeft,
@@ -87,6 +89,8 @@ export default function WorkspaceLeftRail({
     const { user, api, logout } = useAuth();
     const media = usePersonalMedia();
     const availableSections = getWorkspaceSections(manager, observation, canViewDeclarations, treasurer, access);
+    const { semester } = useWorkspaceSemester();
+    const workspacePath = (path) => workspaceSemesterPath(path, semester);
     const [visibleSectionCount, setVisibleSectionCount] = useState(4);
     useEffect(() => {
         const compact = window.matchMedia('(max-width: 480px)');
@@ -131,7 +135,7 @@ export default function WorkspaceLeftRail({
             </Link>
             <nav className="v2-workspace-left-rail-nav" aria-label="Menu CLB" style={{ '--workspace-nav-visible-count': visibleSectionCount }}>
                 {availableSections.slice(0, visibleSectionCount).map(([path, label, Icon]) => (
-                    <NavLink key={path || 'home'} end={!path} to={path ? `${base}/${path}` : base} title={label}>
+                    <NavLink key={path || 'home'} end={!path} to={workspacePath(path ? `${base}/${path}` : base)} title={label}>
                         <Icon size={18} aria-hidden="true" />
                         <span>{label}</span>
                         {path === 'activities' && (
@@ -158,7 +162,7 @@ export default function WorkspaceLeftRail({
                     </button>
                     <div id={overflowId} className={`v2-workspace-nav-overflow-items${overflowMenu.open ? ' is-open' : ''}`}>
                         {availableSections.slice(visibleSectionCount).map(([path, label, Icon]) => (
-                            <NavLink key={path} to={`${base}/${path}`} onClick={() => overflowMenu.setOpen(false)}>
+                            <NavLink key={path} to={workspacePath(`${base}/${path}`)} onClick={() => overflowMenu.setOpen(false)}>
                                 <Icon size={18} aria-hidden="true" />
                                 <span>{label}</span>
                                 {path === 'members' && manager && (

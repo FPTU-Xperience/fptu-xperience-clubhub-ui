@@ -36,7 +36,10 @@ test('club declarations traverse all authorized pages and never retain another c
         {
             request: async (path) => {
                 calls.push(path);
-                return { items: calls.length === 1 ? items.slice(0, 100) : items.slice(100), totalItems: 102 };
+                return {
+                    items: calls.length === 1 ? items.slice(0, 100) : items.slice(100),
+                    pagination: { page: calls.length, pageSize: 100, totalItems: 102, totalPages: 2 },
+                };
             },
         },
         7,
@@ -51,6 +54,12 @@ test('club declarations traverse all authorized pages and never retain another c
         calls.some((path) => path.includes('/users/me/')),
         false,
     );
+});
+test('club declaration queue accepts the canonical empty page and rejects missing metadata', async () => {
+    assert.deepEqual(await loadClubDeclarations({ request: async () => ({
+        items: [], pagination: { page: 1, pageSize: 100, totalItems: 0, totalPages: 0 },
+    }) }, 7), []);
+    await assert.rejects(() => loadClubDeclarations({ request: async () => ({ items: [] }) }, 7), /chưa hợp lệ/);
 });
 test('club list and detail preserve denial/stale/mismatched scope instead of using samples or trusting a URL', async () => {
     await assert.rejects(

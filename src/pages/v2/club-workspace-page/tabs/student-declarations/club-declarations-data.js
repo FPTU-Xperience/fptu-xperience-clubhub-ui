@@ -31,7 +31,7 @@ export async function loadClubDeclarations(api, clubId) {
         items = [];
     do {
         const value = await api.request(`/api/v1/student-affairs/declarations/?page=${page}&pageSize=100`);
-        const count = value?.totalItems ?? value?.total;
+        const count = value?.pagination?.totalItems ?? value?.totalItems ?? value?.total;
         if (!Array.isArray(value?.items) || !Number.isSafeInteger(count) || count < 0)
             throw new Error('Danh sách trải nghiệm trả về chưa hợp lệ.');
         if (total !== undefined && total !== count) throw new Error('Danh sách đã thay đổi. Vui lòng tải lại.');
